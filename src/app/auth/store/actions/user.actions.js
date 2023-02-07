@@ -52,7 +52,7 @@ export function retrieveGroupList() {
 				}
 
 				history.location.state = {
-					redirectUrl: 'myinfo'
+					redirectUrl: 'ranking'
 				};
 
 				dispatch({

@@ -27,6 +27,20 @@ function RankingTable(props) {
 		id: 'rating'
 	});
 
+	const tierNames = {
+		IRON: 200,
+		BRONZE: 300,
+		SILVER: 400,
+		GOLD: 500,
+		PLATINUM: 600,
+		DIAMOND: 700,
+		MASTER: 800,
+		GRANDMASTER: 900,
+		CHALLENGER: 1050,
+		UNRANKED: 500,
+	};
+	const tierSteps = ['IV', 'III', 'II', 'I'];
+
 	const groupName = useSelector(state => state.auth.user.reprGroup.groupName);
 
 	useEffect(() => {
@@ -64,6 +78,54 @@ function RankingTable(props) {
 		setRowsPerPage(event.target.value);
 	}
 
+	function getTierName(rating) {
+		let entries = Object.entries(tierNames);
+		entries = entries.filter((elem) => elem[0] !== 'UNRANKED');
+		entries = entries.sort((a, b) => b[1] - a[1]);
+		for (const [name, tierRating] of entries) {
+			if (rating < tierRating) {
+				continue;
+			}
+		
+			return `${name}`;
+		}
+	}
+
+	function getTierPoint(rating) {
+		let entries = Object.entries(tierNames);
+		entries = entries.filter((elem) => elem[0] !== 'UNRANKED');
+		entries = entries.sort((a, b) => b[1] - a[1]);
+		for (const [name, tierRating] of entries) {
+			if (rating < tierRating) {
+				continue;
+			}
+		
+			return Math.floor((rating - tierRating) % 25 * 4);
+		}
+	}
+
+	function getRatingTierName(rating) {
+		let entries = Object.entries(tierNames);
+		entries = entries.filter((elem) => elem[0] !== 'UNRANKED');
+		entries = entries.sort((a, b) => b[1] - a[1]);
+		for (const [name, tierRating] of entries) {
+			if (rating < tierRating) {
+				continue;
+			}
+		
+			if (isNonStepTier(name)) {
+				return `${name}`;
+			}
+			else {
+				return `${name} ${tierSteps[Math.floor((rating - tierRating) / 25)]}`;
+			}
+		}
+	}
+
+	function isNonStepTier(tierName) {
+		return tierName === 'MASTER' || tierName === 'GRANDMASTER' || tierName === 'CHALLENGER';
+	}
+
 	return (
 		<div className="w-full flex flex-col">
 			<FuseScrollbars className="flex-grow overflow-x-auto">
@@ -85,7 +147,7 @@ function RankingTable(props) {
 										</TableCell>
 
 										<TableCell component="th" scope="row">
-											{n.rating}
+											<img width="32" height="32" src={"/assets/images/ranked-emblems/Emblem_" + getTierName(n.rating) +".png"}/> {getRatingTierName(n.rating) + " " + getTierPoint(n.rating) + "LP"}
 										</TableCell>
 
 										<TableCell component="th" scope="row">
