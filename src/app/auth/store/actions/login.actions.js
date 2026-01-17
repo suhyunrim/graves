@@ -5,14 +5,14 @@ export const TRY_LOGIN = 'TRY_LOGIN';
 export const LOGIN_ERROR = 'LOGIN_ERROR';
 export const LOGIN_SUCCESS = 'LOGIN_SUCCESS';
 
-export function submitLogin({ id, password }) {
+export function submitLogin({ riotId }) {
 	return dispatch => {
 		dispatch({
 			type: TRY_LOGIN
 		});
 
 		camilleRiotAuthService
-			.signInWithIdAndPassword(id, password)
+			.signInWithRiotId(riotId)
 			.then(user => {
 				dispatch(UserActions.retrieveGroupList());
 

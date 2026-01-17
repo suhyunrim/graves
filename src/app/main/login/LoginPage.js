@@ -25,14 +25,13 @@ function LoginPage() {
 	const dispatch = useDispatch();
 
 	const { form, handleChange, resetForm } = useForm({
-		id: '',
-		password: ''
+		riotId: ''
 	});
 
 	const isPending = useSelector(({ auth }) => auth.login.isPending);
 
 	function isFormValid() {
-		return form.id.length > 0 && form.password.length > 0;
+		return form.riotId.length > 0 && form.riotId.includes('#');
 	}
 
 	function handleSubmit(ev) {
@@ -58,22 +57,11 @@ function LoginPage() {
 							<form name="loginForm" noValidate className="flex flex-col justify-center w-full" onSubmit={handleSubmit}>
 								<TextField
 									className="mb-16"
-									label="ID"
+									label="Nickname#TAG"
+									placeholder="Nickname#TAG"
 									autoFocus
-									name="id"
-									value={form.id}
-									onChange={handleChange}
-									variant="outlined"
-									required
-									fullWidth
-								/>
-
-								<TextField
-									className="mb-16"
-									label="Password"
-									type="password"
-									name="password"
-									value={form.password}
+									name="riotId"
+									value={form.riotId}
 									onChange={handleChange}
 									variant="outlined"
 									required
