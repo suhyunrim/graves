@@ -81,9 +81,24 @@ function MatchHistoryTable() {
 	const dispatch = useDispatch();
 
 	const user = useSelector(state => state.auth.user);
-	const matches = useSelector(({ MatchHistory }) => {
+	const allMatches = useSelector(({ MatchHistory }) => {
 		return MatchHistory.matchHistory.matches.matches;
 	});
+	const searchText = useSelector(({ MatchHistory }) => MatchHistory.matchHistory.searchText);
+
+	const filteredMatches = allMatches
+		? allMatches.filter(match => {
+				if (!searchText) return true;
+				const searchLower = searchText.toLowerCase();
+				const team1HasPlayer = match.team1.players.some(player =>
+					player.name.toLowerCase().includes(searchLower)
+				);
+				const team2HasPlayer = match.team2.players.some(player =>
+					player.name.toLowerCase().includes(searchLower)
+				);
+				return team1HasPlayer || team2HasPlayer;
+		  })
+		: [];
 
 	const [page, setPage] = useState(0);
 	const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -91,6 +106,10 @@ function MatchHistoryTable() {
 	useEffect(() => {
 		dispatch(Actions.getMatchHistory(user.reprGroup.groupId));
 	}, [dispatch, user]);
+
+	useEffect(() => {
+		setPage(0);
+	}, [searchText]);
 
 	const handleChangePage = (event, value) => {
 		setPage(value);
@@ -171,7 +190,7 @@ function MatchHistoryTable() {
 		return <span>(0)</span>;
 	};
 
-	if (!matches) {
+	if (!allMatches) {
 		return <FuseLoading />;
 	}
 
@@ -191,11 +210,12 @@ function MatchHistoryTable() {
 						</TableRow>
 					</TableHead>
 					<TableBody>
-						{matches
+						{filteredMatches
 							.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-							.map((match, index) => {
+							.map((match) => {
 								const isTeam1Win = match.winTeam === 1;
-								const displayId = matches.length - (page * rowsPerPage + index);
+								const originalIndex = allMatches.indexOf(match);
+								const displayId = allMatches.length - originalIndex;
 								return (
 									<TableRow key={match.gameId} className="h-64" hover>
 										<TableCell className={classes.idCell}>{displayId}</TableCell>
@@ -225,11 +245,11 @@ function MatchHistoryTable() {
 					</TableBody>
 				</Table>
 			</FuseScrollbars>
-			{matches.length > 0 && (
+			{filteredMatches.length > 0 && (
 				<TablePagination
 					className="overflow-hidden"
 					component="div"
-					count={matches.length}
+					count={filteredMatches.length}
 					rowsPerPage={rowsPerPage}
 					page={page}
 					backIconButtonProps={{

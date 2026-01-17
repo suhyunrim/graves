@@ -1,29 +1,20 @@
-import React from 'react';
-import FusePageSimple from '@fuse/core/FusePageSimple';
-import { makeStyles } from '@material-ui/core/styles';
+import FusePageCarded from '@fuse/core/FusePageCarded';
 import withReducer from 'app/store/withReducer';
+import React from 'react';
+import reducer from './store/reducers';
 import MatchHistoryHeader from './MatchHistoryHeader';
 import MatchHistoryTable from './MatchHistoryTable';
-import reducer from './store/reducers';
-
-const useStyles = makeStyles(theme => ({
-	layoutRoot: {}
-}));
 
 function MatchHistory() {
-	const classes = useStyles();
-
 	return (
-		<FusePageSimple
+		<FusePageCarded
 			classes={{
-				root: classes.layoutRoot
+				content: 'flex',
+				header: 'min-h-72 h-72 sm:h-136 sm:min-h-136'
 			}}
 			header={<MatchHistoryHeader />}
-			content={
-				<div className="p-24">
-					<MatchHistoryTable />
-				</div>
-			}
+			content={<MatchHistoryTable />}
+			innerScroll
 		/>
 	);
 }

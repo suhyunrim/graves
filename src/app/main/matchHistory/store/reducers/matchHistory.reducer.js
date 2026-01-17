@@ -1,7 +1,8 @@
 import * as Actions from '../actions';
 
 const initialState = {
-	matches: []
+	matches: [],
+	searchText: ''
 };
 
 const matchHistoryReducer = (state = initialState, action) => {
@@ -10,6 +11,12 @@ const matchHistoryReducer = (state = initialState, action) => {
 			return {
 				...state,
 				matches: action.payload
+			};
+		}
+		case Actions.SET_SEARCH_TEXT: {
+			return {
+				...state,
+				searchText: action.searchText
 			};
 		}
 		default: {
