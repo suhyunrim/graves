@@ -107,14 +107,14 @@
 		"tailwindcss-dir": "4.0.0"
 	},
 	"scripts": {
-		"start": "yarn run tailwind && react-scripts start",
-		"build": "yarn run tailwind && yarn run purge-tailwind && cross-env GENERATE_SOURCEMAP=false react-scripts build",
+		"start": "yarn run tailwind && cross-env NODE_OPTIONS=--openssl-legacy-provider react-scripts start",
+		"build": "yarn run tailwind && yarn run purge-tailwind && cross-env NODE_OPTIONS=--openssl-legacy-provider GENERATE_SOURCEMAP=false react-scripts build",
 		"tailwind": "tailwind build ./src/styles/tailwind-config.css -c ./tailwind.config.js -o ./src/styles/tailwind.css",
 		"purge-tailwind": "node ./purge-tailwindcss.js",
-		"test": "react-scripts test --env=node",
+		"test": "cross-env NODE_OPTIONS=--openssl-legacy-provider react-scripts test --env=node",
 		"eject": "react-scripts eject",
 		"build-docs": "find ./src/app/main/documentation/material-ui-components \\( -name '*.ts' -o -name '*.tsx' \\) -type f -delete && babel-node --presets @babel/preset-env src/app/main/documentation/material-ui-components/build.js",
-		"analyze": "yarn run tailwind && yarn run purge-tailwind && react-scripts build && source-map-explorer 'build/static/js/*.js' --html analyze-result.html",
+		"analyze": "yarn run tailwind && yarn run purge-tailwind && cross-env NODE_OPTIONS=--openssl-legacy-provider react-scripts build && source-map-explorer 'build/static/js/*.js' --html analyze-result.html",
 		"pnpify-sdk": "yarn pnpify --sdk",
 		"lint": "eslint"
 	},
