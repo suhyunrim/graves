@@ -18,6 +18,13 @@ const navigationConfig = [
 				type: 'item',
 				icon: 'format_list_numbered',
 				url: '/ranking'
+			},
+			{
+				id: 'match-history-component',
+				title: 'Match History',
+				type: 'item',
+				icon: 'history',
+				url: '/match-history'
 			}
 		]
 	}

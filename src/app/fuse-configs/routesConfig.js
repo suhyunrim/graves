@@ -4,9 +4,10 @@ import FuseUtils from '@fuse/utils';
 import authRoleExamplesConfigs from 'app/main/auth/authRoleExamplesConfigs';
 import MyInfoConfig from 'app/main/myinfo/MyInfoConfig';
 import RankingConfig from 'app/main/ranking/RankingConfig';
+import MatchHistoryConfig from 'app/main/matchHistory/MatchHistoryConfig';
 import LoginPageConfig from 'app/main/login/LoginPageConfig';
 
-const routeConfigs = [...authRoleExamplesConfigs, LoginPageConfig, MyInfoConfig, RankingConfig];
+const routeConfigs = [...authRoleExamplesConfigs, LoginPageConfig, MyInfoConfig, RankingConfig, MatchHistoryConfig];
 
 const routes = [
 	...FuseUtils.generateRoutesFromConfigs(routeConfigs),
