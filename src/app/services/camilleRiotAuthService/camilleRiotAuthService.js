@@ -1,8 +1,6 @@
 import FuseUtils from '@fuse/utils/FuseUtils';
 
-const CAMILLE_RIOT_TOKEN_KEY = 'camille_riot_token';
-const CAMILLE_RIOT_TOKEN_EXPIRES_AT = 'camille_riot_token_expires_at';
-const qs = require('querystring');
+const CAMILLE_RIOT_PUUID_KEY = 'camille_riot_puuid';
 /* eslint-disable camelcase */
 
 class CamilleRiotAuthService extends FuseUtils.EventEmitter {
@@ -11,20 +9,14 @@ class CamilleRiotAuthService extends FuseUtils.EventEmitter {
 	}
 
 	handleAuthentication = () => {
-		const accessToken = this.getAccessToken();
+		const puuid = this.getPuuid();
 
-		if (!accessToken) {
+		if (!puuid) {
 			this.emit('onNoAccessToken');
 			return;
 		}
 
-		if (this.isAuthTokenValid(accessToken)) {
-			this.setSession(accessToken);
-			this.emit('onAutoLogin', true);
-		} else {
-			this.setSession(null);
-			this.emit('onAutoLogout', 'accessToken expired');
-		}
+		this.emit('onAutoLogin', true);
 	};
 
 	signInWithRiotId = riotId => {
@@ -34,7 +26,7 @@ class CamilleRiotAuthService extends FuseUtils.EventEmitter {
 				.post('/api/user/login', { riotId })
 				.then(response => {
 					if (response.status === 200) {
-						this.setSession(response.data.loginResult.token);
+						this.setSession(response.data.puuid);
 						resolve(response.data);
 					} else {
 						reject(response.data);
@@ -43,16 +35,11 @@ class CamilleRiotAuthService extends FuseUtils.EventEmitter {
 		});
 	};
 
-	setSession = accessToken => {
-		if (accessToken) {
-			localStorage.setItem(CAMILLE_RIOT_TOKEN_KEY, accessToken);
-
-			const expiresAt = new Date();
-			expiresAt.setHours(expiresAt.getHours() + 6);
-			localStorage.setItem(CAMILLE_RIOT_TOKEN_EXPIRES_AT, expiresAt.getTime());
+	setSession = puuid => {
+		if (puuid) {
+			localStorage.setItem(CAMILLE_RIOT_PUUID_KEY, puuid);
 		} else {
-			localStorage.removeItem(CAMILLE_RIOT_TOKEN_KEY);
-			localStorage.removeItem(CAMILLE_RIOT_TOKEN_EXPIRES_AT);
+			localStorage.removeItem(CAMILLE_RIOT_PUUID_KEY);
 		}
 	};
 
@@ -61,8 +48,8 @@ class CamilleRiotAuthService extends FuseUtils.EventEmitter {
 	};
 
 	checkAuthenticated = () => {
-		const accessToken = this.getAccessToken();
-		if (!this.isAuthTokenValid(accessToken)) {
+		const puuid = this.getPuuid();
+		if (!puuid) {
 			this.logout();
 			return false;
 		}
@@ -70,16 +57,8 @@ class CamilleRiotAuthService extends FuseUtils.EventEmitter {
 		return true;
 	};
 
-	isAuthTokenValid = access_token => {
-		const expiresAt = Number(localStorage.getItem(CAMILLE_RIOT_TOKEN_EXPIRES_AT));
-		const isExpired = new Date().getTime() >= expiresAt;
-		if (isExpired) return false;
-
-		return !!access_token;
-	};
-
-	getAccessToken = () => {
-		return window.localStorage.getItem(CAMILLE_RIOT_TOKEN_KEY);
+	getPuuid = () => {
+		return window.localStorage.getItem(CAMILLE_RIOT_PUUID_KEY);
 	};
 }
 

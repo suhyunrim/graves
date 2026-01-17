@@ -13,7 +13,7 @@ const createCamilleAxios = () => {
 	const instance = axios.create();
 
 	instance.defaults.baseURL = process.env.REACT_APP_CAMILLE_HOST;
-	instance.defaults.headers.common.RiotTokenId = camilleRiotAuthService.getAccessToken();
+	instance.defaults.headers.common.Puuid = camilleRiotAuthService.getPuuid();
 	instance.interceptors.response.use(
 		response => {
 			return response;
