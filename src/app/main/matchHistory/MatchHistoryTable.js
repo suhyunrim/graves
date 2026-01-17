@@ -245,23 +245,21 @@ function MatchHistoryTable() {
 					</TableBody>
 				</Table>
 			</FuseScrollbars>
-			{filteredMatches.length > 0 && (
-				<TablePagination
-					className="overflow-hidden"
-					component="div"
-					count={filteredMatches.length}
-					rowsPerPage={rowsPerPage}
-					page={page}
-					backIconButtonProps={{
-						'aria-label': 'Previous Page'
-					}}
-					nextIconButtonProps={{
-						'aria-label': 'Next Page'
-					}}
-					onChangePage={handleChangePage}
-					onChangeRowsPerPage={handleChangeRowsPerPage}
-				/>
-			)}
+			<TablePagination
+				className="flex-shrink-0 overflow-hidden"
+				component="div"
+				count={filteredMatches.length}
+				rowsPerPage={rowsPerPage}
+				page={page}
+				backIconButtonProps={{
+					'aria-label': 'Previous Page'
+				}}
+				nextIconButtonProps={{
+					'aria-label': 'Next Page'
+				}}
+				onChangePage={handleChangePage}
+				onChangeRowsPerPage={handleChangeRowsPerPage}
+			/>
 		</div>
 	);
 }
