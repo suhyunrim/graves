@@ -25,28 +25,28 @@ export function getMyInfo(groupId) {
 			if (response.status !== 200) return;
 
 			const result = response.data.result;
-			let champScoreArray = result.championScore;
-			champScoreArray = champScoreArray.sort((a, b) => {
-				const aTotal = getTotalMatchCount(a);
-				const bTotal = getTotalMatchCount(b);
-				if (aTotal !== bTotal) return bTotal - aTotal;
+			// let champScoreArray = result.championScore;
+			// champScoreArray = champScoreArray.sort((a, b) => {
+			// 	const aTotal = getTotalMatchCount(a);
+			// 	const bTotal = getTotalMatchCount(b);
+			// 	if (aTotal !== bTotal) return bTotal - aTotal;
 
-				return b.win - a.win;
-			});
-			champScoreArray = champScoreArray.map((elem, index) => {
-				return {
-					...elem,
-					totalMatchCount: getTotalMatchCount(elem),
-					winRate: getWinRate(elem),
-					averageKills: getAverageKills(elem),
-					averageDeaths: getAverageDeaths(elem),
-					averageAssists: getAverageAssists(elem),
-					kda: getKDA(elem),
-					index: index + 1
-				};
-			});
+			// 	return b.win - a.win;
+			// });
+			// champScoreArray = champScoreArray.map((elem, index) => {
+			// 	return {
+			// 		...elem,
+			// 		totalMatchCount: getTotalMatchCount(elem),
+			// 		winRate: getWinRate(elem),
+			// 		averageKills: getAverageKills(elem),
+			// 		averageDeaths: getAverageDeaths(elem),
+			// 		averageAssists: getAverageAssists(elem),
+			// 		kda: getKDA(elem),
+			// 		index: index + 1
+			// 	};
+			// });
 
-			result.championScore = champScoreArray;
+			// result.championScore = champScoreArray;
 
 			dispatch({
 				type: GET_MYINFO,

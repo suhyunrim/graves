@@ -17,10 +17,11 @@ import MyInfoTableHead from './MyInfoTableHeader';
 function MyInfoTable(props) {
 	const dispatch = useDispatch();
 
-	const championScores = useSelector(({ MyInfo }) => MyInfo.myInfo.championScore);
+	// const championScores = useSelector(({ MyInfo }) => MyInfo.myInfo.championScore);
 	const championInfos = useSelector(({ MyInfo }) => MyInfo.championInfo);
 
-	const [data, setData] = useState(championScores);
+	// const [data, setData] = useState(championScores);
+	const [data, setData] = useState([]);
 	const [page, setPage] = useState(0);
 	const [rowsPerPage, setRowsPerPage] = useState(10);
 	const [order, setOrder] = useState({
@@ -32,9 +33,9 @@ function MyInfoTable(props) {
 		dispatch(Actions.retrieveChampionInfo());
 	}, [dispatch]);
 
-	useEffect(() => {
-		setData(championScores);
-	}, [championInfos, championScores]);
+	// useEffect(() => {
+	// 	setData(championScores);
+	// }, [championInfos, championScores]);
 
 	const handleRequestSort = (event, property) => {
 		const id = property;

@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import FuseLoading from '@fuse/core/FuseLoading';
 import FusePageSimple from '@fuse/core/FusePageSimple';
-import { Grid, Card, CardContent, Typography, CardMedia, Button, withStyles } from '@material-ui/core/';
+import { Grid, Card, CardContent, Typography, CardMedia, withStyles } from '@material-ui/core/';
 import { makeStyles } from '@material-ui/core/styles';
 import { useDispatch, useSelector } from 'react-redux';
 import withReducer from 'app/store/withReducer';
@@ -56,7 +56,6 @@ function MyInfoPage(props) {
 	const user = useSelector(state => state.auth.user);
 	const scoreInfo = useSelector(({ MyInfo }) => MyInfo.myInfo.scoreInfo);
 	const summonerInfo = useSelector(({ MyInfo }) => MyInfo.myInfo.summonerInfo);
-	const isRefreshingChampionScores = useSelector(({ MyInfo }) => MyInfo.myInfo.isRefreshingChampionScores);
 
 	const getSoloRankTierName = () => {
 		const tier = summonerInfo.rankTier;
@@ -74,14 +73,8 @@ function MyInfoPage(props) {
 	};
 
 	useEffect(() => {
-		if (isRefreshingChampionScores) return;
-
 		dispatch(Actions.getMyInfo(user.reprGroup.groupId));
-	}, [dispatch, user, isRefreshingChampionScores]);
-
-	const refreshChampionScores = () => {
-		dispatch(Actions.refreshChampionScores(user.reprGroup.groupId));
-	};
+	}, [dispatch, user]);
 
 	if (!scoreInfo) {
 		return <FuseLoading />;
@@ -104,14 +97,6 @@ function MyInfoPage(props) {
 							<Typography variant="body2" color="textSecondary" gutterBottom>
 								Lv. {summonerInfo.summonerLevel}
 							</Typography>
-							<br />
-							<Button variant="contained" color="secondary" size="large" onClick={refreshChampionScores}>
-								{isRefreshingChampionScores ? (
-									<FuseLoading isShowingText={false} isLinearProgress={false} />
-								) : (
-									'챔피언 전적 갱신'
-								)}
-							</Button>
 						</Grid>
 					</Grid>
 					<br />
@@ -135,7 +120,7 @@ function MyInfoPage(props) {
 											{summonerInfo.rankWin}승 {summonerInfo.rankLose}패
 										</Typography>
 										<Typography variant="body2" color="textSecondary" component="p">
-											승률 {Math.ceil((summonerInfo.rankWin / (summonerInfo.rankWin + summonerInfo.rankLose)) * 100)}%
+											승률 {summonerInfo.rankWin + summonerInfo.rankLose > 0 ? `${Math.ceil((summonerInfo.rankWin / (summonerInfo.rankWin + summonerInfo.rankLose)) * 100)}%` : '-'}
 										</Typography>
 									</CardContent>
 								</div>
@@ -165,7 +150,7 @@ function MyInfoPage(props) {
 											{scoreInfo.win}승 {scoreInfo.lose}패
 										</Typography>
 										<Typography variant="body2" color="textSecondary">
-											승률 {Math.ceil((scoreInfo.win / (scoreInfo.win + scoreInfo.lose)) * 100)}%
+											승률 {scoreInfo.win + scoreInfo.lose > 0 ? `${Math.ceil((scoreInfo.win / (scoreInfo.win + scoreInfo.lose)) * 100)}%` : '-'}
 										</Typography>
 									</CardContent>
 								</div>

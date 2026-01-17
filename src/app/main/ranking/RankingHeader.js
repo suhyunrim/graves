@@ -1,9 +1,7 @@
 import FuseAnimate from '@fuse/core/FuseAnimate';
-import FuseLoading from '@fuse/core/FuseLoading';
 import Icon from '@material-ui/core/Icon';
 import Input from '@material-ui/core/Input';
 import Paper from '@material-ui/core/Paper';
-import Button from '@material-ui/core/Button';
 import { ThemeProvider } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import React from 'react';
@@ -14,12 +12,6 @@ function RankingHeader(props) {
 	const dispatch = useDispatch();
 	const searchText = useSelector(({ Ranking }) => Ranking.ranking.searchText);
 	const mainTheme = useSelector(({ fuse }) => fuse.settings.mainTheme);
-	const isRefreshingGroupRating = useSelector(({ Ranking }) => Ranking.ranking.isRefreshingGroupRating);
-	const user = useSelector(state => state.auth.user);
-
-	const onRefreshGroupRating = () => {
-		dispatch(Actions.refreshGroupRating(user.reprGroup.groupName));
-	};
 
 	return (
 		<div className="flex flex-1 w-full items-center justify-between">
@@ -54,17 +46,6 @@ function RankingHeader(props) {
 						</Paper>
 					</FuseAnimate>
 				</ThemeProvider>
-			</div>
-			<div>
-				<FuseAnimate animation="transition.slideRightIn" delay={300}>
-					<Button variant="contained" color="secondary" size="large" onClick={onRefreshGroupRating}>
-						{isRefreshingGroupRating ? (
-							<FuseLoading isShowingText={false} isLinearProgress={false} />
-						) : (
-							'그룹 전적 갱신'
-						)}
-					</Button>
-				</FuseAnimate>
 			</div>
 		</div>
 	);
