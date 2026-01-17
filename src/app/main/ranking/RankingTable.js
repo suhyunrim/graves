@@ -33,10 +33,11 @@ function RankingTable(props) {
 		SILVER: 400,
 		GOLD: 500,
 		PLATINUM: 600,
-		DIAMOND: 700,
-		MASTER: 800,
-		GRANDMASTER: 900,
-		CHALLENGER: 1050,
+		EMERALD: 700,
+		DIAMOND: 800,
+		MASTER: 900,
+		GRANDMASTER: 1000,
+		CHALLENGER: 1150,
 		UNRANKED: 500,
 	};
 	const tierSteps = ['IV', 'III', 'II', 'I'];
@@ -100,7 +101,11 @@ function RankingTable(props) {
 				continue;
 			}
 		
-			return Math.floor((rating - tierRating) % 25 * 4);
+			if (isNonStepTier(name)) {
+				return Math.floor((rating - tierRating) * 4);
+			} else {
+				return Math.floor((rating - tierRating) % 25 * 4);
+			}
 		}
 	}
 
