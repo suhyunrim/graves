@@ -50,7 +50,8 @@ const useStyles = makeStyles(theme => ({
 		fontWeight: 'bold'
 	},
 	headerCell: {
-		fontSize: '2rem'
+		fontSize: '2rem',
+		fontWeight: 'bold'
 	},
 	avgRatingCell: {
 		whiteSpace: 'nowrap',
@@ -203,10 +204,10 @@ function MatchHistoryTable() {
 							<TableCell className={`${classes.idCell} ${classes.headerCell}`}>ID</TableCell>
 							<TableCell className={`${classes.dateCell} ${classes.headerCell}`}>Date</TableCell>
 							<TableCell align="center" className={`${classes.avgRatingCell} ${classes.headerCell}`}>평균 레이팅</TableCell>
-							<TableCell className={`${classes.teamCell} ${classes.headerCell}`}>Team 1 🐶</TableCell>
+							<TableCell className={`${classes.teamCell} ${classes.headerCell}`}>🐶Team 1</TableCell>
 							<TableCell className={classes.spacerCell}></TableCell>
 							<TableCell align="center" className={`${classes.avgRatingCell} ${classes.headerCell}`}>평균 레이팅</TableCell>
-							<TableCell className={`${classes.teamCell} ${classes.headerCell}`}>Team 2 🐱</TableCell>
+							<TableCell className={`${classes.teamCell} ${classes.headerCell}`}>🐱Team 2</TableCell>
 						</TableRow>
 					</TableHead>
 					<TableBody>
