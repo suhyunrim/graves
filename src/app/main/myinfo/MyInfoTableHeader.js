@@ -12,27 +12,6 @@ const rows = [
 		disablePadding: true,
 		label: '#',
 		sort: false
-	},
-	{
-		id: 'champ',
-		align: 'left',
-		disablePadding: false,
-		label: 'Champion',
-		sort: false
-	},
-	{
-		id: 'totalMatchCount',
-		align: 'left',
-		disablePadding: false,
-		label: 'Score',
-		sort: true
-	},
-	{
-		id: 'kda',
-		align: 'left',
-		disablePadding: false,
-		label: 'KDA',
-		sort: true
 	}
 ];
 

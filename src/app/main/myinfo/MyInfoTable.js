@@ -12,7 +12,6 @@ import { withRouter } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { getKDAColor, getWinRateColor } from 'app/utility/statisticsColor';
 import * as Actions from './store/actions';
-import MyInfoTableHead from './MyInfoTableHeader';
 
 function MyInfoTable(props) {
 	const dispatch = useDispatch();
@@ -77,7 +76,6 @@ function MyInfoTable(props) {
 		<div className="w-full flex flex-col">
 			<FuseScrollbars className="flex-grow overflow-x-auto">
 				<Table className="min-w-xl" aria-labelledby="tableTitle">
-					<MyInfoTableHead order={order} onRequestSort={handleRequestSort} rowCount={data.length} />
 					{data.length > 0 ? (
 						<TableBody>
 							{_.orderBy(data, [o => o[order.id]], [order.direction])
