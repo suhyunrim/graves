@@ -8,6 +8,7 @@ import withReducer from 'app/store/withReducer';
 import getLatesetRiotDataVersion from 'app/utility/getLatesetRiotDataVersion';
 import MyInfoHeader from './MyInfoHeader';
 import MyInfoTable from './MyInfoTable';
+import RatingChart from './RatingChart';
 import reducer from './store/reducers';
 import * as Actions from './store/actions';
 
@@ -159,6 +160,8 @@ function MyInfoPage(props) {
 					</Grid>
 					<br />
 					<MyInfoTable />
+					<br />
+					<RatingChart />
 				</div>
 			}
 		/>
