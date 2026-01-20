@@ -20,10 +20,10 @@ function MyInfoTable(props) {
 	const championInfos = useSelector(({ MyInfo }) => MyInfo.championInfo);
 
 	// const [data, setData] = useState(championScores);
-	const [data, setData] = useState([]);
+	const [data] = useState([]);
 	const [page, setPage] = useState(0);
 	const [rowsPerPage, setRowsPerPage] = useState(10);
-	const [order, setOrder] = useState({
+	const [order] = useState({
 		direction: 'desc',
 		id: 'totalMatchCount'
 	});
@@ -36,19 +36,19 @@ function MyInfoTable(props) {
 	// 	setData(championScores);
 	// }, [championInfos, championScores]);
 
-	const handleRequestSort = (event, property) => {
-		const id = property;
-		let direction = 'desc';
+	// const handleRequestSort = (event, property) => {
+	// 	const id = property;
+	// 	let direction = 'desc';
 
-		if (order.id === property && order.direction === 'desc') {
-			direction = 'asc';
-		}
+	// 	if (order.id === property && order.direction === 'desc') {
+	// 		direction = 'asc';
+	// 	}
 
-		setOrder({
-			direction,
-			id
-		});
-	};
+	// 	setOrder({
+	// 		direction,
+	// 		id
+	// 	});
+	// };
 
 	const handleChangePage = (event, value) => {
 		setPage(value);

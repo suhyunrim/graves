@@ -152,7 +152,7 @@ function RankingTable(props) {
 										</TableCell>
 
 										<TableCell component="th" scope="row">
-											<img width="32" height="32" src={"/assets/images/ranked-emblems/Emblem_" + getTierName(n.rating) +".png"}/> {getRatingTierName(n.rating) + " " + getTierPoint(n.rating) + "LP"}
+											<img width="32" height="32" src={"/assets/images/ranked-emblems/Emblem_" + getTierName(n.rating) +".png"} alt={getTierName(n.rating)}/> {getRatingTierName(n.rating) + " " + getTierPoint(n.rating) + "LP"}
 										</TableCell>
 
 										<TableCell component="th" scope="row">

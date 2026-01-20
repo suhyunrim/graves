@@ -6,12 +6,12 @@ export const GET_MYINFO = '[MYINFO] GET MYINFO';
 export const REFRESH_CHAMPION_SCORES = '[MYINFO] REFRESH CHAMPION SCORES';
 export const TRY_REFRESH_CHAMPION_SCORES = '[MYINFO] TRY REFRESH CHAMPION SCORES';
 
-const getTotalMatchCount = champData => champData.win + champData.lose;
-const getWinRate = champData => Math.ceil((champData.win / getTotalMatchCount(champData)) * 100);
-const getAverageKills = champData => champData.kills / getTotalMatchCount(champData);
-const getAverageDeaths = champData => champData.deaths / getTotalMatchCount(champData);
-const getAverageAssists = champData => champData.assists / getTotalMatchCount(champData);
-const getKDA = champData => (getAverageKills(champData) + getAverageAssists(champData)) / getAverageDeaths(champData);
+// const getTotalMatchCount = champData => champData.win + champData.lose;
+// const getWinRate = champData => Math.ceil((champData.win / getTotalMatchCount(champData)) * 100);
+// const getAverageKills = champData => champData.kills / getTotalMatchCount(champData);
+// const getAverageDeaths = champData => champData.deaths / getTotalMatchCount(champData);
+// const getAverageAssists = champData => champData.assists / getTotalMatchCount(champData);
+// const getKDA = champData => (getAverageKills(champData) + getAverageAssists(champData)) / getAverageDeaths(champData);
 
 export function getMyInfo(groupId) {
 	const request = createCamilleAxios().get('/api/user/getInfo', {
