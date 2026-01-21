@@ -371,7 +371,7 @@ function RankingTable(props) {
 					</>
 				) : (
 					<div className={classes.emptyState}>
-						<div className={classes.emptyIcon}>🏆</div>
+						<div className={classes.emptyIcon}><span role="img" aria-label="trophy">🏆</span></div>
 						<div className={classes.emptyText}>랭킹 데이터가 없습니다</div>
 					</div>
 				)}

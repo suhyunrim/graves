@@ -181,7 +181,7 @@ function RatingChart() {
 			<div className={classes.chartCard}>
 				<div className={classes.chartTitle}>Rating History</div>
 				<div className={classes.emptyState}>
-					<div className={classes.emptyIcon}>📊</div>
+					<div className={classes.emptyIcon}><span role="img" aria-label="chart">📊</span></div>
 					<div className={classes.emptyText}>매치 데이터가 없습니다</div>
 				</div>
 			</div>

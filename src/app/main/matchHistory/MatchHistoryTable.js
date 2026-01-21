@@ -392,14 +392,14 @@ function MatchHistoryTable() {
 										<TableCell className={classes.headerCell} align="center">평균</TableCell>
 										<TableCell className={classes.headerCell}>
 											<span className={classes.teamLabel}>
-												<span className={classes.teamEmoji}>🐶</span> Team 1
+												<span role="img" aria-label="dog" className={classes.teamEmoji}>🐶</span> Team 1
 											</span>
 										</TableCell>
 										<TableCell className={classes.headerCell} align="center">VS</TableCell>
 										<TableCell className={classes.headerCell} align="center">평균</TableCell>
 										<TableCell className={classes.headerCell}>
 											<span className={classes.teamLabel}>
-												<span className={classes.teamEmoji}>🐱</span> Team 2
+												<span role="img" aria-label="cat" className={classes.teamEmoji}>🐱</span> Team 2
 											</span>
 										</TableCell>
 									</TableRow>
@@ -480,7 +480,7 @@ function MatchHistoryTable() {
 					</>
 				) : (
 					<div className={classes.emptyState}>
-						<div className={classes.emptyIcon}>📜</div>
+						<div className={classes.emptyIcon}><span role="img" aria-label="scroll">📜</span></div>
 						<div className={classes.emptyText}>매치 기록이 없습니다</div>
 					</div>
 				)}

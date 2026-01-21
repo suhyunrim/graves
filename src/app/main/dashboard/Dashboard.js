@@ -305,7 +305,7 @@ function Dashboard() {
 		return (
 			<div className={`${classes.card} ${item ? classes.cardMostGames : classes.cardEmpty}`}>
 				<div className={classes.cardHeader}>
-					<span className={classes.emoji}>🚨</span>
+					<span role="img" aria-label="alarm" className={classes.emoji}>🚨</span>
 					<div className={classes.cardTitleWrapper}>
 						<div className={classes.cardLabel}>최다 판수</div>
 						<div className={classes.cardTitle}>현생.. 괜찮죠..?</div>
@@ -333,7 +333,7 @@ function Dashboard() {
 		return (
 			<div className={`${classes.card} ${item ? classes.cardBestWinRate : classes.cardEmpty}`}>
 				<div className={classes.cardHeader}>
-					<span className={classes.emoji}>🚍</span>
+					<span role="img" aria-label="bus" className={classes.emoji}>🚍</span>
 					<div className={classes.cardTitleWrapper}>
 						<div className={classes.cardLabel}>{item?.minGames || 5}판 이상 최고 승률</div>
 						<div className={classes.cardTitle}>버스 기사 등장</div>
@@ -361,7 +361,7 @@ function Dashboard() {
 		return (
 			<div className={`${classes.card} ${item ? classes.cardWinStreak : classes.cardEmpty}`}>
 				<div className={classes.cardHeader}>
-					<span className={classes.emoji}>🔥</span>
+					<span role="img" aria-label="fire" className={classes.emoji}>🔥</span>
 					<div className={classes.cardTitleWrapper}>
 						<div className={classes.cardLabel}>최다 연승</div>
 						<div className={classes.cardTitle}>헬퍼 사용자</div>
@@ -388,7 +388,7 @@ function Dashboard() {
 		return (
 			<div className={`${classes.card} ${item ? classes.cardBestDuo : classes.cardEmpty}`}>
 				<div className={classes.cardHeader}>
-					<span className={classes.emoji}>💕</span>
+					<span role="img" aria-label="hearts" className={classes.emoji}>💕</span>
 					<div className={classes.cardTitleWrapper}>
 						<div className={classes.cardLabel}>{item?.minGames || 3}판 이상 2인 조합 최고 승률</div>
 						<div className={classes.cardTitle}>전생에 부부</div>
@@ -420,7 +420,7 @@ function Dashboard() {
 		return (
 			<div className={`${classes.card} ${item ? classes.cardRivalry : classes.cardEmpty}`}>
 				<div className={classes.cardHeader}>
-					<span className={classes.emoji}>⚔️</span>
+					<span role="img" aria-label="swords" className={classes.emoji}>⚔️</span>
 					<div className={classes.cardTitleWrapper}>
 						<div className={classes.cardLabel}>상대 전적 최다 판수</div>
 						<div className={classes.cardTitle}>톰과 제리</div>
@@ -461,7 +461,7 @@ function Dashboard() {
 		return (
 			<div className={`${classes.card} ${item ? classes.cardNewcomer : classes.cardEmpty}`}>
 				<div className={classes.cardHeader}>
-					<span className={classes.emoji}>👶</span>
+					<span role="img" aria-label="baby" className={classes.emoji}>👶</span>
 					<div className={classes.cardTitleWrapper}>
 						<div className={classes.cardLabel}>신규 유저 최다 판수</div>
 						<div className={classes.cardTitle}>고인물 예약</div>
