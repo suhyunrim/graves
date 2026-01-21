@@ -35,21 +35,16 @@ const useStyles = makeStyles(theme => ({
 		backgroundColor: theme.palette.background.default
 	},
 	header: {
-		height: headerHeight,
-		minHeight: headerHeight,
+		height: 'auto',
+		minHeight: 'auto',
 		display: 'flex',
-		background: `linear-gradient(to right, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
+		background: 'transparent',
 		color: theme.palette.primary.contrastText,
 		backgroundSize: 'cover',
-		backgroundColor: theme.palette.primary.dark
+		backgroundColor: 'transparent'
 	},
 	topBg: {
-		position: 'absolute',
-		left: 0,
-		right: 0,
-		top: 0,
-		height: headerHeight,
-		pointerEvents: 'none'
+		display: 'none'
 	},
 	/* contentCardWrapper            : {
          display : 'flex ',
