@@ -55,14 +55,12 @@ const useStyles = makeStyles(theme => ({
 		padding: '20px 16px'
 	},
 	winTeamCell: {
-		backgroundColor: 'rgba(0, 200, 83, 0.15)',
 		borderLeft: '5px solid #00c853',
-		boxShadow: 'inset 0 0 20px rgba(0, 200, 83, 0.1)'
+		backgroundColor: 'rgba(0, 200, 83, 0.35) !important'
 	},
 	loseTeamCell: {
-		backgroundColor: 'rgba(255, 82, 82, 0.12)',
 		borderLeft: '5px solid #ff5252',
-		boxShadow: 'inset 0 0 20px rgba(255, 82, 82, 0.08)'
+		backgroundColor: 'rgba(255, 82, 82, 0.3) !important'
 	},
 	winBadge: {
 		display: 'inline-block',
@@ -554,9 +552,6 @@ function MatchHistoryTable() {
 												</span>
 											</TableCell>
 											<TableCell className={classes.headerCell} align="center">
-												VS
-											</TableCell>
-											<TableCell className={classes.headerCell} align="center">
 												평균
 											</TableCell>
 											<TableCell className={classes.headerCell}>
@@ -598,9 +593,6 @@ function MatchHistoryTable() {
 															</span>
 														</div>
 														<div className={classes.playerList}>{renderPlayers(match.team1.players)}</div>
-													</StyledTableCell>
-													<StyledTableCell>
-														<span className={classes.vsCell}>VS</span>
 													</StyledTableCell>
 													<StyledTableCell
 														align="center"
