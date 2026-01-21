@@ -1,5 +1,6 @@
 import FuseScrollbars from '@fuse/core/FuseScrollbars';
 import _ from '@lodash';
+import Hidden from '@material-ui/core/Hidden';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
@@ -152,6 +153,122 @@ const useStyles = makeStyles(theme => ({
 		fontFamily: '"Noto Sans KR", sans-serif',
 		fontSize: '1.8rem',
 		color: 'rgba(255, 255, 255, 0.4)'
+	},
+	// Mobile card styles
+	mobileCardList: {
+		padding: '16px'
+	},
+	mobileCard: {
+		background: 'rgba(255, 255, 255, 0.03)',
+		borderRadius: 16,
+		padding: '16px',
+		marginBottom: 12,
+		border: '1px solid rgba(255, 255, 255, 0.08)',
+		transition: 'all 0.2s ease',
+		'&:hover': {
+			background: 'rgba(0, 212, 255, 0.05)',
+			borderColor: 'rgba(0, 212, 255, 0.2)'
+		}
+	},
+	mobileCardTop: {
+		display: 'flex',
+		alignItems: 'center',
+		gap: 12,
+		marginBottom: 12
+	},
+	mobileRankBadge: {
+		width: 40,
+		height: 40,
+		borderRadius: 10,
+		display: 'flex',
+		alignItems: 'center',
+		justifyContent: 'center',
+		fontFamily: '"Rajdhani", sans-serif',
+		fontSize: '1.4rem',
+		fontWeight: 700,
+		background: 'rgba(255, 255, 255, 0.1)'
+	},
+	mobileRankTop1: {
+		background: 'linear-gradient(135deg, #FFD700 0%, #FFA500 100%)',
+		color: '#000',
+		boxShadow: '0 0 12px rgba(255, 215, 0, 0.4)'
+	},
+	mobileRankTop2: {
+		background: 'linear-gradient(135deg, #C0C0C0 0%, #A0A0A0 100%)',
+		color: '#000',
+		boxShadow: '0 0 12px rgba(192, 192, 192, 0.4)'
+	},
+	mobileRankTop3: {
+		background: 'linear-gradient(135deg, #CD7F32 0%, #8B4513 100%)',
+		color: '#fff',
+		boxShadow: '0 0 12px rgba(205, 127, 50, 0.4)'
+	},
+	mobilePlayerInfo: {
+		flex: 1,
+		minWidth: 0
+	},
+	mobilePlayerName: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.3rem',
+		fontWeight: 600,
+		color: '#fff',
+		marginBottom: 2,
+		whiteSpace: 'nowrap',
+		overflow: 'hidden',
+		textOverflow: 'ellipsis'
+	},
+	mobileTierRow: {
+		display: 'flex',
+		alignItems: 'center',
+		gap: 8
+	},
+	mobileTierEmblem: {
+		width: 24,
+		height: 24
+	},
+	mobileTierText: {
+		fontFamily: '"Rajdhani", sans-serif',
+		fontSize: '1.1rem',
+		fontWeight: 600
+	},
+	mobileLPText: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '0.9rem',
+		color: 'rgba(255, 255, 255, 0.5)'
+	},
+	mobileStats: {
+		display: 'flex',
+		justifyContent: 'space-between',
+		alignItems: 'center',
+		paddingTop: 12,
+		borderTop: '1px solid rgba(255, 255, 255, 0.08)'
+	},
+	mobileStatItem: {
+		display: 'flex',
+		flexDirection: 'column',
+		alignItems: 'center',
+		gap: 2
+	},
+	mobileStatLabel: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '0.85rem',
+		color: 'rgba(255, 255, 255, 0.4)'
+	},
+	mobileStatValue: {
+		fontFamily: '"Rajdhani", sans-serif',
+		fontSize: '1.3rem',
+		fontWeight: 700
+	},
+	mobileWinValue: {
+		color: '#4dabf7'
+	},
+	mobileLoseValue: {
+		color: '#ff6b6b'
+	},
+	mobileWinRateValue: {
+		fontFamily: '"Rajdhani", sans-serif',
+		fontSize: '1.3rem',
+		fontWeight: 700
 	}
 }));
 
@@ -292,6 +409,13 @@ function RankingTable(props) {
 		return classes.rankNormal;
 	}
 
+	function getMobileRankClass(rank) {
+		if (rank === 1) return classes.mobileRankTop1;
+		if (rank === 2) return classes.mobileRankTop2;
+		if (rank === 3) return classes.mobileRankTop3;
+		return '';
+	}
+
 	function getWinRateClass(winRate) {
 		const rate = parseFloat(winRate);
 		if (rate >= 55) return classes.winRateHigh;
@@ -299,27 +423,30 @@ function RankingTable(props) {
 		return classes.winRateLow;
 	}
 
+	const sortedData = _.orderBy(data, [o => o[order.id]], [order.direction]).slice(
+		page * rowsPerPage,
+		page * rowsPerPage + rowsPerPage
+	);
+
 	return (
 		<div className={classes.container}>
 			<div className={classes.tableWrapper}>
 				{data && data.length > 0 ? (
 					<>
-						<FuseScrollbars className="flex-grow overflow-x-auto">
-							<Table>
-								<RankingTableHead order={order} onRequestSort={handleRequestSort} rowCount={data.length} />
-								<TableBody>
-									{_.orderBy(data, [o => o[order.id]], [order.direction])
-										.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-										.map((n) => {
+						{/* Desktop Table View */}
+						<Hidden smDown>
+							<FuseScrollbars className="flex-grow overflow-x-auto">
+								<Table>
+									<RankingTableHead order={order} onRequestSort={handleRequestSort} rowCount={data.length} />
+									<TableBody>
+										{sortedData.map(n => {
 											const tierName = getTierName(n.rating);
 											const tierColor = tierColors[tierName] || '#fff';
 
 											return (
 												<StyledTableRow key={n.riotId}>
 													<StyledTableCell>
-														<span className={`${classes.rankingNumber} ${getRankClass(n.ranking)}`}>
-															{n.ranking}
-														</span>
+														<span className={`${classes.rankingNumber} ${getRankClass(n.ranking)}`}>{n.ranking}</span>
 													</StyledTableCell>
 													<StyledTableCell>
 														<span className={classes.playerName}>{n.name}</span>
@@ -341,22 +468,74 @@ function RankingTable(props) {
 														</div>
 													</StyledTableCell>
 													<StyledTableCell>
-														<span className={classes.statNumber} style={{ color: '#4dabf7' }}>{n.win}</span>
-													</StyledTableCell>
-													<StyledTableCell>
-														<span className={classes.statNumber} style={{ color: '#ff6b6b' }}>{n.lose}</span>
-													</StyledTableCell>
-													<StyledTableCell>
-														<span className={`${classes.winRate} ${getWinRateClass(n.winRate)}`}>
-															{n.winRate}%
+														<span className={classes.statNumber} style={{ color: '#4dabf7' }}>
+															{n.win}
 														</span>
+													</StyledTableCell>
+													<StyledTableCell>
+														<span className={classes.statNumber} style={{ color: '#ff6b6b' }}>
+															{n.lose}
+														</span>
+													</StyledTableCell>
+													<StyledTableCell>
+														<span className={`${classes.winRate} ${getWinRateClass(n.winRate)}`}>{n.winRate}%</span>
 													</StyledTableCell>
 												</StyledTableRow>
 											);
 										})}
-								</TableBody>
-							</Table>
-						</FuseScrollbars>
+									</TableBody>
+								</Table>
+							</FuseScrollbars>
+						</Hidden>
+
+						{/* Mobile Card View */}
+						<Hidden mdUp>
+							<div className={classes.mobileCardList}>
+								{sortedData.map(n => {
+									const tierName = getTierName(n.rating);
+									const tierColor = tierColors[tierName] || '#fff';
+
+									return (
+										<div key={n.riotId} className={classes.mobileCard}>
+											<div className={classes.mobileCardTop}>
+												<div className={`${classes.mobileRankBadge} ${getMobileRankClass(n.ranking)}`}>{n.ranking}</div>
+												<div className={classes.mobilePlayerInfo}>
+													<div className={classes.mobilePlayerName}>{n.name}</div>
+													<div className={classes.mobileTierRow}>
+														<img
+															className={classes.mobileTierEmblem}
+															src={`/assets/images/ranked-emblems/Emblem_${tierName}.png`}
+															alt={tierName}
+														/>
+														<span className={classes.mobileTierText} style={{ color: tierColor }}>
+															{getRatingTierName(n.rating)}
+														</span>
+														<span className={classes.mobileLPText}>{getTierPoint(n.rating)} LP</span>
+													</div>
+												</div>
+											</div>
+											<div className={classes.mobileStats}>
+												<div className={classes.mobileStatItem}>
+													<span className={classes.mobileStatLabel}>승</span>
+													<span className={`${classes.mobileStatValue} ${classes.mobileWinValue}`}>{n.win}</span>
+												</div>
+												<div className={classes.mobileStatItem}>
+													<span className={classes.mobileStatLabel}>패</span>
+													<span className={`${classes.mobileStatValue} ${classes.mobileLoseValue}`}>{n.lose}</span>
+												</div>
+												<div className={classes.mobileStatItem}>
+													<span className={classes.mobileStatLabel}>승률</span>
+													<span className={`${classes.mobileWinRateValue} ${getWinRateClass(n.winRate)}`}>
+														{n.winRate}%
+													</span>
+												</div>
+											</div>
+										</div>
+									);
+								})}
+							</div>
+						</Hidden>
+
 						<TablePagination
 							className={classes.pagination}
 							component="div"
@@ -371,7 +550,11 @@ function RankingTable(props) {
 					</>
 				) : (
 					<div className={classes.emptyState}>
-						<div className={classes.emptyIcon}><span role="img" aria-label="trophy">🏆</span></div>
+						<div className={classes.emptyIcon}>
+							<span role="img" aria-label="trophy">
+								🏆
+							</span>
+						</div>
 						<div className={classes.emptyText}>랭킹 데이터가 없습니다</div>
 					</div>
 				)}

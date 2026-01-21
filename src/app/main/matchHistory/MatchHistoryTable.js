@@ -1,5 +1,6 @@
 import FuseScrollbars from '@fuse/core/FuseScrollbars';
 import FuseLoading from '@fuse/core/FuseLoading';
+import Hidden from '@material-ui/core/Hidden';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
@@ -217,6 +218,139 @@ const useStyles = makeStyles(theme => ({
 		fontFamily: '"Noto Sans KR", sans-serif',
 		fontSize: '1.8rem',
 		color: 'rgba(255, 255, 255, 0.4)'
+	},
+	// Mobile card styles
+	mobileCardList: {
+		padding: '16px'
+	},
+	mobileCard: {
+		background: 'rgba(255, 255, 255, 0.03)',
+		borderRadius: 16,
+		marginBottom: 16,
+		border: '1px solid rgba(255, 255, 255, 0.08)',
+		overflow: 'hidden'
+	},
+	mobileCardHeader: {
+		display: 'flex',
+		justifyContent: 'space-between',
+		alignItems: 'center',
+		padding: '12px 16px',
+		background: 'rgba(0, 212, 255, 0.08)',
+		borderBottom: '1px solid rgba(255, 255, 255, 0.08)'
+	},
+	mobileMatchId: {
+		fontFamily: '"Rajdhani", sans-serif',
+		fontSize: '1.4rem',
+		fontWeight: 700,
+		color: '#00d4ff'
+	},
+	mobileDate: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.1rem',
+		color: 'rgba(255, 255, 255, 0.6)'
+	},
+	mobileTeamSection: {
+		padding: '12px 16px'
+	},
+	mobileTeamWin: {
+		borderLeft: '4px solid #00c853',
+		background: 'rgba(0, 200, 83, 0.08)'
+	},
+	mobileTeamLose: {
+		borderLeft: '4px solid #ff5252',
+		background: 'rgba(255, 82, 82, 0.05)'
+	},
+	mobileTeamHeader: {
+		display: 'flex',
+		justifyContent: 'space-between',
+		alignItems: 'center',
+		marginBottom: 10
+	},
+	mobileTeamInfo: {
+		display: 'flex',
+		alignItems: 'center',
+		gap: 10
+	},
+	mobileTeamEmoji: {
+		fontSize: '1.4rem'
+	},
+	mobileTeamName: {
+		fontFamily: '"Rajdhani", sans-serif',
+		fontSize: '1.2rem',
+		fontWeight: 600,
+		color: 'rgba(255, 255, 255, 0.8)'
+	},
+	mobileBadgeWin: {
+		padding: '3px 10px',
+		borderRadius: 4,
+		background: 'linear-gradient(135deg, #00c853 0%, #00e676 100%)',
+		color: '#fff',
+		fontFamily: '"Rajdhani", sans-serif',
+		fontSize: '1rem',
+		fontWeight: 700,
+		textTransform: 'uppercase'
+	},
+	mobileBadgeLose: {
+		padding: '3px 10px',
+		borderRadius: 4,
+		background: 'linear-gradient(135deg, #ff5252 0%, #ff1744 100%)',
+		color: '#fff',
+		fontFamily: '"Rajdhani", sans-serif',
+		fontSize: '1rem',
+		fontWeight: 700,
+		textTransform: 'uppercase'
+	},
+	mobileRatingInfo: {
+		display: 'flex',
+		alignItems: 'center',
+		gap: 8
+	},
+	mobileAvgRating: {
+		fontFamily: '"Rajdhani", sans-serif',
+		fontSize: '1.3rem',
+		fontWeight: 700,
+		color: '#fff'
+	},
+	mobileRatingChange: {
+		fontFamily: '"Rajdhani", sans-serif',
+		fontSize: '1.1rem',
+		fontWeight: 600
+	},
+	mobilePlayerList: {
+		display: 'flex',
+		flexWrap: 'wrap',
+		gap: 6
+	},
+	mobilePlayerChip: {
+		display: 'flex',
+		alignItems: 'center',
+		gap: 4,
+		padding: '4px 8px',
+		background: 'rgba(255, 255, 255, 0.06)',
+		borderRadius: 6
+	},
+	mobilePlayerTierIcon: {
+		width: 18,
+		height: 18
+	},
+	mobilePlayerTier: {
+		fontFamily: '"Rajdhani", sans-serif',
+		fontSize: '0.9rem',
+		fontWeight: 700
+	},
+	mobilePlayerName: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1rem',
+		color: '#fff'
+	},
+	mobileVsDivider: {
+		textAlign: 'center',
+		padding: '6px 0',
+		fontFamily: '"Rajdhani", sans-serif',
+		fontSize: '1.2rem',
+		fontWeight: 700,
+		color: 'rgba(255, 255, 255, 0.2)',
+		background: 'rgba(0, 0, 0, 0.2)'
 	}
 }));
 
@@ -254,12 +388,8 @@ function MatchHistoryTable() {
 		? allMatches.filter(match => {
 				if (!searchText) return true;
 				const searchLower = searchText.toLowerCase();
-				const team1HasPlayer = match.team1.players.some(player =>
-					player.name.toLowerCase().includes(searchLower)
-				);
-				const team2HasPlayer = match.team2.players.some(player =>
-					player.name.toLowerCase().includes(searchLower)
-				);
+				const team1HasPlayer = match.team1.players.some(player => player.name.toLowerCase().includes(searchLower));
+				const team2HasPlayer = match.team2.players.some(player => player.name.toLowerCase().includes(searchLower));
 				return team1HasPlayer || team2HasPlayer;
 		  })
 		: [];
@@ -346,10 +476,7 @@ function MatchHistoryTable() {
 					alt={player.tier}
 					style={{ filter: `drop-shadow(0 0 4px ${getTierColor(player.tier)}40)` }}
 				/>
-				<span
-					className={classes.tierBadge}
-					style={{ color: getTierColor(player.tier) }}
-				>
+				<span className={classes.tierBadge} style={{ color: getTierColor(player.tier) }}>
 					{getTierShortName(player.tier)}
 				</span>
 				<span className={classes.playerName}>{player.name}</span>
@@ -359,55 +486,91 @@ function MatchHistoryTable() {
 
 	const renderRatingChange = ratingChange => {
 		if (ratingChange > 0) {
-			return (
-				<span className={`${classes.ratingChange} ${classes.ratingUp}`}>
-					+{ratingChange}
-				</span>
-			);
-		} else if (ratingChange < 0) {
-			return (
-				<span className={`${classes.ratingChange} ${classes.ratingDown}`}>
-					{ratingChange}
-				</span>
-			);
+			return <span className={`${classes.ratingChange} ${classes.ratingUp}`}>+{ratingChange}</span>;
+		}
+		if (ratingChange < 0) {
+			return <span className={`${classes.ratingChange} ${classes.ratingDown}`}>{ratingChange}</span>;
 		}
 		return <span className={`${classes.ratingChange} ${classes.ratingNeutral}`}>0</span>;
+	};
+
+	const renderMobileRatingChange = ratingChange => {
+		if (ratingChange > 0) {
+			return <span className={`${classes.mobileRatingChange} ${classes.ratingUp}`}>+{ratingChange}</span>;
+		}
+		if (ratingChange < 0) {
+			return <span className={`${classes.mobileRatingChange} ${classes.ratingDown}`}>{ratingChange}</span>;
+		}
+		return <span className={`${classes.mobileRatingChange} ${classes.ratingNeutral}`}>0</span>;
+	};
+
+	const renderMobilePlayers = players => {
+		const sortedPlayers = [...players].sort((a, b) => b.rating - a.rating);
+		return sortedPlayers.map(player => (
+			<div key={player.puuid} className={classes.mobilePlayerChip}>
+				<img
+					className={classes.mobilePlayerTierIcon}
+					src={`/assets/images/ranked-emblems/Emblem_${getTierIconName(player.tier)}.png`}
+					alt={player.tier}
+				/>
+				<span className={classes.mobilePlayerTier} style={{ color: getTierColor(player.tier) }}>
+					{getTierShortName(player.tier)}
+				</span>
+				<span className={classes.mobilePlayerName}>{player.name}</span>
+			</div>
+		));
 	};
 
 	if (!allMatches) {
 		return <FuseLoading />;
 	}
 
+	const paginatedMatches = filteredMatches.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
+
 	return (
 		<div className={classes.container}>
 			<div className={classes.tableWrapper}>
 				{filteredMatches && filteredMatches.length > 0 ? (
 					<>
-						<FuseScrollbars className="flex-grow overflow-x-auto">
-							<Table>
-								<TableHead>
-									<TableRow>
-										<TableCell className={classes.headerCell} align="center">#</TableCell>
-										<TableCell className={classes.headerCell}>날짜</TableCell>
-										<TableCell className={classes.headerCell} align="center">평균</TableCell>
-										<TableCell className={classes.headerCell}>
-											<span className={classes.teamLabel}>
-												<span role="img" aria-label="dog" className={classes.teamEmoji}>🐶</span> Team 1
-											</span>
-										</TableCell>
-										<TableCell className={classes.headerCell} align="center">VS</TableCell>
-										<TableCell className={classes.headerCell} align="center">평균</TableCell>
-										<TableCell className={classes.headerCell}>
-											<span className={classes.teamLabel}>
-												<span role="img" aria-label="cat" className={classes.teamEmoji}>🐱</span> Team 2
-											</span>
-										</TableCell>
-									</TableRow>
-								</TableHead>
-								<TableBody>
-									{filteredMatches
-										.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-										.map((match) => {
+						{/* Desktop Table View */}
+						<Hidden smDown>
+							<FuseScrollbars className="flex-grow overflow-x-auto">
+								<Table>
+									<TableHead>
+										<TableRow>
+											<TableCell className={classes.headerCell} align="center">
+												#
+											</TableCell>
+											<TableCell className={classes.headerCell}>날짜</TableCell>
+											<TableCell className={classes.headerCell} align="center">
+												평균
+											</TableCell>
+											<TableCell className={classes.headerCell}>
+												<span className={classes.teamLabel}>
+													<span role="img" aria-label="dog" className={classes.teamEmoji}>
+														🐶
+													</span>{' '}
+													Team 1
+												</span>
+											</TableCell>
+											<TableCell className={classes.headerCell} align="center">
+												VS
+											</TableCell>
+											<TableCell className={classes.headerCell} align="center">
+												평균
+											</TableCell>
+											<TableCell className={classes.headerCell}>
+												<span className={classes.teamLabel}>
+													<span role="img" aria-label="cat" className={classes.teamEmoji}>
+														🐱
+													</span>{' '}
+													Team 2
+												</span>
+											</TableCell>
+										</TableRow>
+									</TableHead>
+									<TableBody>
+										{paginatedMatches.map(match => {
 											const isTeam1Win = match.winTeam === 1;
 											const originalIndex = allMatches.indexOf(match);
 											const displayId = allMatches.length - originalIndex;
@@ -434,9 +597,7 @@ function MatchHistoryTable() {
 																{isTeam1Win ? 'WIN' : 'LOSE'}
 															</span>
 														</div>
-														<div className={classes.playerList}>
-															{renderPlayers(match.team1.players)}
-														</div>
+														<div className={classes.playerList}>{renderPlayers(match.team1.players)}</div>
 													</StyledTableCell>
 													<StyledTableCell>
 														<span className={classes.vsCell}>VS</span>
@@ -456,16 +617,83 @@ function MatchHistoryTable() {
 																{!isTeam1Win ? 'WIN' : 'LOSE'}
 															</span>
 														</div>
-														<div className={classes.playerList}>
-															{renderPlayers(match.team2.players)}
-														</div>
+														<div className={classes.playerList}>{renderPlayers(match.team2.players)}</div>
 													</StyledTableCell>
 												</StyledTableRow>
 											);
 										})}
-								</TableBody>
-							</Table>
-						</FuseScrollbars>
+									</TableBody>
+								</Table>
+							</FuseScrollbars>
+						</Hidden>
+
+						{/* Mobile Card View */}
+						<Hidden mdUp>
+							<div className={classes.mobileCardList}>
+								{paginatedMatches.map(match => {
+									const isTeam1Win = match.winTeam === 1;
+									const originalIndex = allMatches.indexOf(match);
+									const displayId = allMatches.length - originalIndex;
+									return (
+										<div key={match.gameId} className={classes.mobileCard}>
+											<div className={classes.mobileCardHeader}>
+												<span className={classes.mobileMatchId}>#{displayId}</span>
+												<span className={classes.mobileDate}>{formatDate(match.createdAt)}</span>
+											</div>
+											{/* Team 1 */}
+											<div
+												className={`${classes.mobileTeamSection} ${
+													isTeam1Win ? classes.mobileTeamWin : classes.mobileTeamLose
+												}`}
+											>
+												<div className={classes.mobileTeamHeader}>
+													<div className={classes.mobileTeamInfo}>
+														<span role="img" aria-label="dog" className={classes.mobileTeamEmoji}>
+															🐶
+														</span>
+														<span className={classes.mobileTeamName}>Team 1</span>
+														<span className={isTeam1Win ? classes.mobileBadgeWin : classes.mobileBadgeLose}>
+															{isTeam1Win ? 'WIN' : 'LOSE'}
+														</span>
+													</div>
+													<div className={classes.mobileRatingInfo}>
+														<span className={classes.mobileAvgRating}>{match.team1.avgRating}</span>
+														{renderMobileRatingChange(match.team1.ratingChange)}
+													</div>
+												</div>
+												<div className={classes.mobilePlayerList}>{renderMobilePlayers(match.team1.players)}</div>
+											</div>
+											{/* VS Divider */}
+											<div className={classes.mobileVsDivider}>VS</div>
+											{/* Team 2 */}
+											<div
+												className={`${classes.mobileTeamSection} ${
+													!isTeam1Win ? classes.mobileTeamWin : classes.mobileTeamLose
+												}`}
+											>
+												<div className={classes.mobileTeamHeader}>
+													<div className={classes.mobileTeamInfo}>
+														<span role="img" aria-label="cat" className={classes.mobileTeamEmoji}>
+															🐱
+														</span>
+														<span className={classes.mobileTeamName}>Team 2</span>
+														<span className={!isTeam1Win ? classes.mobileBadgeWin : classes.mobileBadgeLose}>
+															{!isTeam1Win ? 'WIN' : 'LOSE'}
+														</span>
+													</div>
+													<div className={classes.mobileRatingInfo}>
+														<span className={classes.mobileAvgRating}>{match.team2.avgRating}</span>
+														{renderMobileRatingChange(match.team2.ratingChange)}
+													</div>
+												</div>
+												<div className={classes.mobilePlayerList}>{renderMobilePlayers(match.team2.players)}</div>
+											</div>
+										</div>
+									);
+								})}
+							</div>
+						</Hidden>
+
 						<TablePagination
 							className={classes.pagination}
 							component="div"
@@ -480,7 +708,11 @@ function MatchHistoryTable() {
 					</>
 				) : (
 					<div className={classes.emptyState}>
-						<div className={classes.emptyIcon}><span role="img" aria-label="scroll">📜</span></div>
+						<div className={classes.emptyIcon}>
+							<span role="img" aria-label="scroll">
+								📜
+							</span>
+						</div>
 						<div className={classes.emptyText}>매치 기록이 없습니다</div>
 					</div>
 				)}
