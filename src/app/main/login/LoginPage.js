@@ -13,6 +13,14 @@ import { useSelector, useDispatch } from 'react-redux';
 import * as authActions from 'app/auth/store/actions';
 
 const useStyles = makeStyles(theme => ({
+	'@keyframes pulseGlow': {
+		'0%, 100%': {
+			boxShadow: '0 0 30px rgba(0, 212, 255, 0.4), 0 0 60px rgba(0, 212, 255, 0.2)'
+		},
+		'50%': {
+			boxShadow: '0 0 50px rgba(0, 212, 255, 0.6), 0 0 100px rgba(0, 212, 255, 0.4)'
+		}
+	},
 	root: {
 		background: 'linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 50%, #16213e 100%)',
 		position: 'relative',
@@ -49,11 +57,18 @@ const useStyles = makeStyles(theme => ({
 	},
 	logo: {
 		width: 128,
+		height: 128,
 		margin: 32,
-		filter: 'drop-shadow(0 0 20px rgba(0, 212, 255, 0.4))',
+		borderRadius: '50%',
+		objectFit: 'cover',
+		border: '3px solid rgba(0, 212, 255, 0.5)',
+		boxShadow: '0 0 30px rgba(0, 212, 255, 0.4), 0 0 60px rgba(0, 212, 255, 0.2)',
+		animation: '$pulseGlow 3s ease-in-out infinite',
 		[theme.breakpoints.up('md')]: {
 			width: 200,
-			margin: 48
+			height: 200,
+			margin: 48,
+			border: '4px solid rgba(0, 212, 255, 0.5)'
 		}
 	},
 	title: {
@@ -167,7 +182,7 @@ function LoginPage() {
 				<FuseAnimate animation="transition.expandIn">
 					<Card className={classes.card}>
 						<CardContent className={clsx(classes.cardContent, 'flex flex-col items-center justify-center')}>
-							<img className={classes.logo} src="assets/images/logos/logo.png" alt="logo" />
+							<img className={classes.logo} src="assets/images/graves.jpg" alt="Graves" />
 
 							<Typography className={classes.title}>
 								Login
