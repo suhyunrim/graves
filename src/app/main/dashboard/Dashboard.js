@@ -30,14 +30,14 @@ const useStyles = makeStyles(theme => ({
 	},
 	monthText: {
 		fontFamily: '"Rajdhani", "Noto Sans KR", sans-serif',
-		fontSize: '1.4rem',
+		fontSize: '1.7rem',
 		fontWeight: 600,
 		color: '#00d4ff',
 		letterSpacing: '0.05em'
 	},
 	totalMatches: {
 		fontFamily: '"Noto Sans KR", sans-serif',
-		fontSize: '1.1rem',
+		fontSize: '1.3rem',
 		color: 'rgba(255, 255, 255, 0.5)'
 	},
 	grid: {
@@ -127,7 +127,7 @@ const useStyles = makeStyles(theme => ({
 		marginBottom: 16
 	},
 	emoji: {
-		fontSize: '2.5rem',
+		fontSize: '3rem',
 		filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))'
 	},
 	cardTitleWrapper: {
@@ -135,14 +135,14 @@ const useStyles = makeStyles(theme => ({
 	},
 	cardLabel: {
 		fontFamily: '"Noto Sans KR", sans-serif',
-		fontSize: '1rem',
+		fontSize: '1.2rem',
 		color: 'rgba(255, 255, 255, 0.5)',
 		marginBottom: 4,
 		letterSpacing: '0.02em'
 	},
 	cardTitle: {
 		fontFamily: '"Rajdhani", "Noto Sans KR", sans-serif',
-		fontSize: '1.4rem',
+		fontSize: '1.7rem',
 		fontWeight: 700,
 		color: '#fff',
 		letterSpacing: '0.03em'
@@ -152,33 +152,33 @@ const useStyles = makeStyles(theme => ({
 	},
 	playerName: {
 		fontFamily: '"Rajdhani", "Noto Sans KR", sans-serif',
-		fontSize: '2.2rem',
+		fontSize: '2.6rem',
 		fontWeight: 700,
 		color: '#fff',
 		letterSpacing: '0.02em',
 		textShadow: '0 2px 10px rgba(0,0,0,0.3)',
-		marginBottom: 12
+		marginBottom: 14
 	},
 	duoNames: {
 		fontFamily: '"Rajdhani", "Noto Sans KR", sans-serif',
-		fontSize: '1.9rem',
+		fontSize: '2.2rem',
 		fontWeight: 700,
 		color: '#fff',
 		letterSpacing: '0.02em',
-		marginBottom: 12,
+		marginBottom: 14,
 		display: 'flex',
 		alignItems: 'center',
-		gap: 10,
+		gap: 12,
 		flexWrap: 'wrap'
 	},
 	heart: {
 		color: '#ff69b4',
-		fontSize: '1.5rem',
+		fontSize: '1.8rem',
 		animation: '$pulse 1.5s ease infinite'
 	},
 	versus: {
 		color: '#8a2be2',
-		fontSize: '1.3rem',
+		fontSize: '1.6rem',
 		fontWeight: 600
 	},
 	'@keyframes pulse': {
@@ -191,18 +191,18 @@ const useStyles = makeStyles(theme => ({
 	},
 	stats: {
 		fontFamily: '"Noto Sans KR", sans-serif',
-		fontSize: '1.15rem',
+		fontSize: '1.35rem',
 		color: 'rgba(255, 255, 255, 0.8)',
 		display: 'flex',
 		alignItems: 'center',
-		gap: 10,
+		gap: 12,
 		flexWrap: 'wrap'
 	},
 	statHighlight: {
 		fontWeight: 700,
-		padding: '4px 12px',
+		padding: '5px 14px',
 		borderRadius: 6,
-		fontSize: '1.15rem'
+		fontSize: '1.35rem'
 	},
 	highlightRed: {
 		background: 'rgba(255, 107, 107, 0.2)',
@@ -230,7 +230,7 @@ const useStyles = makeStyles(theme => ({
 	},
 	streakNumber: {
 		fontFamily: '"Rajdhani", sans-serif',
-		fontSize: '3.5rem',
+		fontSize: '4rem',
 		fontWeight: 700,
 		color: '#ff8c00',
 		textShadow: '0 0 30px rgba(255, 140, 0, 0.5)',
@@ -238,27 +238,27 @@ const useStyles = makeStyles(theme => ({
 	},
 	streakLabel: {
 		fontFamily: '"Noto Sans KR", sans-serif',
-		fontSize: '1.3rem',
+		fontSize: '1.5rem',
 		color: 'rgba(255, 255, 255, 0.6)',
-		marginLeft: 6
+		marginLeft: 8
 	},
 	rivalryScore: {
 		display: 'flex',
 		alignItems: 'center',
 		gap: 16,
-		marginTop: 12
+		marginTop: 14
 	},
 	rivalryWins: {
 		fontFamily: '"Rajdhani", sans-serif',
-		fontSize: '1.8rem',
+		fontSize: '2.1rem',
 		fontWeight: 700
 	},
 	emptyText: {
 		fontFamily: '"Noto Sans KR", sans-serif',
-		fontSize: '1.1rem',
+		fontSize: '1.25rem',
 		color: 'rgba(255, 255, 255, 0.4)',
 		textAlign: 'center',
-		padding: '24px 0'
+		padding: '28px 0'
 	},
 	decorLine: {
 		position: 'absolute',
@@ -271,9 +271,9 @@ const useStyles = makeStyles(theme => ({
 	},
 	firstMatchDate: {
 		fontFamily: '"Noto Sans KR", sans-serif',
-		fontSize: '1.05rem',
+		fontSize: '1.2rem',
 		color: 'rgba(255, 255, 255, 0.5)',
-		marginTop: 8
+		marginTop: 10
 	}
 }));
 

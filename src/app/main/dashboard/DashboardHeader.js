@@ -14,7 +14,7 @@ const useStyles = makeStyles(theme => ({
 	title: {
 		fontFamily: '"Rajdhani", "Noto Sans KR", sans-serif',
 		fontWeight: 700,
-		fontSize: '3rem',
+		fontSize: '3.5rem',
 		color: '#fff',
 		textTransform: 'uppercase',
 		letterSpacing: '0.15em',
@@ -23,9 +23,9 @@ const useStyles = makeStyles(theme => ({
 	},
 	subtitle: {
 		fontFamily: '"Noto Sans KR", sans-serif',
-		fontSize: '1.15rem',
+		fontSize: '1.4rem',
 		color: 'rgba(255, 255, 255, 0.6)',
-		marginTop: 6,
+		marginTop: 8,
 		letterSpacing: '0.05em'
 	}
 }));
