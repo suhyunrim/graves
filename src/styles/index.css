@@ -97,14 +97,20 @@ form label {
 
 @keyframes autofill {
     0%,100% {
-        background: transparent;
+        background: #1a1a2e;
     }
 }
-input:-webkit-autofill {
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
     animation-delay: 1s;
     animation-name: autofill!important;
     animation-fill-mode: both;
-    -webkit-box-shadow:0 0 0 100px transparent inset!important;
+    -webkit-box-shadow: 0 0 0 1000px #1a1a2e inset !important;
+    -webkit-text-fill-color: #ffffff !important;
+    caret-color: #ffffff !important;
+    transition: background-color 9999s ease-out;
 }
 
 @import 'print.css';
