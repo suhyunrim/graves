@@ -92,3 +92,26 @@ REACT_APP_CAMILLE_HOST=<백엔드 API URL>
 - Material-UI 테마 커스터마이징 적용
 - IE 11 지원을 위한 폴리필 포함
 - Docker 배포 지원 (Dockerfile 포함)
+
+## CI/CD 주의사항 (Vercel)
+
+### ESLint 경고 = 에러
+Vercel은 `CI=true` 환경에서 빌드하므로 **ESLint 경고가 빌드 에러로 처리됨**.
+
+### 이모지 접근성 필수 (jsx-a11y/accessible-emoji)
+이모지 사용 시 반드시 접근성 속성을 추가해야 함:
+
+```jsx
+// ❌ 잘못된 사용 - 빌드 실패
+<span>🏆</span>
+<div className={classes.emoji}>🔥</div>
+
+// ✅ 올바른 사용
+<span role="img" aria-label="trophy">🏆</span>
+<span role="img" aria-label="fire" className={classes.emoji}>🔥</span>
+```
+
+### 기타 주의사항
+- 사용하지 않는 import 제거
+- 사용하지 않는 변수 제거 또는 `_` 접두사 사용
+- `console.log` 제거 (필요시 주석 처리)
