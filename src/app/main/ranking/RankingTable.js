@@ -5,17 +5,180 @@ import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TablePagination from '@material-ui/core/TablePagination';
 import TableRow from '@material-ui/core/TableRow';
+import { makeStyles, withStyles } from '@material-ui/core/styles';
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { withRouter } from 'react-router-dom';
 import * as Actions from './store/actions';
 import RankingTableHead from './RankingTableHeader';
 
+const tierColors = {
+	IRON: '#5C5C5C',
+	BRONZE: '#CD7F32',
+	SILVER: '#C0C0C0',
+	GOLD: '#FFD700',
+	PLATINUM: '#00CED1',
+	EMERALD: '#50C878',
+	DIAMOND: '#B9F2FF',
+	MASTER: '#9932CC',
+	GRANDMASTER: '#FF4500',
+	CHALLENGER: '#F0E68C'
+};
+
+const useStyles = makeStyles(theme => ({
+	container: {
+		padding: '28px',
+		maxWidth: 1400,
+		margin: '0 auto',
+		width: '100%'
+	},
+	tableWrapper: {
+		background: 'linear-gradient(135deg, #1a1a2e 0%, #0f0f1a 100%)',
+		borderRadius: 20,
+		border: '1px solid rgba(0, 212, 255, 0.2)',
+		overflow: 'hidden',
+		animation: '$fadeIn 0.6s ease'
+	},
+	'@keyframes fadeIn': {
+		'0%': { opacity: 0, transform: 'translateY(20px)' },
+		'100%': { opacity: 1, transform: 'translateY(0)' }
+	},
+	rankingNumber: {
+		fontFamily: '"Rajdhani", sans-serif',
+		fontSize: '1.8rem',
+		fontWeight: 700,
+		minWidth: 50,
+		textAlign: 'center'
+	},
+	rankTop1: {
+		color: '#FFD700',
+		textShadow: '0 0 10px rgba(255, 215, 0, 0.5)'
+	},
+	rankTop2: {
+		color: '#C0C0C0',
+		textShadow: '0 0 10px rgba(192, 192, 192, 0.5)'
+	},
+	rankTop3: {
+		color: '#CD7F32',
+		textShadow: '0 0 10px rgba(205, 127, 50, 0.5)'
+	},
+	rankNormal: {
+		color: 'rgba(255, 255, 255, 0.7)'
+	},
+	playerName: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.5rem',
+		fontWeight: 600,
+		color: '#fff'
+	},
+	tierWrapper: {
+		display: 'flex',
+		alignItems: 'center',
+		gap: 12
+	},
+	tierEmblem: {
+		width: 48,
+		height: 48,
+		transition: 'transform 0.2s ease',
+		'&:hover': {
+			transform: 'scale(1.15)'
+		}
+	},
+	tierInfo: {
+		display: 'flex',
+		flexDirection: 'column',
+		gap: 2
+	},
+	tierName: {
+		fontFamily: '"Rajdhani", sans-serif',
+		fontSize: '1.4rem',
+		fontWeight: 700
+	},
+	tierLP: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.2rem',
+		color: 'rgba(255, 255, 255, 0.5)'
+	},
+	statNumber: {
+		fontFamily: '"Rajdhani", sans-serif',
+		fontSize: '1.5rem',
+		fontWeight: 600,
+		color: 'rgba(255, 255, 255, 0.8)'
+	},
+	winRate: {
+		fontFamily: '"Rajdhani", sans-serif',
+		fontSize: '1.5rem',
+		fontWeight: 700
+	},
+	winRateHigh: {
+		color: '#00ff7f'
+	},
+	winRateMid: {
+		color: '#ffd700'
+	},
+	winRateLow: {
+		color: '#ff6b6b'
+	},
+	pagination: {
+		color: 'rgba(255, 255, 255, 0.7)',
+		borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+		'& .MuiTablePagination-selectIcon': {
+			color: 'rgba(255, 255, 255, 0.5)'
+		},
+		'& .MuiIconButton-root': {
+			color: 'rgba(255, 255, 255, 0.5)'
+		},
+		'& .MuiIconButton-root.Mui-disabled': {
+			color: 'rgba(255, 255, 255, 0.2)'
+		},
+		'& .MuiSelect-icon': {
+			color: 'rgba(255, 255, 255, 0.5)'
+		}
+	},
+	emptyState: {
+		display: 'flex',
+		flexDirection: 'column',
+		alignItems: 'center',
+		justifyContent: 'center',
+		padding: '80px 20px',
+		textAlign: 'center'
+	},
+	emptyIcon: {
+		fontSize: '5rem',
+		marginBottom: 20,
+		opacity: 0.5
+	},
+	emptyText: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.8rem',
+		color: 'rgba(255, 255, 255, 0.4)'
+	}
+}));
+
+const StyledTableCell = withStyles(theme => ({
+	body: {
+		backgroundColor: 'transparent',
+		color: '#fff',
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1rem',
+		borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
+		padding: '18px 24px'
+	}
+}))(TableCell);
+
+const StyledTableRow = withStyles(theme => ({
+	root: {
+		transition: 'background-color 0.2s ease',
+		'&:hover': {
+			backgroundColor: 'rgba(0, 212, 255, 0.05)'
+		}
+	}
+}))(TableRow);
+
 function RankingTable(props) {
+	const classes = useStyles();
 	const dispatch = useDispatch();
-	const ranking = useSelector(({ Ranking }) => {
-		return Ranking.ranking.data;
-	});
+	const ranking = useSelector(({ Ranking }) => Ranking.ranking.data);
 	const searchText = useSelector(({ Ranking }) => Ranking.ranking.searchText);
 	const isRefreshingGroupRating = useSelector(({ Ranking }) => Ranking.ranking.isRefreshingGroupRating);
 
@@ -38,7 +201,7 @@ function RankingTable(props) {
 		MASTER: 900,
 		GRANDMASTER: 1000,
 		CHALLENGER: 1150,
-		UNRANKED: 500,
+		UNRANKED: 500
 	};
 	const tierSteps = ['IV', 'III', 'II', 'I'];
 
@@ -65,10 +228,7 @@ function RankingTable(props) {
 			direction = 'asc';
 		}
 
-		setOrder({
-			direction,
-			id
-		});
+		setOrder({ direction, id });
 	}
 
 	function handleChangePage(event, value) {
@@ -81,113 +241,141 @@ function RankingTable(props) {
 
 	function getTierName(rating) {
 		let entries = Object.entries(tierNames);
-		entries = entries.filter((elem) => elem[0] !== 'UNRANKED');
+		entries = entries.filter(elem => elem[0] !== 'UNRANKED');
 		entries = entries.sort((a, b) => b[1] - a[1]);
 		for (const [name, tierRating] of entries) {
-			if (rating < tierRating) {
-				continue;
+			if (rating >= tierRating) {
+				return name;
 			}
-		
-			return `${name}`;
 		}
+		return 'IRON';
 	}
 
 	function getTierPoint(rating) {
 		let entries = Object.entries(tierNames);
-		entries = entries.filter((elem) => elem[0] !== 'UNRANKED');
+		entries = entries.filter(elem => elem[0] !== 'UNRANKED');
 		entries = entries.sort((a, b) => b[1] - a[1]);
 		for (const [name, tierRating] of entries) {
-			if (rating < tierRating) {
-				continue;
-			}
-		
-			if (isNonStepTier(name)) {
-				return Math.floor((rating - tierRating) * 4);
-			} else {
-				return Math.floor((rating - tierRating) % 25 * 4);
+			if (rating >= tierRating) {
+				if (isNonStepTier(name)) {
+					return Math.floor((rating - tierRating) * 4);
+				}
+				return Math.floor(((rating - tierRating) % 25) * 4);
 			}
 		}
+		return 0;
 	}
 
 	function getRatingTierName(rating) {
 		let entries = Object.entries(tierNames);
-		entries = entries.filter((elem) => elem[0] !== 'UNRANKED');
+		entries = entries.filter(elem => elem[0] !== 'UNRANKED');
 		entries = entries.sort((a, b) => b[1] - a[1]);
 		for (const [name, tierRating] of entries) {
-			if (rating < tierRating) {
-				continue;
-			}
-		
-			if (isNonStepTier(name)) {
-				return `${name}`;
-			}
-			else {
+			if (rating >= tierRating) {
+				if (isNonStepTier(name)) {
+					return name;
+				}
 				return `${name} ${tierSteps[Math.floor((rating - tierRating) / 25)]}`;
 			}
 		}
+		return 'IRON IV';
 	}
 
 	function isNonStepTier(tierName) {
 		return tierName === 'MASTER' || tierName === 'GRANDMASTER' || tierName === 'CHALLENGER';
 	}
 
+	function getRankClass(rank) {
+		if (rank === 1) return classes.rankTop1;
+		if (rank === 2) return classes.rankTop2;
+		if (rank === 3) return classes.rankTop3;
+		return classes.rankNormal;
+	}
+
+	function getWinRateClass(winRate) {
+		const rate = parseFloat(winRate);
+		if (rate >= 55) return classes.winRateHigh;
+		if (rate >= 45) return classes.winRateMid;
+		return classes.winRateLow;
+	}
+
 	return (
-		<div className="w-full flex flex-col">
-			<FuseScrollbars className="flex-grow overflow-x-auto">
-				<Table className="min-w-xl" aria-labelledby="tableTitle">
-					<RankingTableHead order={order} onRequestSort={handleRequestSort} rowCount={data.length} />
+		<div className={classes.container}>
+			<div className={classes.tableWrapper}>
+				{data && data.length > 0 ? (
+					<>
+						<FuseScrollbars className="flex-grow overflow-x-auto">
+							<Table>
+								<RankingTableHead order={order} onRequestSort={handleRequestSort} rowCount={data.length} />
+								<TableBody>
+									{_.orderBy(data, [o => o[order.id]], [order.direction])
+										.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+										.map((n) => {
+											const tierName = getTierName(n.rating);
+											const tierColor = tierColors[tierName] || '#fff';
 
-					<TableBody>
-						{_.orderBy(data, [o => o[order.id]], [order.direction])
-							.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-							.map((n, i) => {
-								return (
-									<TableRow className="h-64 cursor-pointer" hover role="checkbox" tabIndex={-1} key={n.riotId}>
-										<TableCell component="th" scope="row">
-											{n.ranking}
-										</TableCell>
-
-										<TableCell component="th" scope="row">
-											{n.name}
-										</TableCell>
-
-										<TableCell component="th" scope="row">
-											<img width="32" height="32" src={"/assets/images/ranked-emblems/Emblem_" + getTierName(n.rating) +".png"} alt={getTierName(n.rating)}/> {getRatingTierName(n.rating) + " " + getTierPoint(n.rating) + "LP"}
-										</TableCell>
-
-										<TableCell component="th" scope="row">
-											{n.win}
-										</TableCell>
-
-										<TableCell component="th" scope="row">
-											{n.lose}
-										</TableCell>
-
-										<TableCell component="th" scope="row">
-											{n.winRate}
-										</TableCell>
-									</TableRow>
-								);
-							})}
-					</TableBody>
-				</Table>
-			</FuseScrollbars>
-
-			<TablePagination
-				className="overflow-hidden"
-				component="div"
-				count={data.length}
-				rowsPerPage={rowsPerPage}
-				page={page}
-				backIconButtonProps={{
-					'aria-label': 'Previous Page'
-				}}
-				nextIconButtonProps={{
-					'aria-label': 'Next Page'
-				}}
-				onChangePage={handleChangePage}
-				onChangeRowsPerPage={handleChangeRowsPerPage}
-			/>
+											return (
+												<StyledTableRow key={n.riotId}>
+													<StyledTableCell>
+														<span className={`${classes.rankingNumber} ${getRankClass(n.ranking)}`}>
+															{n.ranking}
+														</span>
+													</StyledTableCell>
+													<StyledTableCell>
+														<span className={classes.playerName}>{n.name}</span>
+													</StyledTableCell>
+													<StyledTableCell>
+														<div className={classes.tierWrapper}>
+															<img
+																className={classes.tierEmblem}
+																src={`/assets/images/ranked-emblems/Emblem_${tierName}.png`}
+																alt={tierName}
+																style={{ filter: `drop-shadow(0 0 8px ${tierColor}40)` }}
+															/>
+															<div className={classes.tierInfo}>
+																<span className={classes.tierName} style={{ color: tierColor }}>
+																	{getRatingTierName(n.rating)}
+																</span>
+																<span className={classes.tierLP}>{getTierPoint(n.rating)} LP</span>
+															</div>
+														</div>
+													</StyledTableCell>
+													<StyledTableCell>
+														<span className={classes.statNumber} style={{ color: '#4dabf7' }}>{n.win}</span>
+													</StyledTableCell>
+													<StyledTableCell>
+														<span className={classes.statNumber} style={{ color: '#ff6b6b' }}>{n.lose}</span>
+													</StyledTableCell>
+													<StyledTableCell>
+														<span className={`${classes.winRate} ${getWinRateClass(n.winRate)}`}>
+															{n.winRate}%
+														</span>
+													</StyledTableCell>
+												</StyledTableRow>
+											);
+										})}
+								</TableBody>
+							</Table>
+						</FuseScrollbars>
+						<TablePagination
+							className={classes.pagination}
+							component="div"
+							count={data.length}
+							rowsPerPage={rowsPerPage}
+							page={page}
+							backIconButtonProps={{ 'aria-label': 'Previous Page' }}
+							nextIconButtonProps={{ 'aria-label': 'Next Page' }}
+							onChangePage={handleChangePage}
+							onChangeRowsPerPage={handleChangeRowsPerPage}
+						/>
+					</>
+				) : (
+					<div className={classes.emptyState}>
+						<div className={classes.emptyIcon}>🏆</div>
+						<div className={classes.emptyText}>랭킹 데이터가 없습니다</div>
+					</div>
+				)}
+			</div>
 		</div>
 	);
 }

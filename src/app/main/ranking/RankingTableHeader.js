@@ -3,6 +3,7 @@ import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import TableSortLabel from '@material-ui/core/TableSortLabel';
 import Tooltip from '@material-ui/core/Tooltip';
+import { makeStyles, withStyles } from '@material-ui/core/styles';
 import React from 'react';
 
 const rows = [
@@ -10,57 +11,94 @@ const rows = [
 		id: 'ranking',
 		align: 'left',
 		disablePadding: false,
-		label: 'Ranking',
+		label: '#',
 		sort: true
 	},
 	{
 		id: 'name',
 		align: 'left',
 		disablePadding: false,
-		label: 'Name',
+		label: '소환사',
 		sort: true
 	},
 	{
 		id: 'rating',
 		align: 'left',
 		disablePadding: false,
-		label: 'Rating',
+		label: '티어',
 		sort: true
 	},
 	{
 		id: 'win',
 		align: 'left',
 		disablePadding: false,
-		label: 'Win',
+		label: '승',
 		sort: true
 	},
 	{
 		id: 'lose',
 		align: 'left',
 		disablePadding: false,
-		label: 'Lose',
+		label: '패',
 		sort: true
 	},
 	{
 		id: 'winRate',
 		align: 'left',
 		disablePadding: false,
-		label: 'WinRate',
+		label: '승률',
 		sort: true
 	}
 ];
 
+const useStyles = makeStyles(theme => ({
+	sortLabel: {
+		color: 'rgba(255, 255, 255, 0.7) !important',
+		'&:hover': {
+			color: '#00d4ff !important'
+		},
+		'&.MuiTableSortLabel-active': {
+			color: '#00d4ff !important'
+		},
+		'& .MuiTableSortLabel-icon': {
+			color: '#00d4ff !important'
+		}
+	}
+}));
+
+const StyledTableCell = withStyles(theme => ({
+	head: {
+		backgroundColor: 'rgba(0, 212, 255, 0.08)',
+		color: 'rgba(255, 255, 255, 0.9)',
+		fontFamily: '"Rajdhani", "Noto Sans KR", sans-serif',
+		fontSize: '1.4rem',
+		fontWeight: 700,
+		textTransform: 'uppercase',
+		letterSpacing: '0.08em',
+		borderBottom: '2px solid rgba(0, 212, 255, 0.3)',
+		padding: '20px 24px'
+	}
+}))(TableCell);
+
+const StyledTableRow = withStyles(theme => ({
+	root: {
+		height: 64
+	}
+}))(TableRow);
+
 function RankingTableHead(props) {
+	const classes = useStyles();
+
 	const createSortHandler = property => event => {
 		props.onRequestSort(event, property);
 	};
 
 	return (
 		<TableHead>
-			<TableRow className="h-64">
+			<StyledTableRow>
 				{rows.map(row => {
 					return (
-						<TableCell
+						<StyledTableCell
 							key={row.id}
 							align={row.align}
 							padding={row.disablePadding ? 'none' : 'default'}
@@ -68,11 +106,12 @@ function RankingTableHead(props) {
 						>
 							{row.sort && (
 								<Tooltip
-									title="Sort"
+									title="정렬"
 									placement={row.align === 'right' ? 'bottom-end' : 'bottom-start'}
 									enterDelay={300}
 								>
 									<TableSortLabel
+										className={classes.sortLabel}
 										active={props.order.id === row.id}
 										direction={props.order.direction}
 										onClick={createSortHandler(row.id)}
@@ -81,10 +120,10 @@ function RankingTableHead(props) {
 									</TableSortLabel>
 								</Tooltip>
 							)}
-						</TableCell>
+						</StyledTableCell>
 					);
 				}, this)}
-			</TableRow>
+			</StyledTableRow>
 		</TableHead>
 	);
 }

@@ -1,20 +1,28 @@
-import FusePageCarded from '@fuse/core/FusePageCarded';
+import FusePageSimple from '@fuse/core/FusePageSimple';
 import withReducer from 'app/store/withReducer';
+import { makeStyles } from '@material-ui/core/styles';
 import React from 'react';
 import reducer from './store/reducers';
 import MatchHistoryHeader from './MatchHistoryHeader';
 import MatchHistoryTable from './MatchHistoryTable';
 
+const useStyles = makeStyles(theme => ({
+	layoutRoot: {
+		background: 'linear-gradient(180deg, #0f0f1a 0%, #1a1a2e 100%)',
+		minHeight: '100vh'
+	}
+}));
+
 function MatchHistory() {
+	const classes = useStyles();
+
 	return (
-		<FusePageCarded
+		<FusePageSimple
 			classes={{
-				content: 'flex',
-				header: 'min-h-72 h-72 sm:h-136 sm:min-h-136'
+				root: classes.layoutRoot
 			}}
 			header={<MatchHistoryHeader />}
 			content={<MatchHistoryTable />}
-			innerScroll
 		/>
 	);
 }

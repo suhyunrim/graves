@@ -1,17 +1,63 @@
 import React, { useEffect, useState } from 'react';
 import { Line } from 'react-chartjs-2';
 import { useSelector } from 'react-redux';
-import { Card, CardContent, Typography } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import FuseLoading from '@fuse/core/FuseLoading';
 import createCamilleAxios from 'app/utility/camilleAxios';
 
 const useStyles = makeStyles(theme => ({
 	chartCard: {
-		marginTop: 16
+		marginTop: 24,
+		background: 'linear-gradient(135deg, #1a1a2e 0%, #0f0f1a 100%)',
+		borderRadius: 20,
+		border: '1px solid rgba(0, 212, 255, 0.2)',
+		padding: 28,
+		animation: '$fadeIn 0.6s ease',
+		animationDelay: '0.3s',
+		animationFillMode: 'backwards'
+	},
+	'@keyframes fadeIn': {
+		'0%': { opacity: 0, transform: 'translateY(20px)' },
+		'100%': { opacity: 1, transform: 'translateY(0)' }
+	},
+	chartTitle: {
+		fontFamily: '"Rajdhani", "Noto Sans KR", sans-serif',
+		fontSize: '2.1rem',
+		fontWeight: 700,
+		color: '#fff',
+		marginBottom: 28,
+		display: 'flex',
+		alignItems: 'center',
+		gap: 14,
+		'&::before': {
+			content: '""',
+			width: 5,
+			height: 32,
+			background: 'linear-gradient(180deg, #00d4ff, #0066ff)',
+			borderRadius: 2
+		}
 	},
 	chartContainer: {
-		height: 400
+		height: 420,
+		position: 'relative'
+	},
+	emptyState: {
+		display: 'flex',
+		flexDirection: 'column',
+		alignItems: 'center',
+		justifyContent: 'center',
+		padding: '70px 20px',
+		textAlign: 'center'
+	},
+	emptyIcon: {
+		fontSize: '4.5rem',
+		marginBottom: 20,
+		opacity: 0.5
+	},
+	emptyText: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.5rem',
+		color: 'rgba(255, 255, 255, 0.4)'
 	}
 }));
 
@@ -132,28 +178,28 @@ function RatingChart() {
 
 	if (!ratingHistory || ratingHistory.length === 0) {
 		return (
-			<Card className={classes.chartCard}>
-				<CardContent>
-					<Typography variant="h6">Rating History</Typography>
-					<Typography color="textSecondary">No match data available</Typography>
-				</CardContent>
-			</Card>
+			<div className={classes.chartCard}>
+				<div className={classes.chartTitle}>Rating History</div>
+				<div className={classes.emptyState}>
+					<div className={classes.emptyIcon}>📊</div>
+					<div className={classes.emptyText}>매치 데이터가 없습니다</div>
+				</div>
+			</div>
 		);
 	}
 
-	// 날짜별로 그룹핑하여 그날 마지막 판의 데이터만 추출
 	const groupByDate = (history) => {
 		const grouped = {};
 		history.forEach(h => {
-			const dateKey = h.date.toISOString().split('T')[0]; // YYYY-MM-DD 형식
-			grouped[dateKey] = h; // 나중 데이터가 덮어씀 (마지막 판)
+			const dateKey = h.date.toISOString().split('T')[0];
+			grouped[dateKey] = h;
 		});
 		return Object.entries(grouped)
-			.sort((a, b) => a[0].localeCompare(b[0])) // 날짜순 정렬
-			.slice(-10) // 최근 10개만
+			.sort((a, b) => a[0].localeCompare(b[0]))
+			.slice(-10)
 			.map(([dateKey, data]) => ({
 				...data,
-				dateLabel: dateKey.slice(5) // MM-DD 형식으로 표시
+				dateLabel: dateKey.slice(5)
 			}));
 	};
 
@@ -169,12 +215,18 @@ function RatingChart() {
 			{
 				label: 'Tier',
 				data: tierValues,
-				fill: false,
-				borderColor: '#4374D9',
-				backgroundColor: '#4374D9',
-				tension: 0.1,
-				pointRadius: 4,
-				pointHoverRadius: 6
+				fill: true,
+				borderColor: '#00d4ff',
+				backgroundColor: 'rgba(0, 212, 255, 0.1)',
+				tension: 0.4,
+				pointRadius: 6,
+				pointHoverRadius: 10,
+				pointBackgroundColor: '#00d4ff',
+				pointBorderColor: '#fff',
+				pointBorderWidth: 2,
+				pointHoverBackgroundColor: '#fff',
+				pointHoverBorderColor: '#00d4ff',
+				pointHoverBorderWidth: 3
 			}
 		]
 	};
@@ -182,19 +234,52 @@ function RatingChart() {
 	const chartOptions = {
 		responsive: true,
 		maintainAspectRatio: false,
+		legend: {
+			display: false
+		},
 		scales: {
+			xAxes: [{
+				gridLines: {
+					color: 'rgba(255, 255, 255, 0.05)',
+					zeroLineColor: 'rgba(255, 255, 255, 0.1)'
+				},
+				ticks: {
+					fontColor: 'rgba(255, 255, 255, 0.6)',
+					fontSize: 15,
+					fontFamily: '"Noto Sans KR", sans-serif'
+				}
+			}],
 			yAxes: [{
+				gridLines: {
+					color: 'rgba(255, 255, 255, 0.05)',
+					zeroLineColor: 'rgba(255, 255, 255, 0.1)'
+				},
 				ticks: {
 					min: Math.max(0, minTierValue),
 					max: maxTierValue,
 					stepSize: 1,
-					callback: value => tierValueToLabel(value)
+					callback: value => tierValueToLabel(value),
+					fontColor: 'rgba(255, 255, 255, 0.6)',
+					fontSize: 14,
+					fontFamily: '"Rajdhani", sans-serif'
 				}
 			}]
 		},
 		tooltips: {
+			backgroundColor: 'rgba(15, 15, 26, 0.95)',
+			titleFontColor: '#fff',
+			titleFontSize: 16,
+			titleFontFamily: '"Noto Sans KR", sans-serif',
+			bodyFontColor: '#00d4ff',
+			bodyFontSize: 18,
+			bodyFontFamily: '"Rajdhani", sans-serif',
+			borderColor: 'rgba(0, 212, 255, 0.3)',
+			borderWidth: 1,
+			cornerRadius: 8,
+			displayColors: false,
+			padding: 14,
 			callbacks: {
-				label: (tooltipItem, data) => {
+				label: (tooltipItem) => {
 					const index = tooltipItem.index;
 					const rating = dailyHistory[index].rating;
 					const tierInfo = getTierFromRating(rating);
@@ -208,14 +293,12 @@ function RatingChart() {
 	};
 
 	return (
-		<Card className={classes.chartCard}>
-			<CardContent>
-				<Typography variant="h6" gutterBottom>Rating History</Typography>
-				<div className={classes.chartContainer}>
-					<Line data={chartData} options={chartOptions} />
-				</div>
-			</CardContent>
-		</Card>
+		<div className={classes.chartCard}>
+			<div className={classes.chartTitle}>Rating History</div>
+			<div className={classes.chartContainer}>
+				<Line data={chartData} options={chartOptions} />
+			</div>
+		</div>
 	);
 }
 

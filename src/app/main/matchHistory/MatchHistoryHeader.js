@@ -1,51 +1,101 @@
-import FuseAnimate from '@fuse/core/FuseAnimate';
-import Icon from '@material-ui/core/Icon';
-import Input from '@material-ui/core/Input';
-import Paper from '@material-ui/core/Paper';
-import { ThemeProvider } from '@material-ui/core/styles';
-import Typography from '@material-ui/core/Typography';
 import React from 'react';
+import { Typography, InputBase } from '@material-ui/core';
+import { makeStyles } from '@material-ui/core/styles';
+import SearchIcon from '@material-ui/icons/Search';
 import { useDispatch, useSelector } from 'react-redux';
 import * as Actions from './store/actions';
 
+const useStyles = makeStyles(theme => ({
+	root: {
+		display: 'flex',
+		flexDirection: 'column',
+		width: '100%',
+		padding: '24px 28px 20px',
+		background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)'
+	},
+	topRow: {
+		display: 'flex',
+		alignItems: 'center',
+		justifyContent: 'space-between',
+		flexWrap: 'wrap',
+		gap: 16
+	},
+	titleWrapper: {
+		flex: 1
+	},
+	title: {
+		fontFamily: '"Rajdhani", "Noto Sans KR", sans-serif',
+		fontWeight: 700,
+		fontSize: '4.5rem',
+		color: '#fff',
+		textTransform: 'uppercase',
+		letterSpacing: '0.15em',
+		textShadow: '0 0 20px rgba(0, 212, 255, 0.5)',
+		margin: 0
+	},
+	subtitle: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.8rem',
+		color: 'rgba(255, 255, 255, 0.6)',
+		marginTop: 10,
+		letterSpacing: '0.05em'
+	},
+	searchWrapper: {
+		display: 'flex',
+		alignItems: 'center',
+		background: 'rgba(255, 255, 255, 0.05)',
+		border: '1px solid rgba(0, 212, 255, 0.3)',
+		borderRadius: 12,
+		padding: '10px 18px',
+		minWidth: 280,
+		transition: 'border-color 0.3s ease, box-shadow 0.3s ease',
+		'&:focus-within': {
+			borderColor: 'rgba(0, 212, 255, 0.6)',
+			boxShadow: '0 0 20px rgba(0, 212, 255, 0.2)'
+		}
+	},
+	searchIcon: {
+		color: 'rgba(255, 255, 255, 0.4)',
+		marginRight: 12,
+		fontSize: '1.5rem'
+	},
+	searchInput: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.4rem',
+		color: '#fff',
+		flex: 1,
+		'&::placeholder': {
+			color: 'rgba(255, 255, 255, 0.4)'
+		}
+	}
+}));
+
 function MatchHistoryHeader() {
+	const classes = useStyles();
 	const dispatch = useDispatch();
 	const searchText = useSelector(({ MatchHistory }) => MatchHistory.matchHistory.searchText);
-	const mainTheme = useSelector(({ fuse }) => fuse.settings.mainTheme);
 
 	return (
-		<div className="flex flex-1 w-full items-center justify-between">
-			<div className="flex items-center">
-				<FuseAnimate animation="transition.expandIn" delay={300}>
-					<Icon className="text-32">history</Icon>
-				</FuseAnimate>
-				<FuseAnimate animation="transition.slideLeftIn" delay={300}>
-					<Typography className="hidden sm:flex mx-0 sm:mx-12" variant="h6">
+		<div className={classes.root}>
+			<div className={classes.topRow}>
+				<div className={classes.titleWrapper}>
+					<Typography className={classes.title} variant="h4">
 						Match History
 					</Typography>
-				</FuseAnimate>
-			</div>
-
-			<div className="flex flex-1 items-center justify-center px-12">
-				<ThemeProvider theme={mainTheme}>
-					<FuseAnimate animation="transition.slideDownIn" delay={300}>
-						<Paper className="flex items-center w-full max-w-512 px-8 py-4 rounded-8" elevation={1}>
-							<Icon color="action">search</Icon>
-
-							<Input
-								placeholder="Search"
-								className="flex flex-1 mx-8"
-								disableUnderline
-								fullWidth
-								value={searchText}
-								inputProps={{
-									'aria-label': 'Search'
-								}}
-								onChange={ev => dispatch(Actions.setSearchText(ev))}
-							/>
-						</Paper>
-					</FuseAnimate>
-				</ThemeProvider>
+					<Typography className={classes.subtitle}>
+						내전 매치 기록
+					</Typography>
+				</div>
+				<div className={classes.searchWrapper}>
+					<SearchIcon className={classes.searchIcon} />
+					<InputBase
+						className={classes.searchInput}
+						placeholder="소환사 검색..."
+						value={searchText}
+						onChange={ev => dispatch(Actions.setSearchText(ev))}
+						inputProps={{ 'aria-label': 'search' }}
+					/>
+				</div>
 			</div>
 		</div>
 	);
