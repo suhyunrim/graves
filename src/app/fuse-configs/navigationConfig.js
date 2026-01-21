@@ -6,6 +6,13 @@ const navigationConfig = [
 		icon: 'apps',
 		children: [
 			{
+				id: 'dashboard-component',
+				title: 'Dashboard',
+				type: 'item',
+				icon: 'dashboard',
+				url: '/dashboard'
+			},
+			{
 				id: 'myinfo-component',
 				title: 'MyInfo',
 				type: 'item',
