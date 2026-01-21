@@ -16,6 +16,8 @@ import { useDispatch, useSelector } from 'react-redux';
 
 const useStyles = makeStyles(theme => ({
 	root: {
+		background: 'linear-gradient(135deg, #16213e 0%, #1a1a2e 100%)',
+		borderBottom: '1px solid rgba(0, 212, 255, 0.15)',
 		'&.user': {
 			'& .username, & .email': {
 				transition: theme.transitions.create('opacity', {
@@ -26,12 +28,12 @@ const useStyles = makeStyles(theme => ({
 		}
 	},
 	avatar: {
-		width: 72,
-		height: 72,
+		width: 80,
+		height: 80,
 		position: 'absolute',
 		top: 72,
-		padding: 8,
-		background: theme.palette.background.default,
+		padding: 4,
+		background: 'linear-gradient(135deg, #00d4ff 0%, #0066ff 100%)',
 		boxSizing: 'content-box',
 		left: '50%',
 		transform: 'translateX(-50%)',
@@ -39,9 +41,49 @@ const useStyles = makeStyles(theme => ({
 			duration: theme.transitions.duration.shortest,
 			easing: theme.transitions.easing.easeInOut
 		}),
+		boxShadow: '0 4px 20px rgba(0, 212, 255, 0.4)',
 		'& > img': {
 			borderRadius: '50%'
 		}
+	},
+	username: {
+		fontFamily: '"Rajdhani", "Noto Sans KR", sans-serif',
+		fontSize: '1.6rem',
+		fontWeight: 700,
+		color: '#fff',
+		textShadow: '0 0 10px rgba(0, 212, 255, 0.3)',
+		letterSpacing: '0.05em'
+	},
+	dropdownIcon: {
+		color: '#00d4ff',
+		marginLeft: 4
+	},
+	userButton: {
+		'&:hover': {
+			background: 'rgba(0, 212, 255, 0.1)'
+		}
+	},
+	popover: {
+		background: '#1a1a2e',
+		border: '1px solid rgba(0, 212, 255, 0.2)',
+		boxShadow: '0 8px 32px rgba(0, 0, 0, 0.5)'
+	},
+	menuItem: {
+		color: 'rgba(255, 255, 255, 0.8)',
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.2rem',
+		transition: 'all 0.2s ease',
+		'&:hover': {
+			background: 'rgba(0, 212, 255, 0.1)',
+			color: '#00d4ff'
+		}
+	},
+	menuIcon: {
+		color: 'rgba(255, 255, 255, 0.6)'
+	},
+	divider: {
+		background: 'rgba(0, 212, 255, 0.2)',
+		margin: '8px 16px'
 	}
 }));
 
@@ -73,17 +115,16 @@ function UserNavbarHeader(props) {
 	return (
 		<AppBar
 			position="static"
-			color="primary"
 			elevation={0}
 			classes={{ root: classes.root }}
 			className="user relative flex flex-col items-center justify-center pt-24 pb-64 mb-32 z-0"
 		>
-			<Button onClick={onGroupListClick}>
-				<Typography className="username text-20 whitespace-no-wrap" color="inherit">
+			<Button onClick={onGroupListClick} className={classes.userButton}>
+				<Typography className={clsx(classes.username, 'username whitespace-no-wrap')}>
 					{user.data.displayName}
 				</Typography>
 
-				<Icon className="text-16 hidden sm:flex" variant="action">
+				<Icon className={clsx(classes.dropdownIcon, 'text-16 hidden sm:flex')} variant="action">
 					keyboard_arrow_down
 				</Icon>
 			</Button>
@@ -101,20 +142,25 @@ function UserNavbarHeader(props) {
 					horizontal: 'center'
 				}}
 				classes={{
-					paper: 'py-8'
+					paper: clsx('py-8', classes.popover)
 				}}
 			>
 				{user.groupList.map(elem => (
-					<MenuItem key={elem.groupId} onClick={() => onChangeGroup(elem.groupId)} role="button">
-						<ListItemIcon className="min-w-40">
+					<MenuItem
+						key={elem.groupId}
+						onClick={() => onChangeGroup(elem.groupId)}
+						role="button"
+						className={classes.menuItem}
+					>
+						<ListItemIcon className={clsx('min-w-40', classes.menuIcon)}>
 							<Icon>account_circle</Icon>
 						</ListItemIcon>
 						<ListItemText primary={elem.groupName} />
 					</MenuItem>
 				))}
-				<Divider />
-				<MenuItem>
-					<ListItemIcon className="min-w-40">
+				<Divider className={classes.divider} />
+				<MenuItem className={classes.menuItem}>
+					<ListItemIcon className={clsx('min-w-40', classes.menuIcon)}>
 						<Icon>add_box</Icon>
 					</ListItemIcon>
 					<ListItemText primary="Create Group" />
@@ -124,8 +170,9 @@ function UserNavbarHeader(props) {
 						dispatch(authActions.logoutUser());
 						onGroupListClose();
 					}}
+					className={classes.menuItem}
 				>
-					<ListItemIcon className="min-w-40">
+					<ListItemIcon className={clsx('min-w-40', classes.menuIcon)}>
 						<Icon>exit_to_app</Icon>
 					</ListItemIcon>
 					<ListItemText primary="Logout" />

@@ -12,10 +12,23 @@ import { useSelector } from 'react-redux';
 import LanguageSwitcher from '../../shared-components/LanguageSwitcher';
 
 const useStyles = makeStyles(theme => ({
+	root: {
+		background: 'linear-gradient(90deg, #0f0f1a 0%, #1a1a2e 50%, #0f0f1a 100%)',
+		borderBottom: '1px solid rgba(0, 212, 255, 0.2)',
+		boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)'
+	},
 	separator: {
 		width: 1,
-		height: 64,
-		backgroundColor: theme.palette.divider
+		height: 48,
+		background: 'linear-gradient(180deg, transparent 0%, rgba(0, 212, 255, 0.3) 50%, transparent 100%)'
+	},
+	iconButton: {
+		color: 'rgba(255, 255, 255, 0.7)',
+		transition: 'all 0.3s ease',
+		'&:hover': {
+			color: '#00d4ff',
+			background: 'rgba(0, 212, 255, 0.1)'
+		}
 	}
 }));
 
@@ -29,9 +42,9 @@ function ToolbarLayout1(props) {
 		<ThemeProvider theme={toolbarTheme}>
 			<AppBar
 				id="fuse-toolbar"
-				className="flex relative z-10"
-				color="default"
-				style={{ backgroundColor: toolbarTheme.palette.background.default }}
+				className={classes.root}
+				position="relative"
+				elevation={0}
 			>
 				<Toolbar className="p-0">
 					{config.navbar.display && config.navbar.position === 'left' && (
@@ -47,7 +60,7 @@ function ToolbarLayout1(props) {
 						</Hidden>
 					</div>
 
-					<div className="flex">
+					<div className="flex items-center">
 						<UserMenu />
 
 						<div className={classes.separator} />

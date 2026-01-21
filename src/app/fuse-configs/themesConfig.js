@@ -2,6 +2,37 @@ import { fuseDark, skyBlue } from '@fuse/colors';
 import { lightBlue, red } from '@material-ui/core/colors';
 
 const themesConfig = {
+	graves: {
+		palette: {
+			type: 'dark',
+			primary: {
+				light: '#4de8ff',
+				main: '#00d4ff',
+				dark: '#0099cc',
+				contrastText: '#fff'
+			},
+			secondary: {
+				light: '#4de8ff',
+				main: '#00d4ff',
+				dark: '#0099cc',
+				contrastText: '#fff'
+			},
+			background: {
+				paper: '#1a1a2e',
+				default: '#0f0f1a'
+			},
+			text: {
+				primary: '#ffffff',
+				secondary: 'rgba(255, 255, 255, 0.7)',
+				disabled: 'rgba(255, 255, 255, 0.5)'
+			},
+			divider: 'rgba(0, 212, 255, 0.2)',
+			error: red
+		},
+		status: {
+			danger: '#ff5252'
+		}
+	},
 	default: {
 		palette: {
 			type: 'light',

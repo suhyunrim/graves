@@ -16,31 +16,52 @@ import FuseNavBadge from '../FuseNavBadge';
 
 const useStyles = makeStyles(theme => ({
 	item: props => ({
-		height: 40,
+		height: 48,
 		width: 'calc(100% - 16px)',
-		borderRadius: '0 20px 20px 0',
-		paddingRight: 12,
+		borderRadius: '0 24px 24px 0',
+		paddingRight: 16,
 		paddingLeft: props.itemPadding > 80 ? 80 : props.itemPadding,
+		marginBottom: 4,
+		color: 'rgba(255, 255, 255, 0.7)',
+		cursor: 'pointer',
+		textDecoration: 'none!important',
+		transition: 'all 0.3s ease',
+		'&:hover': {
+			backgroundColor: 'rgba(0, 212, 255, 0.1)',
+			color: '#00d4ff',
+			'& .list-item-icon': {
+				color: '#00d4ff'
+			}
+		},
 		'&.active': {
-			backgroundColor: theme.palette.secondary.main,
-			color: `${theme.palette.secondary.contrastText}!important`,
+			backgroundColor: 'rgba(0, 212, 255, 0.15)',
+			color: '#00d4ff',
+			boxShadow: 'inset 0 0 20px rgba(0, 212, 255, 0.1)',
+			borderRight: '3px solid #00d4ff',
 			pointerEvents: 'none',
-			transition: 'border-radius .15s cubic-bezier(0.4,0.0,0.2,1)',
 			'& .list-item-text-primary': {
-				color: 'inherit'
+				color: '#00d4ff',
+				fontWeight: 700
 			},
 			'& .list-item-icon': {
-				color: 'inherit'
+				color: '#00d4ff'
 			}
 		},
 		'& .list-item-icon': {
-			marginRight: 16
+			marginRight: 16,
+			color: 'rgba(255, 255, 255, 0.5)',
+			transition: 'color 0.3s ease'
 		},
-		'& .list-item-text': {},
-		color: theme.palette.text.primary,
-		cursor: 'pointer',
-		textDecoration: 'none!important'
-	})
+		'& .list-item-text': {}
+	}),
+	listItemText: {
+		'& .MuiTypography-root': {
+			fontFamily: '"Noto Sans KR", sans-serif',
+			fontSize: '1.3rem',
+			fontWeight: 500,
+			letterSpacing: '0.02em'
+		}
+	}
 }));
 
 function FuseNavVerticalItem(props) {
@@ -72,13 +93,13 @@ function FuseNavVerticalItem(props) {
 			exact={item.exact}
 		>
 			{item.icon && (
-				<Icon className="list-item-icon text-16 flex-shrink-0" color="action">
+				<Icon className="list-item-icon text-18 flex-shrink-0" color="action">
 					{item.icon}
 				</Icon>
 			)}
 
 			<ListItemText
-				className="list-item-text"
+				className={clsx('list-item-text', classes.listItemText)}
 				primary={item.translate ? t(item.translate) : item.title}
 				classes={{ primary: 'text-14 list-item-text-primary' }}
 			/>

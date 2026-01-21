@@ -6,12 +6,13 @@ import React from 'react';
 const useStyles = makeStyles(theme => ({
 	root: {
 		'& .logo-icon': {
-			width: 24,
-			height: 24,
-			transition: theme.transitions.create(['width', 'height'], {
+			width: 28,
+			height: 28,
+			transition: theme.transitions.create(['width', 'height', 'filter'], {
 				duration: theme.transitions.duration.shortest,
 				easing: theme.transitions.easing.easeInOut
-			})
+			}),
+			filter: 'drop-shadow(0 0 8px rgba(0, 212, 255, 0.5))'
 		},
 		'& .logo-text': {
 			transition: theme.transitions.create('opacity', {
@@ -19,6 +20,16 @@ const useStyles = makeStyles(theme => ({
 				easing: theme.transitions.easing.easeInOut
 			})
 		}
+	},
+	logoText: {
+		fontFamily: '"Rajdhani", "Noto Sans KR", sans-serif',
+		fontSize: '1.8rem',
+		fontWeight: 700,
+		color: '#fff',
+		letterSpacing: '0.1em',
+		textTransform: 'uppercase',
+		textShadow: '0 0 15px rgba(0, 212, 255, 0.5)',
+		marginLeft: 12
 	}
 }));
 
@@ -28,7 +39,7 @@ function Logo() {
 	return (
 		<div className={clsx(classes.root, 'flex items-center')}>
 			<img className="logo-icon" src="assets/images/logos/logo.png" alt="logo" />
-			<Typography className="text-16 mx-12 font-light logo-text" color="inherit">
+			<Typography className={clsx(classes.logoText, 'logo-text')}>
 				Graves
 			</Typography>
 		</div>
