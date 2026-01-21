@@ -16,12 +16,20 @@ const useStyles = makeStyles(theme => ({
 	topRow: {
 		display: 'flex',
 		alignItems: 'center',
-		justifyContent: 'space-between',
-		flexWrap: 'wrap',
-		gap: 16
+		justifyContent: 'center',
+		position: 'relative',
+		[theme.breakpoints.down('sm')]: {
+			flexDirection: 'column',
+			gap: 16
+		}
 	},
 	titleWrapper: {
-		flex: 1
+		position: 'absolute',
+		left: 0,
+		[theme.breakpoints.down('sm')]: {
+			position: 'static',
+			width: '100%'
+		}
 	},
 	title: {
 		fontFamily: '"Rajdhani", "Noto Sans KR", sans-serif',
@@ -31,14 +39,20 @@ const useStyles = makeStyles(theme => ({
 		textTransform: 'uppercase',
 		letterSpacing: '0.15em',
 		textShadow: '0 0 20px rgba(0, 212, 255, 0.5)',
-		margin: 0
+		margin: 0,
+		[theme.breakpoints.down('sm')]: {
+			fontSize: '2.75rem'
+		}
 	},
 	subtitle: {
 		fontFamily: '"Noto Sans KR", sans-serif',
 		fontSize: '1.8rem',
 		color: 'rgba(255, 255, 255, 0.6)',
 		marginTop: 10,
-		letterSpacing: '0.05em'
+		letterSpacing: '0.05em',
+		[theme.breakpoints.down('sm')]: {
+			fontSize: '1.35rem'
+		}
 	},
 	searchWrapper: {
 		display: 'flex',
@@ -47,11 +61,14 @@ const useStyles = makeStyles(theme => ({
 		border: '1px solid rgba(0, 212, 255, 0.3)',
 		borderRadius: 12,
 		padding: '10px 18px',
-		minWidth: 280,
+		width: 560,
 		transition: 'border-color 0.3s ease, box-shadow 0.3s ease',
 		'&:focus-within': {
 			borderColor: 'rgba(0, 212, 255, 0.6)',
 			boxShadow: '0 0 20px rgba(0, 212, 255, 0.2)'
+		},
+		[theme.breakpoints.down('sm')]: {
+			width: '100%'
 		}
 	},
 	searchIcon: {
@@ -82,9 +99,7 @@ function MatchHistoryHeader() {
 					<Typography className={classes.title} variant="h4">
 						Match History
 					</Typography>
-					<Typography className={classes.subtitle}>
-						내전 매치 기록
-					</Typography>
+					<Typography className={classes.subtitle}>내전 매치 기록</Typography>
 				</div>
 				<div className={classes.searchWrapper}>
 					<SearchIcon className={classes.searchIcon} />

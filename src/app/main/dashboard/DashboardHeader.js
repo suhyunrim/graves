@@ -19,14 +19,20 @@ const useStyles = makeStyles(theme => ({
 		textTransform: 'uppercase',
 		letterSpacing: '0.15em',
 		textShadow: '0 0 20px rgba(0, 212, 255, 0.5)',
-		margin: 0
+		margin: 0,
+		[theme.breakpoints.down('sm')]: {
+			fontSize: '2.75rem'
+		}
 	},
 	subtitle: {
 		fontFamily: '"Noto Sans KR", sans-serif',
 		fontSize: '1.4rem',
 		color: 'rgba(255, 255, 255, 0.6)',
 		marginTop: 8,
-		letterSpacing: '0.05em'
+		letterSpacing: '0.05em',
+		[theme.breakpoints.down('sm')]: {
+			fontSize: '1.35rem'
+		}
 	}
 }));
 
