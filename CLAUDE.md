@@ -93,16 +93,31 @@ REACT_APP_CAMILLE_HOST=<백엔드 API URL>
 - IE 11 지원을 위한 폴리필 포함
 - Docker 배포 지원 (Dockerfile 포함)
 
-## CI/CD 주의사항 (Vercel)
+## CI/CD 주의사항 (Vercel) - 중요!!
 
-### ESLint 경고 = 에러
+### ESLint 경고 = 빌드 실패
 Vercel은 `CI=true` 환경에서 빌드하므로 **ESLint 경고가 빌드 에러로 처리됨**.
+**코드 수정 시 ESLint 규칙을 반드시 준수해야 함!!**
+
+### 코드 수정 시 필수 체크리스트 (no-unused-vars)
+
+```jsx
+// ❌ 빌드 실패 - 사용하지 않는 변수/함수
+const [value, setValue] = useState(0);  // setValue를 사용하지 않으면 에러
+import { foo, bar } from 'module';      // bar를 사용하지 않으면 에러
+const unused = 'test';                   // 사용하지 않는 변수 에러
+
+// ✅ 올바른 사용
+const [value] = useState(0);            // setter가 필요없으면 생략
+const value = 0;                         // 변경이 필요없으면 상수로
+import { foo } from 'module';           // 필요한 것만 import
+```
 
 ### 이모지 접근성 필수 (jsx-a11y/accessible-emoji)
 이모지 사용 시 반드시 접근성 속성을 추가해야 함:
 
 ```jsx
-// ❌ 잘못된 사용 - 빌드 실패
+// ❌ 빌드 실패
 <span>🏆</span>
 <div className={classes.emoji}>🔥</div>
 
@@ -111,7 +126,8 @@ Vercel은 `CI=true` 환경에서 빌드하므로 **ESLint 경고가 빌드 에�
 <span role="img" aria-label="fire" className={classes.emoji}>🔥</span>
 ```
 
-### 기타 주의사항
+### 기타 ESLint 규칙
 - 사용하지 않는 import 제거
-- 사용하지 않는 변수 제거 또는 `_` 접두사 사용
+- 사용하지 않는 변수/함수 제거 (useState setter 포함!)
 - `console.log` 제거 (필요시 주석 처리)
+- 함수나 변수를 제거할 때 관련 참조도 모두 제거
