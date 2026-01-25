@@ -269,6 +269,57 @@ const useStyles = makeStyles(theme => ({
 		fontFamily: '"Rajdhani", sans-serif',
 		fontSize: '1.3rem',
 		fontWeight: 700
+	},
+	// Mobile sort controls
+	mobileSortBar: {
+		display: 'flex',
+		alignItems: 'center',
+		gap: 8,
+		padding: '12px 16px',
+		overflowX: 'auto',
+		borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+		background: 'rgba(0, 212, 255, 0.05)',
+		'&::-webkit-scrollbar': {
+			display: 'none'
+		},
+		scrollbarWidth: 'none'
+	},
+	mobileSortLabel: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1rem',
+		color: 'rgba(255, 255, 255, 0.5)',
+		whiteSpace: 'nowrap',
+		flexShrink: 0
+	},
+	mobileSortChip: {
+		display: 'flex',
+		alignItems: 'center',
+		gap: 4,
+		padding: '6px 12px',
+		borderRadius: 16,
+		background: 'rgba(255, 255, 255, 0.08)',
+		border: '1px solid rgba(255, 255, 255, 0.1)',
+		color: 'rgba(255, 255, 255, 0.7)',
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1rem',
+		fontWeight: 500,
+		cursor: 'pointer',
+		whiteSpace: 'nowrap',
+		flexShrink: 0,
+		transition: 'all 0.2s ease',
+		'&:hover': {
+			background: 'rgba(0, 212, 255, 0.15)',
+			borderColor: 'rgba(0, 212, 255, 0.3)'
+		}
+	},
+	mobileSortChipActive: {
+		background: 'rgba(0, 212, 255, 0.2)',
+		borderColor: '#00d4ff',
+		color: '#00d4ff'
+	},
+	sortArrow: {
+		fontSize: '0.9rem',
+		opacity: 0.8
 	}
 }));
 
@@ -486,6 +537,32 @@ function RankingTable(props) {
 
 						{/* Mobile Card View */}
 						<Hidden mdUp>
+							{/* Mobile Sort Bar */}
+							<div className={classes.mobileSortBar}>
+								<span className={classes.mobileSortLabel}>정렬:</span>
+								{[
+									{ id: 'rating', label: '티어' },
+									{ id: 'win', label: '승' },
+									{ id: 'lose', label: '패' },
+									{ id: 'winRate', label: '승률' }
+								].map(option => (
+									<div
+										key={option.id}
+										className={`${classes.mobileSortChip} ${order.id === option.id ? classes.mobileSortChipActive : ''}`}
+										onClick={() => handleRequestSort(null, option.id)}
+										role="button"
+										tabIndex={0}
+										onKeyDown={e => e.key === 'Enter' && handleRequestSort(null, option.id)}
+									>
+										{option.label}
+										{order.id === option.id && (
+											<span className={classes.sortArrow}>
+												{order.direction === 'asc' ? '↑' : '↓'}
+											</span>
+										)}
+									</div>
+								))}
+							</div>
 							<div className={classes.mobileCardList}>
 								{sortedData.map(n => {
 									const tierName = getTierName(n.rating);
