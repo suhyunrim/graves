@@ -407,10 +407,6 @@ function MatchHistoryTable() {
 		setPage(value);
 	};
 
-	const handleChangeRowsPerPage = event => {
-		setRowsPerPage(event.target.value);
-	};
-
 	const formatDate = utcDateString => {
 		const date = new Date(utcDateString);
 		const year = String(date.getFullYear()).slice(-2);
@@ -691,11 +687,11 @@ function MatchHistoryTable() {
 							component="div"
 							count={filteredMatches.length}
 							rowsPerPage={rowsPerPage}
+							rowsPerPageOptions={[]}
 							page={page}
 							backIconButtonProps={{ 'aria-label': 'Previous Page' }}
 							nextIconButtonProps={{ 'aria-label': 'Next Page' }}
 							onChangePage={handleChangePage}
-							onChangeRowsPerPage={handleChangeRowsPerPage}
 						/>
 					</>
 				) : (

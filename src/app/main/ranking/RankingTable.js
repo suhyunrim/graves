@@ -352,10 +352,6 @@ function RankingTable(props) {
 		setPage(value);
 	}
 
-	function handleChangeRowsPerPage(event) {
-		setRowsPerPage(event.target.value);
-	}
-
 	function getTierName(rating) {
 		let entries = Object.entries(tierNames);
 		entries = entries.filter(elem => elem[0] !== 'UNRANKED');
@@ -541,11 +537,11 @@ function RankingTable(props) {
 							component="div"
 							count={data.length}
 							rowsPerPage={rowsPerPage}
+							rowsPerPageOptions={[]}
 							page={page}
 							backIconButtonProps={{ 'aria-label': 'Previous Page' }}
 							nextIconButtonProps={{ 'aria-label': 'Next Page' }}
 							onChangePage={handleChangePage}
-							onChangeRowsPerPage={handleChangeRowsPerPage}
 						/>
 					</>
 				) : (
