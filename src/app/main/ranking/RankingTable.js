@@ -352,7 +352,7 @@ function RankingTable(props) {
 
 	const [data, setData] = useState(ranking);
 	const [page, setPage] = useState(0);
-	const [rowsPerPage, setRowsPerPage] = useState(10);
+	const rowsPerPage = 10;
 	const [order, setOrder] = useState({
 		direction: 'desc',
 		id: 'rating'

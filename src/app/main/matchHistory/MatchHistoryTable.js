@@ -393,7 +393,7 @@ function MatchHistoryTable() {
 		: [];
 
 	const [page, setPage] = useState(0);
-	const [rowsPerPage, setRowsPerPage] = useState(10);
+	const rowsPerPage = 10;
 
 	useEffect(() => {
 		dispatch(Actions.getMatchHistory(user.reprGroup.groupId));
