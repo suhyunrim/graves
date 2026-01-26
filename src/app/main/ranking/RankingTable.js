@@ -470,7 +470,8 @@ function RankingTable(props) {
 		return classes.winRateLow;
 	}
 
-	const sortedData = _.orderBy(data, [o => o[order.id]], [order.direction]).slice(
+	const getSortValue = o => (order.id === 'games' ? o.win + o.lose : o[order.id]);
+	const sortedData = _.orderBy(data, [getSortValue], [order.direction]).slice(
 		page * rowsPerPage,
 		page * rowsPerPage + rowsPerPage
 	);
@@ -515,6 +516,9 @@ function RankingTable(props) {
 														</div>
 													</StyledTableCell>
 													<StyledTableCell>
+														<span className={classes.statNumber}>{n.win + n.lose}</span>
+													</StyledTableCell>
+													<StyledTableCell>
 														<span className={classes.statNumber} style={{ color: '#4dabf7' }}>
 															{n.win}
 														</span>
@@ -542,6 +546,7 @@ function RankingTable(props) {
 								<span className={classes.mobileSortLabel}>정렬:</span>
 								{[
 									{ id: 'rating', label: '티어' },
+									{ id: 'games', label: '판수' },
 									{ id: 'win', label: '승' },
 									{ id: 'lose', label: '패' },
 									{ id: 'winRate', label: '승률' }
@@ -588,6 +593,10 @@ function RankingTable(props) {
 												</div>
 											</div>
 											<div className={classes.mobileStats}>
+												<div className={classes.mobileStatItem}>
+													<span className={classes.mobileStatLabel}>판수</span>
+													<span className={classes.mobileStatValue}>{n.win + n.lose}</span>
+												</div>
 												<div className={classes.mobileStatItem}>
 													<span className={classes.mobileStatLabel}>승</span>
 													<span className={`${classes.mobileStatValue} ${classes.mobileWinValue}`}>{n.win}</span>

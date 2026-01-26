@@ -29,6 +29,13 @@ const rows = [
 		sort: true
 	},
 	{
+		id: 'games',
+		align: 'left',
+		disablePadding: false,
+		label: '판수',
+		sort: true
+	},
+	{
 		id: 'win',
 		align: 'left',
 		disablePadding: false,
