@@ -167,6 +167,16 @@ const useStyles = makeStyles(theme => ({
 		fontWeight: 500,
 		color: '#fff'
 	},
+	playerNameHighlight: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.4rem',
+		fontWeight: 700,
+		color: '#00d4ff',
+		background: 'rgba(0, 212, 255, 0.15)',
+		padding: '2px 8px',
+		borderRadius: 4,
+		textShadow: '0 0 8px rgba(0, 212, 255, 0.5)'
+	},
 	teamLabel: {
 		display: 'flex',
 		alignItems: 'center',
@@ -341,6 +351,16 @@ const useStyles = makeStyles(theme => ({
 		fontSize: '1rem',
 		color: '#fff'
 	},
+	mobilePlayerNameHighlight: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1rem',
+		fontWeight: 700,
+		color: '#00d4ff',
+		background: 'rgba(0, 212, 255, 0.15)',
+		padding: '1px 6px',
+		borderRadius: 4,
+		textShadow: '0 0 6px rgba(0, 212, 255, 0.5)'
+	},
 	mobileVsDivider: {
 		textAlign: 'center',
 		padding: '6px 0',
@@ -460,6 +480,11 @@ function MatchHistoryTable() {
 		return tierColors[tierName] || '#fff';
 	};
 
+	const isPlayerMatched = playerName => {
+		if (!searchText) return false;
+		return playerName.toLowerCase().includes(searchText.toLowerCase());
+	};
+
 	const renderPlayers = players => {
 		const sortedPlayers = [...players].sort((a, b) => b.rating - a.rating);
 		return sortedPlayers.map(player => (
@@ -473,7 +498,9 @@ function MatchHistoryTable() {
 				<span className={classes.tierBadge} style={{ color: getTierColor(player.tier) }}>
 					{getTierShortName(player.tier)}
 				</span>
-				<span className={classes.playerName}>{player.name}</span>
+				<span className={isPlayerMatched(player.name) ? classes.playerNameHighlight : classes.playerName}>
+					{player.name}
+				</span>
 			</div>
 		));
 	};
@@ -510,7 +537,9 @@ function MatchHistoryTable() {
 				<span className={classes.mobilePlayerTier} style={{ color: getTierColor(player.tier) }}>
 					{getTierShortName(player.tier)}
 				</span>
-				<span className={classes.mobilePlayerName}>{player.name}</span>
+				<span className={isPlayerMatched(player.name) ? classes.mobilePlayerNameHighlight : classes.mobilePlayerName}>
+					{player.name}
+				</span>
 			</div>
 		));
 	};
