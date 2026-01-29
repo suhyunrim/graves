@@ -25,6 +25,21 @@ const tierColors = {
 	CHALLENGER: '#F0E68C'
 };
 
+const tierThresholds = {
+	IRON: 200,
+	BRONZE: 300,
+	SILVER: 400,
+	GOLD: 500,
+	PLATINUM: 600,
+	EMERALD: 700,
+	DIAMOND: 800,
+	MASTER: 900,
+	GRANDMASTER: 1000,
+	CHALLENGER: 1150
+};
+
+const tierSteps = ['IV', 'III', 'II', 'I'];
+
 const useStyles = makeStyles(theme => ({
 	container: {
 		padding: '28px',
@@ -108,13 +123,36 @@ const useStyles = makeStyles(theme => ({
 		display: 'flex',
 		flexDirection: 'column',
 		alignItems: 'center',
-		gap: 4
+		gap: 6
 	},
-	avgRating: {
+	avgTierDisplay: {
+		display: 'flex',
+		alignItems: 'center',
+		gap: 8
+	},
+	avgTierIcon: {
+		width: 32,
+		height: 32,
+		transition: 'transform 0.2s ease',
+		'&:hover': {
+			transform: 'scale(1.15)'
+		}
+	},
+	avgTierBadge: {
 		fontFamily: '"Rajdhani", sans-serif',
-		fontSize: '1.6rem',
+		fontSize: '1.3rem',
 		fontWeight: 700,
-		color: '#fff'
+		minWidth: 48,
+		textAlign: 'center',
+		padding: '3px 8px',
+		borderRadius: 4,
+		background: 'rgba(255, 255, 255, 0.1)'
+	},
+	lpChange: {
+		fontFamily: '"Rajdhani", sans-serif',
+		fontSize: '1.1rem',
+		fontWeight: 600,
+		marginTop: 2
 	},
 	ratingChange: {
 		fontFamily: '"Rajdhani", sans-serif',
@@ -310,14 +348,31 @@ const useStyles = makeStyles(theme => ({
 	},
 	mobileRatingInfo: {
 		display: 'flex',
-		alignItems: 'center',
-		gap: 8
+		flexDirection: 'column',
+		alignItems: 'flex-end',
+		gap: 2
 	},
-	mobileAvgRating: {
+	mobileAvgTierRow: {
+		display: 'flex',
+		alignItems: 'center',
+		gap: 4
+	},
+	mobileAvgTierIcon: {
+		width: 20,
+		height: 20
+	},
+	mobileAvgTierBadge: {
 		fontFamily: '"Rajdhani", sans-serif',
-		fontSize: '1.3rem',
+		fontSize: '1rem',
 		fontWeight: 700,
-		color: '#fff'
+		padding: '2px 6px',
+		borderRadius: 4,
+		background: 'rgba(255, 255, 255, 0.1)'
+	},
+	mobileLpChange: {
+		fontFamily: '"Rajdhani", sans-serif',
+		fontSize: '0.95rem',
+		fontWeight: 600
 	},
 	mobileRatingChange: {
 		fontFamily: '"Rajdhani", sans-serif',
@@ -480,6 +535,27 @@ function MatchHistoryTable() {
 		return tierColors[tierName] || '#fff';
 	};
 
+	const isNonStepTier = tierName => {
+		return tierName === 'MASTER' || tierName === 'GRANDMASTER' || tierName === 'CHALLENGER';
+	};
+
+	const getTierNameFromRating = rating => {
+		const entries = Object.entries(tierThresholds).sort((a, b) => b[1] - a[1]);
+		const found = entries.find(([, tierRating]) => rating >= tierRating);
+		return found ? found[0] : 'IRON';
+	};
+
+	const getRatingTierName = rating => {
+		const entries = Object.entries(tierThresholds).sort((a, b) => b[1] - a[1]);
+		const found = entries.find(([, tierRating]) => rating >= tierRating);
+		if (!found) return 'IRON IV';
+		const [name, tierRating] = found;
+		if (isNonStepTier(name)) {
+			return name;
+		}
+		return `${name} ${tierSteps[Math.floor((rating - tierRating) / 25)]}`;
+	};
+
 	const isPlayerMatched = playerName => {
 		if (!searchText) return false;
 		return playerName.toLowerCase().includes(searchText.toLowerCase());
@@ -505,24 +581,26 @@ function MatchHistoryTable() {
 		));
 	};
 
-	const renderRatingChange = ratingChange => {
-		if (ratingChange > 0) {
-			return <span className={`${classes.ratingChange} ${classes.ratingUp}`}>+{ratingChange}</span>;
+	const renderLpChange = ratingChange => {
+		const lp = ratingChange * 4;
+		if (lp > 0) {
+			return <span className={`${classes.lpChange} ${classes.ratingUp}`}>+{lp} LP</span>;
 		}
-		if (ratingChange < 0) {
-			return <span className={`${classes.ratingChange} ${classes.ratingDown}`}>{ratingChange}</span>;
+		if (lp < 0) {
+			return <span className={`${classes.lpChange} ${classes.ratingDown}`}>{lp} LP</span>;
 		}
-		return <span className={`${classes.ratingChange} ${classes.ratingNeutral}`}>0</span>;
+		return <span className={`${classes.lpChange} ${classes.ratingNeutral}`}>0 LP</span>;
 	};
 
-	const renderMobileRatingChange = ratingChange => {
-		if (ratingChange > 0) {
-			return <span className={`${classes.mobileRatingChange} ${classes.ratingUp}`}>+{ratingChange}</span>;
+	const renderMobileLpChange = ratingChange => {
+		const lp = ratingChange * 4;
+		if (lp > 0) {
+			return <span className={`${classes.mobileLpChange} ${classes.ratingUp}`}>+{lp} LP</span>;
 		}
-		if (ratingChange < 0) {
-			return <span className={`${classes.mobileRatingChange} ${classes.ratingDown}`}>{ratingChange}</span>;
+		if (lp < 0) {
+			return <span className={`${classes.mobileLpChange} ${classes.ratingDown}`}>{lp} LP</span>;
 		}
-		return <span className={`${classes.mobileRatingChange} ${classes.ratingNeutral}`}>0</span>;
+		return <span className={`${classes.mobileLpChange} ${classes.ratingNeutral}`}>0 LP</span>;
 	};
 
 	const renderMobilePlayers = players => {
@@ -607,8 +685,27 @@ function MatchHistoryTable() {
 														className={isTeam1Win ? classes.winTeamCell : classes.loseTeamCell}
 													>
 														<div className={classes.avgRatingWrapper}>
-															<span className={classes.avgRating}>{match.team1.avgRating}</span>
-															{renderRatingChange(match.team1.ratingChange)}
+															<div className={classes.avgTierDisplay}>
+																<img
+																	className={classes.avgTierIcon}
+																	src={`/assets/images/ranked-emblems/Emblem_${getTierNameFromRating(
+																		match.team1.avgRating
+																	)}.png`}
+																	alt={getRatingTierName(match.team1.avgRating)}
+																	style={{
+																		filter: `drop-shadow(0 0 4px ${
+																			tierColors[getTierNameFromRating(match.team1.avgRating)]
+																		}40)`
+																	}}
+																/>
+																<span
+																	className={classes.avgTierBadge}
+																	style={{ color: tierColors[getTierNameFromRating(match.team1.avgRating)] }}
+																>
+																	{getTierShortName(getRatingTierName(match.team1.avgRating))}
+																</span>
+															</div>
+															{renderLpChange(match.team1.ratingChange)}
 														</div>
 													</StyledTableCell>
 													<StyledTableCell className={isTeam1Win ? classes.winTeamCell : classes.loseTeamCell}>
@@ -624,8 +721,27 @@ function MatchHistoryTable() {
 														className={!isTeam1Win ? classes.winTeamCell : classes.loseTeamCell}
 													>
 														<div className={classes.avgRatingWrapper}>
-															<span className={classes.avgRating}>{match.team2.avgRating}</span>
-															{renderRatingChange(match.team2.ratingChange)}
+															<div className={classes.avgTierDisplay}>
+																<img
+																	className={classes.avgTierIcon}
+																	src={`/assets/images/ranked-emblems/Emblem_${getTierNameFromRating(
+																		match.team2.avgRating
+																	)}.png`}
+																	alt={getRatingTierName(match.team2.avgRating)}
+																	style={{
+																		filter: `drop-shadow(0 0 4px ${
+																			tierColors[getTierNameFromRating(match.team2.avgRating)]
+																		}40)`
+																	}}
+																/>
+																<span
+																	className={classes.avgTierBadge}
+																	style={{ color: tierColors[getTierNameFromRating(match.team2.avgRating)] }}
+																>
+																	{getTierShortName(getRatingTierName(match.team2.avgRating))}
+																</span>
+															</div>
+															{renderLpChange(match.team2.ratingChange)}
 														</div>
 													</StyledTableCell>
 													<StyledTableCell className={!isTeam1Win ? classes.winTeamCell : classes.loseTeamCell}>
@@ -674,8 +790,22 @@ function MatchHistoryTable() {
 														</span>
 													</div>
 													<div className={classes.mobileRatingInfo}>
-														<span className={classes.mobileAvgRating}>{match.team1.avgRating}</span>
-														{renderMobileRatingChange(match.team1.ratingChange)}
+														<div className={classes.mobileAvgTierRow}>
+															<img
+																className={classes.mobileAvgTierIcon}
+																src={`/assets/images/ranked-emblems/Emblem_${getTierNameFromRating(
+																	match.team1.avgRating
+																)}.png`}
+																alt={getRatingTierName(match.team1.avgRating)}
+															/>
+															<span
+																className={classes.mobileAvgTierBadge}
+																style={{ color: tierColors[getTierNameFromRating(match.team1.avgRating)] }}
+															>
+																{getTierShortName(getRatingTierName(match.team1.avgRating))}
+															</span>
+														</div>
+														{renderMobileLpChange(match.team1.ratingChange)}
 													</div>
 												</div>
 												<div className={classes.mobilePlayerList}>{renderMobilePlayers(match.team1.players)}</div>
@@ -699,8 +829,22 @@ function MatchHistoryTable() {
 														</span>
 													</div>
 													<div className={classes.mobileRatingInfo}>
-														<span className={classes.mobileAvgRating}>{match.team2.avgRating}</span>
-														{renderMobileRatingChange(match.team2.ratingChange)}
+														<div className={classes.mobileAvgTierRow}>
+															<img
+																className={classes.mobileAvgTierIcon}
+																src={`/assets/images/ranked-emblems/Emblem_${getTierNameFromRating(
+																	match.team2.avgRating
+																)}.png`}
+																alt={getRatingTierName(match.team2.avgRating)}
+															/>
+															<span
+																className={classes.mobileAvgTierBadge}
+																style={{ color: tierColors[getTierNameFromRating(match.team2.avgRating)] }}
+															>
+																{getTierShortName(getRatingTierName(match.team2.avgRating))}
+															</span>
+														</div>
+														{renderMobileLpChange(match.team2.ratingChange)}
 													</div>
 												</div>
 												<div className={classes.mobilePlayerList}>{renderMobilePlayers(match.team2.players)}</div>
