@@ -244,7 +244,7 @@ function MyInfoPage(props) {
 
 	const getSoloRankTierName = () => {
 		const tier = summonerInfo.rankTier;
-		if (tier === 'UNRANKED') return 'UNRANKED';
+		if (!tier || tier === 'UNRANKED') return 'UNRANKED';
 		return tier.split(' ')[0];
 	};
 
