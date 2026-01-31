@@ -34,6 +34,9 @@ const useStyles = makeStyles(theme => ({
 		maxWidth: 1400,
 		margin: '0 auto'
 	},
+	statsSection: {
+		marginBottom: 32
+	},
 	profileSection: {
 		display: 'flex',
 		alignItems: 'center',
@@ -231,6 +234,201 @@ const useStyles = makeStyles(theme => ({
 			background: 'linear-gradient(180deg, #00d4ff, #0066ff)',
 			borderRadius: 2
 		}
+	},
+	// 새로운 통계 섹션 스타일
+	statsGrid: {
+		display: 'grid',
+		gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+		gap: 16,
+		marginBottom: 24
+	},
+	statCard: {
+		background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
+		borderRadius: 16,
+		padding: '20px 24px',
+		border: '1px solid rgba(0, 212, 255, 0.15)',
+		animation: '$fadeInUp 0.5s ease forwards',
+		opacity: 0,
+		'&:nth-child(1)': { animationDelay: '0.1s' },
+		'&:nth-child(2)': { animationDelay: '0.15s' },
+		'&:nth-child(3)': { animationDelay: '0.2s' },
+		'&:nth-child(4)': { animationDelay: '0.25s' }
+	},
+	statLabel: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.2rem',
+		color: 'rgba(255, 255, 255, 0.5)',
+		marginBottom: 8
+	},
+	statValue: {
+		fontFamily: '"Rajdhani", sans-serif',
+		fontSize: '2.4rem',
+		fontWeight: 700,
+		color: '#fff'
+	},
+	statSubValue: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.2rem',
+		color: 'rgba(255, 255, 255, 0.6)',
+		marginTop: 4
+	},
+	recentWinRateHigh: {
+		color: '#00ff7f'
+	},
+	recentWinRateMid: {
+		color: '#ffd700'
+	},
+	recentWinRateLow: {
+		color: '#ff6b6b'
+	},
+	streakWin: {
+		color: '#00d4ff'
+	},
+	streakLose: {
+		color: '#ff6b6b'
+	},
+	// 팀원/상대 카드 섹션
+	relationSection: {
+		display: 'grid',
+		gridTemplateColumns: 'repeat(auto-fit, minmax(420px, 1fr))',
+		gap: 24,
+		marginBottom: 32
+	},
+	relationCard: {
+		background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
+		borderRadius: 20,
+		padding: 24,
+		border: '1px solid rgba(0, 212, 255, 0.15)',
+		animation: '$fadeInUp 0.6s ease forwards',
+		opacity: 0,
+		'&:nth-child(1)': { animationDelay: '0.2s' },
+		'&:nth-child(2)': { animationDelay: '0.3s' }
+	},
+	relationTitle: {
+		fontFamily: '"Rajdhani", "Noto Sans KR", sans-serif',
+		fontSize: '1.6rem',
+		fontWeight: 700,
+		color: '#fff',
+		marginBottom: 20,
+		display: 'flex',
+		alignItems: 'center',
+		gap: 10
+	},
+	relationTitleIcon: {
+		fontSize: '1.4rem'
+	},
+	relationList: {
+		display: 'flex',
+		flexDirection: 'column',
+		gap: 12
+	},
+	relationItem: {
+		display: 'flex',
+		alignItems: 'center',
+		justifyContent: 'space-between',
+		padding: '12px 16px',
+		background: 'rgba(0, 0, 0, 0.2)',
+		borderRadius: 12,
+		transition: 'background 0.2s ease',
+		'&:hover': {
+			background: 'rgba(0, 212, 255, 0.1)'
+		}
+	},
+	relationRank: {
+		fontFamily: '"Rajdhani", sans-serif',
+		fontSize: '1.4rem',
+		fontWeight: 700,
+		color: 'rgba(255, 255, 255, 0.4)',
+		width: 28
+	},
+	relationName: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.35rem',
+		color: '#fff',
+		flex: 1,
+		marginLeft: 12
+	},
+	relationStats: {
+		display: 'flex',
+		alignItems: 'center',
+		gap: 16
+	},
+	relationGames: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.2rem',
+		color: 'rgba(255, 255, 255, 0.6)'
+	},
+	relationWinRate: {
+		fontFamily: '"Rajdhani", sans-serif',
+		fontSize: '1.35rem',
+		fontWeight: 700,
+		padding: '4px 12px',
+		borderRadius: 6
+	},
+	// 베스트/워스트 카드
+	highlightSection: {
+		display: 'grid',
+		gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+		gap: 16,
+		marginBottom: 32
+	},
+	highlightCard: {
+		background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
+		borderRadius: 16,
+		padding: '20px 24px',
+		border: '1px solid rgba(0, 212, 255, 0.15)',
+		animation: '$fadeInUp 0.5s ease forwards',
+		opacity: 0,
+		display: 'flex',
+		alignItems: 'center',
+		gap: 16,
+		'&:nth-child(1)': { animationDelay: '0.3s' },
+		'&:nth-child(2)': { animationDelay: '0.35s' },
+		'&:nth-child(3)': { animationDelay: '0.4s' }
+	},
+	highlightIcon: {
+		fontSize: '2.2rem',
+		width: 48,
+		height: 48,
+		display: 'flex',
+		alignItems: 'center',
+		justifyContent: 'center',
+		borderRadius: 12,
+		background: 'rgba(0, 0, 0, 0.3)'
+	},
+	highlightContent: {
+		flex: 1
+	},
+	highlightLabel: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.15rem',
+		color: 'rgba(255, 255, 255, 0.5)',
+		marginBottom: 4
+	},
+	highlightName: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.5rem',
+		fontWeight: 600,
+		color: '#fff'
+	},
+	highlightStat: {
+		fontFamily: '"Rajdhani", sans-serif',
+		fontSize: '1.3rem',
+		fontWeight: 600,
+		marginTop: 2
+	},
+	highlightBest: {
+		color: '#00ff7f'
+	},
+	highlightWorst: {
+		color: '#ff6b6b'
+	},
+	noData: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.3rem',
+		color: 'rgba(255, 255, 255, 0.4)',
+		textAlign: 'center',
+		padding: '20px 0'
 	}
 }));
 
@@ -241,6 +439,16 @@ function MyInfoPage(props) {
 	const user = useSelector(state => state.auth.user);
 	const scoreInfo = useSelector(({ MyInfo }) => MyInfo.myInfo.scoreInfo);
 	const summonerInfo = useSelector(({ MyInfo }) => MyInfo.myInfo.summonerInfo);
+	const topTeammates = useSelector(({ MyInfo }) => MyInfo.myInfo.topTeammates);
+	const topOpponents = useSelector(({ MyInfo }) => MyInfo.myInfo.topOpponents);
+	const bestTeammate = useSelector(({ MyInfo }) => MyInfo.myInfo.bestTeammate);
+	const recentGames = useSelector(({ MyInfo }) => MyInfo.myInfo.recentGames);
+	const recentWins = useSelector(({ MyInfo }) => MyInfo.myInfo.recentWins);
+	const recentWinRate = useSelector(({ MyInfo }) => MyInfo.myInfo.recentWinRate);
+	const maxWinStreak = useSelector(({ MyInfo }) => MyInfo.myInfo.maxWinStreak);
+	const maxLoseStreak = useSelector(({ MyInfo }) => MyInfo.myInfo.maxLoseStreak);
+	const bestOpponent = useSelector(({ MyInfo }) => MyInfo.myInfo.bestOpponent);
+	const worstOpponent = useSelector(({ MyInfo }) => MyInfo.myInfo.worstOpponent);
 
 	const getSoloRankTierName = () => {
 		const tier = summonerInfo.rankTier;
@@ -253,17 +461,25 @@ function MyInfoPage(props) {
 	};
 
 	const getProfileIconURI = () => {
-		return `https://ddragon.leagueoflegends.com/cdn/${getLatesetRiotDataVersion()}/img/profileicon/${summonerInfo.profileIconId}.png`;
+		return `https://ddragon.leagueoflegends.com/cdn/${getLatesetRiotDataVersion()}/img/profileicon/${
+			summonerInfo.profileIconId
+		}.png`;
 	};
 
-	const getTierColor = (tierName) => {
+	const getTierColor = tierName => {
 		return tierColors[tierName] || tierColors.UNRANKED;
 	};
 
-	const getWinRateClass = (winRate) => {
+	const getWinRateClass = winRate => {
 		if (winRate >= 55) return classes.winRateHigh;
 		if (winRate >= 45) return classes.winRateMid;
 		return classes.winRateLow;
+	};
+
+	const getRecentWinRateClass = winRate => {
+		if (winRate >= 55) return classes.recentWinRateHigh;
+		if (winRate >= 45) return classes.recentWinRateMid;
+		return classes.recentWinRateLow;
 	};
 
 	const calculateWinRate = (wins, losses) => {
@@ -297,11 +513,7 @@ function MyInfoPage(props) {
 				<div className={classes.container}>
 					{/* 프로필 섹션 */}
 					<div className={classes.profileSection}>
-						<img
-							className={classes.profileIcon}
-							src={getProfileIconURI()}
-							alt="Profile Icon"
-						/>
+						<img className={classes.profileIcon} src={getProfileIconURI()} alt="Profile Icon" />
 						<div className={classes.profileInfo}>
 							<div className={classes.summonerName}>{summonerInfo.name}</div>
 							<div className={classes.summonerLevel}>
@@ -325,10 +537,7 @@ function MyInfoPage(props) {
 								</div>
 								<div className={classes.cardTitleWrapper}>
 									<div className={classes.cardLabel}>Solo Rank</div>
-									<div
-										className={classes.tierText}
-										style={{ color: soloTierColor.primary }}
-									>
+									<div className={classes.tierText} style={{ color: soloTierColor.primary }}>
 										{summonerInfo.rankTier}
 									</div>
 								</div>
@@ -337,10 +546,8 @@ function MyInfoPage(props) {
 								<span className={classes.statItem}>
 									{summonerInfo.rankWin}승 {summonerInfo.rankLose}패
 								</span>
-								{(summonerInfo.rankWin + summonerInfo.rankLose) > 0 && (
-									<span className={`${classes.winRate} ${getWinRateClass(soloWinRate)}`}>
-										{soloWinRate}%
-									</span>
+								{summonerInfo.rankWin + summonerInfo.rankLose > 0 && (
+									<span className={`${classes.winRate} ${getWinRateClass(soloWinRate)}`}>{soloWinRate}%</span>
 								)}
 							</div>
 							<div className={classes.decorLine} style={{ color: soloTierColor.primary }} />
@@ -359,10 +566,7 @@ function MyInfoPage(props) {
 								</div>
 								<div className={classes.cardTitleWrapper}>
 									<div className={classes.cardLabel}>Custom Rating</div>
-									<div
-										className={classes.tierText}
-										style={{ color: ratingTierColor.primary }}
-									>
+									<div className={classes.tierText} style={{ color: ratingTierColor.primary }}>
 										{scoreInfo.ratingTier}
 									</div>
 								</div>
@@ -370,20 +574,154 @@ function MyInfoPage(props) {
 							<div className={classes.ratingPoints}>
 								{scoreInfo.defaultRating + scoreInfo.additionalRating}p
 								<span className={classes.ratingBreakdown}>
-									({scoreInfo.defaultRating} {scoreInfo.additionalRating >= 0 ? '+' : '-'} {Math.abs(scoreInfo.additionalRating)})
+									({scoreInfo.defaultRating} {scoreInfo.additionalRating >= 0 ? '+' : '-'}{' '}
+									{Math.abs(scoreInfo.additionalRating)})
 								</span>
 							</div>
 							<div className={classes.statsRow}>
 								<span className={classes.statItem}>
 									{scoreInfo.win}승 {scoreInfo.lose}패
 								</span>
-								{(scoreInfo.win + scoreInfo.lose) > 0 && (
-									<span className={`${classes.winRate} ${getWinRateClass(customWinRate)}`}>
-										{customWinRate}%
-									</span>
+								{scoreInfo.win + scoreInfo.lose > 0 && (
+									<span className={`${classes.winRate} ${getWinRateClass(customWinRate)}`}>{customWinRate}%</span>
 								)}
 							</div>
 							<div className={classes.decorLine} style={{ color: '#00d4ff' }} />
+						</div>
+					</div>
+
+					{/* 최근 전적 & 연승/연패 통계 */}
+					<div className={classes.statsSection}>
+						<div className={classes.statsGrid}>
+							<div className={classes.statCard}>
+								<div className={classes.statLabel}>최근 10경기</div>
+								<div className={`${classes.statValue} ${getRecentWinRateClass(recentWinRate)}`}>{recentWinRate}%</div>
+								<div className={classes.statSubValue}>
+									{recentWins}승 {recentGames - recentWins}패
+								</div>
+							</div>
+							<div className={classes.statCard}>
+								<div className={classes.statLabel}>최다 연승</div>
+								<div className={`${classes.statValue} ${classes.streakWin}`}>{maxWinStreak}연승</div>
+							</div>
+							<div className={classes.statCard}>
+								<div className={classes.statLabel}>최다 연패</div>
+								<div className={`${classes.statValue} ${classes.streakLose}`}>{maxLoseStreak}연패</div>
+							</div>
+						</div>
+					</div>
+
+					{/* 베스트/워스트 하이라이트 */}
+					<div className={classes.highlightSection}>
+						{bestTeammate && (
+							<div className={classes.highlightCard}>
+								<div className={classes.highlightIcon}>
+									<span role="img" aria-label="best teammate">
+										🤝
+									</span>
+								</div>
+								<div className={classes.highlightContent}>
+									<div className={classes.highlightLabel}>함께하면 승률 최고</div>
+									<div className={classes.highlightName}>{bestTeammate.name}</div>
+									<div className={`${classes.highlightStat} ${classes.highlightBest}`}>
+										{bestTeammate.games}판 ({bestTeammate.wins}승 {bestTeammate.losses}패) {bestTeammate.winRate}%
+									</div>
+								</div>
+							</div>
+						)}
+						{bestOpponent && (
+							<div className={classes.highlightCard}>
+								<div className={classes.highlightIcon}>
+									<span role="img" aria-label="best opponent">
+										💪
+									</span>
+								</div>
+								<div className={classes.highlightContent}>
+									<div className={classes.highlightLabel}>상대 전적 최고</div>
+									<div className={classes.highlightName}>{bestOpponent.name}</div>
+									<div className={`${classes.highlightStat} ${classes.highlightBest}`}>
+										{bestOpponent.games}판 ({bestOpponent.myWins}승 {bestOpponent.myLosses}패) {bestOpponent.winRate}%
+									</div>
+								</div>
+							</div>
+						)}
+						{worstOpponent && (
+							<div className={classes.highlightCard}>
+								<div className={classes.highlightIcon}>
+									<span role="img" aria-label="worst opponent">
+										😰
+									</span>
+								</div>
+								<div className={classes.highlightContent}>
+									<div className={classes.highlightLabel}>상대 전적 최악</div>
+									<div className={classes.highlightName}>{worstOpponent.name}</div>
+									<div className={`${classes.highlightStat} ${classes.highlightWorst}`}>
+										{worstOpponent.games}판 ({worstOpponent.myWins}승 {worstOpponent.myLosses}패){' '}
+										{worstOpponent.winRate}%
+									</div>
+								</div>
+							</div>
+						)}
+					</div>
+
+					{/* 자주 함께한 팀원 / 자주 맞선 상대 */}
+					<div className={classes.relationSection}>
+						<div className={classes.relationCard}>
+							<div className={classes.relationTitle}>
+								<span role="img" aria-label="teammates" className={classes.relationTitleIcon}>
+									👥
+								</span>
+								자주 함께한 팀원 Top 5
+							</div>
+							{topTeammates && topTeammates.length > 0 ? (
+								<div className={classes.relationList}>
+									{topTeammates.map((teammate, index) => (
+										<div key={teammate.puuid} className={classes.relationItem}>
+											<span className={classes.relationRank}>{index + 1}</span>
+											<span className={classes.relationName}>{teammate.name}</span>
+											<div className={classes.relationStats}>
+												<span className={classes.relationGames}>
+													{teammate.games}판 ({teammate.wins}승 {teammate.games - teammate.wins}패)
+												</span>
+												<span className={`${classes.relationWinRate} ${getWinRateClass(teammate.winRate)}`}>
+													{teammate.winRate}%
+												</span>
+											</div>
+										</div>
+									))}
+								</div>
+							) : (
+								<div className={classes.noData}>데이터가 없습니다</div>
+							)}
+						</div>
+
+						<div className={classes.relationCard}>
+							<div className={classes.relationTitle}>
+								<span role="img" aria-label="opponents" className={classes.relationTitleIcon}>
+									⚔️
+								</span>
+								자주 맞선 상대 Top 5
+							</div>
+							{topOpponents && topOpponents.length > 0 ? (
+								<div className={classes.relationList}>
+									{topOpponents.map((opponent, index) => (
+										<div key={opponent.puuid} className={classes.relationItem}>
+											<span className={classes.relationRank}>{index + 1}</span>
+											<span className={classes.relationName}>{opponent.name}</span>
+											<div className={classes.relationStats}>
+												<span className={classes.relationGames}>
+													{opponent.games}판 ({opponent.myWins}승 {opponent.myLosses}패)
+												</span>
+												<span className={`${classes.relationWinRate} ${getWinRateClass(opponent.winRate)}`}>
+													{opponent.winRate}%
+												</span>
+											</div>
+										</div>
+									))}
+								</div>
+							) : (
+								<div className={classes.noData}>데이터가 없습니다</div>
+							)}
 						</div>
 					</div>
 
