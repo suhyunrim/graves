@@ -195,21 +195,6 @@ const useStyles = makeStyles(theme => ({
 		background: 'rgba(255, 107, 107, 0.2)',
 		color: '#ff6b6b'
 	},
-	ratingPoints: {
-		fontFamily: '"Rajdhani", sans-serif',
-		fontSize: '1.9rem',
-		fontWeight: 700,
-		color: '#00d4ff',
-		marginTop: 14,
-		display: 'flex',
-		alignItems: 'center',
-		gap: 10
-	},
-	ratingBreakdown: {
-		fontFamily: '"Noto Sans KR", sans-serif',
-		fontSize: '1.2rem',
-		color: 'rgba(255, 255, 255, 0.5)'
-	},
 	decorLine: {
 		position: 'absolute',
 		bottom: 0,
@@ -464,6 +449,24 @@ function MyInfoPage(props) {
 		return scoreInfo.ratingTier.split(' ')[0];
 	};
 
+	const getRatingLP = () => {
+		const rating = scoreInfo.defaultRating + scoreInfo.additionalRating;
+		const bases = [
+			['CHALLENGER', 1150], ['GRANDMASTER', 1000], ['MASTER', 900],
+			['DIAMOND', 800], ['EMERALD', 700], ['PLATINUM', 600],
+			['GOLD', 500], ['SILVER', 400], ['BRONZE', 300], ['IRON', 200]
+		];
+		for (const [name, base] of bases) {
+			if (rating >= base) {
+				if (['MASTER', 'GRANDMASTER', 'CHALLENGER'].includes(name)) {
+					return Math.floor((rating - base) * 4);
+				}
+				return Math.floor((rating - base) % 25 * 4);
+			}
+		}
+		return 0;
+	};
+
 	const getProfileIconURI = () => {
 		return `https://ddragon.leagueoflegends.com/cdn/${getLatesetRiotDataVersion()}/img/profileicon/${
 			summonerInfo.profileIconId
@@ -571,16 +574,9 @@ function MyInfoPage(props) {
 								<div className={classes.cardTitleWrapper}>
 									<div className={classes.cardLabel}>Custom Rating</div>
 									<div className={classes.tierText} style={{ color: ratingTierColor.primary }}>
-										{scoreInfo.ratingTier}
+										{scoreInfo.ratingTier} {getRatingLP()}LP
 									</div>
 								</div>
-							</div>
-							<div className={classes.ratingPoints}>
-								{scoreInfo.defaultRating + scoreInfo.additionalRating}p
-								<span className={classes.ratingBreakdown}>
-									({scoreInfo.defaultRating} {scoreInfo.additionalRating >= 0 ? '+' : '-'}{' '}
-									{Math.abs(scoreInfo.additionalRating)})
-								</span>
 							</div>
 							<div className={classes.statsRow}>
 								<span className={classes.statItem}>
