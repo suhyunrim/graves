@@ -12,7 +12,11 @@ const useStyles = makeStyles(theme => ({
 		padding: 28,
 		animation: '$fadeIn 0.6s ease',
 		animationDelay: '0.3s',
-		animationFillMode: 'backwards'
+		animationFillMode: 'backwards',
+		[theme.breakpoints.down('xs')]: {
+			padding: 16,
+			borderRadius: 16
+		}
 	},
 	'@keyframes fadeIn': {
 		'0%': { opacity: 0, transform: 'translateY(20px)' },
@@ -37,7 +41,10 @@ const useStyles = makeStyles(theme => ({
 	},
 	chartContainer: {
 		height: 420,
-		position: 'relative'
+		position: 'relative',
+		[theme.breakpoints.down('xs')]: {
+			height: 280
+		}
 	},
 	emptyState: {
 		display: 'flex',

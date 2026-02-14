@@ -33,7 +33,10 @@ const useStyles = makeStyles(theme => ({
 	container: {
 		padding: '28px',
 		maxWidth: 1400,
-		margin: '0 auto'
+		margin: '0 auto',
+		[theme.breakpoints.down('xs')]: {
+			padding: '16px'
+		}
 	},
 	statsSection: {
 		marginBottom: 32
@@ -47,7 +50,11 @@ const useStyles = makeStyles(theme => ({
 		background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
 		borderRadius: 16,
 		border: '1px solid rgba(0, 212, 255, 0.2)',
-		animation: '$fadeIn 0.5s ease'
+		animation: '$fadeIn 0.5s ease',
+		[theme.breakpoints.down('xs')]: {
+			gap: 16,
+			padding: 16
+		}
 	},
 	'@keyframes fadeIn': {
 		'0%': { opacity: 0, transform: 'translateY(20px)' },
@@ -63,6 +70,11 @@ const useStyles = makeStyles(theme => ({
 		'&:hover': {
 			transform: 'scale(1.05)',
 			boxShadow: '0 0 40px rgba(0, 212, 255, 0.5)'
+		},
+		[theme.breakpoints.down('xs')]: {
+			width: 80,
+			height: 80,
+			borderRadius: 12
 		}
 	},
 	profileInfo: {
@@ -75,7 +87,10 @@ const useStyles = makeStyles(theme => ({
 		color: '#fff',
 		letterSpacing: '0.02em',
 		textShadow: '0 2px 20px rgba(0, 212, 255, 0.3)',
-		marginBottom: 6
+		marginBottom: 6,
+		[theme.breakpoints.down('xs')]: {
+			fontSize: '2.2rem'
+		}
 	},
 	summonerLevel: {
 		fontFamily: '"Noto Sans KR", sans-serif',
@@ -97,7 +112,11 @@ const useStyles = makeStyles(theme => ({
 		display: 'grid',
 		gridTemplateColumns: 'repeat(auto-fit, minmax(380px, 1fr))',
 		gap: 24,
-		marginBottom: 32
+		marginBottom: 32,
+		[theme.breakpoints.down('xs')]: {
+			gridTemplateColumns: '1fr',
+			gap: 16
+		}
 	},
 	rankCard: {
 		position: 'relative',
@@ -109,6 +128,10 @@ const useStyles = makeStyles(theme => ({
 		opacity: 0,
 		'&:hover': {
 			transform: 'translateY(-6px) scale(1.02)'
+		},
+		[theme.breakpoints.down('xs')]: {
+			padding: 20,
+			borderRadius: 16
 		}
 	},
 	'@keyframes fadeInUp': {
@@ -147,6 +170,10 @@ const useStyles = makeStyles(theme => ({
 		transition: 'transform 0.3s ease',
 		'&:hover': {
 			transform: 'scale(1.1) rotate(5deg)'
+		},
+		[theme.breakpoints.down('xs')]: {
+			width: 72,
+			height: 72
 		}
 	},
 	cardTitleWrapper: {
@@ -163,7 +190,10 @@ const useStyles = makeStyles(theme => ({
 		fontSize: '2.4rem',
 		fontWeight: 700,
 		letterSpacing: '0.03em',
-		textShadow: '0 2px 10px currentColor'
+		textShadow: '0 2px 10px currentColor',
+		[theme.breakpoints.down('xs')]: {
+			fontSize: '1.8rem'
+		}
 	},
 	statsRow: {
 		display: 'flex',
@@ -226,7 +256,11 @@ const useStyles = makeStyles(theme => ({
 		display: 'grid',
 		gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
 		gap: 16,
-		marginBottom: 24
+		marginBottom: 24,
+		[theme.breakpoints.down('xs')]: {
+			gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
+			gap: 12
+		}
 	},
 	statCard: {
 		background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
@@ -278,7 +312,11 @@ const useStyles = makeStyles(theme => ({
 		display: 'grid',
 		gridTemplateColumns: 'repeat(auto-fit, minmax(420px, 1fr))',
 		gap: 24,
-		marginBottom: 32
+		marginBottom: 32,
+		[theme.breakpoints.down('xs')]: {
+			gridTemplateColumns: '1fr',
+			gap: 16
+		}
 	},
 	relationCard: {
 		background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
@@ -288,7 +326,11 @@ const useStyles = makeStyles(theme => ({
 		animation: '$fadeInUp 0.6s ease forwards',
 		opacity: 0,
 		'&:nth-child(1)': { animationDelay: '0.2s' },
-		'&:nth-child(2)': { animationDelay: '0.3s' }
+		'&:nth-child(2)': { animationDelay: '0.3s' },
+		[theme.breakpoints.down('xs')]: {
+			padding: 16,
+			borderRadius: 16
+		}
 	},
 	relationTitle: {
 		fontFamily: '"Rajdhani", "Noto Sans KR", sans-serif',
@@ -318,6 +360,11 @@ const useStyles = makeStyles(theme => ({
 		transition: 'background 0.2s ease',
 		'&:hover': {
 			background: 'rgba(0, 212, 255, 0.1)'
+		},
+		[theme.breakpoints.down('xs')]: {
+			flexWrap: 'wrap',
+			gap: 4,
+			padding: '10px 12px'
 		}
 	},
 	relationRank: {
@@ -356,7 +403,11 @@ const useStyles = makeStyles(theme => ({
 		display: 'grid',
 		gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
 		gap: 16,
-		marginBottom: 32
+		marginBottom: 32,
+		[theme.breakpoints.down('xs')]: {
+			gridTemplateColumns: '1fr',
+			gap: 12
+		}
 	},
 	highlightCard: {
 		background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
