@@ -82,11 +82,11 @@ const useStyles = makeStyles(theme => ({
 		}
 	},
 	cardMostGames: {
-		background: 'linear-gradient(135deg, #2d1f1f 0%, #1a1215 100%)',
-		border: '1px solid rgba(255, 107, 107, 0.3)',
+		background: 'linear-gradient(135deg, #1f2535 0%, #121828 100%)',
+		border: '1px solid rgba(77, 171, 247, 0.3)',
 		animationDelay: '0.1s',
 		'&:hover': {
-			boxShadow: '0 20px 40px rgba(255, 107, 107, 0.2)'
+			boxShadow: '0 20px 40px rgba(77, 171, 247, 0.2)'
 		}
 	},
 	cardBestWinRate: {
@@ -242,8 +242,8 @@ const useStyles = makeStyles(theme => ({
 		fontSize: '1.35rem'
 	},
 	highlightRed: {
-		background: 'rgba(255, 107, 107, 0.2)',
-		color: '#ff6b6b'
+		background: 'rgba(77, 171, 247, 0.2)',
+		color: '#4dabf7'
 	},
 	highlightGold: {
 		background: 'rgba(255, 215, 0, 0.2)',
@@ -413,7 +413,7 @@ function Dashboard() {
 				) : (
 					<div className={classes.emptyText}>데이터가 없습니다</div>
 				)}
-				<div className={classes.decorLine} style={{ color: '#ff6b6b' }} />
+				<div className={classes.decorLine} style={{ color: '#4dabf7' }} />
 			</div>
 		);
 	};
