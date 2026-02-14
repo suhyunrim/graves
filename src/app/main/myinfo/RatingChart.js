@@ -1,9 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Line } from 'react-chartjs-2';
 import { useSelector } from 'react-redux';
 import { makeStyles } from '@material-ui/core/styles';
-import FuseLoading from '@fuse/core/FuseLoading';
-import createCamilleAxios from 'app/utility/camilleAxios';
 
 const useStyles = makeStyles(theme => ({
 	chartCard: {
@@ -76,11 +74,9 @@ const tierConfig = {
 
 const tierOrder = ['IRON', 'BRONZE', 'SILVER', 'GOLD', 'PLATINUM', 'EMERALD', 'DIAMOND', 'MASTER', 'GRANDMASTER', 'CHALLENGER'];
 
-function RatingChart({ puuid: puuidProp }) {
+function RatingChart() {
 	const classes = useStyles();
-	const user = useSelector(state => state.auth.user);
-	const [ratingHistory, setRatingHistory] = useState(null);
-	const [loading, setLoading] = useState(true);
+	const ratingHistory = useSelector(({ MyInfo }) => MyInfo.myInfo.ratingHistory);
 
 	const getTierFromRating = rating => {
 		const entries = Object.entries(tierConfig).sort((a, b) => b[1].base - a[1].base);
@@ -136,53 +132,6 @@ function RatingChart({ puuid: puuidProp }) {
 		return `${tier} ${divisions[subIndex]}`;
 	};
 
-	useEffect(() => {
-		const fetchMatchHistory = async () => {
-			try {
-				const response = await createCamilleAxios().get(`/api/match/history/${user.reprGroup.groupId}`);
-				if (response.status === 200) {
-					const matches = response.data.matches;
-					const myPuuid = puuidProp || localStorage.getItem('camille_riot_puuid');
-
-					const history = [];
-
-					const reversedMatches = [...matches].reverse();
-
-					for (const match of reversedMatches) {
-						let playerData = match.team1.players.find(p => p.puuid === myPuuid);
-						let ratingChange = match.team1.ratingChange;
-
-						if (!playerData) {
-							playerData = match.team2.players.find(p => p.puuid === myPuuid);
-							ratingChange = match.team2.ratingChange;
-						}
-
-						if (playerData) {
-							history.push({
-								date: new Date(match.createdAt),
-								rating: playerData.rating,
-								ratingChange,
-								gameId: match.gameId
-							});
-						}
-					}
-
-					setRatingHistory(history);
-				}
-			} catch (error) {
-				console.error('Failed to fetch match history:', error);
-			} finally {
-				setLoading(false);
-			}
-		};
-
-		fetchMatchHistory();
-	}, [user, puuidProp]);
-
-	if (loading) {
-		return <FuseLoading />;
-	}
-
 	if (!ratingHistory || ratingHistory.length === 0) {
 		return (
 			<div className={classes.chartCard}>
@@ -195,22 +144,10 @@ function RatingChart({ puuid: puuidProp }) {
 		);
 	}
 
-	const groupByDate = (history) => {
-		const grouped = {};
-		history.forEach(h => {
-			const dateKey = h.date.toISOString().split('T')[0];
-			grouped[dateKey] = h;
-		});
-		return Object.entries(grouped)
-			.sort((a, b) => a[0].localeCompare(b[0]))
-			.slice(-10)
-			.map(([dateKey, data]) => ({
-				...data,
-				dateLabel: dateKey.slice(5)
-			}));
-	};
-
-	const dailyHistory = groupByDate(ratingHistory);
+	const dailyHistory = ratingHistory.map(h => ({
+		...h,
+		dateLabel: h.date.slice(5)
+	}));
 
 	const tierValues = dailyHistory.map(h => ratingToTierValue(h.rating));
 	const minTierValue = Math.floor(Math.min(...tierValues)) - 1;

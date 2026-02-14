@@ -726,7 +726,7 @@ function MyInfoPage(props) {
 					</div>
 
 					{/* 레이팅 차트 */}
-					<RatingChart puuid={puuid} />
+					<RatingChart />
 				</div>
 			}
 		/>

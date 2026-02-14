@@ -23,7 +23,8 @@ const myInfoReducer = (state = initialState, action) => {
 				maxWinStreak: stats.maxWinStreak || 0,
 				maxLoseStreak: stats.maxLoseStreak || 0,
 				bestOpponent: stats.bestOpponent || null,
-				worstOpponent: stats.worstOpponent || null
+				worstOpponent: stats.worstOpponent || null,
+				ratingHistory: stats.ratingHistory || []
 			};
 		}
 		case Actions.TRY_REFRESH_CHAMPION_SCORES: {
