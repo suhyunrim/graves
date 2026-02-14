@@ -390,7 +390,7 @@ function Dashboard() {
 				<div className={classes.cardHeader}>
 					<span role="img" aria-label="hearts" className={classes.emoji}>💕</span>
 					<div className={classes.cardTitleWrapper}>
-						<div className={classes.cardLabel}>{item?.minGames || 3}판 이상 2인 조합 최고 승률</div>
+						<div className={classes.cardLabel}>{item?.minGames || 3}판 이상 듀오 최고 승률</div>
 						<div className={classes.cardTitle}>전생에 부부</div>
 					</div>
 				</div>
