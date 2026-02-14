@@ -525,8 +525,6 @@ function Dashboard() {
 						</div>
 						<div className={classes.stats}>
 							<span className={`${classes.statHighlight} ${classes.highlightPurple}`}>{item.games}판</span>
-						</div>
-						<div className={classes.rivalryScore}>
 							<span className={classes.rivalryWins} style={{ color: '#4dabf7' }}>{item.player1Wins}승</span>
 							<span style={{ color: 'rgba(255,255,255,0.3)' }}>vs</span>
 							<span className={classes.rivalryWins} style={{ color: '#ff6b6b' }}>{item.player2Wins}승</span>
@@ -691,9 +689,7 @@ function Dashboard() {
 						<div className={classes.playerName}>{item.name}</div>
 						<div className={classes.stats}>
 							<span className={`${classes.statHighlight} ${classes.highlightGreen}`}>{item.games}판</span>
-						</div>
-						<div className={classes.firstMatchDate}>
-							첫 내전: {formatDate(item.firstMatchDate)}
+							<span>첫 내전: {formatDate(item.firstMatchDate)}</span>
 						</div>
 					</div>
 				) : (
