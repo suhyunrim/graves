@@ -129,6 +129,30 @@ const useStyles = makeStyles(theme => ({
 			boxShadow: '0 20px 40px rgba(0, 255, 127, 0.2)'
 		}
 	},
+	cardRatingRiser: {
+		background: 'linear-gradient(135deg, #1f2a2d 0%, #121a1c 100%)',
+		border: '1px solid rgba(0, 212, 255, 0.3)',
+		animationDelay: '0.7s',
+		'&:hover': {
+			boxShadow: '0 20px 40px rgba(0, 212, 255, 0.2)'
+		}
+	},
+	cardNightOwl: {
+		background: 'linear-gradient(135deg, #1a1f2d 0%, #0f1220 100%)',
+		border: '1px solid rgba(75, 0, 130, 0.3)',
+		animationDelay: '0.8s',
+		'&:hover': {
+			boxShadow: '0 20px 40px rgba(75, 0, 130, 0.2)'
+		}
+	},
+	cardDarkHorse: {
+		background: 'linear-gradient(135deg, #2d2d1f 0%, #1a1a12 100%)',
+		border: '1px solid rgba(184, 134, 11, 0.3)',
+		animationDelay: '0.9s',
+		'&:hover': {
+			boxShadow: '0 20px 40px rgba(184, 134, 11, 0.2)'
+		}
+	},
 	cardEmpty: {
 		background: 'linear-gradient(135deg, #1a1a1a 0%, #121212 100%)',
 		border: '1px solid rgba(255, 255, 255, 0.1)'
@@ -241,6 +265,14 @@ const useStyles = makeStyles(theme => ({
 		background: 'rgba(0, 255, 127, 0.2)',
 		color: '#00ff7f'
 	},
+	highlightIndigo: {
+		background: 'rgba(75, 0, 130, 0.2)',
+		color: '#9370db'
+	},
+	highlightDarkGold: {
+		background: 'rgba(184, 134, 11, 0.2)',
+		color: '#daa520'
+	},
 	streakNumber: {
 		fontFamily: '"Rajdhani", sans-serif',
 		fontSize: '4rem',
@@ -287,6 +319,26 @@ const useStyles = makeStyles(theme => ({
 		fontSize: '1.2rem',
 		color: 'rgba(255, 255, 255, 0.5)',
 		marginTop: 10
+	},
+	tierBadge: {
+		display: 'flex',
+		alignItems: 'center',
+		gap: 4
+	},
+	tierEmblemSmall: {
+		width: 28,
+		height: 28
+	},
+	tierShortName: {
+		fontFamily: '"Rajdhani", sans-serif',
+		fontSize: '1.5rem',
+		fontWeight: 700,
+		color: '#fff'
+	},
+	tierArrow: {
+		fontFamily: '"Rajdhani", sans-serif',
+		fontSize: '1.4rem',
+		color: 'rgba(255, 255, 255, 0.4)'
 	}
 }));
 
@@ -488,6 +540,135 @@ function Dashboard() {
 		);
 	};
 
+	const renderRatingRiser = () => {
+		const item = data.topRatingRiser;
+		const tierBases = [
+			['CHALLENGER', 1150], ['GRANDMASTER', 1000], ['MASTER', 900],
+			['DIAMOND', 800], ['EMERALD', 700], ['PLATINUM', 600],
+			['GOLD', 500], ['SILVER', 400], ['BRONZE', 300], ['IRON', 200]
+		];
+		const divisionNames = ['IV', 'III', 'II', 'I'];
+		const highTiers = ['MASTER', 'GRANDMASTER', 'CHALLENGER'];
+		const tierShortNames = {
+			IRON: 'I', BRONZE: 'B', SILVER: 'S', GOLD: 'G',
+			PLATINUM: 'P', EMERALD: 'E', DIAMOND: 'D',
+			MASTER: 'M', GRANDMASTER: 'GM', CHALLENGER: 'C'
+		};
+
+		const getTierInfo = (rating) => {
+			for (const [name, base] of tierBases) {
+				if (rating >= base) {
+					if (highTiers.includes(name)) {
+						return { tier: name, short: tierShortNames[name], division: '' };
+					}
+					const divIdx = Math.min(Math.floor((rating - base) / 25), 3);
+					return { tier: name, short: tierShortNames[name], division: divisionNames[divIdx] };
+				}
+			}
+			return { tier: 'IRON', short: 'I', division: 'IV' };
+		};
+
+		const divisionToNum = (div) => {
+			const map = { IV: '4', III: '3', II: '2', I: '1' };
+			return map[div] || '';
+		};
+
+		const renderTierBadge = (rating) => {
+			const info = getTierInfo(rating);
+			const label = info.division ? `${info.short}${divisionToNum(info.division)}` : info.short;
+			return (
+				<span className={classes.tierBadge}>
+					<img
+						className={classes.tierEmblemSmall}
+						src={`/assets/images/ranked-emblems/Emblem_${info.tier}.png`}
+						alt={info.tier}
+					/>
+					<span className={classes.tierShortName}>{label}</span>
+				</span>
+			);
+		};
+
+		return (
+			<div className={`${classes.card} ${item ? classes.cardRatingRiser : classes.cardEmpty}`}>
+				<div className={classes.cardHeader}>
+					<span role="img" aria-label="sparkles" className={classes.emoji}>✨</span>
+					<div className={classes.cardTitleWrapper}>
+						<div className={classes.cardLabel}>레이팅 상승 1등</div>
+						<div className={classes.cardTitle}>깨달은 자</div>
+					</div>
+				</div>
+				{item ? (
+					<div className={classes.cardContent}>
+						<div className={classes.playerName}>{item.name}</div>
+						<div className={classes.stats}>
+							{renderTierBadge(item.startRating)}
+							<span className={classes.tierArrow}>→</span>
+							{renderTierBadge(item.endRating)}
+							<span>{item.games}판</span>
+						</div>
+					</div>
+				) : (
+					<div className={classes.emptyText}>데이터가 없습니다</div>
+				)}
+				<div className={classes.decorLine} style={{ color: '#00d4ff' }} />
+			</div>
+		);
+	};
+
+	const renderNightOwl = () => {
+		const item = data.nightOwl;
+		return (
+			<div className={`${classes.card} ${item ? classes.cardNightOwl : classes.cardEmpty}`}>
+				<div className={classes.cardHeader}>
+					<span role="img" aria-label="crescent moon" className={classes.emoji}>🌙</span>
+					<div className={classes.cardTitleWrapper}>
+						<div className={classes.cardLabel}>새벽 경기 비율 1등</div>
+						<div className={classes.cardTitle}>새벽 전사</div>
+					</div>
+				</div>
+				{item ? (
+					<div className={classes.cardContent}>
+						<div className={classes.playerName}>{item.name}</div>
+						<div className={classes.stats}>
+							<span className={`${classes.statHighlight} ${classes.highlightIndigo}`}>{item.lateNightRate}%</span>
+							<span>{item.games}판 중 {item.lateNightGames}판</span>
+						</div>
+					</div>
+				) : (
+					<div className={classes.emptyText}>데이터가 없습니다</div>
+				)}
+				<div className={classes.decorLine} style={{ color: '#4b0082' }} />
+			</div>
+		);
+	};
+
+	const renderDarkHorse = () => {
+		const item = data.darkHorse;
+		return (
+			<div className={`${classes.card} ${item ? classes.cardDarkHorse : classes.cardEmpty}`}>
+				<div className={classes.cardHeader}>
+					<span role="img" aria-label="horse" className={classes.emoji}>🐴</span>
+					<div className={classes.cardTitleWrapper}>
+						<div className={classes.cardLabel}>팀내 최저 레이팅 승리 횟수 1등</div>
+						<div className={classes.cardTitle}>다크호스</div>
+					</div>
+				</div>
+				{item ? (
+					<div className={classes.cardContent}>
+						<div className={classes.playerName}>{item.name}</div>
+						<div className={classes.stats}>
+							<span className={`${classes.statHighlight} ${classes.highlightDarkGold}`}>{item.darkHorseWinRate}%</span>
+							<span>총 {item.games}판 중 {item.darkHorseGames}판 최저 레이팅 / {item.darkHorseWins}승 {item.darkHorseGames - item.darkHorseWins}패</span>
+						</div>
+					</div>
+				) : (
+					<div className={classes.emptyText}>데이터가 없습니다</div>
+				)}
+				<div className={classes.decorLine} style={{ color: '#b8860b' }} />
+			</div>
+		);
+	};
+
 	const renderNewcomer = () => {
 		const item = data.topNewcomer;
 		const formatDate = (dateStr) => {
@@ -548,6 +729,9 @@ function Dashboard() {
 						{renderBestDuo()}
 						{renderRivalry()}
 						{renderNewcomer()}
+						{renderRatingRiser()}
+						{renderNightOwl()}
+						{renderDarkHorse()}
 					</div>
 				</div>
 			}
