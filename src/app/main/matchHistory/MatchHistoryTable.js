@@ -8,7 +8,7 @@ import TableHead from '@material-ui/core/TableHead';
 import TablePagination from '@material-ui/core/TablePagination';
 import TableRow from '@material-ui/core/TableRow';
 import { makeStyles, withStyles } from '@material-ui/core/styles';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import * as Actions from './store/actions';
@@ -458,34 +458,28 @@ function MatchHistoryTable() {
 	const history = useHistory();
 
 	const user = useSelector(state => state.auth.user);
-	const allMatches = useSelector(({ MatchHistory }) => {
-		return MatchHistory.matchHistory.matches.matches;
-	});
+	const matches = useSelector(({ MatchHistory }) => MatchHistory.matchHistory.matches);
+	const total = useSelector(({ MatchHistory }) => MatchHistory.matchHistory.total);
+	const serverPage = useSelector(({ MatchHistory }) => MatchHistory.matchHistory.page);
 	const searchText = useSelector(({ MatchHistory }) => MatchHistory.matchHistory.searchText);
 
-	const filteredMatches = allMatches
-		? allMatches.filter(match => {
-				if (!searchText) return true;
-				const searchLower = searchText.toLowerCase();
-				const team1HasPlayer = match.team1.players.some(player => player.name.toLowerCase().includes(searchLower));
-				const team2HasPlayer = match.team2.players.some(player => player.name.toLowerCase().includes(searchLower));
-				return team1HasPlayer || team2HasPlayer;
-		  })
-		: [];
-
-	const [page, setPage] = useState(0);
 	const rowsPerPage = 10;
+	const debounceTimer = useRef(null);
 
 	useEffect(() => {
-		dispatch(Actions.getMatchHistory(user.reprGroup.groupId));
+		dispatch(Actions.getMatchHistory(user.reprGroup.groupId, 1, rowsPerPage));
 	}, [dispatch, user]);
 
 	useEffect(() => {
-		setPage(0);
-	}, [searchText]);
+		if (debounceTimer.current) clearTimeout(debounceTimer.current);
+		debounceTimer.current = setTimeout(() => {
+			dispatch(Actions.getMatchHistory(user.reprGroup.groupId, 1, rowsPerPage, searchText));
+		}, 400);
+		return () => clearTimeout(debounceTimer.current);
+	}, [searchText, dispatch, user]);
 
-	const handleChangePage = (event, value) => {
-		setPage(value);
+	const handleChangePage = (event, newPage) => {
+		dispatch(Actions.getMatchHistory(user.reprGroup.groupId, newPage + 1, rowsPerPage, searchText));
 	};
 
 	const formatDate = utcDateString => {
@@ -628,16 +622,16 @@ function MatchHistoryTable() {
 		));
 	};
 
-	if (!allMatches) {
+	if (!matches) {
 		return <FuseLoading />;
 	}
 
-	const paginatedMatches = filteredMatches.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
+	const getDisplayId = index => total - ((serverPage - 1) * rowsPerPage + index);
 
 	return (
 		<div className={classes.container}>
 			<div className={classes.tableWrapper}>
-				{filteredMatches && filteredMatches.length > 0 ? (
+				{matches && matches.length > 0 ? (
 					<>
 						{/* Desktop Table View */}
 						<Hidden smDown>
@@ -674,10 +668,9 @@ function MatchHistoryTable() {
 										</TableRow>
 									</TableHead>
 									<TableBody>
-										{paginatedMatches.map(match => {
+										{matches.map((match, index) => {
 											const isTeam1Win = match.winTeam === 1;
-											const originalIndex = allMatches.indexOf(match);
-											const displayId = allMatches.length - originalIndex;
+											const displayId = getDisplayId(matches.indexOf(match));
 											return (
 												<StyledTableRow key={match.gameId}>
 													<StyledTableCell>
@@ -769,10 +762,9 @@ function MatchHistoryTable() {
 						{/* Mobile Card View */}
 						<Hidden mdUp>
 							<div className={classes.mobileCardList}>
-								{paginatedMatches.map(match => {
+								{matches.map((match, index) => {
 									const isTeam1Win = match.winTeam === 1;
-									const originalIndex = allMatches.indexOf(match);
-									const displayId = allMatches.length - originalIndex;
+									const displayId = getDisplayId(matches.indexOf(match));
 									return (
 										<div key={match.gameId} className={classes.mobileCard}>
 											<div className={classes.mobileCardHeader}>
@@ -864,10 +856,10 @@ function MatchHistoryTable() {
 						<TablePagination
 							className={classes.pagination}
 							component="div"
-							count={filteredMatches.length}
+							count={total}
 							rowsPerPage={rowsPerPage}
 							rowsPerPageOptions={[]}
-							page={page}
+							page={serverPage - 1}
 							backIconButtonProps={{ 'aria-label': 'Previous Page' }}
 							nextIconButtonProps={{ 'aria-label': 'Next Page' }}
 							onChangePage={handleChangePage}

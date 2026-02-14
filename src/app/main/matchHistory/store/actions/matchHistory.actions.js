@@ -10,8 +10,11 @@ export function setSearchText(event) {
 	};
 }
 
-export function getMatchHistory(groupId) {
-	const request = createCamilleAxios().get(`/api/match/history/${groupId}`);
+export function getMatchHistory(groupId, page = 1, limit = 10, search = '') {
+	const params = { page, limit };
+	if (search) params.search = search;
+
+	const request = createCamilleAxios().get(`/api/match/history/${groupId}`, { params });
 
 	return dispatch =>
 		request.then(response => {
