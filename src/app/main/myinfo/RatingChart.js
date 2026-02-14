@@ -107,26 +107,33 @@ function RatingChart({ puuid: puuidProp }) {
 		if (!['MASTER', 'GRANDMASTER', 'CHALLENGER'].includes(tierInfo.tier)) {
 			const divisionMap = { IV: 0, III: 1, II: 2, I: 3 };
 			value += divisionMap[tierInfo.division] || 0;
+			value += tierInfo.lp / 100;
 		} else {
-			value += 3;
+			const currentBase = tierConfig[tierInfo.tier].base;
+			const nextTierName = tierOrder[tierIndex + 1];
+			const nextBase = nextTierName ? tierConfig[nextTierName].base : currentBase + 200;
+			value += Math.min(((rating - currentBase) / (nextBase - currentBase)) * 4, 3.99);
 		}
 
-		value += tierInfo.lp / 100;
 		return value;
 	};
 
 	const tierValueToLabel = value => {
 		const tierIndex = Math.floor(value / 4);
-		const divisionIndex = Math.floor(value % 4);
+		const subIndex = Math.floor(value % 4);
 		const divisions = ['IV', 'III', 'II', 'I'];
 
 		if (tierIndex >= tierOrder.length) return 'CHALLENGER';
 		const tier = tierOrder[tierIndex];
 
 		if (['MASTER', 'GRANDMASTER', 'CHALLENGER'].includes(tier)) {
-			return tier;
+			const currentBase = tierConfig[tier].base;
+			const nextTierName = tierOrder[tierIndex + 1];
+			const nextBase = nextTierName ? tierConfig[nextTierName].base : currentBase + 200;
+			const lp = Math.round(subIndex * ((nextBase - currentBase) * 4) / 4);
+			return `${tier} ${lp}LP`;
 		}
-		return `${tier} ${divisions[divisionIndex]}`;
+		return `${tier} ${divisions[subIndex]}`;
 	};
 
 	useEffect(() => {
