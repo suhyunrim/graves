@@ -1,7 +1,10 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import FuseLoading from '@fuse/core/FuseLoading';
 import FusePageSimple from '@fuse/core/FusePageSimple';
 import { makeStyles } from '@material-ui/core/styles';
+import IconButton from '@material-ui/core/IconButton';
+import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
+import ChevronRightIcon from '@material-ui/icons/ChevronRight';
 import { useDispatch, useSelector } from 'react-redux';
 import withReducer from 'app/store/withReducer';
 import DashboardHeader from './DashboardHeader';
@@ -25,8 +28,18 @@ const useStyles = makeStyles(theme => ({
 		background: 'rgba(0, 212, 255, 0.1)',
 		border: '1px solid rgba(0, 212, 255, 0.3)',
 		borderRadius: 8,
-		padding: '8px 16px',
+		padding: '4px 8px 4px 4px',
 		marginBottom: 24
+	},
+	monthNavBtn: {
+		color: '#00d4ff',
+		padding: 4,
+		'&:hover': {
+			background: 'rgba(0, 212, 255, 0.15)'
+		},
+		'&.Mui-disabled': {
+			color: 'rgba(0, 212, 255, 0.2)'
+		}
 	},
 	monthText: {
 		fontFamily: '"Rajdhani", "Noto Sans KR", sans-serif',
@@ -284,11 +297,36 @@ function Dashboard() {
 	const user = useSelector(state => state.auth.user);
 	const { data, loading } = useSelector(({ Dashboard: db }) => db.dashboard);
 
+	const getCurrentMonth = () => {
+		const now = new Date();
+		return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+	};
+
+	const [month, setMonth] = useState(getCurrentMonth);
+
 	useEffect(() => {
 		if (user?.reprGroup?.groupId) {
-			dispatch(Actions.getDashboard(user.reprGroup.groupId));
+			dispatch(Actions.getDashboard(user.reprGroup.groupId, month));
 		}
-	}, [dispatch, user]);
+	}, [dispatch, user, month]);
+
+	const handlePrevMonth = useCallback(() => {
+		setMonth(prev => {
+			const [y, m] = prev.split('-').map(Number);
+			const d = new Date(y, m - 2, 1);
+			return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+		});
+	}, []);
+
+	const handleNextMonth = useCallback(() => {
+		setMonth(prev => {
+			const [y, m] = prev.split('-').map(Number);
+			const d = new Date(y, m, 1);
+			return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+		});
+	}, []);
+
+	const isCurrentMonth = month === getCurrentMonth();
 
 	if (loading || !data) {
 		return <FuseLoading />;
@@ -494,8 +532,14 @@ function Dashboard() {
 			content={
 				<div className={classes.container}>
 					<div className={classes.monthBadge}>
+						<IconButton className={classes.monthNavBtn} onClick={handlePrevMonth} size="small">
+							<ChevronLeftIcon />
+						</IconButton>
 						<span className={classes.monthText}>{formatMonth(data.month)}</span>
 						<span className={classes.totalMatches}>총 {data.totalMatches}판</span>
+						<IconButton className={classes.monthNavBtn} onClick={handleNextMonth} size="small" disabled={isCurrentMonth}>
+							<ChevronRightIcon />
+						</IconButton>
 					</div>
 					<div className={classes.grid}>
 						{renderMostGames()}
