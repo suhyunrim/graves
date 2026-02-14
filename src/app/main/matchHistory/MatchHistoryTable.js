@@ -10,6 +10,7 @@ import TableRow from '@material-ui/core/TableRow';
 import { makeStyles, withStyles } from '@material-ui/core/styles';
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useHistory } from 'react-router-dom';
 import * as Actions from './store/actions';
 
 const tierColors = {
@@ -203,7 +204,8 @@ const useStyles = makeStyles(theme => ({
 		fontFamily: '"Noto Sans KR", sans-serif',
 		fontSize: '1.4rem',
 		fontWeight: 500,
-		color: '#fff'
+		color: '#fff',
+		cursor: 'pointer'
 	},
 	playerNameHighlight: {
 		fontFamily: '"Noto Sans KR", sans-serif',
@@ -213,7 +215,8 @@ const useStyles = makeStyles(theme => ({
 		background: 'rgba(0, 212, 255, 0.15)',
 		padding: '2px 8px',
 		borderRadius: 4,
-		textShadow: '0 0 8px rgba(0, 212, 255, 0.5)'
+		textShadow: '0 0 8px rgba(0, 212, 255, 0.5)',
+		cursor: 'pointer'
 	},
 	teamLabel: {
 		display: 'flex',
@@ -404,7 +407,8 @@ const useStyles = makeStyles(theme => ({
 	mobilePlayerName: {
 		fontFamily: '"Noto Sans KR", sans-serif',
 		fontSize: '1rem',
-		color: '#fff'
+		color: '#fff',
+		cursor: 'pointer'
 	},
 	mobilePlayerNameHighlight: {
 		fontFamily: '"Noto Sans KR", sans-serif',
@@ -414,7 +418,8 @@ const useStyles = makeStyles(theme => ({
 		background: 'rgba(0, 212, 255, 0.15)',
 		padding: '1px 6px',
 		borderRadius: 4,
-		textShadow: '0 0 6px rgba(0, 212, 255, 0.5)'
+		textShadow: '0 0 6px rgba(0, 212, 255, 0.5)',
+		cursor: 'pointer'
 	},
 	mobileVsDivider: {
 		textAlign: 'center',
@@ -450,6 +455,7 @@ const StyledTableRow = withStyles(theme => ({
 function MatchHistoryTable() {
 	const classes = useStyles();
 	const dispatch = useDispatch();
+	const history = useHistory();
 
 	const user = useSelector(state => state.auth.user);
 	const allMatches = useSelector(({ MatchHistory }) => {
@@ -574,7 +580,7 @@ function MatchHistoryTable() {
 				<span className={classes.tierBadge} style={{ color: getTierColor(player.tier) }}>
 					{getTierShortName(player.tier)}
 				</span>
-				<span className={isPlayerMatched(player.name) ? classes.playerNameHighlight : classes.playerName}>
+				<span className={isPlayerMatched(player.name) ? classes.playerNameHighlight : classes.playerName} onClick={() => history.push(`/userinfo/${player.puuid}`)}>
 					{player.name}
 				</span>
 			</div>
@@ -615,7 +621,7 @@ function MatchHistoryTable() {
 				<span className={classes.mobilePlayerTier} style={{ color: getTierColor(player.tier) }}>
 					{getTierShortName(player.tier)}
 				</span>
-				<span className={isPlayerMatched(player.name) ? classes.mobilePlayerNameHighlight : classes.mobilePlayerName}>
+				<span className={isPlayerMatched(player.name) ? classes.mobilePlayerNameHighlight : classes.mobilePlayerName} onClick={() => history.push(`/userinfo/${player.puuid}`)}>
 					{player.name}
 				</span>
 			</div>

@@ -3,6 +3,7 @@ import FuseLoading from '@fuse/core/FuseLoading';
 import FusePageSimple from '@fuse/core/FusePageSimple';
 import { makeStyles } from '@material-ui/core/styles';
 import { useDispatch, useSelector } from 'react-redux';
+import { useParams } from 'react-router-dom';
 import withReducer from 'app/store/withReducer';
 import getLatesetRiotDataVersion from 'app/utility/getLatesetRiotDataVersion';
 import MyInfoHeader from './MyInfoHeader';
@@ -436,6 +437,9 @@ function MyInfoPage(props) {
 	const classes = useStyles(props);
 	const dispatch = useDispatch();
 
+	const { puuid } = useParams();
+	const myPuuid = localStorage.getItem('camille_riot_puuid');
+	const isOtherUser = puuid && puuid !== myPuuid;
 	const user = useSelector(state => state.auth.user);
 	const scoreInfo = useSelector(({ MyInfo }) => MyInfo.myInfo.scoreInfo);
 	const summonerInfo = useSelector(({ MyInfo }) => MyInfo.myInfo.summonerInfo);
@@ -489,8 +493,8 @@ function MyInfoPage(props) {
 	};
 
 	useEffect(() => {
-		dispatch(Actions.getMyInfo(user.reprGroup.groupId));
-	}, [dispatch, user]);
+		dispatch(Actions.getMyInfo(user.reprGroup.groupId, puuid));
+	}, [dispatch, user, puuid]);
 
 	if (!scoreInfo) {
 		return <FuseLoading />;
@@ -508,7 +512,7 @@ function MyInfoPage(props) {
 			classes={{
 				root: classes.layoutRoot
 			}}
-			header={<MyInfoHeader />}
+			header={<MyInfoHeader title={puuid ? 'Player Info' : undefined} subtitle={puuid ? '소환사 정보 및 내전 기록' : undefined} showBack={isOtherUser} />}
 			content={
 				<div className={classes.container}>
 					{/* 프로필 섹션 */}
@@ -726,7 +730,7 @@ function MyInfoPage(props) {
 					</div>
 
 					{/* 레이팅 차트 */}
-					<RatingChart />
+					<RatingChart puuid={puuid} />
 				</div>
 			}
 		/>

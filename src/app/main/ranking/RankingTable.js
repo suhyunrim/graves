@@ -9,7 +9,7 @@ import TableRow from '@material-ui/core/TableRow';
 import { makeStyles, withStyles } from '@material-ui/core/styles';
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { withRouter } from 'react-router-dom';
+import { Link, withRouter } from 'react-router-dom';
 import * as Actions from './store/actions';
 import RankingTableHead from './RankingTableHeader';
 
@@ -70,7 +70,12 @@ const useStyles = makeStyles(theme => ({
 		fontFamily: '"Noto Sans KR", sans-serif',
 		fontSize: '1.5rem',
 		fontWeight: 600,
-		color: '#fff'
+		color: '#fff',
+		textDecoration: 'none',
+		transition: 'color 0.2s ease',
+		'&:hover': {
+			color: '#00d4ff'
+		}
 	},
 	tierWrapper: {
 		display: 'flex',
@@ -212,10 +217,16 @@ const useStyles = makeStyles(theme => ({
 		fontSize: '1.3rem',
 		fontWeight: 600,
 		color: '#fff',
+		textDecoration: 'none',
 		marginBottom: 2,
 		whiteSpace: 'nowrap',
 		overflow: 'hidden',
-		textOverflow: 'ellipsis'
+		textOverflow: 'ellipsis',
+		display: 'block',
+		transition: 'color 0.2s ease',
+		'&:hover': {
+			color: '#00d4ff'
+		}
 	},
 	mobileTierRow: {
 		display: 'flex',
@@ -497,7 +508,7 @@ function RankingTable(props) {
 														<span className={`${classes.rankingNumber} ${getRankClass(n.ranking)}`}>{n.ranking}</span>
 													</StyledTableCell>
 													<StyledTableCell>
-														<span className={classes.playerName}>{n.name}</span>
+														<Link to={`/userinfo/${n.puuid}`} className={classes.playerName}>{n.name}</Link>
 													</StyledTableCell>
 													<StyledTableCell>
 														<div className={classes.tierWrapper}>
@@ -578,7 +589,7 @@ function RankingTable(props) {
 											<div className={classes.mobileCardTop}>
 												<div className={`${classes.mobileRankBadge} ${getMobileRankClass(n.ranking)}`}>{n.ranking}</div>
 												<div className={classes.mobilePlayerInfo}>
-													<div className={classes.mobilePlayerName}>{n.name}</div>
+													<Link to={`/userinfo/${n.puuid}`} className={classes.mobilePlayerName}>{n.name}</Link>
 													<div className={classes.mobileTierRow}>
 														<img
 															className={classes.mobileTierEmblem}

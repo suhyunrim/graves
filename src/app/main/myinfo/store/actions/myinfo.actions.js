@@ -13,11 +13,11 @@ export const TRY_REFRESH_CHAMPION_SCORES = '[MYINFO] TRY REFRESH CHAMPION SCORES
 // const getAverageAssists = champData => champData.assists / getTotalMatchCount(champData);
 // const getKDA = champData => (getAverageKills(champData) + getAverageAssists(champData)) / getAverageDeaths(champData);
 
-export function getMyInfo(groupId) {
+export function getMyInfo(groupId, puuid) {
+	const params = { groupId };
+	if (puuid) params.puuid = puuid;
 	const request = createCamilleAxios().get('/api/user/getInfo', {
-		params: {
-			groupId
-		}
+		params
 	});
 
 	return dispatch =>

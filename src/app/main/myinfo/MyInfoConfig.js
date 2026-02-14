@@ -9,6 +9,11 @@ const MyInfoConfig = {
 	},
 	routes: [
 		{
+			path: '/userinfo/:puuid',
+			auth: authRoles.user,
+			component: React.lazy(() => import('./MyInfo'))
+		},
+		{
 			path: '/myinfo',
 			auth: authRoles.user,
 			component: React.lazy(() => import('./MyInfo'))

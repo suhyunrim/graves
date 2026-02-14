@@ -76,7 +76,7 @@ const tierConfig = {
 
 const tierOrder = ['IRON', 'BRONZE', 'SILVER', 'GOLD', 'PLATINUM', 'EMERALD', 'DIAMOND', 'MASTER', 'GRANDMASTER', 'CHALLENGER'];
 
-function RatingChart() {
+function RatingChart({ puuid: puuidProp }) {
 	const classes = useStyles();
 	const user = useSelector(state => state.auth.user);
 	const [ratingHistory, setRatingHistory] = useState(null);
@@ -135,7 +135,7 @@ function RatingChart() {
 				const response = await createCamilleAxios().get(`/api/match/history/${user.reprGroup.groupId}`);
 				if (response.status === 200) {
 					const matches = response.data.matches;
-					const myPuuid = localStorage.getItem('camille_riot_puuid');
+					const myPuuid = puuidProp || localStorage.getItem('camille_riot_puuid');
 
 					const history = [];
 
@@ -170,7 +170,7 @@ function RatingChart() {
 		};
 
 		fetchMatchHistory();
-	}, [user]);
+	}, [user, puuidProp]);
 
 	if (loading) {
 		return <FuseLoading />;
