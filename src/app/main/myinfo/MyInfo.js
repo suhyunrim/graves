@@ -108,6 +108,28 @@ const useStyles = makeStyles(theme => ({
 		color: '#00d4ff',
 		fontWeight: 600
 	},
+	honorInfo: {
+		display: 'flex',
+		alignItems: 'center',
+		gap: 12,
+		marginTop: 8,
+		flexWrap: 'wrap'
+	},
+	honorTitle: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.4rem',
+		fontWeight: 600,
+		color: '#ffd700',
+		background: 'rgba(255, 215, 0, 0.12)',
+		padding: '4px 14px',
+		borderRadius: 20,
+		border: '1px solid rgba(255, 215, 0, 0.25)'
+	},
+	honorPoints: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.25rem',
+		color: 'rgba(255, 255, 255, 0.6)'
+	},
 	cardsGrid: {
 		display: 'grid',
 		gridTemplateColumns: 'repeat(auto-fit, minmax(380px, 1fr))',
@@ -489,6 +511,7 @@ function MyInfoPage(props) {
 	const maxLoseStreak = useSelector(({ MyInfo }) => MyInfo.myInfo.maxLoseStreak);
 	const bestOpponent = useSelector(({ MyInfo }) => MyInfo.myInfo.bestOpponent);
 	const worstOpponent = useSelector(({ MyInfo }) => MyInfo.myInfo.worstOpponent);
+	const honorStats = useSelector(({ MyInfo }) => MyInfo.myInfo.honorStats);
 
 	const getSoloRankTierName = () => {
 		const tier = summonerInfo.rankTier;
@@ -577,6 +600,19 @@ function MyInfoPage(props) {
 							<div className={classes.summonerLevel}>
 								<span className={classes.levelBadge}>Lv. {summonerInfo.summonerLevel}</span>
 							</div>
+							{honorStats && (
+								<div className={classes.honorInfo}>
+									{honorStats.title && (
+										<span className={classes.honorTitle}>
+											<span role="img" aria-label="honor title">
+												{honorStats.title.emoji}
+											</span>{' '}
+											{honorStats.title.title}
+										</span>
+									)}
+									<span className={classes.honorPoints}>명예 포인트: {honorStats.received}</span>
+								</div>
+							)}
 						</div>
 					</div>
 

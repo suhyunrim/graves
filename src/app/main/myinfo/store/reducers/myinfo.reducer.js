@@ -24,7 +24,8 @@ const myInfoReducer = (state = initialState, action) => {
 				maxLoseStreak: stats.maxLoseStreak || 0,
 				bestOpponent: stats.bestOpponent || null,
 				worstOpponent: stats.worstOpponent || null,
-				ratingHistory: stats.ratingHistory || []
+				ratingHistory: stats.ratingHistory || [],
+				honorStats: action.payload.honorStats || null
 			};
 		}
 		case Actions.TRY_REFRESH_CHAMPION_SCORES: {

@@ -153,6 +153,14 @@ const useStyles = makeStyles(theme => ({
 			boxShadow: '0 20px 40px rgba(184, 134, 11, 0.2)'
 		}
 	},
+	cardHonorKing: {
+		background: 'linear-gradient(135deg, #2d2a1f 0%, #1a1710 100%)',
+		border: '1px solid rgba(255, 193, 7, 0.3)',
+		animationDelay: '1.0s',
+		'&:hover': {
+			boxShadow: '0 20px 40px rgba(255, 193, 7, 0.2)'
+		}
+	},
 	cardEmpty: {
 		background: 'linear-gradient(135deg, #1a1a1a 0%, #121212 100%)',
 		border: '1px solid rgba(255, 255, 255, 0.1)'
@@ -640,6 +648,34 @@ function Dashboard() {
 		);
 	};
 
+	const renderHonorKing = () => {
+		const item = data.honorKing;
+		return (
+			<div className={`${classes.card} ${item ? classes.cardHonorKing : classes.cardEmpty}`}>
+				<div className={classes.cardHeader}>
+					<span role="img" aria-label="trophy" className={classes.emoji}>
+						🏆
+					</span>
+					<div className={classes.cardTitleWrapper}>
+						<div className={classes.cardLabel}>이달의 MVP 투표 1등</div>
+						<div className={classes.cardTitle}>명예왕</div>
+					</div>
+				</div>
+				{item ? (
+					<div className={classes.cardContent}>
+						<div className={classes.playerName}>{item.name}</div>
+						<div className={classes.stats}>
+							<span className={`${classes.statHighlight} ${classes.highlightGold}`}>{item.votes}표</span>
+						</div>
+					</div>
+				) : (
+					<div className={classes.emptyText}>데이터가 없습니다</div>
+				)}
+				<div className={classes.decorLine} style={{ color: '#ffc107' }} />
+			</div>
+		);
+	};
+
 	const renderDarkHorse = () => {
 		const item = data.darkHorse;
 		return (
@@ -728,6 +764,7 @@ function Dashboard() {
 						{renderRatingRiser()}
 						{renderNightOwl()}
 						{renderDarkHorse()}
+						{renderHonorKing()}
 					</div>
 				</div>
 			}
