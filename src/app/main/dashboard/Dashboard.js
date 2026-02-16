@@ -651,7 +651,7 @@ function Dashboard() {
 	const renderHonorKing = () => {
 		const item = data.honorKing;
 		return (
-			<div className={`${classes.card} ${item ? classes.cardHonorKing : classes.cardEmpty}`}>
+			<div className={`${classes.card} ${item ? classes.cardHonorKing : classes.cardEmpty}`} style={{ animationDelay: '1.0s' }}>
 				<div className={classes.cardHeader}>
 					<span role="img" aria-label="trophy" className={classes.emoji}>
 						🏆
