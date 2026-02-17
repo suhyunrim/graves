@@ -32,6 +32,13 @@ const navigationConfig = [
 				type: 'item',
 				icon: 'history',
 				url: '/match-history'
+			},
+			{
+				id: 'honor-ranking-component',
+				title: 'Honor',
+				type: 'item',
+				icon: 'emoji_events',
+				url: '/honor-ranking'
 			}
 		]
 	}
