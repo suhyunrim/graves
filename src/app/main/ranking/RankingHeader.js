@@ -13,28 +13,10 @@ const useStyles = makeStyles(theme => ({
 		padding: '24px 28px 20px',
 		background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)'
 	},
-	topRow: {
-		display: 'flex',
-		alignItems: 'center',
-		justifyContent: 'center',
-		position: 'relative',
-		[theme.breakpoints.down('sm')]: {
-			flexDirection: 'column',
-			gap: 16
-		}
-	},
-	titleWrapper: {
-		position: 'absolute',
-		left: 0,
-		[theme.breakpoints.down('sm')]: {
-			position: 'static',
-			width: '100%'
-		}
-	},
 	title: {
 		fontFamily: '"Rajdhani", "Noto Sans KR", sans-serif',
 		fontWeight: 700,
-		fontSize: '4.5rem',
+		fontSize: '4rem',
 		color: '#fff',
 		textTransform: 'uppercase',
 		letterSpacing: '0.15em',
@@ -44,13 +26,27 @@ const useStyles = makeStyles(theme => ({
 			fontSize: '2.75rem'
 		}
 	},
-	subtitle: {
-		fontFamily: '"Noto Sans KR", sans-serif',
-		fontSize: '1.8rem',
-		color: 'rgba(255, 255, 255, 0.6)',
+	subtitleRow: {
+		display: 'flex',
+		alignItems: 'center',
+		justifyContent: 'center',
+		position: 'relative',
 		marginTop: 10,
+		[theme.breakpoints.down('sm')]: {
+			flexDirection: 'column',
+			alignItems: 'flex-start',
+			gap: 12
+		}
+	},
+	subtitle: {
+		position: 'absolute',
+		left: 0,
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.6rem',
+		color: 'rgba(255, 255, 255, 0.6)',
 		letterSpacing: '0.05em',
 		[theme.breakpoints.down('sm')]: {
+			position: 'static',
 			fontSize: '1.35rem'
 		}
 	},
@@ -60,25 +56,27 @@ const useStyles = makeStyles(theme => ({
 		background: 'rgba(255, 255, 255, 0.05)',
 		border: '1px solid rgba(0, 212, 255, 0.3)',
 		borderRadius: 12,
-		padding: '10px 18px',
-		width: 560,
+		padding: '8px 16px',
+		width: 450,
+		maxWidth: 'calc(100% - 300px)',
 		transition: 'border-color 0.3s ease, box-shadow 0.3s ease',
 		'&:focus-within': {
 			borderColor: 'rgba(0, 212, 255, 0.6)',
 			boxShadow: '0 0 20px rgba(0, 212, 255, 0.2)'
 		},
 		[theme.breakpoints.down('sm')]: {
-			width: '100%'
+			width: '100%',
+			maxWidth: '100%'
 		}
 	},
 	searchIcon: {
 		color: 'rgba(255, 255, 255, 0.4)',
-		marginRight: 12,
-		fontSize: '1.5rem'
+		marginRight: 10,
+		fontSize: '1.4rem'
 	},
 	searchInput: {
 		fontFamily: '"Noto Sans KR", sans-serif',
-		fontSize: '1.4rem',
+		fontSize: '1.3rem',
 		color: '#fff',
 		flex: 1,
 		'&::placeholder': {
@@ -94,13 +92,11 @@ function RankingHeader() {
 
 	return (
 		<div className={classes.root}>
-			<div className={classes.topRow}>
-				<div className={classes.titleWrapper}>
-					<Typography className={classes.title} variant="h4">
-						Ranking
-					</Typography>
-					<Typography className={classes.subtitle}>내전 레이팅 순위</Typography>
-				</div>
+			<Typography className={classes.title} variant="h4">
+				Ranking
+			</Typography>
+			<div className={classes.subtitleRow}>
+				<Typography className={classes.subtitle}>내전 레이팅 순위</Typography>
 				<div className={classes.searchWrapper}>
 					<SearchIcon className={classes.searchIcon} />
 					<InputBase
