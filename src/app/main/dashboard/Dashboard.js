@@ -84,7 +84,7 @@ const useStyles = makeStyles(theme => ({
 	cardMostGames: {
 		background: 'linear-gradient(135deg, #1f2535 0%, #121828 100%)',
 		border: '1px solid rgba(77, 171, 247, 0.3)',
-		animationDelay: '0.1s',
+		animationDelay: '0.2s',
 		'&:hover': {
 			boxShadow: '0 20px 40px rgba(77, 171, 247, 0.2)'
 		}
@@ -92,7 +92,7 @@ const useStyles = makeStyles(theme => ({
 	cardBestWinRate: {
 		background: 'linear-gradient(135deg, #2d2a1f 0%, #1a1812 100%)',
 		border: '1px solid rgba(255, 215, 0, 0.3)',
-		animationDelay: '0.2s',
+		animationDelay: '0.3s',
 		'&:hover': {
 			boxShadow: '0 20px 40px rgba(255, 215, 0, 0.2)'
 		}
@@ -100,7 +100,7 @@ const useStyles = makeStyles(theme => ({
 	cardWinStreak: {
 		background: 'linear-gradient(135deg, #2d1f1f 0%, #1a1210 100%)',
 		border: '1px solid rgba(255, 140, 0, 0.3)',
-		animationDelay: '0.3s',
+		animationDelay: '0.4s',
 		'&:hover': {
 			boxShadow: '0 20px 40px rgba(255, 140, 0, 0.2)'
 		}
@@ -108,7 +108,7 @@ const useStyles = makeStyles(theme => ({
 	cardBestDuo: {
 		background: 'linear-gradient(135deg, #2d1f2a 0%, #1a1218 100%)',
 		border: '1px solid rgba(255, 105, 180, 0.3)',
-		animationDelay: '0.4s',
+		animationDelay: '0.5s',
 		'&:hover': {
 			boxShadow: '0 20px 40px rgba(255, 105, 180, 0.2)'
 		}
@@ -116,7 +116,7 @@ const useStyles = makeStyles(theme => ({
 	cardRivalry: {
 		background: 'linear-gradient(135deg, #1f1f2d 0%, #12121a 100%)',
 		border: '1px solid rgba(138, 43, 226, 0.3)',
-		animationDelay: '0.5s',
+		animationDelay: '0.6s',
 		'&:hover': {
 			boxShadow: '0 20px 40px rgba(138, 43, 226, 0.2)'
 		}
@@ -124,7 +124,7 @@ const useStyles = makeStyles(theme => ({
 	cardNewcomer: {
 		background: 'linear-gradient(135deg, #1f2d1f 0%, #121a12 100%)',
 		border: '1px solid rgba(0, 255, 127, 0.3)',
-		animationDelay: '0.6s',
+		animationDelay: '0.7s',
 		'&:hover': {
 			boxShadow: '0 20px 40px rgba(0, 255, 127, 0.2)'
 		}
@@ -132,7 +132,7 @@ const useStyles = makeStyles(theme => ({
 	cardRatingRiser: {
 		background: 'linear-gradient(135deg, #1f2a2d 0%, #121a1c 100%)',
 		border: '1px solid rgba(0, 212, 255, 0.3)',
-		animationDelay: '0.7s',
+		animationDelay: '0.8s',
 		'&:hover': {
 			boxShadow: '0 20px 40px rgba(0, 212, 255, 0.2)'
 		}
@@ -140,7 +140,7 @@ const useStyles = makeStyles(theme => ({
 	cardNightOwl: {
 		background: 'linear-gradient(135deg, #1a1f2d 0%, #0f1220 100%)',
 		border: '1px solid rgba(75, 0, 130, 0.3)',
-		animationDelay: '0.8s',
+		animationDelay: '0.9s',
 		'&:hover': {
 			boxShadow: '0 20px 40px rgba(75, 0, 130, 0.2)'
 		}
@@ -148,7 +148,7 @@ const useStyles = makeStyles(theme => ({
 	cardDarkHorse: {
 		background: 'linear-gradient(135deg, #2d2d1f 0%, #1a1a12 100%)',
 		border: '1px solid rgba(184, 134, 11, 0.3)',
-		animationDelay: '0.9s',
+		animationDelay: '1.0s',
 		'&:hover': {
 			boxShadow: '0 20px 40px rgba(184, 134, 11, 0.2)'
 		}
@@ -156,7 +156,7 @@ const useStyles = makeStyles(theme => ({
 	cardHonorKing: {
 		background: 'linear-gradient(135deg, #2d2a1f 0%, #1a1710 100%)',
 		border: '1px solid rgba(255, 193, 7, 0.3)',
-		animationDelay: '1.0s',
+		animationDelay: '0.1s',
 		'&:hover': {
 			boxShadow: '0 20px 40px rgba(255, 193, 7, 0.2)'
 		}
@@ -651,7 +651,7 @@ function Dashboard() {
 	const renderHonorKing = () => {
 		const item = data.honorKing;
 		return (
-			<div className={`${classes.card} ${item ? classes.cardHonorKing : classes.cardEmpty}`} style={{ animationDelay: '1.0s' }}>
+			<div className={`${classes.card} ${item ? classes.cardHonorKing : classes.cardEmpty}`} style={{ animationDelay: '0.1s' }}>
 				<div className={classes.cardHeader}>
 					<span role="img" aria-label="trophy" className={classes.emoji}>
 						🏆
@@ -666,6 +666,12 @@ function Dashboard() {
 						<div className={classes.playerName}>{item.name}</div>
 						<div className={classes.stats}>
 							<span className={`${classes.statHighlight} ${classes.highlightGold}`}>{item.votes}표</span>
+						{item.title && (
+							<span>
+								<span role="img" aria-label="title badge">{item.title.emoji}</span>
+								{' '}{item.title.title}
+							</span>
+						)}
 						</div>
 					</div>
 				) : (
@@ -755,6 +761,7 @@ function Dashboard() {
 						</IconButton>
 					</div>
 					<div className={classes.grid}>
+						{renderHonorKing()}
 						{renderMostGames()}
 						{renderBestWinRate()}
 						{renderWinStreak()}
@@ -764,7 +771,6 @@ function Dashboard() {
 						{renderRatingRiser()}
 						{renderNightOwl()}
 						{renderDarkHorse()}
-						{renderHonorKing()}
 					</div>
 				</div>
 			}
