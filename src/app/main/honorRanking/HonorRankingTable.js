@@ -262,16 +262,17 @@ const emojiAriaLabels = {
 	'\u{1F91D}': 'handshake'
 };
 
-function getSinceDate(period) {
-	const now = new Date();
-	if (period === 'thisMonth') {
-		return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`;
+function getPeriodDates(period) {
+	if (period !== 'all' && period.year != null) {
+		const { year, month } = period;
+		const pad = n => String(n).padStart(2, '0');
+		const lastDay = new Date(year, month, 0).getDate();
+		return {
+			since: `${year}-${pad(month)}-01`,
+			until: `${year}-${pad(month)}-${pad(lastDay)}`
+		};
 	}
-	if (period === 'lastMonth') {
-		const d = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-		return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-01`;
-	}
-	return null;
+	return { since: null, until: null };
 }
 
 function HonorRankingTable() {
@@ -287,8 +288,8 @@ function HonorRankingTable() {
 	const rowsPerPage = 10;
 
 	useEffect(() => {
-		const since = getSinceDate(period);
-		dispatch(Actions.getHonorRanking(groupId, since));
+		const { since, until } = getPeriodDates(period);
+		dispatch(Actions.getHonorRanking(groupId, since, until));
 	}, [dispatch, groupId, period]);
 
 	const filteredData = useMemo(() => {

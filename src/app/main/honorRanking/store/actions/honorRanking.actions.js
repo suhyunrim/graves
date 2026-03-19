@@ -4,10 +4,13 @@ export const GET_HONOR_RANKING = '[HONOR RANKING] GET HONOR RANKING';
 export const SET_SEARCH_TEXT = '[HONOR RANKING] SET SEARCH TEXT';
 export const SET_PERIOD = '[HONOR RANKING] SET PERIOD';
 
-export function getHonorRanking(groupId, since) {
+export function getHonorRanking(groupId, since, until) {
 	const params = { limit: 50 };
 	if (since) {
 		params.since = since;
+	}
+	if (until) {
+		params.until = until;
 	}
 
 	const request = createCamilleAxios().get(`/api/honor/ranking/${groupId}`, { params });

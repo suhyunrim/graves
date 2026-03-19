@@ -1,15 +1,11 @@
 import React from 'react';
-import { Typography, InputBase } from '@material-ui/core';
+import { Typography, InputBase, IconButton } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import SearchIcon from '@material-ui/icons/Search';
+import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
+import ChevronRightIcon from '@material-ui/icons/ChevronRight';
 import { useDispatch, useSelector } from 'react-redux';
 import * as Actions from './store/actions';
-
-const periodOptions = [
-	{ id: 'thisMonth', label: '이번 달' },
-	{ id: 'lastMonth', label: '지난 달' },
-	{ id: 'all', label: '전체' }
-];
 
 const useStyles = makeStyles(theme => ({
 	root: {
@@ -120,6 +116,23 @@ const useStyles = makeStyles(theme => ({
 		background: 'rgba(255, 193, 7, 0.2)',
 		borderColor: '#ffc107',
 		color: '#ffc107'
+	},
+	monthNav: {
+		display: 'flex',
+		alignItems: 'center',
+		gap: 0
+	},
+	monthNavBtn: {
+		color: 'rgba(255, 255, 255, 0.6)',
+		padding: 4,
+		transition: 'color 0.2s ease',
+		'&:hover': {
+			color: '#ffc107',
+			background: 'rgba(255, 193, 7, 0.1)'
+		}
+	},
+	monthNavIcon: {
+		fontSize: '1.4rem'
 	}
 }));
 
@@ -128,6 +141,48 @@ function HonorRankingHeader() {
 	const dispatch = useDispatch();
 	const searchText = useSelector(({ HonorRanking }) => HonorRanking.honorRanking.searchText);
 	const period = useSelector(({ HonorRanking }) => HonorRanking.honorRanking.period);
+
+	const isAll = period === 'all';
+	const isMonth = period !== 'all';
+
+	const now = new Date();
+
+	function handleAllClick() {
+		dispatch(Actions.setPeriod('all'));
+	}
+
+	function handleMonthClick() {
+		dispatch(Actions.setPeriod({ year: now.getFullYear(), month: now.getMonth() + 1 }));
+	}
+
+	function handlePrevMonth() {
+		if (!isMonth) return;
+		let { year, month } = period;
+		month -= 1;
+		if (month < 1) {
+			month = 12;
+			year -= 1;
+		}
+		dispatch(Actions.setPeriod({ year, month }));
+	}
+
+	function handleNextMonth() {
+		if (!isMonth) return;
+		let { year, month } = period;
+		month += 1;
+		if (month > 12) {
+			month = 1;
+			year += 1;
+		}
+		dispatch(Actions.setPeriod({ year, month }));
+	}
+
+	function getMonthLabel() {
+		if (isMonth) {
+			return `${period.month}월`;
+		}
+		return `${now.getMonth() + 1}월`;
+	}
 
 	return (
 		<div className={classes.root}>
@@ -148,18 +203,37 @@ function HonorRankingHeader() {
 				</div>
 			</div>
 			<div className={classes.filterRow}>
-				{periodOptions.map(option => (
+				<div
+					className={`${classes.filterChip} ${isAll ? classes.filterChipActive : ''}`}
+					onClick={handleAllClick}
+					role="button"
+					tabIndex={0}
+					onKeyDown={e => e.key === 'Enter' && handleAllClick()}
+				>
+					전체
+				</div>
+				<div className={classes.monthNav}>
+					{isMonth && (
+						<IconButton className={classes.monthNavBtn} onClick={handlePrevMonth}>
+							<ChevronLeftIcon className={classes.monthNavIcon} />
+						</IconButton>
+					)}
 					<div
-						key={option.id}
-						className={`${classes.filterChip} ${period === option.id ? classes.filterChipActive : ''}`}
-						onClick={() => dispatch(Actions.setPeriod(option.id))}
+						className={`${classes.filterChip} ${isMonth ? classes.filterChipActive : ''}`}
+						onClick={!isMonth ? handleMonthClick : undefined}
 						role="button"
 						tabIndex={0}
-						onKeyDown={e => e.key === 'Enter' && dispatch(Actions.setPeriod(option.id))}
+						onKeyDown={e => e.key === 'Enter' && !isMonth && handleMonthClick()}
 					>
-						{option.label}
+						{isMonth && period.year !== now.getFullYear() ? `${period.year}. ` : ''}
+						{getMonthLabel()}
 					</div>
-				))}
+					{isMonth && (
+						<IconButton className={classes.monthNavBtn} onClick={handleNextMonth}>
+							<ChevronRightIcon className={classes.monthNavIcon} />
+						</IconButton>
+					)}
+				</div>
 			</div>
 		</div>
 	);
