@@ -3,6 +3,7 @@ import * as Actions from '../actions';
 const initialState = {
 	data: [],
 	searchText: '',
+	period: 'all',
 	isRefreshingGroupRating: false
 };
 
@@ -18,6 +19,12 @@ const rankingReducer = (state = initialState, action) => {
 			return {
 				...state,
 				searchText: action.searchText
+			};
+		}
+		case Actions.SET_PERIOD: {
+			return {
+				...state,
+				period: action.period
 			};
 		}
 		case Actions.TRY_REFRESH_GROUP_RATING: {

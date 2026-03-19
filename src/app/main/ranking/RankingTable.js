@@ -125,6 +125,20 @@ const useStyles = makeStyles(theme => ({
 	winRateLow: {
 		color: '#ff6b6b'
 	},
+	ratingChangeInline: {
+		fontFamily: '"Rajdhani", sans-serif',
+		fontWeight: 700,
+		marginLeft: 4
+	},
+	ratingUp: {
+		color: '#00ff7f'
+	},
+	ratingDown: {
+		color: '#ff6b6b'
+	},
+	ratingNeutral: {
+		color: 'rgba(255, 255, 255, 0.5)'
+	},
 	pagination: {
 		color: 'rgba(255, 255, 255, 0.7)',
 		borderTop: '1px solid rgba(255, 255, 255, 0.1)',
@@ -359,6 +373,7 @@ function RankingTable(props) {
 	const dispatch = useDispatch();
 	const ranking = useSelector(({ Ranking }) => Ranking.ranking.data);
 	const searchText = useSelector(({ Ranking }) => Ranking.ranking.searchText);
+	const period = useSelector(({ Ranking }) => Ranking.ranking.period);
 	const isRefreshingGroupRating = useSelector(({ Ranking }) => Ranking.ranking.isRefreshingGroupRating);
 
 	const [data, setData] = useState(ranking);
@@ -385,10 +400,16 @@ function RankingTable(props) {
 	const tierSteps = ['IV', 'III', 'II', 'I'];
 
 	const groupName = useSelector(state => state.auth.user.reprGroup.groupName);
+	const groupId = useSelector(state => state.auth.user.reprGroup.groupId);
 
 	useEffect(() => {
-		dispatch(Actions.getRanking(groupName));
-	}, [dispatch, groupName, isRefreshingGroupRating]);
+		if (period === 'all') {
+			dispatch(Actions.getRanking(groupName));
+		} else {
+			dispatch(Actions.getPeriodRanking(groupId, period.startDate, period.endDate));
+		}
+		setPage(0);
+	}, [dispatch, groupName, groupId, period, isRefreshingGroupRating]);
 
 	useEffect(() => {
 		if (searchText.length !== 0) {
@@ -474,6 +495,17 @@ function RankingTable(props) {
 		return '';
 	}
 
+	function getRatingChangeClass(val) {
+		if (val > 0) return classes.ratingUp;
+		if (val < 0) return classes.ratingDown;
+		return classes.ratingNeutral;
+	}
+
+	function formatRatingChange(val) {
+		if (val > 0) return `+${val}`;
+		return String(val);
+	}
+
 	function getWinRateClass(winRate) {
 		const rate = parseFloat(winRate);
 		if (rate >= 55) return classes.winRateHigh;
@@ -481,7 +513,12 @@ function RankingTable(props) {
 		return classes.winRateLow;
 	}
 
-	const getSortValue = o => (order.id === 'games' ? o.win + o.lose : o[order.id]);
+	const isPeriod = period !== 'all';
+	const getSortValue = o => {
+		if (order.id === 'games') return o.win + o.lose;
+		if (order.id === 'rating') return o.rating != null ? o.rating : -Infinity;
+		return o[order.id];
+	};
 	const sortedData = _.orderBy(data, [getSortValue], [order.direction]).slice(
 		page * rowsPerPage,
 		page * rowsPerPage + rowsPerPage
@@ -498,33 +535,61 @@ function RankingTable(props) {
 								<Table>
 									<RankingTableHead order={order} onRequestSort={handleRequestSort} rowCount={data.length} />
 									<TableBody>
-										{sortedData.map(n => {
-											const tierName = getTierName(n.rating);
+										{sortedData.map((n, idx) => {
+											const rank = n.ranking != null ? n.ranking : page * rowsPerPage + idx + 1;
+											const hasRating = n.rating != null;
+											const tierName = hasRating ? getTierName(n.rating) : 'UNRANKED';
 											const tierColor = tierColors[tierName] || '#fff';
 
 											return (
-												<StyledTableRow key={n.riotId}>
+												<StyledTableRow key={n.riotId || n.puuid}>
 													<StyledTableCell>
-														<span className={`${classes.rankingNumber} ${getRankClass(n.ranking)}`}>{n.ranking}</span>
+														<span className={`${classes.rankingNumber} ${getRankClass(rank)}`}>{rank}</span>
 													</StyledTableCell>
 													<StyledTableCell>
-														<Link to={`/userinfo/${n.puuid}`} className={classes.playerName}>{n.name}</Link>
+														<Link to={`/userinfo/${n.puuid}`} className={classes.playerName}>
+															{n.name}
+														</Link>
 													</StyledTableCell>
 													<StyledTableCell>
-														<div className={classes.tierWrapper}>
-															<img
-																className={classes.tierEmblem}
-																src={`/assets/images/ranked-emblems/Emblem_${tierName}.png`}
-																alt={tierName}
-																style={{ filter: `drop-shadow(0 0 8px ${tierColor}40)` }}
-															/>
-															<div className={classes.tierInfo}>
-																<span className={classes.tierName} style={{ color: tierColor }}>
-																	{getRatingTierName(n.rating)}
-																</span>
-																<span className={classes.tierLP}>{getTierPoint(n.rating)} LP</span>
+														{hasRating ? (
+															<div className={classes.tierWrapper}>
+																<img
+																	className={classes.tierEmblem}
+																	src={`/assets/images/ranked-emblems/Emblem_${tierName}.png`}
+																	alt={tierName}
+																	style={{ filter: `drop-shadow(0 0 8px ${tierColor}40)` }}
+																/>
+																<div className={classes.tierInfo}>
+																	<span className={classes.tierName} style={{ color: tierColor }}>
+																		{getRatingTierName(n.rating)}
+																	</span>
+																	<span className={classes.tierLP}>
+																		{getTierPoint(n.rating)} LP
+																		{isPeriod && n.ratingChange != null && (
+																			<span
+																				className={`${classes.ratingChangeInline} ${getRatingChangeClass(
+																					n.ratingChange
+																				)}`}
+																			>
+																				{` (${formatRatingChange(n.ratingChange)})`}
+																			</span>
+																		)}
+																	</span>
+																</div>
 															</div>
-														</div>
+														) : (
+															<span className={classes.tierName} style={{ color: 'rgba(255,255,255,0.4)' }}>
+																-
+																{isPeriod && n.ratingChange != null && (
+																	<span
+																		className={`${classes.ratingChangeInline} ${getRatingChangeClass(n.ratingChange)}`}
+																	>
+																		{` (${formatRatingChange(n.ratingChange)})`}
+																	</span>
+																)}
+															</span>
+														)}
 													</StyledTableCell>
 													<StyledTableCell>
 														<span className={classes.statNumber}>{n.win + n.lose}</span>
@@ -564,7 +629,9 @@ function RankingTable(props) {
 								].map(option => (
 									<div
 										key={option.id}
-										className={`${classes.mobileSortChip} ${order.id === option.id ? classes.mobileSortChipActive : ''}`}
+										className={`${classes.mobileSortChip} ${
+											order.id === option.id ? classes.mobileSortChipActive : ''
+										}`}
 										onClick={() => handleRequestSort(null, option.id)}
 										role="button"
 										tabIndex={0}
@@ -572,35 +639,46 @@ function RankingTable(props) {
 									>
 										{option.label}
 										{order.id === option.id && (
-											<span className={classes.sortArrow}>
-												{order.direction === 'asc' ? '↑' : '↓'}
-											</span>
+											<span className={classes.sortArrow}>{order.direction === 'asc' ? '↑' : '↓'}</span>
 										)}
 									</div>
 								))}
 							</div>
 							<div className={classes.mobileCardList}>
-								{sortedData.map(n => {
-									const tierName = getTierName(n.rating);
+								{sortedData.map((n, idx) => {
+									const rank = n.ranking != null ? n.ranking : page * rowsPerPage + idx + 1;
+									const hasRating = n.rating != null;
+									const tierName = hasRating ? getTierName(n.rating) : 'UNRANKED';
 									const tierColor = tierColors[tierName] || '#fff';
 
 									return (
-										<div key={n.riotId} className={classes.mobileCard}>
+										<div key={n.riotId || n.puuid} className={classes.mobileCard}>
 											<div className={classes.mobileCardTop}>
-												<div className={`${classes.mobileRankBadge} ${getMobileRankClass(n.ranking)}`}>{n.ranking}</div>
+												<div className={`${classes.mobileRankBadge} ${getMobileRankClass(rank)}`}>{rank}</div>
 												<div className={classes.mobilePlayerInfo}>
-													<Link to={`/userinfo/${n.puuid}`} className={classes.mobilePlayerName}>{n.name}</Link>
-													<div className={classes.mobileTierRow}>
-														<img
-															className={classes.mobileTierEmblem}
-															src={`/assets/images/ranked-emblems/Emblem_${tierName}.png`}
-															alt={tierName}
-														/>
-														<span className={classes.mobileTierText} style={{ color: tierColor }}>
-															{getRatingTierName(n.rating)}
-														</span>
-														<span className={classes.mobileLPText}>{getTierPoint(n.rating)} LP</span>
-													</div>
+													<Link to={`/userinfo/${n.puuid}`} className={classes.mobilePlayerName}>
+														{n.name}
+													</Link>
+													{hasRating && (
+														<div className={classes.mobileTierRow}>
+															<img
+																className={classes.mobileTierEmblem}
+																src={`/assets/images/ranked-emblems/Emblem_${tierName}.png`}
+																alt={tierName}
+															/>
+															<span className={classes.mobileTierText} style={{ color: tierColor }}>
+																{getRatingTierName(n.rating)}
+															</span>
+															<span className={classes.mobileLPText}>
+																{getTierPoint(n.rating)} LP
+																{isPeriod && n.ratingChange != null && (
+																	<span className={getRatingChangeClass(n.ratingChange)}>
+																		{` (${formatRatingChange(n.ratingChange)})`}
+																	</span>
+																)}
+															</span>
+														</div>
+													)}
 												</div>
 											</div>
 											<div className={classes.mobileStats}>
