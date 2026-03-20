@@ -28,6 +28,10 @@ const LoginPageConfig = {
 		{
 			path: '/login',
 			component: React.lazy(() => import('./LoginPage'))
+		},
+		{
+			path: '/auth/callback',
+			component: React.lazy(() => import('./AuthCallback'))
 		}
 	]
 };

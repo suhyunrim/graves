@@ -13,12 +13,27 @@ const createCamilleAxios = () => {
 	const instance = axios.create();
 
 	instance.defaults.baseURL = process.env.REACT_APP_CAMILLE_HOST;
-	instance.defaults.headers.common.Puuid = camilleRiotAuthService.getPuuid();
+
+	const discordToken = camilleRiotAuthService.getDiscordToken();
+	if (discordToken) {
+		instance.defaults.headers.common.Authorization = `Bearer ${discordToken}`;
+	}
+
+	const puuid = camilleRiotAuthService.getPuuid();
+	if (puuid) {
+		instance.defaults.headers.common.Puuid = puuid;
+	}
+
 	instance.interceptors.response.use(
 		response => {
 			return response;
 		},
 		error => {
+			if (error.response && error.response.status === 401 && camilleRiotAuthService.getDiscordToken()) {
+				camilleRiotAuthService.logout();
+				window.location.href = '/login';
+				return Promise.reject(error);
+			}
 			store.dispatch(
 				fuseActions.openDialog({
 					children: (

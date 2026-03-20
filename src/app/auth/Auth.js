@@ -26,12 +26,18 @@ class Auth extends Component {
 			});
 
 			if (camilleRiotAuthService.checkAuthenticated()) {
-				this.props.retrieveGroupList();
-				resolve();
-				// camilleRiotAuthService.getUserData().then(tokenData => {
-				// 	this.props.setUserDataCamilleRiotAuth(tokenData);
-				// 	this.props.showMessage({ message: 'Logged in with CailleRiotAuth' });
-				// });
+				const authType = camilleRiotAuthService.getAuthType();
+				if (authType === 'discord') {
+					this.props
+						.retrieveDiscordUser()
+						.then(() => resolve())
+						.catch(() => resolve());
+				} else {
+					this.props
+						.retrieveGroupList()
+						.then(() => resolve())
+						.catch(() => resolve());
+				}
 			} else {
 				resolve();
 			}
@@ -47,6 +53,7 @@ function mapDispatchToProps(dispatch) {
 		{
 			logout: userActions.logoutUser,
 			retrieveGroupList: userActions.retrieveGroupList,
+			retrieveDiscordUser: userActions.retrieveDiscordUser,
 			showMessage: Actions.showMessage,
 			hideMessage: Actions.hideMessage
 		},

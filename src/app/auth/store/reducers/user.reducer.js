@@ -30,6 +30,23 @@ const user = (state = initialState, action) => {
 			const reprGroup = groupList[0];
 			return generateReprGroupState(groupList, reprGroup);
 		}
+		case Actions.SET_DISCORD_USER_DATA: {
+			const discordData = action.payload;
+			return {
+				...state,
+				data: {
+					...state.data,
+					photoURL: discordData.avatar
+						? `https://cdn.discordapp.com/avatars/${discordData.discordId}/${discordData.avatar}.png`
+						: `https://cdn.discordapp.com/embed/avatars/${Number(discordData.discordId) % 5}.png`,
+					discordUser: {
+						discordId: discordData.discordId,
+						username: discordData.username,
+						globalName: discordData.globalName
+					}
+				}
+			};
+		}
 		case Actions.CHANGE_GROUP: {
 			const { groupList } = state;
 			if (groupList.length === 0) return { ...initialState };

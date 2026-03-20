@@ -151,6 +151,61 @@ const useStyles = makeStyles(theme => ({
 			fontSize: '2rem',
 			borderRadius: 12
 		}
+	},
+	divider: {
+		display: 'flex',
+		alignItems: 'center',
+		width: '100%',
+		margin: '24px 0',
+		[theme.breakpoints.up('md')]: {
+			margin: '32px 0'
+		}
+	},
+	dividerLine: {
+		flex: 1,
+		height: 1,
+		background: 'rgba(255, 255, 255, 0.15)'
+	},
+	dividerText: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '0.85rem',
+		color: 'rgba(255, 255, 255, 0.4)',
+		padding: '0 16px',
+		[theme.breakpoints.up('md')]: {
+			fontSize: '1.4rem'
+		}
+	},
+	discordButton: {
+		background: '#5865F2',
+		borderRadius: 8,
+		padding: '12px 32px',
+		fontFamily: '"Rajdhani", "Noto Sans KR", sans-serif',
+		fontWeight: 600,
+		fontSize: '1rem',
+		letterSpacing: '0.05em',
+		color: '#fff',
+		boxShadow: '0 4px 15px rgba(88, 101, 242, 0.3)',
+		transition: 'all 0.3s ease',
+		'&:hover': {
+			background: '#4752C4',
+			boxShadow: '0 6px 20px rgba(88, 101, 242, 0.5)',
+			transform: 'translateY(-2px)'
+		},
+		[theme.breakpoints.up('md')]: {
+			padding: '18px 48px',
+			fontSize: '2rem',
+			borderRadius: 12
+		}
+	},
+	discordIcon: {
+		width: 24,
+		height: 24,
+		marginRight: 8,
+		[theme.breakpoints.up('md')]: {
+			width: 32,
+			height: 32,
+			marginRight: 12
+		}
 	}
 }));
 
@@ -172,6 +227,10 @@ function LoginPage() {
 		dispatch(authActions.submitLogin(form));
 		ev.preventDefault();
 		resetForm();
+	}
+
+	function handleDiscordLogin() {
+		window.location.href = `${process.env.REACT_APP_CAMILLE_HOST}api/auth/discord`;
 	}
 
 	if (isPending) return <FuseSplashScreen />;
@@ -214,6 +273,19 @@ function LoginPage() {
 									Login
 								</Button>
 							</form>
+
+							<div className={classes.divider}>
+								<div className={classes.dividerLine} />
+								<span className={classes.dividerText}>또는</span>
+								<div className={classes.dividerLine} />
+							</div>
+
+							<Button className={clsx(classes.discordButton, 'w-full')} onClick={handleDiscordLogin}>
+								<svg className={classes.discordIcon} viewBox="0 0 71 55" fill="currentColor">
+									<path d="M60.1 4.9C55.6 2.8 50.7 1.3 45.7.4c-.1 0-.2 0-.2.1-.6 1.1-1.3 2.6-1.8 3.7-5.5-.8-10.9-.8-16.2 0-.5-1.2-1.2-2.6-1.8-3.7-.1-.1-.2-.1-.2-.1C20.3 1.3 15.4 2.8 10.9 4.9c0 0-.1 0-.1.1C1.6 18.7-.9 32.1.3 45.4c0 .1 0 .1.1.2 6.1 4.5 12 7.2 17.7 9 .1 0 .2 0 .3-.1 1.4-1.9 2.6-3.8 3.6-5.9.1-.1 0-.3-.1-.3-2-.7-3.8-1.6-5.6-2.7-.1-.1-.1-.3 0-.4.5-.3.9-.6 1.2-.9.1-.1.1-.1.2-.1 11.6 5.3 24.2 5.3 35.7 0h.2c.4.3.8.7 1.2.9.1.1.1.3 0 .4-1.8 1-3.6 2-5.6 2.7-.1 0-.2.2-.1.3 1.1 2.1 2.3 4 3.6 5.9.1.1.2.1.3.1 5.8-1.8 11.7-4.5 17.8-9 .1 0 .1-.1.1-.2 1.5-15.3-2.5-28.6-10.5-40.4 0 0 0-.1-.1-.1zM23.7 37.3c-3.5 0-6.4-3.2-6.4-7.2s2.8-7.2 6.4-7.2c3.6 0 6.4 3.2 6.4 7.2 0 4-2.8 7.2-6.4 7.2zm23.6 0c-3.5 0-6.4-3.2-6.4-7.2s2.8-7.2 6.4-7.2c3.6 0 6.4 3.2 6.4 7.2 0 4-2.8 7.2-6.4 7.2z" />
+								</svg>
+								Discord로 로그인
+							</Button>
 						</CardContent>
 					</Card>
 				</FuseAnimate>

@@ -29,3 +29,20 @@ export function submitLogin({ riotId }) {
 			});
 	};
 }
+
+export function submitDiscordLogin(token) {
+	return dispatch => {
+		dispatch({ type: TRY_LOGIN });
+
+		camilleRiotAuthService.setDiscordToken(token);
+
+		return dispatch(UserActions.retrieveDiscordUser())
+			.then(() => {
+				return dispatch({ type: LOGIN_SUCCESS });
+			})
+			.catch(error => {
+				camilleRiotAuthService.setDiscordToken(null);
+				return dispatch({ type: LOGIN_ERROR, payload: error });
+			});
+	};
+}

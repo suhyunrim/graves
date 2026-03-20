@@ -1,6 +1,7 @@
 import FuseUtils from '@fuse/utils/FuseUtils';
 
 const CAMILLE_RIOT_PUUID_KEY = 'camille_riot_puuid';
+const DISCORD_TOKEN_KEY = 'camille_discord_token';
 /* eslint-disable camelcase */
 
 class CamilleRiotAuthService extends FuseUtils.EventEmitter {
@@ -10,8 +11,9 @@ class CamilleRiotAuthService extends FuseUtils.EventEmitter {
 
 	handleAuthentication = () => {
 		const puuid = this.getPuuid();
+		const discordToken = this.getDiscordToken();
 
-		if (!puuid) {
+		if (!puuid && !discordToken) {
 			this.emit('onNoAccessToken');
 			return;
 		}
@@ -43,18 +45,38 @@ class CamilleRiotAuthService extends FuseUtils.EventEmitter {
 		}
 	};
 
+	setDiscordToken = token => {
+		if (token) {
+			localStorage.setItem(DISCORD_TOKEN_KEY, token);
+		} else {
+			localStorage.removeItem(DISCORD_TOKEN_KEY);
+		}
+	};
+
+	getDiscordToken = () => {
+		return window.localStorage.getItem(DISCORD_TOKEN_KEY);
+	};
+
 	logout = () => {
 		this.setSession(null);
+		this.setDiscordToken(null);
 	};
 
 	checkAuthenticated = () => {
 		const puuid = this.getPuuid();
-		if (!puuid) {
+		const discordToken = this.getDiscordToken();
+		if (!puuid && !discordToken) {
 			this.logout();
 			return false;
 		}
 
 		return true;
+	};
+
+	getAuthType = () => {
+		if (this.getDiscordToken()) return 'discord';
+		if (this.getPuuid()) return 'riot';
+		return null;
 	};
 
 	getPuuid = () => {

@@ -11,6 +11,7 @@ import CamilleRiotAuthService from 'app/services/camilleRiotAuthService';
 
 export const SET_TOKEN_DATA = '[USER] SET TOKEN DATA';
 export const RETRIEVE_GROUP_LIST = '[USER] RETRIEVE GROUP LIST';
+export const SET_DISCORD_USER_DATA = '[USER] SET DISCORD USER DATA';
 export const SET_GROUP_LIST = '[USER] SET GROUP LIST';
 export const REMOVE_USER_DATA = '[USER] REMOVE DATA';
 export const USER_LOGGED_OUT = '[USER] LOGGED OUT';
@@ -65,6 +66,34 @@ export function retrieveGroupList() {
 				history.location.state = {
 					redirectUrl: 'login'
 				};
+			});
+}
+
+export function retrieveDiscordUser() {
+	const createCamilleAxios = require('app/utility/camilleAxios').default;
+	const request = createCamilleAxios().get('/api/auth/me');
+
+	return dispatch =>
+		request
+			.then(response => {
+				const user = response.data.result;
+
+				if (user.puuid) {
+					CamilleRiotAuthService.setSession(user.puuid);
+				}
+
+				dispatch({
+					type: SET_DISCORD_USER_DATA,
+					payload: user
+				});
+
+				return dispatch(retrieveGroupList());
+			})
+			.catch(e => {
+				history.location.state = {
+					redirectUrl: 'login'
+				};
+				return Promise.reject(e);
 			});
 }
 
