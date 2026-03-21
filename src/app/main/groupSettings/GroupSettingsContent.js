@@ -14,9 +14,10 @@ import {
 	DialogActions,
 	Chip,
 	Select,
-	MenuItem
+	MenuItem,
+	useMediaQuery
 } from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
+import { makeStyles, useTheme } from '@material-ui/core/styles';
 import FuseLoading from '@fuse/core/FuseLoading';
 import { useDispatch, useSelector } from 'react-redux';
 import * as Actions from './store/actions';
@@ -259,6 +260,79 @@ const useStyles = makeStyles(theme => ({
 	tierMenuItem: {
 		fontFamily: '"Noto Sans KR", sans-serif',
 		fontSize: '1.2rem'
+	},
+	// Mobile card styles
+	cardList: {
+		display: 'flex',
+		flexDirection: 'column',
+		gap: 12
+	},
+	card: {
+		borderRadius: 14,
+		background: 'rgba(255, 255, 255, 0.03)',
+		border: '1px solid rgba(255, 255, 255, 0.06)',
+		padding: 16,
+		transition: 'background 0.2s ease'
+	},
+	cardOutsider: {
+		opacity: 0.5
+	},
+	cardHeader: {
+		display: 'flex',
+		alignItems: 'center',
+		justifyContent: 'space-between',
+		marginBottom: 12
+	},
+	cardName: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.4rem',
+		fontWeight: 700,
+		color: '#fff'
+	},
+	cardBody: {
+		display: 'grid',
+		gridTemplateColumns: '1fr 1fr',
+		gap: '10px 16px'
+	},
+	cardField: {
+		display: 'flex',
+		flexDirection: 'column',
+		gap: 2
+	},
+	cardLabel: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1rem',
+		color: 'rgba(255, 255, 255, 0.4)'
+	},
+	cardValue: {
+		fontFamily: '"Rajdhani", sans-serif',
+		fontSize: '1.2rem',
+		fontWeight: 600,
+		color: 'rgba(255, 255, 255, 0.8)'
+	},
+	cardTierRow: {
+		gridColumn: '1 / -1'
+	},
+	cardActions: {
+		marginTop: 12,
+		display: 'flex',
+		justifyContent: 'flex-end'
+	},
+	tierSelectMobile: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.1rem',
+		color: '#fff',
+		background: 'rgba(255, 255, 255, 0.05)',
+		border: '1px solid rgba(255, 255, 255, 0.15)',
+		borderRadius: 8,
+		padding: '2px 6px',
+		width: '100%',
+		'&:before, &:after': {
+			display: 'none'
+		},
+		'& .MuiSelect-icon': {
+			color: 'rgba(255, 255, 255, 0.5)'
+		}
 	}
 }));
 
@@ -271,6 +345,8 @@ const ROLE_LABELS = {
 function GroupSettingsContent() {
 	const classes = useStyles();
 	const dispatch = useDispatch();
+	const theme = useTheme();
+	const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 	const user = useSelector(state => state.auth.user);
 	const { members, loading, searchText } = useSelector(({ GroupSettings }) => GroupSettings.groupSettings);
 	const [confirmDialog, setConfirmDialog] = useState(null);
@@ -358,6 +434,49 @@ function GroupSettingsContent() {
 		);
 	}
 
+	function renderTierSelect(member, mobile) {
+		return (
+			<Select
+				className={mobile ? classes.tierSelectMobile : classes.tierSelect}
+				value={member.defaultRating}
+				onChange={e => handleTierChange(member.puuid, e.target.value)}
+				renderValue={val => renderTierOption(getTierName(val), getRatingTierName(val))}
+				MenuProps={{
+					PaperProps: {
+						style: {
+							background: '#1a1a2e',
+							border: '1px solid rgba(0, 212, 255, 0.3)',
+							color: '#fff',
+							maxHeight: 300
+						}
+					}
+				}}
+			>
+				{TIER_OPTIONS.map(opt => (
+					<MenuItem key={opt.apiValue} value={opt.rating} className={classes.tierMenuItem}>
+						{renderTierOption(opt.tierName, opt.label)}
+					</MenuItem>
+				))}
+			</Select>
+		);
+	}
+
+	function renderActionBtn(member) {
+		if (member.role === 'admin') return null;
+		if (member.role === 'outsider') {
+			return (
+				<Button className={classes.restoreBtn} size="small" onClick={() => handleRestore(member)}>
+					복구
+				</Button>
+			);
+		}
+		return (
+			<Button className={classes.blacklistBtn} size="small" onClick={() => handleBlacklist(member)}>
+				추방
+			</Button>
+		);
+	}
+
 	function formatDate(dateStr) {
 		if (!dateStr) return '-';
 		const d = new Date(dateStr);
@@ -365,6 +484,93 @@ function GroupSettingsContent() {
 		const m = String(d.getMonth() + 1).padStart(2, '0');
 		const day = String(d.getDate()).padStart(2, '0');
 		return `${y}.${m}.${day}`;
+	}
+
+	function renderConfirmDialog() {
+		return (
+			<Dialog
+				open={Boolean(confirmDialog)}
+				onClose={() => setConfirmDialog(null)}
+				PaperProps={{ className: classes.dialogPaper }}
+			>
+				{confirmDialog && (
+					<>
+						<DialogTitle className={classes.dialogTitle}>
+							{confirmDialog.type === 'blacklist' ? '멤버 추방' : '멤버 복구'}
+						</DialogTitle>
+						<DialogContent>
+							<DialogContentText className={classes.dialogText}>
+								{confirmDialog.type === 'blacklist'
+									? `"${confirmDialog.member.name}" 을(를) 추방하시겠습니까? 추방된 유저는 랭킹, 대시보드 등에서 제외됩니다.`
+									: `"${confirmDialog.member.name}" 을(를) 복구하시겠습니까?`}
+							</DialogContentText>
+						</DialogContent>
+						<DialogActions>
+							<Button onClick={() => setConfirmDialog(null)} style={{ color: 'rgba(255,255,255,0.6)' }}>
+								취소
+							</Button>
+							<Button
+								onClick={handleConfirm}
+								style={{
+									color: confirmDialog.type === 'blacklist' ? '#ff6b6b' : '#00ff7f'
+								}}
+							>
+								확인
+							</Button>
+						</DialogActions>
+					</>
+				)}
+			</Dialog>
+		);
+	}
+
+	if (isMobile) {
+		return (
+			<div className={classes.root}>
+				<div className={classes.cardList}>
+					{filteredMembers.map(member => {
+						const totalRating = member.defaultRating + member.additionalRating;
+						return (
+							<div
+								key={member.puuid}
+								className={`${classes.card} ${member.role === 'outsider' ? classes.cardOutsider : ''}`}
+							>
+								<div className={classes.cardHeader}>
+									<span className={classes.cardName}>{member.name}</span>
+									{getRoleChip(member.role)}
+								</div>
+								<div className={classes.cardBody}>
+									<div className={classes.cardField}>
+										<span className={classes.cardLabel}>전적</span>
+										<span className={classes.cardValue}>
+											{member.win}W {member.lose}L
+										</span>
+									</div>
+									<div className={classes.cardField}>
+										<span className={classes.cardLabel}>현재 티어</span>
+										{renderTier(totalRating)}
+									</div>
+									<div className={classes.cardField}>
+										<span className={classes.cardLabel}>생성일</span>
+										<span className={classes.cardValue}>{formatDate(member.createdAt)}</span>
+									</div>
+									<div className={classes.cardField}>
+										<span className={classes.cardLabel}>최근 경기</span>
+										<span className={classes.cardValue}>{formatDate(member.latestMatchDate)}</span>
+									</div>
+									<div className={`${classes.cardField} ${classes.cardTierRow}`}>
+										<span className={classes.cardLabel}>기본 티어</span>
+										{renderTierSelect(member, true)}
+									</div>
+								</div>
+								<div className={classes.cardActions}>{renderActionBtn(member)}</div>
+							</div>
+						);
+					})}
+				</div>
+				{renderConfirmDialog()}
+			</div>
+		);
 	}
 
 	return (
@@ -411,28 +617,7 @@ function GroupSettingsContent() {
 										</span>
 									</TableCell>
 									<TableCell className={classes.bodyCell} align="center">
-										<Select
-											className={classes.tierSelect}
-											value={member.defaultRating}
-											onChange={e => handleTierChange(member.puuid, e.target.value)}
-											renderValue={val => renderTierOption(getTierName(val), getRatingTierName(val))}
-											MenuProps={{
-												PaperProps: {
-													style: {
-														background: '#1a1a2e',
-														border: '1px solid rgba(0, 212, 255, 0.3)',
-														color: '#fff',
-														maxHeight: 300
-													}
-												}
-											}}
-										>
-											{TIER_OPTIONS.map(opt => (
-												<MenuItem key={opt.apiValue} value={opt.rating} className={classes.tierMenuItem}>
-													{renderTierOption(opt.tierName, opt.label)}
-												</MenuItem>
-											))}
-										</Select>
+										{renderTierSelect(member, false)}
 									</TableCell>
 									<TableCell className={classes.bodyCell} align="center">
 										{renderTier(totalRating)}
@@ -444,15 +629,7 @@ function GroupSettingsContent() {
 										<span className={classes.statsText}>{formatDate(member.latestMatchDate)}</span>
 									</TableCell>
 									<TableCell className={classes.bodyCell} align="center">
-										{member.role === 'admin' ? null : member.role === 'outsider' ? (
-											<Button className={classes.restoreBtn} size="small" onClick={() => handleRestore(member)}>
-												복구
-											</Button>
-										) : (
-											<Button className={classes.blacklistBtn} size="small" onClick={() => handleBlacklist(member)}>
-												추방
-											</Button>
-										)}
+										{renderActionBtn(member)}
 									</TableCell>
 								</TableRow>
 							);
@@ -460,40 +637,7 @@ function GroupSettingsContent() {
 					</TableBody>
 				</Table>
 			</TableContainer>
-
-			<Dialog
-				open={Boolean(confirmDialog)}
-				onClose={() => setConfirmDialog(null)}
-				PaperProps={{ className: classes.dialogPaper }}
-			>
-				{confirmDialog && (
-					<>
-						<DialogTitle className={classes.dialogTitle}>
-							{confirmDialog.type === 'blacklist' ? '멤버 추방' : '멤버 복구'}
-						</DialogTitle>
-						<DialogContent>
-							<DialogContentText className={classes.dialogText}>
-								{confirmDialog.type === 'blacklist'
-									? `"${confirmDialog.member.name}" 을(를) 추방하시겠습니까? 추방된 유저는 랭킹, 대시보드 등에서 제외됩니다.`
-									: `"${confirmDialog.member.name}" 을(를) 복구하시겠습니까?`}
-							</DialogContentText>
-						</DialogContent>
-						<DialogActions>
-							<Button onClick={() => setConfirmDialog(null)} style={{ color: 'rgba(255,255,255,0.6)' }}>
-								취소
-							</Button>
-							<Button
-								onClick={handleConfirm}
-								style={{
-									color: confirmDialog.type === 'blacklist' ? '#ff6b6b' : '#00ff7f'
-								}}
-							>
-								확인
-							</Button>
-						</DialogActions>
-					</>
-				)}
-			</Dialog>
+			{renderConfirmDialog()}
 		</div>
 	);
 }
