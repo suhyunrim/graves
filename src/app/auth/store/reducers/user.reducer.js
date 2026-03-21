@@ -8,6 +8,18 @@ const initialState = {
 	}
 };
 
+const mergeAdminFlags = (groupList, discordGroups) => {
+	if (!discordGroups || discordGroups.length === 0) return groupList;
+	const adminMap = {};
+	discordGroups.forEach(g => {
+		adminMap[g.groupId] = g.isAdmin;
+	});
+	return groupList.map(g => ({
+		...g,
+		isAdmin: adminMap[g.groupId] || false
+	}));
+};
+
 const generateReprGroupState = (groupList, reprGroup) => {
 	return {
 		...initialState,
@@ -24,9 +36,10 @@ const generateReprGroupState = (groupList, reprGroup) => {
 const user = (state = initialState, action) => {
 	switch (action.type) {
 		case Actions.RETRIEVE_GROUP_LIST: {
-			const groupList = action.payload;
-			if (groupList.length === 0) return { ...initialState };
+			const rawGroupList = action.payload;
+			if (rawGroupList.length === 0) return { ...initialState };
 
+			const groupList = mergeAdminFlags(rawGroupList, state.discordGroups);
 			const reprGroup = groupList[0];
 			return generateReprGroupState(groupList, reprGroup);
 		}
@@ -34,6 +47,7 @@ const user = (state = initialState, action) => {
 			const discordData = action.payload;
 			return {
 				...state,
+				discordGroups: discordData.groups || [],
 				data: {
 					...state.data,
 					photoURL: discordData.avatar

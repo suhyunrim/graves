@@ -39,6 +39,13 @@ const navigationConfig = [
 				type: 'item',
 				icon: 'emoji_events',
 				url: '/honor-ranking'
+			},
+			{
+				id: 'group-settings-component',
+				title: 'Group Settings',
+				type: 'item',
+				icon: 'settings',
+				url: '/group-settings'
 			}
 		]
 	}

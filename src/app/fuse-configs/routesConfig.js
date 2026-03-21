@@ -7,9 +7,19 @@ import MyInfoConfig from 'app/main/myinfo/MyInfoConfig';
 import RankingConfig from 'app/main/ranking/RankingConfig';
 import MatchHistoryConfig from 'app/main/matchHistory/MatchHistoryConfig';
 import HonorRankingConfig from 'app/main/honorRanking/HonorRankingConfig';
+import GroupSettingsConfig from 'app/main/groupSettings/GroupSettingsConfig';
 import LoginPageConfig from 'app/main/login/LoginPageConfig';
 
-const routeConfigs = [...authRoleExamplesConfigs, LoginPageConfig, DashboardConfig, MyInfoConfig, RankingConfig, MatchHistoryConfig, HonorRankingConfig];
+const routeConfigs = [
+	...authRoleExamplesConfigs,
+	LoginPageConfig,
+	DashboardConfig,
+	MyInfoConfig,
+	RankingConfig,
+	MatchHistoryConfig,
+	HonorRankingConfig,
+	GroupSettingsConfig
+];
 
 const routes = [
 	...FuseUtils.generateRoutesFromConfigs(routeConfigs),
