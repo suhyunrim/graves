@@ -20,14 +20,14 @@ const mergeAdminFlags = (groupList, discordGroups) => {
 	}));
 };
 
-const generateReprGroupState = (groupList, reprGroup) => {
+const generateReprGroupState = (state, groupList, reprGroup) => {
 	return {
-		...initialState,
+		...state,
 		groupList,
 		reprGroup,
 		role: ['admin'], // 임시코드 (by ZeroBoom)
 		data: {
-			...initialState.data,
+			...state.data,
 			displayName: reprGroup.groupName
 		}
 	};
@@ -41,7 +41,7 @@ const user = (state = initialState, action) => {
 
 			const groupList = mergeAdminFlags(rawGroupList, state.discordGroups);
 			const reprGroup = groupList[0];
-			return generateReprGroupState(groupList, reprGroup);
+			return generateReprGroupState(state, groupList, reprGroup);
 		}
 		case Actions.SET_DISCORD_USER_DATA: {
 			const discordData = action.payload;
@@ -69,7 +69,7 @@ const user = (state = initialState, action) => {
 			if (idx === -1) return { ...initialState };
 
 			const reprGroup = groupList[idx];
-			return generateReprGroupState(groupList, reprGroup);
+			return generateReprGroupState(state, groupList, reprGroup);
 		}
 		case Actions.REMOVE_USER_DATA: {
 			return {

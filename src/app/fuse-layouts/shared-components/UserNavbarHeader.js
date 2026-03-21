@@ -54,6 +54,24 @@ const useStyles = makeStyles(theme => ({
 		textShadow: '0 0 10px rgba(0, 212, 255, 0.3)',
 		letterSpacing: '0.05em'
 	},
+	discordInfo: {
+		display: 'flex',
+		alignItems: 'center',
+		justifyContent: 'center',
+		gap: 4,
+		paddingTop: 28,
+		paddingBottom: 8
+	},
+	discordIcon: {
+		width: 14,
+		height: 14
+	},
+	discordName: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.1rem',
+		color: 'rgba(255, 255, 255, 0.45)',
+		letterSpacing: '0.02em'
+	},
 	dropdownIcon: {
 		color: '#00d4ff',
 		marginLeft: 4
@@ -113,78 +131,88 @@ function UserNavbarHeader(props) {
 	}
 
 	return (
-		<AppBar
-			position="static"
-			elevation={0}
-			classes={{ root: classes.root }}
-			className="user relative flex flex-col items-center justify-center pt-24 pb-64 mb-32 z-0"
-		>
-			<Button onClick={onGroupListClick} className={classes.userButton}>
-				<Typography className={clsx(classes.username, 'username whitespace-no-wrap')}>
-					{user.data.displayName}
-				</Typography>
-
-				<Icon className={clsx(classes.dropdownIcon, 'text-16 hidden sm:flex')} variant="action">
-					keyboard_arrow_down
-				</Icon>
-			</Button>
-
-			<Popover
-				open={Boolean(groupListMenu)}
-				anchorEl={groupListMenu}
-				onClose={onGroupListClose}
-				anchorOrigin={{
-					vertical: 'bottom',
-					horizontal: 'center'
-				}}
-				transformOrigin={{
-					vertical: 'top',
-					horizontal: 'center'
-				}}
-				classes={{
-					paper: clsx('py-8', classes.popover)
-				}}
+		<>
+			<AppBar
+				position="static"
+				elevation={0}
+				classes={{ root: classes.root }}
+				className="user relative flex flex-col items-center justify-center pt-24 pb-64 mb-32 z-0"
 			>
-				{user.groupList.map(elem => (
+				<Button onClick={onGroupListClick} className={classes.userButton}>
+					<Typography className={clsx(classes.username, 'username whitespace-no-wrap')}>
+						{user.data.displayName}
+					</Typography>
+
+					<Icon className={clsx(classes.dropdownIcon, 'text-16 hidden sm:flex')} variant="action">
+						keyboard_arrow_down
+					</Icon>
+				</Button>
+
+				<Popover
+					open={Boolean(groupListMenu)}
+					anchorEl={groupListMenu}
+					onClose={onGroupListClose}
+					anchorOrigin={{
+						vertical: 'bottom',
+						horizontal: 'center'
+					}}
+					transformOrigin={{
+						vertical: 'top',
+						horizontal: 'center'
+					}}
+					classes={{
+						paper: clsx('py-8', classes.popover)
+					}}
+				>
+					{user.groupList.map(elem => (
+						<MenuItem
+							key={elem.groupId}
+							onClick={() => onChangeGroup(elem.groupId)}
+							role="button"
+							className={classes.menuItem}
+						>
+							<ListItemIcon className={clsx('min-w-40', classes.menuIcon)}>
+								<Icon>account_circle</Icon>
+							</ListItemIcon>
+							<ListItemText primary={elem.groupName} />
+						</MenuItem>
+					))}
+					<Divider className={classes.divider} />
+					<MenuItem className={classes.menuItem}>
+						<ListItemIcon className={clsx('min-w-40', classes.menuIcon)}>
+							<Icon>add_box</Icon>
+						</ListItemIcon>
+						<ListItemText primary="Create Group" />
+					</MenuItem>
 					<MenuItem
-						key={elem.groupId}
-						onClick={() => onChangeGroup(elem.groupId)}
-						role="button"
+						onClick={() => {
+							dispatch(authActions.logoutUser());
+							onGroupListClose();
+						}}
 						className={classes.menuItem}
 					>
 						<ListItemIcon className={clsx('min-w-40', classes.menuIcon)}>
-							<Icon>account_circle</Icon>
+							<Icon>exit_to_app</Icon>
 						</ListItemIcon>
-						<ListItemText primary={elem.groupName} />
+						<ListItemText primary="Logout" />
 					</MenuItem>
-				))}
-				<Divider className={classes.divider} />
-				<MenuItem className={classes.menuItem}>
-					<ListItemIcon className={clsx('min-w-40', classes.menuIcon)}>
-						<Icon>add_box</Icon>
-					</ListItemIcon>
-					<ListItemText primary="Create Group" />
-				</MenuItem>
-				<MenuItem
-					onClick={() => {
-						dispatch(authActions.logoutUser());
-						onGroupListClose();
-					}}
-					className={classes.menuItem}
-				>
-					<ListItemIcon className={clsx('min-w-40', classes.menuIcon)}>
-						<Icon>exit_to_app</Icon>
-					</ListItemIcon>
-					<ListItemText primary="Logout" />
-				</MenuItem>
-			</Popover>
+				</Popover>
 
-			<Avatar
-				className={clsx(classes.avatar, 'avatar')}
-				alt="user photo"
-				src={user.data.photoURL && user.data.photoURL !== '' ? user.data.photoURL : 'assets/images/avatars/profile.jpg'}
-			/>
-		</AppBar>
+				<Avatar
+					className={clsx(classes.avatar, 'avatar')}
+					alt="user photo"
+					src={
+						user.data.photoURL && user.data.photoURL !== '' ? user.data.photoURL : 'assets/images/avatars/profile.jpg'
+					}
+				/>
+			</AppBar>
+			{user.data.discordUser && (
+				<div className={classes.discordInfo}>
+					<img className={classes.discordIcon} src="/assets/images/logos/discord-mark-white.svg" alt="Discord" />
+					<span className={classes.discordName}>{user.data.discordUser.globalName || user.data.discordUser.username}</span>
+				</div>
+			)}
+		</>
 	);
 }
 
