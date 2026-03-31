@@ -101,11 +101,8 @@ export function syncChallenge(groupId, challengeId) {
 				dispatch({ type: SYNC_DONE, payload: response.data.result });
 				dispatch(getLeaderboard(groupId, challengeId));
 			})
-			.catch(error => {
-				const message = error.response && error.response.status === 429
-					? error.response.data.result
-					: '전적 갱신에 실패했습니다.';
-				dispatch({ type: SYNC_ERROR, payload: message });
+			.catch(() => {
+				dispatch({ type: SYNC_ERROR, payload: null });
 			});
 	};
 }

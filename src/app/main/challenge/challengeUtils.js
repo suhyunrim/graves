@@ -47,9 +47,9 @@ export function getDday(endAt) {
 	return `D-${days}`;
 }
 
-export function formatLastSync(lastSyncAt) {
-	if (!lastSyncAt) return '없음';
-	const d = new Date(lastSyncAt);
+export function formatShortDateTime(dateStr) {
+	if (!dateStr) return '없음';
+	const d = new Date(dateStr);
 	const m = String(d.getMonth() + 1).padStart(2, '0');
 	const day = String(d.getDate()).padStart(2, '0');
 	const h = String(d.getHours()).padStart(2, '0');

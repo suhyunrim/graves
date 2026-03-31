@@ -31,7 +31,7 @@ import {
 	statusColors,
 	formatDateRange,
 	getDday,
-	formatLastSync
+	formatShortDateTime
 } from './challengeUtils';
 
 const useStyles = makeStyles(theme => ({
@@ -290,6 +290,12 @@ const useStyles = makeStyles(theme => ({
 	winRateHigh: { color: '#00ff7f' },
 	winRateMid: { color: '#ffd700' },
 	winRateLow: { color: '#ff6b6b' },
+	ddayText: {
+		fontFamily: '"Rajdhani", sans-serif',
+		fontSize: '1.6rem',
+		fontWeight: 700,
+		color: '#00d4ff'
+	},
 	streakFire: { color: '#ff6b00' },
 	streakSkull: { color: '#868e96' },
 	emptyState: {
@@ -416,7 +422,7 @@ function ChallengeDetail() {
 	const groupId = user && user.reprGroup ? user.reprGroup.groupId : null;
 	const isLoggedIn = Boolean(user && user.reprGroup);
 	const isAdmin = user && user.role && user.role.includes('admin');
-	const myPuuid = user && user.data && user.data.puuid ? user.data.puuid : null;
+	const myPuuid = localStorage.getItem('camille_riot_puuid');
 
 	const [editOpen, setEditOpen] = useState(false);
 	const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
@@ -439,13 +445,9 @@ function ChallengeDetail() {
 	}, [loadData, dispatch]);
 
 	useEffect(() => {
-		if (syncMessage) {
-			if (syncMessage.type === 'success') {
-				const synced = syncMessage.data && syncMessage.data.synced;
-				setSnack({ open: true, message: `${synced}건 동기화 완료`, type: 'success' });
-			} else {
-				setSnack({ open: true, message: syncMessage.data, type: 'error' });
-			}
+		if (syncMessage && syncMessage.type === 'success') {
+			const synced = syncMessage.data && syncMessage.data.synced;
+			setSnack({ open: true, message: `${synced}건 동기화 완료`, type: 'success' });
 		}
 	}, [syncMessage]);
 
@@ -542,7 +544,7 @@ function ChallengeDetail() {
 							{statusLabels[detail.status] || detail.status}
 						</span>
 						{dday && (
-							<span style={{ fontFamily: '"Rajdhani", sans-serif', fontSize: '1.6rem', fontWeight: 700, color: '#00d4ff' }}>
+							<span className={classes.ddayText}>
 								{dday}
 							</span>
 						)}
@@ -572,7 +574,7 @@ function ChallengeDetail() {
 						)}
 						{isLoggedIn && (
 							<span className={classes.syncInfo}>
-								마지막 갱신: {formatLastSync(detail.lastSyncAt)}
+								마지막 갱신: {formatShortDateTime(detail.lastSyncAt)}
 							</span>
 						)}
 						{isAdmin && detail.status !== 'canceled' && (
@@ -603,11 +605,11 @@ function ChallengeDetail() {
 								</div>
 								<div className={classes.myStatItem}>
 									<span className={classes.myStatLabel}>승</span>
-									<span className={classes.myStatValue} style={{ color: '#4dabf7' }}>{myStats.wins}</span>
+									<span className={`${classes.myStatValue} ${classes.statWin}`}>{myStats.wins}</span>
 								</div>
 								<div className={classes.myStatItem}>
 									<span className={classes.myStatLabel}>패</span>
-									<span className={classes.myStatValue} style={{ color: '#ff6b6b' }}>{myStats.losses}</span>
+									<span className={`${classes.myStatValue} ${classes.statLose}`}>{myStats.losses}</span>
 								</div>
 								<div className={classes.myStatItem}>
 									<span className={classes.myStatLabel}>승률</span>
@@ -706,11 +708,11 @@ function ChallengeDetail() {
 													</div>
 													<div className={classes.mobileStatItem}>
 														<span className={classes.mobileStatLabel}>승</span>
-														<span className={classes.mobileStatValue} style={{ color: '#4dabf7' }}>{row.wins}</span>
+														<span className={`${classes.mobileStatValue} ${classes.statWin}`}>{row.wins}</span>
 													</div>
 													<div className={classes.mobileStatItem}>
 														<span className={classes.mobileStatLabel}>패</span>
-														<span className={classes.mobileStatValue} style={{ color: '#ff6b6b' }}>{row.losses}</span>
+														<span className={`${classes.mobileStatValue} ${classes.statLose}`}>{row.losses}</span>
 													</div>
 													<div className={classes.mobileStatItem}>
 														<span className={classes.mobileStatLabel}>승률</span>

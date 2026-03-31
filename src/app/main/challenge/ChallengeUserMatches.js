@@ -7,6 +7,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useParams, Link } from 'react-router-dom';
 import reducer from './store/reducers';
 import * as Actions from './store/actions';
+import { formatShortDateTime } from './challengeUtils';
 
 const DDRAGON_VERSION = '14.10.1';
 
@@ -174,15 +175,6 @@ const useStyles = makeStyles(theme => ({
 	}
 }));
 
-function formatMatchDate(dateStr) {
-	const d = new Date(dateStr);
-	const m = String(d.getMonth() + 1).padStart(2, '0');
-	const day = String(d.getDate()).padStart(2, '0');
-	const h = String(d.getHours()).padStart(2, '0');
-	const min = String(d.getMinutes()).padStart(2, '0');
-	return `${m}.${day} ${h}:${min}`;
-}
-
 function getChampionIcon(championName) {
 	return `https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/champion/${championName}.png`;
 }
@@ -263,7 +255,7 @@ function ChallengeUserMatches() {
 									<span className={classes.kda}>
 										{match.kills}/{match.deaths}/{match.assists}
 									</span>
-									<span className={classes.matchDate}>{formatMatchDate(match.gameCreation)}</span>
+									<span className={classes.matchDate}>{formatShortDateTime(match.gameCreation)}</span>
 								</div>
 								{match.groupMembers && match.groupMembers.length > 0 && (
 									<div className={classes.groupMembers}>

@@ -5,7 +5,7 @@ const initialState = {
 	detail: null,
 	leaderboard: [],
 	myStats: null,
-	userMatches: [],
+	userMatches: null,
 	isSyncing: false,
 	syncMessage: null
 };
