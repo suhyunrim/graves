@@ -41,6 +41,13 @@ const navigationConfig = [
 				url: '/honor-ranking'
 			},
 			{
+				id: 'challenge-component',
+				title: 'Challenge',
+				type: 'item',
+				icon: 'flag',
+				url: '/challenge'
+			},
+			{
 				id: 'group-settings-component',
 				title: 'Group Settings',
 				type: 'item',

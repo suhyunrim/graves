@@ -8,6 +8,7 @@ import RankingConfig from 'app/main/ranking/RankingConfig';
 import MatchHistoryConfig from 'app/main/matchHistory/MatchHistoryConfig';
 import HonorRankingConfig from 'app/main/honorRanking/HonorRankingConfig';
 import GroupSettingsConfig from 'app/main/groupSettings/GroupSettingsConfig';
+import ChallengeConfig from 'app/main/challenge/ChallengeConfig';
 import LoginPageConfig from 'app/main/login/LoginPageConfig';
 
 const routeConfigs = [
@@ -18,7 +19,8 @@ const routeConfigs = [
 	RankingConfig,
 	MatchHistoryConfig,
 	HonorRankingConfig,
-	GroupSettingsConfig
+	GroupSettingsConfig,
+	ChallengeConfig
 ];
 
 const routes = [
