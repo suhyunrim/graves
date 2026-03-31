@@ -4,6 +4,14 @@ Behavioral guidelines to reduce common LLM coding mistakes. Merge with project-s
 
 **Tradeoff:** These guidelines bias toward caution over speed. For trivial tasks, use judgment.
 
+## 0. 커밋 및 푸시 제한
+
+**사용자가 명시적으로 허락하지 않은 커밋 및 푸시는 절대 금지.**
+
+- git commit, git push 등의 명령은 사용자가 직접 요청하거나 허락한 경우에만 실행한다.
+- 코드 변경 후 자동으로 커밋하거나 푸시하지 않는다.
+- 커밋/푸시가 필요한 상황이라면 반드시 사용자에게 먼저 확인을 받는다.
+
 ## 1. Think Before Coding
 
 **Don't assume. Don't hide confusion. Surface tradeoffs.**
