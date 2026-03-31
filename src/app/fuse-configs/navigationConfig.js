@@ -46,6 +46,13 @@ const navigationConfig = [
 				type: 'item',
 				icon: 'settings',
 				url: '/group-settings'
+			},
+			{
+				id: 'release-notes-component',
+				title: 'Release Notes',
+				type: 'item',
+				icon: 'new_releases',
+				url: '/release-notes'
 			}
 		]
 	}
