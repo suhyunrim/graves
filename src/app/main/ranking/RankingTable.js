@@ -556,7 +556,7 @@ function RankingTable(props) {
 															<div className={classes.tierWrapper}>
 																<img
 																	className={classes.tierEmblem}
-																	src={`/assets/images/ranked-emblems/Emblem_${tierName}.png`}
+																	src={`/assets/images/ranked-emblems/Emblem_${tierName}.webp`}
 																	alt={tierName}
 																	style={{ filter: `drop-shadow(0 0 8px ${tierColor}40)` }}
 																/>
@@ -663,7 +663,7 @@ function RankingTable(props) {
 														<div className={classes.mobileTierRow}>
 															<img
 																className={classes.mobileTierEmblem}
-																src={`/assets/images/ranked-emblems/Emblem_${tierName}.png`}
+																src={`/assets/images/ranked-emblems/Emblem_${tierName}.webp`}
 																alt={tierName}
 															/>
 															<span className={classes.mobileTierText} style={{ color: tierColor }}>

@@ -567,7 +567,7 @@ function MatchHistoryTable() {
 			<div key={player.puuid} className={classes.playerRow}>
 				<img
 					className={classes.tierIcon}
-					src={`/assets/images/ranked-emblems/Emblem_${getTierIconName(player.tier)}.png`}
+					src={`/assets/images/ranked-emblems/Emblem_${getTierIconName(player.tier)}.webp`}
 					alt={player.tier}
 					style={{ filter: `drop-shadow(0 0 4px ${getTierColor(player.tier)}40)` }}
 				/>
@@ -609,7 +609,7 @@ function MatchHistoryTable() {
 			<div key={player.puuid} className={classes.mobilePlayerChip}>
 				<img
 					className={classes.mobilePlayerTierIcon}
-					src={`/assets/images/ranked-emblems/Emblem_${getTierIconName(player.tier)}.png`}
+					src={`/assets/images/ranked-emblems/Emblem_${getTierIconName(player.tier)}.webp`}
 					alt={player.tier}
 				/>
 				<span className={classes.mobilePlayerTier} style={{ color: getTierColor(player.tier) }}>

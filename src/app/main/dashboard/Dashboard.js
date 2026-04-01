@@ -586,7 +586,7 @@ function Dashboard() {
 				<span className={classes.tierBadge}>
 					<img
 						className={classes.tierEmblemSmall}
-						src={`/assets/images/ranked-emblems/Emblem_${info.tier}.png`}
+						src={`/assets/images/ranked-emblems/Emblem_${info.tier}.webp`}
 						alt={info.tier}
 					/>
 					<span className={classes.tierShortName}>{label}</span>

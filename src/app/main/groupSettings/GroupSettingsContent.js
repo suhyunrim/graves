@@ -402,7 +402,7 @@ function GroupSettingsContent() {
 			<div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
 				<img
 					style={{ width: 20, height: 20 }}
-					src={`/assets/images/ranked-emblems/Emblem_${tierName}.png`}
+					src={`/assets/images/ranked-emblems/Emblem_${tierName}.webp`}
 					alt={tierName}
 				/>
 				<span style={{ color, fontFamily: '"Rajdhani", sans-serif', fontWeight: 600 }}>{label}</span>
@@ -424,7 +424,7 @@ function GroupSettingsContent() {
 			<div className={classes.tierCell}>
 				<img
 					className={classes.tierEmblem}
-					src={`/assets/images/ranked-emblems/Emblem_${tierName}.png`}
+					src={`/assets/images/ranked-emblems/Emblem_${tierName}.webp`}
 					alt={tierName}
 				/>
 				<span className={classes.tierText} style={{ color }}>
