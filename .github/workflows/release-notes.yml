@@ -167,15 +167,20 @@ jobs:
 
       - name: Update release-notes.json
         if: steps.ai.outputs.has_changes == 'true'
+        env:
+          RELEASE_VERSION: ${{ steps.version.outputs.version }}
+          RELEASE_DATE: ${{ steps.version.outputs.date }}
+          RELEASE_TITLE: ${{ steps.title.outputs.title }}
+          RELEASE_CHANGES: ${{ steps.ai.outputs.changes }}
         run: |
           node -e "
             const fs = require('fs');
             const notes = require('./public/release-notes.json');
             const newEntry = {
-              version: '${{ steps.version.outputs.version }}',
-              date: '${{ steps.version.outputs.date }}',
-              title: $(node -e "console.log(JSON.stringify(process.argv[1]))" '${{ steps.title.outputs.title }}'),
-              changes: ${{ steps.ai.outputs.changes }}
+              version: process.env.RELEASE_VERSION,
+              date: process.env.RELEASE_DATE,
+              title: process.env.RELEASE_TITLE,
+              changes: JSON.parse(process.env.RELEASE_CHANGES)
             };
             notes.unshift(newEntry);
             fs.writeFileSync('./public/release-notes.json', JSON.stringify(notes, null, '\t') + '\n');
