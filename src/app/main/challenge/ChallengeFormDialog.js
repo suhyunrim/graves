@@ -11,6 +11,9 @@ import {
 	Checkbox
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
+import { MuiPickersUtilsProvider, KeyboardDatePicker } from '@material-ui/pickers';
+import DateFnsUtils from '@date-io/date-fns';
+import koLocale from 'date-fns/locale/ko';
 import * as Actions from './store/actions';
 
 const useStyles = makeStyles(theme => ({
@@ -98,12 +101,9 @@ const useStyles = makeStyles(theme => ({
 	}
 }));
 
-function toLocalDatetime(dateStr) {
-	if (!dateStr) return '';
-	const d = new Date(dateStr);
-	const offset = d.getTimezoneOffset();
-	const local = new Date(d.getTime() - offset * 60 * 1000);
-	return local.toISOString().slice(0, 16);
+function toLocalDate(dateStr) {
+	if (!dateStr) return null;
+	return new Date(dateStr);
 }
 
 function ChallengeFormDialog({ open, onClose, onSuccess, groupId, challenge }) {
@@ -114,8 +114,8 @@ function ChallengeFormDialog({ open, onClose, onSuccess, groupId, challenge }) {
 		title: challenge ? challenge.title : '',
 		description: challenge ? challenge.description || '' : '',
 		gameType: challenge ? challenge.gameType : 'soloRank',
-		startAt: challenge ? toLocalDatetime(challenge.startAt) : '',
-		endAt: challenge ? toLocalDatetime(challenge.endAt) : '',
+		startAt: challenge ? toLocalDate(challenge.startAt) : null,
+		endAt: challenge ? toLocalDate(challenge.endAt) : null,
 		scoringType: challenge ? challenge.scoringType : 'points',
 		isVisible: challenge ? challenge.isVisible : true
 	});
@@ -127,11 +127,19 @@ function ChallengeFormDialog({ open, onClose, onSuccess, groupId, challenge }) {
 		setForm(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
 	}
 
+	function handleStartDateChange(date) {
+		setForm(prev => ({ ...prev, startAt: date }));
+	}
+
+	function handleEndDateChange(date) {
+		setForm(prev => ({ ...prev, endAt: date }));
+	}
+
 	function validate() {
 		if (!form.title.trim()) return '제목을 입력하세요.';
-		if (!form.startAt) return '시작일시를 선택하세요.';
-		if (!form.endAt) return '종료일시를 선택하세요.';
-		if (new Date(form.endAt) <= new Date(form.startAt)) return '종료일시는 시작일시 이후여야 합니다.';
+		if (!form.startAt) return '시작일을 선택하세요.';
+		if (!form.endAt) return '종료일을 선택하세요.';
+		if (form.endAt <= form.startAt) return '종료일은 시작일 이후여야 합니다.';
 		return null;
 	}
 
@@ -148,8 +156,8 @@ function ChallengeFormDialog({ open, onClose, onSuccess, groupId, challenge }) {
 			title: form.title.trim(),
 			description: form.description.trim() || undefined,
 			gameType: form.gameType,
-			startAt: new Date(form.startAt).toISOString(),
-			endAt: new Date(form.endAt).toISOString(),
+			startAt: form.startAt.toISOString(),
+			endAt: form.endAt.toISOString(),
 			scoringType: form.scoringType,
 			isVisible: form.isVisible
 		};
@@ -212,30 +220,33 @@ function ChallengeFormDialog({ open, onClose, onSuccess, groupId, challenge }) {
 					<MenuItem value="aram">칼바람</MenuItem>
 					<MenuItem value="arena">아레나</MenuItem>
 				</TextField>
-				<TextField
-					className={classes.field}
-					label="시작일시"
-					name="startAt"
-					type="datetime-local"
-					value={form.startAt}
-					onChange={handleChange}
-					variant="outlined"
-					fullWidth
-					required
-					InputLabelProps={{ shrink: true }}
-				/>
-				<TextField
-					className={classes.field}
-					label="종료일시"
-					name="endAt"
-					type="datetime-local"
-					value={form.endAt}
-					onChange={handleChange}
-					variant="outlined"
-					fullWidth
-					required
-					InputLabelProps={{ shrink: true }}
-				/>
+				<MuiPickersUtilsProvider utils={DateFnsUtils} locale={koLocale}>
+					<KeyboardDatePicker
+						className={classes.field}
+						label="시작일"
+						format="yyyy-MM-dd"
+						value={form.startAt}
+						onChange={handleStartDateChange}
+						inputVariant="outlined"
+						fullWidth
+						required
+						autoOk
+						KeyboardButtonProps={{ style: { color: 'rgba(255,255,255,0.7)' } }}
+					/>
+					<KeyboardDatePicker
+						className={classes.field}
+						label="종료일"
+						format="yyyy-MM-dd"
+						value={form.endAt}
+						onChange={handleEndDateChange}
+						inputVariant="outlined"
+						fullWidth
+						required
+						autoOk
+						minDate={form.startAt || undefined}
+						KeyboardButtonProps={{ style: { color: 'rgba(255,255,255,0.7)' } }}
+					/>
+				</MuiPickersUtilsProvider>
 				<TextField
 					className={classes.field}
 					label="점수 방식"
