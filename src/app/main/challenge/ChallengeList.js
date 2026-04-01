@@ -63,6 +63,10 @@ const useStyles = makeStyles(theme => ({
 		textTransform: 'none',
 		'&:hover': {
 			background: 'linear-gradient(135deg, #00bce0 0%, #0088bb 100%)'
+		},
+		[theme.breakpoints.down('xs')]: {
+			fontSize: '1rem',
+			padding: '6px 14px'
 		}
 	},
 	container: {

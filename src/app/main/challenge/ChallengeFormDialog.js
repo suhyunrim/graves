@@ -13,13 +13,18 @@ import {
 import { makeStyles } from '@material-ui/core/styles';
 import * as Actions from './store/actions';
 
-const useStyles = makeStyles(() => ({
+const useStyles = makeStyles(theme => ({
 	paper: {
 		background: 'linear-gradient(135deg, #1a1a2e 0%, #0f0f1a 100%)',
 		color: '#fff',
 		borderRadius: 20,
 		border: '1px solid rgba(0, 212, 255, 0.3)',
-		minWidth: 400
+		minWidth: 400,
+		[theme.breakpoints.down('xs')]: {
+			minWidth: 'auto',
+			margin: 16,
+			borderRadius: 16
+		}
 	},
 	title: {
 		fontFamily: '"Noto Sans KR", sans-serif',
