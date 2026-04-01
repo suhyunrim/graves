@@ -15,6 +15,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
+          ref: prod
           fetch-depth: 0
 
       - name: Get commits since last release note date
@@ -180,11 +181,18 @@ jobs:
             fs.writeFileSync('./public/release-notes.json', JSON.stringify(notes, null, '\t') + '\n');
           "
 
-      - name: Commit and push
+      - name: Commit and push to prod
         if: steps.ai.outputs.has_changes == 'true'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add public/release-notes.json
           git commit -m "릴리즈 노트 자동 업데이트 v${{ steps.version.outputs.version }}"
-          git push
+          git push origin prod
+
+      - name: Merge to master
+        if: steps.ai.outputs.has_changes == 'true'
+        run: |
+          git checkout master
+          git merge prod --no-edit
+          git push origin master
