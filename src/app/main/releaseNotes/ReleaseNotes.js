@@ -9,6 +9,17 @@ import axios from 'axios';
 
 const STORAGE_KEY = 'graves_last_seen_version';
 
+function compareVersions(a, b) {
+	const pa = a.split('.').map(Number);
+	const pb = b.split('.').map(Number);
+	for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
+		const na = pa[i] || 0;
+		const nb = pb[i] || 0;
+		if (na !== nb) return na - nb;
+	}
+	return 0;
+}
+
 const useStyles = makeStyles(theme => ({
 	layoutRoot: {
 		background: 'linear-gradient(180deg, #0f0f1a 0%, #1a1a2e 100%)',
@@ -176,7 +187,7 @@ function ReleaseNotes() {
 				<div className={classes.container}>
 					{releases.length > 0 ? (
 						releases.map(release => {
-							const isNew = lastSeenVersion && release.version > lastSeenVersion;
+							const isNew = lastSeenVersion && compareVersions(release.version, lastSeenVersion) > 0;
 							return (
 								<div
 									key={release.version}
