@@ -624,7 +624,7 @@ function MyInfoPage(props) {
 								<div className={classes.emblemContainer}>
 									<img
 										className={classes.emblem}
-										src={`/assets/images/ranked-emblems/Emblem_${soloTierName}.png`}
+										src={`/assets/images/ranked-emblems/Emblem_${soloTierName}.webp`}
 										alt={soloTierName}
 										style={{ filter: `drop-shadow(0 0 20px ${soloTierColor.glow})` }}
 									/>
@@ -653,7 +653,7 @@ function MyInfoPage(props) {
 								<div className={classes.emblemContainer}>
 									<img
 										className={classes.emblem}
-										src={`/assets/images/ranked-emblems/Emblem_${ratingTierName}.png`}
+										src={`/assets/images/ranked-emblems/Emblem_${ratingTierName}.webp`}
 										alt={ratingTierName}
 										style={{ filter: `drop-shadow(0 0 20px ${ratingTierColor.glow})` }}
 									/>

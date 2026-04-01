@@ -1,0 +1,203 @@
+name: Daily Release Notes
+
+on:
+  schedule:
+    # 매일 아침 6시 KST (= 전날 21:00 UTC)
+    - cron: '0 21 * * *'
+  workflow_dispatch: # 수동 실행도 가능
+
+jobs:
+  generate-release-notes:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: prod
+          fetch-depth: 0
+
+      - name: Get commits since last release note date
+        id: commits
+        run: |
+          # release-notes.json에서 최신 날짜 가져오기
+          LAST_DATE=$(node -e "
+            const notes = require('./public/release-notes.json');
+            if (notes.length > 0) {
+              console.log(notes[0].date);
+            } else {
+              console.log('2000-01-01');
+            }
+          ")
+          echo "last_date=$LAST_DATE"
+
+          # 그 날짜 이후 커밋 수집 (머지 커밋 제외)
+          COMMITS=$(git log --after="$LAST_DATE" --format="%s" --no-merges HEAD)
+
+          if [ -z "$COMMITS" ]; then
+            echo "has_commits=false" >> $GITHUB_OUTPUT
+            echo "No new commits since $LAST_DATE"
+          else
+            echo "has_commits=true" >> $GITHUB_OUTPUT
+            # 멀티라인을 GITHUB_OUTPUT에 저장
+            EOF_MARKER=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
+            echo "commits<<$EOF_MARKER" >> $GITHUB_OUTPUT
+            echo "$COMMITS" >> $GITHUB_OUTPUT
+            echo "$EOF_MARKER" >> $GITHUB_OUTPUT
+            echo "Found commits since $LAST_DATE:"
+            echo "$COMMITS"
+          fi
+
+      - name: Get next version
+        if: steps.commits.outputs.has_commits == 'true'
+        id: version
+        run: |
+          NEXT_VERSION=$(node -e "
+            const notes = require('./public/release-notes.json');
+            if (notes.length === 0) {
+              console.log('0.1.0');
+            } else {
+              const parts = notes[0].version.split('.');
+              const minor = parseInt(parts[1]) + 1;
+              console.log(parts[0] + '.' + minor + '.0');
+            }
+          ")
+          TODAY=$(date -u +%Y-%m-%d)
+          echo "version=$NEXT_VERSION" >> $GITHUB_OUTPUT
+          echo "date=$TODAY" >> $GITHUB_OUTPUT
+          echo "Next version: $NEXT_VERSION, Date: $TODAY"
+
+      - name: Generate release notes with Claude
+        if: steps.commits.outputs.has_commits == 'true'
+        id: ai
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          COMMITS='${{ steps.commits.outputs.commits }}'
+
+          RESPONSE=$(curl -s https://api.anthropic.com/v1/messages \
+            -H "content-type: application/json" \
+            -H "x-api-key: $ANTHROPIC_API_KEY" \
+            -H "anthropic-version: 2023-06-01" \
+            -d "$(node -e "
+              const commits = process.argv[1];
+              const payload = {
+                model: 'claude-haiku-4-5-20251001',
+                max_tokens: 1024,
+                messages: [{
+                  role: 'user',
+                  content: '다음은 git 커밋 메시지 목록이야. 이걸 유저가 읽을 릴리즈 노트로 변환해줘.\n\n규칙:\n- eslint, CLAUDE.md, 설정파일 수정 같은 내부 작업은 제외\n- 유저 관점에서 의미 있는 변경만 포함\n- 한글로 간결하게 작성\n- 비슷한 커밋은 하나로 합쳐\n- JSON 배열로만 응답 (문자열 배열, 다른 텍스트 없이)\n- 항목이 하나도 없으면 빈 배열 [] 반환\n\n커밋 목록:\n' + commits
+                }]
+              };
+              console.log(JSON.stringify(payload));
+            " "$COMMITS")")
+
+          # Claude 응답에서 텍스트 추출
+          CHANGES=$(echo "$RESPONSE" | node -e "
+            let data = '';
+            process.stdin.on('data', c => data += c);
+            process.stdin.on('end', () => {
+              const parsed = JSON.parse(data);
+              const text = parsed.content[0].text;
+              // JSON 배열 부분만 추출
+              const match = text.match(/\[[\s\S]*\]/);
+              if (match) {
+                console.log(match[0]);
+              } else {
+                console.log('[]');
+              }
+            });
+          ")
+
+          echo "changes=$CHANGES"
+
+          # 빈 배열이면 스킵
+          IS_EMPTY=$(node -e "
+            const arr = JSON.parse(process.argv[1]);
+            console.log(arr.length === 0 ? 'true' : 'false');
+          " "$CHANGES")
+
+          if [ "$IS_EMPTY" = "true" ]; then
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+          else
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+            EOF_MARKER=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
+            echo "changes<<$EOF_MARKER" >> $GITHUB_OUTPUT
+            echo "$CHANGES" >> $GITHUB_OUTPUT
+            echo "$EOF_MARKER" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Generate title with Claude
+        if: steps.ai.outputs.has_changes == 'true'
+        id: title
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          CHANGES='${{ steps.ai.outputs.changes }}'
+
+          RESPONSE=$(curl -s https://api.anthropic.com/v1/messages \
+            -H "content-type: application/json" \
+            -H "x-api-key: $ANTHROPIC_API_KEY" \
+            -H "anthropic-version: 2023-06-01" \
+            -d "$(node -e "
+              const changes = process.argv[1];
+              const payload = {
+                model: 'claude-haiku-4-5-20251001',
+                max_tokens: 100,
+                messages: [{
+                  role: 'user',
+                  content: '다음 변경사항 목록을 보고 한글로 짧은 제목(10자 이내)을 지어줘. 제목 텍스트만 응답해.\n\n' + changes
+                }]
+              };
+              console.log(JSON.stringify(payload));
+            " "$CHANGES")")
+
+          TITLE=$(echo "$RESPONSE" | node -e "
+            let data = '';
+            process.stdin.on('data', c => data += c);
+            process.stdin.on('end', () => {
+              const parsed = JSON.parse(data);
+              console.log(parsed.content[0].text.trim());
+            });
+          ")
+
+          echo "title=$TITLE" >> $GITHUB_OUTPUT
+          echo "Title: $TITLE"
+
+      - name: Update release-notes.json
+        if: steps.ai.outputs.has_changes == 'true'
+        env:
+          RELEASE_VERSION: ${{ steps.version.outputs.version }}
+          RELEASE_DATE: ${{ steps.version.outputs.date }}
+          RELEASE_TITLE: ${{ steps.title.outputs.title }}
+          RELEASE_CHANGES: ${{ steps.ai.outputs.changes }}
+        run: |
+          node -e "
+            const fs = require('fs');
+            const notes = require('./public/release-notes.json');
+            const newEntry = {
+              version: process.env.RELEASE_VERSION,
+              date: process.env.RELEASE_DATE,
+              title: process.env.RELEASE_TITLE,
+              changes: JSON.parse(process.env.RELEASE_CHANGES)
+            };
+            notes.unshift(newEntry);
+            fs.writeFileSync('./public/release-notes.json', JSON.stringify(notes, null, '\t') + '\n');
+          "
+
+      - name: Commit and push to prod
+        if: steps.ai.outputs.has_changes == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add public/release-notes.json
+          git commit -m "릴리즈 노트 자동 업데이트 v${{ steps.version.outputs.version }}"
+          git push origin prod
+
+      - name: Merge to master
+        if: steps.ai.outputs.has_changes == 'true'
+        run: |
+          git checkout master
+          git merge prod --no-edit
+          git push origin master

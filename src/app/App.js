@@ -16,6 +16,7 @@ import { Auth } from './auth';
 import routes from './fuse-configs/routesConfig';
 import store from './store';
 import './utility/getLatesetRiotDataVersion';
+import './main/releaseNotes/releaseNoteBadge';
 
 const jss = create({
 	...jssPreset(),
