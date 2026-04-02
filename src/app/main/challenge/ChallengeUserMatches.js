@@ -526,24 +526,11 @@ const useStyles = makeStyles(theme => ({
 	}
 }));
 
-function findMyParticipant(match, puuid, subPuuid) {
+function findMyParticipant(match, puuid) {
 	if (!match.participants) return null;
-	// 본캐 puuid로 먼저 찾기
-	const byMain = match.participants.find(p => p.puuid === puuid);
-	if (byMain) return byMain;
-	// 부캐 puuid로 찾기
-	if (subPuuid) {
-		const bySub = match.participants.find(p => p.puuid === subPuuid);
-		if (bySub) return bySub;
-	}
-	// 둘 다 못 찾으면 top-level 필드(championName + kills/deaths/assists)로 매칭
-	if (match.championName) {
-		const byStats = match.participants.find(
-			p => p.championName === match.championName && p.kills === match.kills && p.deaths === match.deaths && p.assists === match.assists
-		);
-		if (byStats) return byStats;
-	}
-	return null;
+	// targetPuuid: 백엔드에서 해당 매치의 실제 플레이어 puuid 제공
+	const target = match.targetPuuid || puuid;
+	return match.participants.find(p => p.puuid === target) || null;
 }
 
 function ChallengeUserMatches() {
@@ -573,15 +560,12 @@ function ChallengeUserMatches() {
 		return leaderboard.find(p => p.puuid === puuid) || null;
 	}, [leaderboard, puuid]);
 
-	// Sub account puuid from auth state
-	const subPuuid = user && user.subPuuid ? user.subPuuid : null;
-
 	// Find most played champion from matches
 	const topChampion = useMemo(() => {
 		if (!userMatches || userMatches.length === 0) return null;
 		const counts = {};
 		userMatches.forEach(m => {
-			const me = findMyParticipant(m, puuid, subPuuid);
+			const me = findMyParticipant(m, puuid);
 			const champ = me ? me.championName : m.championName;
 			counts[champ] = (counts[champ] || 0) + 1;
 		});
@@ -595,7 +579,7 @@ function ChallengeUserMatches() {
 		let totalD = 0;
 		let totalA = 0;
 		userMatches.forEach(m => {
-			const me = findMyParticipant(m, puuid, subPuuid);
+			const me = findMyParticipant(m, puuid);
 			totalK += me ? me.kills : (m.kills || 0);
 			totalD += me ? me.deaths : (m.deaths || 0);
 			totalA += me ? me.assists : (m.assists || 0);
@@ -640,7 +624,7 @@ function ChallengeUserMatches() {
 		);
 	}
 
-	function renderTeamTable(participants, teamId, teamWin) {
+	function renderTeamTable(participants, teamId, teamWin, targetPuuid) {
 		const team = participants.filter(p => p.teamId === teamId);
 		const isBlue = teamId === 100;
 
@@ -650,7 +634,7 @@ function ChallengeUserMatches() {
 					{isBlue ? '블루팀' : '레드팀'} ({teamWin ? '승리' : '패배'})
 				</div>
 				{team.map(p => {
-					const isMe = p.puuid === puuid || (subPuuid && p.puuid === subPuuid);
+					const isMe = p.puuid === (targetPuuid || puuid);
 					const isGroupMember = groupMemberPuuids.has(p.puuid) && !isMe;
 					const cs = (p.totalMinionsKilled || 0) + (p.neutralMinionsKilled || 0);
 					let rowClass = classes.teamRow;
@@ -745,7 +729,7 @@ function ChallengeUserMatches() {
 					) : (
 						<>
 							{visibleMatches.map(match => {
-								const me = findMyParticipant(match, puuid, subPuuid);
+								const me = findMyParticipant(match, puuid);
 								const expanded = expandedMatches[match.matchId];
 								const champName = me ? me.championName : match.championName;
 								const kills = me ? me.kills : match.kills;
@@ -877,8 +861,8 @@ function ChallengeUserMatches() {
 										{/* Expanded: 10 player table */}
 										{expanded && match.participants && (
 											<div className={classes.expandedContent}>
-												{renderTeamTable(match.participants, 100, blueWin)}
-												{renderTeamTable(match.participants, 200, !blueWin)}
+												{renderTeamTable(match.participants, 100, blueWin, match.targetPuuid)}
+												{renderTeamTable(match.participants, 200, !blueWin, match.targetPuuid)}
 											</div>
 										)}
 									</div>
