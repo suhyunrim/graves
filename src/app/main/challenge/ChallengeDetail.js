@@ -387,6 +387,7 @@ function ChallengeDetail() {
 	const { challengeId } = useParams();
 	const detail = useSelector(({ Challenge }) => Challenge.challenge.detail);
 	const leaderboard = useSelector(({ Challenge }) => Challenge.challenge.leaderboard);
+	const loadingLeaderboard = useSelector(({ Challenge }) => Challenge.challenge.loadingLeaderboard);
 	const myStats = useSelector(({ Challenge }) => Challenge.challenge.myStats);
 	const syncMessage = useSelector(({ Challenge }) => Challenge.challenge.syncMessage);
 	const syncStatus = useSelector(({ Challenge }) => Challenge.challenge.syncStatus);
@@ -637,7 +638,11 @@ function ChallengeDetail() {
 
 					{/* Leaderboard */}
 					<div className={classes.tableWrapper}>
-						{leaderboard && leaderboard.length > 0 ? (
+						{loadingLeaderboard ? (
+							<div className={classes.loadingWrapper}>
+								<CircularProgress style={{ color: '#00d4ff' }} />
+							</div>
+						) : leaderboard && leaderboard.length > 0 ? (
 							<>
 								{/* Desktop */}
 								<div className={classes.desktopOnly}>

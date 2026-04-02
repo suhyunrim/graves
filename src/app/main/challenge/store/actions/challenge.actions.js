@@ -1,5 +1,7 @@
 import createCamilleAxios from 'app/utility/camilleAxios';
 
+export const LOADING_LIST = '[CHALLENGE] LOADING LIST';
+export const LOADING_LEADERBOARD = '[CHALLENGE] LOADING LEADERBOARD';
 export const GET_CHALLENGE_LIST = '[CHALLENGE] GET CHALLENGE LIST';
 export const GET_CHALLENGE_DETAIL = '[CHALLENGE] GET CHALLENGE DETAIL';
 export const GET_LEADERBOARD = '[CHALLENGE] GET LEADERBOARD';
@@ -14,13 +16,15 @@ export const CLEAR_CHALLENGE_DETAIL = '[CHALLENGE] CLEAR CHALLENGE DETAIL';
 export function getChallengeList(groupId) {
 	const request = createCamilleAxios().get(`/api/challenge/${groupId}/list`);
 
-	return dispatch =>
-		request.then(response =>
+	return dispatch => {
+		dispatch({ type: LOADING_LIST });
+		return request.then(response =>
 			dispatch({
 				type: GET_CHALLENGE_LIST,
 				payload: response.data.result
 			})
 		);
+	};
 }
 
 export function getChallengeDetail(groupId, challengeId) {
@@ -38,13 +42,15 @@ export function getChallengeDetail(groupId, challengeId) {
 export function getLeaderboard(groupId, challengeId) {
 	const request = createCamilleAxios().get(`/api/challenge/${groupId}/${challengeId}/leaderboard`);
 
-	return dispatch =>
-		request.then(response =>
+	return dispatch => {
+		dispatch({ type: LOADING_LEADERBOARD });
+		return request.then(response =>
 			dispatch({
 				type: GET_LEADERBOARD,
 				payload: response.data.result
 			})
 		);
+	};
 }
 
 export function getMyStats(groupId, challengeId) {

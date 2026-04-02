@@ -2,8 +2,10 @@ import * as Actions from '../actions';
 
 const initialState = {
 	list: [],
+	loadingList: false,
 	detail: null,
 	leaderboard: [],
+	loadingLeaderboard: false,
 	myStats: null,
 	userMatches: null,
 	isSyncing: false,
@@ -14,8 +16,14 @@ const initialState = {
 
 const challengeReducer = (state = initialState, action) => {
 	switch (action.type) {
+		case Actions.LOADING_LIST: {
+			return { ...state, loadingList: true };
+		}
+		case Actions.LOADING_LEADERBOARD: {
+			return { ...state, loadingLeaderboard: true };
+		}
 		case Actions.GET_CHALLENGE_LIST: {
-			return { ...state, list: action.payload };
+			return { ...state, list: action.payload, loadingList: false };
 		}
 		case Actions.GET_CHALLENGE_DETAIL: {
 			return {
@@ -26,7 +34,7 @@ const challengeReducer = (state = initialState, action) => {
 			};
 		}
 		case Actions.GET_LEADERBOARD: {
-			return { ...state, leaderboard: action.payload };
+			return { ...state, leaderboard: action.payload, loadingLeaderboard: false };
 		}
 		case Actions.GET_MY_STATS: {
 			return { ...state, myStats: action.payload };

@@ -1,7 +1,7 @@
 import FusePageSimple from '@fuse/core/FusePageSimple';
 import withReducer from 'app/store/withReducer';
 import { makeStyles } from '@material-ui/core/styles';
-import { Typography, Button, Snackbar } from '@material-ui/core';
+import { Typography, Button, Snackbar, CircularProgress } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
 import PeopleIcon from '@material-ui/icons/People';
 import React, { useEffect, useState } from 'react';
@@ -172,6 +172,11 @@ const useStyles = makeStyles(theme => ({
 		fontSize: '1.8rem',
 		color: 'rgba(255, 255, 255, 0.4)'
 	},
+	loadingWrapper: {
+		display: 'flex',
+		justifyContent: 'center',
+		padding: 60
+	},
 	snackbar: {
 		'& .MuiSnackbarContent-root': {
 			background: '#51cf66',
@@ -187,6 +192,7 @@ function ChallengeList() {
 	const classes = useStyles();
 	const dispatch = useDispatch();
 	const list = useSelector(({ Challenge }) => Challenge.challenge.list);
+	const loadingList = useSelector(({ Challenge }) => Challenge.challenge.loadingList);
 	const user = useSelector(state => state.auth.user);
 	const groupId = user && user.reprGroup ? user.reprGroup.groupId : null;
 	const [formOpen, setFormOpen] = useState(false);
@@ -226,7 +232,11 @@ function ChallengeList() {
 			}
 			content={
 				<div className={classes.container}>
-					{list && list.length > 0 ? (
+					{loadingList ? (
+						<div className={classes.loadingWrapper}>
+							<CircularProgress style={{ color: '#00d4ff' }} />
+						</div>
+					) : list && list.length > 0 ? (
 						<div className={classes.cardGrid}>
 							{list.map(c => {
 								const statusColor = statusColors[c.status] || '#868e96';
