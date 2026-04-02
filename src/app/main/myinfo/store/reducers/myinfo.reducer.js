@@ -25,7 +25,14 @@ const myInfoReducer = (state = initialState, action) => {
 				bestOpponent: stats.bestOpponent || null,
 				worstOpponent: stats.worstOpponent || null,
 				ratingHistory: stats.ratingHistory || [],
-				honorStats: action.payload.honorStats || null
+				honorStats: action.payload.honorStats || null,
+				subAccount: action.payload.subAccount || null
+			};
+		}
+		case Actions.SET_SUB_ACCOUNT: {
+			return {
+				...state,
+				subAccount: action.payload
 			};
 		}
 		case Actions.TRY_REFRESH_CHAMPION_SCORES: {

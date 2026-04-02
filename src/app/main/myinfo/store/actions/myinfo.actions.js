@@ -5,6 +5,7 @@ const qs = require('querystring');
 export const GET_MYINFO = '[MYINFO] GET MYINFO';
 export const REFRESH_CHAMPION_SCORES = '[MYINFO] REFRESH CHAMPION SCORES';
 export const TRY_REFRESH_CHAMPION_SCORES = '[MYINFO] TRY REFRESH CHAMPION SCORES';
+export const SET_SUB_ACCOUNT = '[MYINFO] SET SUB ACCOUNT';
 
 // const getTotalMatchCount = champData => champData.win + champData.lose;
 // const getWinRate = champData => Math.ceil((champData.win / getTotalMatchCount(champData)) * 100);
@@ -51,6 +52,31 @@ export function getMyInfo(groupId, puuid) {
 			dispatch({
 				type: GET_MYINFO,
 				payload: result
+			});
+		});
+}
+
+export function registerSubAccount(riotId, groupId) {
+	const request = createCamilleAxios().post('/api/user/sub-account', { riotId, groupId }, { silentError: true });
+
+	return dispatch =>
+		request.then(response => {
+			dispatch({
+				type: SET_SUB_ACCOUNT,
+				payload: response.data.result.subAccount
+			});
+			return response.data.result;
+		});
+}
+
+export function removeSubAccount(groupId) {
+	const request = createCamilleAxios().delete('/api/user/sub-account', { data: { groupId }, silentError: true });
+
+	return dispatch =>
+		request.then(() => {
+			dispatch({
+				type: SET_SUB_ACCOUNT,
+				payload: null
 			});
 		});
 }

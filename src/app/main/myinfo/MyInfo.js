@@ -1,7 +1,18 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import FuseLoading from '@fuse/core/FuseLoading';
 import FusePageSimple from '@fuse/core/FusePageSimple';
 import { makeStyles } from '@material-ui/core/styles';
+import {
+	Button,
+	TextField,
+	Dialog,
+	DialogTitle,
+	DialogContent,
+	DialogContentText,
+	DialogActions,
+	Snackbar,
+	CircularProgress
+} from '@material-ui/core';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import withReducer from 'app/store/withReducer';
@@ -488,6 +499,126 @@ const useStyles = makeStyles(theme => ({
 		color: 'rgba(255, 255, 255, 0.4)',
 		textAlign: 'center',
 		padding: '20px 0'
+	},
+	// 부캐 설정
+	subAccountSection: {
+		background: 'linear-gradient(135deg, #1a1a2e 0%, #0f0f1a 100%)',
+		borderRadius: 20,
+		border: '1px solid rgba(0, 212, 255, 0.2)',
+		padding: '24px 28px',
+		marginTop: 20
+	},
+	subAccountTitle: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.6rem',
+		fontWeight: 700,
+		color: '#fff',
+		marginBottom: 16
+	},
+	subAccountEmpty: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.3rem',
+		color: 'rgba(255, 255, 255, 0.5)',
+		marginBottom: 16
+	},
+	subAccountForm: {
+		display: 'flex',
+		alignItems: 'center',
+		gap: 12,
+		[theme.breakpoints.down('xs')]: {
+			flexDirection: 'column',
+			alignItems: 'stretch'
+		}
+	},
+	subAccountInput: {
+		flex: 1,
+		'& .MuiInputBase-root': {
+			color: '#fff',
+			fontFamily: '"Noto Sans KR", sans-serif'
+		},
+		'& .MuiInputLabel-root': {
+			color: 'rgba(255, 255, 255, 0.5)',
+			fontFamily: '"Noto Sans KR", sans-serif'
+		},
+		'& .MuiOutlinedInput-notchedOutline': {
+			borderColor: 'rgba(255, 255, 255, 0.2)'
+		},
+		'& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline': {
+			borderColor: 'rgba(0, 212, 255, 0.5)'
+		},
+		'& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline': {
+			borderColor: '#00d4ff'
+		},
+		'& .MuiInputLabel-root.Mui-focused': {
+			color: '#00d4ff'
+		}
+	},
+	subAccountRegisterBtn: {
+		background: 'linear-gradient(135deg, #00d4ff 0%, #0099cc 100%)',
+		color: '#000',
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontWeight: 700,
+		fontSize: '1.2rem',
+		padding: '10px 24px',
+		borderRadius: 10,
+		textTransform: 'none',
+		whiteSpace: 'nowrap',
+		'&:hover': {
+			background: 'linear-gradient(135deg, #00bce0 0%, #0088bb 100%)'
+		},
+		'&.Mui-disabled': {
+			background: 'rgba(255, 255, 255, 0.1)',
+			color: 'rgba(255, 255, 255, 0.3)'
+		}
+	},
+	subAccountInfo: {
+		display: 'flex',
+		alignItems: 'center',
+		justifyContent: 'space-between',
+		flexWrap: 'wrap',
+		gap: 12
+	},
+	subAccountName: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.5rem',
+		fontWeight: 600,
+		color: '#00d4ff'
+	},
+	subAccountRemoveBtn: {
+		background: 'rgba(255, 107, 107, 0.15)',
+		color: '#ff6b6b',
+		border: '1px solid rgba(255, 107, 107, 0.3)',
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontWeight: 600,
+		fontSize: '1.1rem',
+		padding: '6px 16px',
+		borderRadius: 10,
+		textTransform: 'none',
+		'&:hover': {
+			background: 'rgba(255, 107, 107, 0.25)'
+		}
+	},
+	subAccountNote: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.1rem',
+		color: 'rgba(255, 255, 255, 0.4)',
+		marginTop: 12
+	},
+	snackSuccess: {
+		'& .MuiSnackbarContent-root': {
+			background: '#51cf66',
+			color: '#000',
+			fontFamily: '"Noto Sans KR", sans-serif',
+			fontWeight: 600
+		}
+	},
+	snackError: {
+		'& .MuiSnackbarContent-root': {
+			background: '#ff6b6b',
+			color: '#fff',
+			fontFamily: '"Noto Sans KR", sans-serif',
+			fontWeight: 600
+		}
 	}
 }));
 
@@ -512,6 +643,42 @@ function MyInfoPage(props) {
 	const bestOpponent = useSelector(({ MyInfo }) => MyInfo.myInfo.bestOpponent);
 	const worstOpponent = useSelector(({ MyInfo }) => MyInfo.myInfo.worstOpponent);
 	const honorStats = useSelector(({ MyInfo }) => MyInfo.myInfo.honorStats);
+	const subAccount = useSelector(({ MyInfo }) => MyInfo.myInfo.subAccount);
+
+	const [subAccountInput, setSubAccountInput] = useState('');
+	const [subAccountLoading, setSubAccountLoading] = useState(false);
+	const [removeDialogOpen, setRemoveDialogOpen] = useState(false);
+	const [snack, setSnack] = useState({ open: false, message: '', type: 'success' });
+
+	const isMyPage = !puuid || puuid === myPuuid;
+	const isLoggedIn = Boolean(myPuuid);
+
+	function handleRegisterSubAccount() {
+		if (!subAccountInput.trim()) return;
+		setSubAccountLoading(true);
+		dispatch(Actions.registerSubAccount(subAccountInput.trim(), user.reprGroup.groupId))
+			.then(result => {
+				setSubAccountLoading(false);
+				setSubAccountInput('');
+				setSnack({ open: true, message: result.message || '부캐가 등록되었습니다.', type: 'success' });
+			})
+			.catch(err => {
+				setSubAccountLoading(false);
+				const msg = err.response && err.response.data ? err.response.data.result : '부캐 등록에 실패했습니다.';
+				setSnack({ open: true, message: msg, type: 'error' });
+			});
+	}
+
+	function handleRemoveSubAccount() {
+		setRemoveDialogOpen(false);
+		dispatch(Actions.removeSubAccount(user.reprGroup.groupId))
+			.then(() => {
+				setSnack({ open: true, message: '부캐가 해제되었습니다.', type: 'success' });
+			})
+			.catch(() => {
+				setSnack({ open: true, message: '부캐 해제에 실패했습니다.', type: 'error' });
+			});
+	}
 
 	const getSoloRankTierName = () => {
 		const tier = summonerInfo.rankTier;
@@ -811,6 +978,89 @@ function MyInfoPage(props) {
 							)}
 						</div>
 					</div>
+
+					{/* 부캐 설정 */}
+					{isMyPage && isLoggedIn && (
+						<div className={classes.subAccountSection}>
+							<div className={classes.subAccountTitle}>부캐 설정</div>
+							{subAccount ? (
+								<>
+									<div className={classes.subAccountInfo}>
+										<span className={classes.subAccountName}>
+											<span role="img" aria-label="gamepad">&#x1F3AE;</span> {subAccount.name}
+										</span>
+										<Button className={classes.subAccountRemoveBtn} onClick={() => setRemoveDialogOpen(true)}>
+											해제
+										</Button>
+									</div>
+									<div className={classes.subAccountNote}>
+										※ 챌린지에서 부캐 전적이 합산됩니다.
+									</div>
+								</>
+							) : (
+								<>
+									<div className={classes.subAccountEmpty}>등록된 부캐가 없습니다.</div>
+									<div className={classes.subAccountForm}>
+										<TextField
+											className={classes.subAccountInput}
+											label="Riot ID (닉네임#태그)"
+											variant="outlined"
+											size="small"
+											value={subAccountInput}
+											onChange={e => setSubAccountInput(e.target.value)}
+											onKeyDown={e => e.key === 'Enter' && handleRegisterSubAccount()}
+											disabled={subAccountLoading}
+										/>
+										<Button
+											className={classes.subAccountRegisterBtn}
+											onClick={handleRegisterSubAccount}
+											disabled={subAccountLoading || !subAccountInput.trim()}
+										>
+											{subAccountLoading ? <CircularProgress size={20} style={{ color: '#000' }} /> : '등록'}
+										</Button>
+									</div>
+								</>
+							)}
+						</div>
+					)}
+
+					{/* 부캐 해제 확인 다이얼로그 */}
+					<Dialog
+						open={removeDialogOpen}
+						onClose={() => setRemoveDialogOpen(false)}
+						PaperProps={{
+							style: {
+								background: 'linear-gradient(135deg, #1a1a2e 0%, #0f0f1a 100%)',
+								color: '#fff',
+								border: '1px solid rgba(255, 107, 107, 0.3)',
+								borderRadius: 16
+							}
+						}}
+					>
+						<DialogTitle style={{ fontFamily: '"Noto Sans KR", sans-serif' }}>부캐 해제</DialogTitle>
+						<DialogContent>
+							<DialogContentText style={{ fontFamily: '"Noto Sans KR", sans-serif', color: 'rgba(255, 255, 255, 0.7)' }}>
+								부캐를 해제하시겠습니까? 챌린지에서 부캐 전적이 합산되지 않습니다.
+							</DialogContentText>
+						</DialogContent>
+						<DialogActions>
+							<Button onClick={() => setRemoveDialogOpen(false)} style={{ color: 'rgba(255, 255, 255, 0.6)', fontFamily: '"Noto Sans KR", sans-serif' }}>
+								취소
+							</Button>
+							<Button onClick={handleRemoveSubAccount} style={{ color: '#ff6b6b', fontFamily: '"Noto Sans KR", sans-serif', fontWeight: 700 }}>
+								해제
+							</Button>
+						</DialogActions>
+					</Dialog>
+
+					{/* Snackbar */}
+					<Snackbar
+						className={snack.type === 'success' ? classes.snackSuccess : classes.snackError}
+						open={snack.open}
+						autoHideDuration={3000}
+						onClose={() => setSnack(prev => ({ ...prev, open: false }))}
+						message={snack.message}
+					/>
 
 					{/* 레이팅 차트 */}
 					<RatingChart />
