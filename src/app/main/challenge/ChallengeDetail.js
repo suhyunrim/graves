@@ -270,7 +270,6 @@ const useStyles = makeStyles(theme => ({
 		color: '#00d4ff'
 	},
 	streakFire: { color: '#ff6b00' },
-	streakSkull: { color: '#868e96' },
 	emptyState: {
 		display: 'flex',
 		flexDirection: 'column',
@@ -652,7 +651,7 @@ function ChallengeDetail() {
 												<TableCell className={classes.th}>패</TableCell>
 												<TableCell className={classes.th}>승률</TableCell>
 												<TableCell className={classes.th}>포인트</TableCell>
-												<TableCell className={classes.th}>연승</TableCell>
+												<TableCell className={classes.th}>최대 연승</TableCell>
 											</TableRow>
 										</TableHead>
 										<TableBody>
@@ -676,16 +675,10 @@ function ChallengeDetail() {
 														</TableCell>
 														<TableCell className={classes.td}>{row.points}</TableCell>
 														<TableCell className={classes.td}>
-															{row.currentWinStreak > 0 && (
+															{row.bestWinStreak > 0 && (
 																<span className={classes.streakFire}>
 																	<span role="img" aria-label="fire">&#x1F525;</span>
-																	{row.currentWinStreak}
-																</span>
-															)}
-															{row.currentLoseStreak > 0 && (
-																<span className={classes.streakSkull}>
-																	<span role="img" aria-label="skull">&#x1F480;</span>
-																	{row.currentLoseStreak}
+																	{row.bestWinStreak}
 																</span>
 															)}
 														</TableCell>
@@ -707,10 +700,10 @@ function ChallengeDetail() {
 													<Link to={`/challenge/${challengeId}/user/${row.puuid}`} className={classes.mobileName}>
 														{row.name}
 													</Link>
-													{row.currentWinStreak > 0 && (
+													{row.bestWinStreak > 0 && (
 														<span className={classes.streakFire}>
 															<span role="img" aria-label="fire">&#x1F525;</span>
-															{row.currentWinStreak}
+															{row.bestWinStreak}
 														</span>
 													)}
 												</div>
