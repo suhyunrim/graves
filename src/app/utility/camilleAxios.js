@@ -34,6 +34,9 @@ const createCamilleAxios = () => {
 				window.location.href = '/login';
 				return Promise.reject(error);
 			}
+			if (error.config && error.config.silentError) {
+				return Promise.reject(error);
+			}
 			store.dispatch(
 				fuseActions.openDialog({
 					children: (

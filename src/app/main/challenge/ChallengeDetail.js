@@ -31,7 +31,7 @@ import {
 	statusColors,
 	formatDateRange,
 	getDday,
-	formatShortDateTime
+	formatTimeAgo
 } from './challengeUtils';
 
 const useStyles = makeStyles(theme => ({
@@ -416,8 +416,9 @@ function ChallengeDetail() {
 	const detail = useSelector(({ Challenge }) => Challenge.challenge.detail);
 	const leaderboard = useSelector(({ Challenge }) => Challenge.challenge.leaderboard);
 	const myStats = useSelector(({ Challenge }) => Challenge.challenge.myStats);
-	const isSyncing = useSelector(({ Challenge }) => Challenge.challenge.isSyncing);
 	const syncMessage = useSelector(({ Challenge }) => Challenge.challenge.syncMessage);
+	const syncStatus = useSelector(({ Challenge }) => Challenge.challenge.syncStatus);
+	const syncProgress = useSelector(({ Challenge }) => Challenge.challenge.syncProgress);
 	const user = useSelector(state => state.auth.user);
 	const groupId = user && user.reprGroup ? user.reprGroup.groupId : null;
 	const isLoggedIn = Boolean(user && user.reprGroup);
@@ -427,6 +428,7 @@ function ChallengeDetail() {
 	const [editOpen, setEditOpen] = useState(false);
 	const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
 	const [snack, setSnack] = useState({ open: false, message: '', type: 'success' });
+	const [syncComplete, setSyncComplete] = useState(false);
 
 	const loadData = useCallback(() => {
 		if (!groupId) return;
@@ -444,12 +446,51 @@ function ChallengeDetail() {
 		};
 	}, [loadData, dispatch]);
 
+	// Handle sync request result
 	useEffect(() => {
-		if (syncMessage && syncMessage.type === 'success') {
-			const synced = syncMessage.data && syncMessage.data.synced;
-			setSnack({ open: true, message: `${synced}건 동기화 완료`, type: 'success' });
+		if (!syncMessage) return;
+		if (syncMessage.type === 'success') {
+			setSnack({ open: true, message: '전적 갱신을 요청했습니다.', type: 'success' });
+		} else if (syncMessage.type === 'error') {
+			const { status, message } = syncMessage.data || {};
+			if (status === 409) {
+				setSnack({ open: true, message: message || '이미 갱신 중입니다.', type: 'error' });
+			} else if (status === 429) {
+				setSnack({ open: true, message: message || '잠시 후 다시 시도해주세요.', type: 'error' });
+			}
 		}
 	}, [syncMessage]);
+
+	// Poll sync-status when syncing
+	useEffect(() => {
+		const isSyncing = syncStatus === 'syncing' || (detail && detail.syncStatus === 'syncing');
+		if (!isSyncing || !groupId) return;
+		const interval = setInterval(() => {
+			dispatch(Actions.getSyncStatus(groupId, challengeId));
+		}, 10000);
+		return () => clearInterval(interval);
+	}, [syncStatus, detail, groupId, challengeId, dispatch]);
+
+	// Start polling on 409 (someone else started sync)
+	useEffect(() => {
+		if (syncMessage && syncMessage.type === 'error' && syncMessage.data && syncMessage.data.status === 409 && groupId) {
+			dispatch(Actions.getSyncStatus(groupId, challengeId));
+		}
+	}, [syncMessage, groupId, challengeId, dispatch]);
+
+	// When sync finishes (syncing → idle), refresh data
+	const prevSyncStatus = React.useRef(null);
+	useEffect(() => {
+		if (prevSyncStatus.current === 'syncing' && syncStatus === 'idle') {
+			setSyncComplete(true);
+			setSnack({ open: true, message: '전적 갱신이 완료되었습니다.', type: 'success' });
+			dispatch(Actions.getChallengeDetail(groupId, challengeId));
+			dispatch(Actions.getLeaderboard(groupId, challengeId));
+			if (isLoggedIn) dispatch(Actions.getMyStats(groupId, challengeId));
+			setTimeout(() => setSyncComplete(false), 2000);
+		}
+		prevSyncStatus.current = syncStatus;
+	}, [syncStatus, dispatch, groupId, challengeId, isLoggedIn]);
 
 	function handleJoin() {
 		dispatch(Actions.joinChallenge(groupId, challengeId)).then(() => {
@@ -567,14 +608,25 @@ function ChallengeDetail() {
 								참가 취소
 							</Button>
 						)}
-						{isLoggedIn && (
-							<Button className={classes.syncBtn} onClick={handleSync} disabled={isSyncing} startIcon={isSyncing ? <CircularProgress size={16} style={{ color: '#00d4ff' }} /> : <SyncIcon />}>
-								{isSyncing ? '갱신 중...' : '전적 갱신'}
+						{isLoggedIn && (syncStatus === 'syncing' || detail.syncStatus === 'syncing') && (
+							<span className={classes.syncBtn} style={{ cursor: 'default', display: 'inline-flex', alignItems: 'center' }}>
+								<CircularProgress size={16} style={{ color: '#00d4ff', marginRight: 8 }} />
+								{syncProgress ? `${syncProgress.done}/${syncProgress.total}명 갱신 중...` : '갱신 중...'}
+							</span>
+						)}
+						{isLoggedIn && syncComplete && syncStatus !== 'syncing' && (
+							<span className={classes.syncBtn} style={{ cursor: 'default', color: '#51cf66', borderColor: 'rgba(81, 207, 102, 0.3)' }}>
+								갱신 완료!
+							</span>
+						)}
+						{isLoggedIn && !syncComplete && syncStatus !== 'syncing' && detail.syncStatus !== 'syncing' && (
+							<Button className={classes.syncBtn} onClick={handleSync} startIcon={<SyncIcon />}>
+								전적 갱신
 							</Button>
 						)}
 						{isLoggedIn && (
 							<span className={classes.syncInfo}>
-								마지막 갱신: {formatShortDateTime(detail.lastSyncAt)}
+								마지막 갱신: {formatTimeAgo(detail.lastSyncAt)}
 							</span>
 						)}
 						{isAdmin && detail.status !== 'canceled' && (
