@@ -99,6 +99,25 @@ const useStyles = makeStyles(theme => ({
 	menuIcon: {
 		color: 'rgba(255, 255, 255, 0.6)'
 	},
+	groupIcon: {
+		width: 24,
+		height: 24,
+		borderRadius: '50%',
+		objectFit: 'cover'
+	},
+	groupIconFallback: {
+		width: 24,
+		height: 24,
+		borderRadius: '50%',
+		display: 'flex',
+		alignItems: 'center',
+		justifyContent: 'center',
+		background: 'linear-gradient(135deg, #00d4ff 0%, #0066ff 100%)',
+		color: '#fff',
+		fontSize: '1.2rem',
+		fontWeight: 700,
+		fontFamily: '"Rajdhani", "Noto Sans KR", sans-serif'
+	},
 	divider: {
 		background: 'rgba(0, 212, 255, 0.2)',
 		margin: '8px 16px'
@@ -139,6 +158,18 @@ function UserNavbarHeader(props) {
 				className="user relative flex flex-col items-center justify-center pt-24 pb-64 mb-32 z-0"
 			>
 				<Button onClick={onGroupListClick} className={classes.userButton}>
+					{user.reprGroup && user.reprGroup.iconUrl ? (
+						<img
+							src={user.reprGroup.iconUrl}
+							alt={user.data.displayName}
+							className={classes.groupIcon}
+							style={{ marginRight: 8 }}
+						/>
+					) : (
+						<span className={classes.groupIconFallback} style={{ marginRight: 8 }}>
+							{user.data.displayName ? user.data.displayName.charAt(0).toUpperCase() : '?'}
+						</span>
+					)}
 					<Typography className={clsx(classes.username, 'username whitespace-no-wrap')}>
 						{user.data.displayName}
 					</Typography>
@@ -172,7 +203,13 @@ function UserNavbarHeader(props) {
 							className={classes.menuItem}
 						>
 							<ListItemIcon className={clsx('min-w-40', classes.menuIcon)}>
-								<Icon>account_circle</Icon>
+								{elem.iconUrl ? (
+									<img src={elem.iconUrl} alt={elem.groupName} className={classes.groupIcon} />
+								) : (
+									<span className={classes.groupIconFallback}>
+										{elem.groupName ? elem.groupName.charAt(0).toUpperCase() : '?'}
+									</span>
+								)}
 							</ListItemIcon>
 							<ListItemText primary={elem.groupName} />
 						</MenuItem>

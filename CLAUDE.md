@@ -4,6 +4,10 @@ Behavioral guidelines to reduce common LLM coding mistakes. Merge with project-s
 
 **Tradeoff:** These guidelines bias toward caution over speed. For trivial tasks, use judgment.
 
+## 0-1. 언어
+
+**한글로 대답한다.** 코드, 기술 용어 등 영어가 자연스러운 부분은 영어를 섞어도 된다.
+
 ## 0. 커밋 및 푸시 제한
 
 **사용자가 명시적으로 허락하지 않은 커밋 및 푸시는 절대 금지.**
