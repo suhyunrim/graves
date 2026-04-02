@@ -8,6 +8,7 @@ export const GET_USER_MATCHES = '[CHALLENGE] GET USER MATCHES';
 export const TRY_SYNC = '[CHALLENGE] TRY SYNC';
 export const SYNC_DONE = '[CHALLENGE] SYNC DONE';
 export const SYNC_ERROR = '[CHALLENGE] SYNC ERROR';
+export const GET_SYNC_STATUS = '[CHALLENGE] GET SYNC STATUS';
 export const CLEAR_CHALLENGE_DETAIL = '[CHALLENGE] CLEAR CHALLENGE DETAIL';
 
 export function getChallengeList(groupId) {
@@ -47,15 +48,17 @@ export function getLeaderboard(groupId, challengeId) {
 }
 
 export function getMyStats(groupId, challengeId) {
-	const request = createCamilleAxios().get(`/api/challenge/${groupId}/${challengeId}/my-stats`);
+	const request = createCamilleAxios().get(`/api/challenge/${groupId}/${challengeId}/my-stats`, { silentError: true });
 
 	return dispatch =>
-		request.then(response =>
-			dispatch({
-				type: GET_MY_STATS,
-				payload: response.data.result
-			})
-		);
+		request
+			.then(response =>
+				dispatch({
+					type: GET_MY_STATS,
+					payload: response.data.result
+				})
+			)
+			.catch(() => {});
 }
 
 export function getUserMatches(groupId, challengeId, puuid) {
@@ -94,17 +97,32 @@ export function syncChallenge(groupId, challengeId) {
 	return dispatch => {
 		dispatch({ type: TRY_SYNC });
 
-		const request = createCamilleAxios().post(`/api/challenge/${groupId}/${challengeId}/sync`);
+		const request = createCamilleAxios().post(`/api/challenge/${groupId}/${challengeId}/sync`, null, { silentError: true });
 
 		request
 			.then(response => {
 				dispatch({ type: SYNC_DONE, payload: response.data.result });
-				dispatch(getLeaderboard(groupId, challengeId));
 			})
-			.catch(() => {
-				dispatch({ type: SYNC_ERROR, payload: null });
+			.catch(error => {
+				const status = error.response && error.response.status;
+				const message = error.response && error.response.data ? error.response.data.result : null;
+				dispatch({ type: SYNC_ERROR, payload: { status, message } });
 			});
 	};
+}
+
+export function getSyncStatus(groupId, challengeId) {
+	const request = createCamilleAxios().get(`/api/challenge/${groupId}/${challengeId}/sync-status`, { silentError: true });
+
+	return dispatch =>
+		request
+			.then(response =>
+				dispatch({
+					type: GET_SYNC_STATUS,
+					payload: response.data.result
+				})
+			)
+			.catch(() => {});
 }
 
 export function createChallenge(groupId, data) {
