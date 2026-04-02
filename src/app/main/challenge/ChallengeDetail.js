@@ -462,13 +462,23 @@ function ChallengeDetail() {
 	}, [syncMessage]);
 
 	// Poll sync-status when syncing
+	const pollingRef = React.useRef(null);
 	useEffect(() => {
 		const isSyncing = syncStatus === 'syncing' || (detail && detail.syncStatus === 'syncing');
-		if (!isSyncing || !groupId) return;
-		const interval = setInterval(() => {
-			dispatch(Actions.getSyncStatus(groupId, challengeId));
-		}, 10000);
-		return () => clearInterval(interval);
+		if (isSyncing && groupId && !pollingRef.current) {
+			pollingRef.current = setInterval(() => {
+				dispatch(Actions.getSyncStatus(groupId, challengeId));
+			}, 10000);
+		} else if (!isSyncing && pollingRef.current) {
+			clearInterval(pollingRef.current);
+			pollingRef.current = null;
+		}
+		return () => {
+			if (pollingRef.current) {
+				clearInterval(pollingRef.current);
+				pollingRef.current = null;
+			}
+		};
 	}, [syncStatus, detail, groupId, challengeId, dispatch]);
 
 	// Start polling on 409 (someone else started sync)

@@ -47,7 +47,6 @@ const user = (state = initialState, action) => {
 			const discordData = action.payload;
 			return {
 				...state,
-				subPuuid: discordData.subPuuid || null,
 				discordGroups: discordData.groups || [],
 				data: {
 					...state.data,
