@@ -254,7 +254,7 @@ function ChallengeList() {
 										<div className={classes.cardFooter}>
 											<span className={classes.participantCount}>
 												<PeopleIcon style={{ fontSize: '1.4rem' }} />
-												{c.participantCount}명
+												{c.activePlayerCount}명
 											</span>
 											{dday && <span className={classes.dday}>{dday}</span>}
 										</div>

@@ -563,7 +563,7 @@ function ChallengeDetail() {
 					<div className={classes.infoRow}>
 						<span className={classes.gameTypeBadge}>{gameTypeLabels[detail.gameType] || detail.gameType}</span>
 						<span className={classes.infoBadge}>{formatDateRange(detail.startAt, detail.endAt)}</span>
-						<span className={classes.infoBadge}>{detail.participantCount}명 참가</span>
+						<span className={classes.infoBadge}>{detail.activePlayerCount}명 참가</span>
 						<span className={classes.infoBadge}>{scoringTypeLabels[detail.scoringType] || detail.scoringType}</span>
 					</div>
 					{detail.description && <div className={classes.description}>{detail.description}</div>}
