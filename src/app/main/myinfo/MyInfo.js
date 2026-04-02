@@ -506,7 +506,10 @@ const useStyles = makeStyles(theme => ({
 		borderRadius: 20,
 		border: '1px solid rgba(0, 212, 255, 0.2)',
 		padding: '24px 28px',
-		marginTop: 20
+		marginTop: 20,
+		animation: '$fadeInUp 0.6s ease forwards',
+		opacity: 0,
+		animationDelay: '0.4s'
 	},
 	subAccountTitle: {
 		fontFamily: '"Noto Sans KR", sans-serif',
@@ -979,6 +982,9 @@ function MyInfoPage(props) {
 						</div>
 					</div>
 
+					{/* 레이팅 차트 */}
+					<RatingChart />
+
 					{/* 부캐 설정 */}
 					{isMyPage && isLoggedIn && (
 						<div className={classes.subAccountSection}>
@@ -1061,9 +1067,6 @@ function MyInfoPage(props) {
 						onClose={() => setSnack(prev => ({ ...prev, open: false }))}
 						message={snack.message}
 					/>
-
-					{/* 레이팅 차트 */}
-					<RatingChart />
 				</div>
 			}
 		/>
