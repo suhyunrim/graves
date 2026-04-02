@@ -73,25 +73,6 @@ export function getUserMatches(groupId, challengeId, puuid) {
 		);
 }
 
-export function joinChallenge(groupId, challengeId) {
-	const request = createCamilleAxios().post(`/api/challenge/${groupId}/${challengeId}/join`);
-
-	return dispatch =>
-		request.then(() => {
-			dispatch(getChallengeDetail(groupId, challengeId));
-			dispatch(getLeaderboard(groupId, challengeId));
-		});
-}
-
-export function leaveChallenge(groupId, challengeId) {
-	const request = createCamilleAxios().delete(`/api/challenge/${groupId}/${challengeId}/join`);
-
-	return dispatch =>
-		request.then(() => {
-			dispatch(getChallengeDetail(groupId, challengeId));
-			dispatch(getLeaderboard(groupId, challengeId));
-		});
-}
 
 export function syncChallenge(groupId, challengeId) {
 	return dispatch => {

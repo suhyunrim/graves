@@ -116,33 +116,6 @@ const useStyles = makeStyles(theme => ({
 		marginTop: 16,
 		flexWrap: 'wrap'
 	},
-	joinBtn: {
-		background: 'linear-gradient(135deg, #51cf66 0%, #37b24d 100%)',
-		color: '#000',
-		fontFamily: '"Noto Sans KR", sans-serif',
-		fontWeight: 700,
-		fontSize: '1.2rem',
-		padding: '8px 24px',
-		borderRadius: 12,
-		textTransform: 'none',
-		'&:hover': {
-			background: 'linear-gradient(135deg, #40c057 0%, #2f9e44 100%)'
-		}
-	},
-	leaveBtn: {
-		background: 'rgba(255, 107, 107, 0.2)',
-		color: '#ff6b6b',
-		border: '1px solid rgba(255, 107, 107, 0.4)',
-		fontFamily: '"Noto Sans KR", sans-serif',
-		fontWeight: 700,
-		fontSize: '1.2rem',
-		padding: '8px 24px',
-		borderRadius: 12,
-		textTransform: 'none',
-		'&:hover': {
-			background: 'rgba(255, 107, 107, 0.3)'
-		}
-	},
 	syncBtn: {
 		background: 'rgba(0, 212, 255, 0.15)',
 		color: '#00d4ff',
@@ -502,16 +475,6 @@ function ChallengeDetail() {
 		prevSyncStatus.current = syncStatus;
 	}, [syncStatus, dispatch, groupId, challengeId, isLoggedIn]);
 
-	function handleJoin() {
-		dispatch(Actions.joinChallenge(groupId, challengeId)).then(() => {
-			if (isLoggedIn) dispatch(Actions.getMyStats(groupId, challengeId));
-		});
-	}
-
-	function handleLeave() {
-		dispatch(Actions.leaveChallenge(groupId, challengeId));
-	}
-
 	function handleSync() {
 		dispatch(Actions.syncChallenge(groupId, challengeId));
 	}
@@ -569,8 +532,6 @@ function ChallengeDetail() {
 
 	const statusColor = statusColors[detail.status] || '#868e96';
 	const dday = detail.status === 'active' ? getDday(detail.endAt) : null;
-	const isParticipant = myStats !== null;
-	const canJoin = isLoggedIn && (detail.status === 'scheduled' || detail.status === 'active');
 
 	return (
 		<FusePageSimple
@@ -608,16 +569,6 @@ function ChallengeDetail() {
 					</div>
 					{detail.description && <div className={classes.description}>{detail.description}</div>}
 					<div className={classes.actionRow}>
-						{canJoin && !isParticipant && (
-							<Button className={classes.joinBtn} onClick={handleJoin}>
-								참가하기
-							</Button>
-						)}
-						{canJoin && isParticipant && (
-							<Button className={classes.leaveBtn} onClick={handleLeave}>
-								참가 취소
-							</Button>
-						)}
 						{isLoggedIn && (syncStatus === 'syncing' || detail.syncStatus === 'syncing') && (
 							<span className={classes.syncBtn} style={{ cursor: 'default', display: 'inline-flex', alignItems: 'center' }}>
 								<CircularProgress size={16} style={{ color: '#00d4ff', marginRight: 8 }} />
