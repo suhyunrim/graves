@@ -3,7 +3,6 @@ import React from 'react';
 
 const MyInfoConfig = {
 	settings: {
-		customScrollbars: false,
 		layout: {
 			config: {}
 		}

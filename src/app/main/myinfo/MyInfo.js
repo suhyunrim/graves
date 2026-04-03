@@ -39,11 +39,7 @@ const tierColors = {
 const useStyles = makeStyles(theme => ({
 	layoutRoot: {
 		background: 'linear-gradient(180deg, #0f0f1a 0%, #1a1a2e 100%)',
-		minHeight: '100vh',
-		'& .ps': {
-			overflow: 'auto !important',
-			position: 'static !important'
-		}
+		minHeight: '100vh'
 	},
 	container: {
 		padding: '28px',
@@ -765,6 +761,16 @@ function MyInfoPage(props) {
 	useEffect(() => {
 		dispatch(Actions.getMyInfo(user.reprGroup.groupId, puuid));
 	}, [dispatch, user, puuid]);
+
+	// PerfectScrollbar가 content 높이를 제대로 인식하도록 강제 업데이트
+	useEffect(() => {
+		if (scoreInfo) {
+			const timer = setTimeout(() => {
+				window.dispatchEvent(new Event('resize'));
+			}, 700);
+			return () => clearTimeout(timer);
+		}
+	}, [scoreInfo]);
 
 	if (!scoreInfo) {
 		return <FuseLoading />;
