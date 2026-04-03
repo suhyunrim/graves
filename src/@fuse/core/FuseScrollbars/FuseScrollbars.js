@@ -135,7 +135,7 @@ const FuseScrollbars = React.forwardRef((props, ref) => {
 			id={props.id}
 			className={clsx(classes.root, props.className)}
 			style={
-				props.customScrollbars && (props.enable || true) && !isMobile
+				props.customScrollbars && props.enable && !isMobile
 					? {
 							position: 'relative',
 							overflow: 'hidden'
