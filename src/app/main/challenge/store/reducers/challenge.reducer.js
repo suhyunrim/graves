@@ -59,7 +59,7 @@ const challengeReducer = (state = initialState, action) => {
 			};
 		}
 		case Actions.CLEAR_CHALLENGE_DETAIL: {
-			return { ...state, detail: null, leaderboard: [], myStats: null, userMatches: [], syncMessage: null, syncStatus: null, syncProgress: null };
+			return { ...state, detail: null, leaderboard: [], myStats: null, userMatches: null, syncMessage: null, syncStatus: null, syncProgress: null };
 		}
 		default: {
 			return state;
