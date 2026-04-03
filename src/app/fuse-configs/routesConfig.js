@@ -11,7 +11,7 @@ import GroupSettingsConfig from 'app/main/groupSettings/GroupSettingsConfig';
 import ChallengeConfig from 'app/main/challenge/ChallengeConfig';
 import ReleaseNotesConfig from 'app/main/releaseNotes/ReleaseNotesConfig';
 import LoginPageConfig from 'app/main/login/LoginPageConfig';
-import Maintenance from 'app/main/maintenance/Maintenance';
+import MaintenanceConfig from 'app/main/maintenance/MaintenanceConfig';
 
 const routeConfigs = [
 	...authRoleExamplesConfigs,
@@ -23,15 +23,12 @@ const routeConfigs = [
 	HonorRankingConfig,
 	GroupSettingsConfig,
 	ChallengeConfig,
-	ReleaseNotesConfig
+	ReleaseNotesConfig,
+	MaintenanceConfig
 ];
 
 const routes = [
 	...FuseUtils.generateRoutesFromConfigs(routeConfigs),
-	{
-		path: '/maintenance',
-		component: Maintenance
-	},
 	{
 		path: '/',
 		component: () => <Redirect to="/dashboard" />
