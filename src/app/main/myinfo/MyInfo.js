@@ -693,6 +693,25 @@ function MyInfoPage(props) {
 		return scoreInfo.ratingTier.split(' ')[0];
 	};
 
+	const getRatingTierDisplay = () => {
+		const rating = scoreInfo.defaultRating + scoreInfo.additionalRating;
+		const tierSteps = ['IV', 'III', 'II', 'I'];
+		const bases = [
+			['CHALLENGER', 1150], ['GRANDMASTER', 1000], ['MASTER', 900],
+			['DIAMOND', 800], ['EMERALD', 700], ['PLATINUM', 600],
+			['GOLD', 500], ['SILVER', 400], ['BRONZE', 300], ['IRON', 200]
+		];
+		for (const [name, base] of bases) {
+			if (rating >= base) {
+				if (['MASTER', 'GRANDMASTER', 'CHALLENGER'].includes(name)) {
+					return name;
+				}
+				return `${name} ${tierSteps[Math.floor((rating - base) / 25)]}`;
+			}
+		}
+		return 'IRON IV';
+	};
+
 	const getRatingLP = () => {
 		const rating = scoreInfo.defaultRating + scoreInfo.additionalRating;
 		const bases = [
@@ -831,7 +850,7 @@ function MyInfoPage(props) {
 								<div className={classes.cardTitleWrapper}>
 									<div className={classes.cardLabel}>Custom Rating</div>
 									<div className={classes.tierText} style={{ color: ratingTierColor.primary }}>
-										{scoreInfo.ratingTier} {getRatingLP()}LP
+										{getRatingTierDisplay()} {getRatingLP()}LP
 									</div>
 								</div>
 							</div>
