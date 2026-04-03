@@ -689,7 +689,7 @@ function MatchHistoryTable() {
 																	className={classes.avgTierIcon}
 																	src={`/assets/images/ranked-emblems/Emblem_${getTierNameFromRating(
 																		match.team1.avgRating
-																	)}.png`}
+																	)}.webp`}
 																	alt={getRatingTierName(match.team1.avgRating)}
 																	style={{
 																		filter: `drop-shadow(0 0 4px ${
@@ -725,7 +725,7 @@ function MatchHistoryTable() {
 																	className={classes.avgTierIcon}
 																	src={`/assets/images/ranked-emblems/Emblem_${getTierNameFromRating(
 																		match.team2.avgRating
-																	)}.png`}
+																	)}.webp`}
 																	alt={getRatingTierName(match.team2.avgRating)}
 																	style={{
 																		filter: `drop-shadow(0 0 4px ${
