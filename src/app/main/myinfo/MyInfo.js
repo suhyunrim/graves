@@ -39,7 +39,10 @@ const tierColors = {
 const useStyles = makeStyles(theme => ({
 	layoutRoot: {
 		background: 'linear-gradient(180deg, #0f0f1a 0%, #1a1a2e 100%)',
-		minHeight: '100vh'
+		minHeight: '100vh',
+		'& .ps': {
+			overflow: 'auto !important'
+		}
 	},
 	container: {
 		padding: '28px',
