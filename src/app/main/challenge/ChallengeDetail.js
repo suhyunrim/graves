@@ -629,10 +629,12 @@ function ChallengeDetail() {
 									<span className={classes.myStatLabel}>승률</span>
 									<span className={`${classes.myStatValue} ${getWinRateClass(myStats.winRate)}`}>{myStats.winRate}%</span>
 								</div>
-								<div className={classes.myStatItem}>
-									<span className={classes.myStatLabel}>포인트</span>
-									<span className={classes.myStatValue}>{myStats.points}</span>
-								</div>
+								{detail.scoringType === 'points' && (
+									<div className={classes.myStatItem}>
+										<span className={classes.myStatLabel}>포인트</span>
+										<span className={classes.myStatValue}>{myStats.points}</span>
+									</div>
+								)}
 							</div>
 						</div>
 					)}
@@ -656,7 +658,7 @@ function ChallengeDetail() {
 												<TableCell className={classes.th}>승</TableCell>
 												<TableCell className={classes.th}>패</TableCell>
 												<TableCell className={classes.th}>승률</TableCell>
-												<TableCell className={classes.th}>포인트</TableCell>
+												{detail.scoringType === 'points' && <TableCell className={classes.th}>포인트</TableCell>}
 												<TableCell className={classes.th}>최대 연승</TableCell>
 											</TableRow>
 										</TableHead>
@@ -679,7 +681,7 @@ function ChallengeDetail() {
 														<TableCell className={`${classes.td} ${getWinRateClass(row.winRate)}`}>
 															{row.winRate}%
 														</TableCell>
-														<TableCell className={classes.td}>{row.points}</TableCell>
+														{detail.scoringType === 'points' && <TableCell className={classes.td}>{row.points}</TableCell>}
 														<TableCell className={classes.td}>
 															{row.bestWinStreak > 0 && (
 																<span className={classes.streakFire}>
@@ -730,10 +732,12 @@ function ChallengeDetail() {
 														<span className={classes.mobileStatLabel}>승률</span>
 														<span className={`${classes.mobileStatValue} ${getWinRateClass(row.winRate)}`}>{row.winRate}%</span>
 													</div>
-													<div className={classes.mobileStatItem}>
-														<span className={classes.mobileStatLabel}>PT</span>
-														<span className={classes.mobileStatValue}>{row.points}</span>
-													</div>
+													{detail.scoringType === 'points' && (
+														<div className={classes.mobileStatItem}>
+															<span className={classes.mobileStatLabel}>PT</span>
+															<span className={classes.mobileStatValue}>{row.points}</span>
+														</div>
+													)}
 												</div>
 											</div>
 										);
