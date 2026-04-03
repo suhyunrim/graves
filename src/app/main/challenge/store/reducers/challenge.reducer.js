@@ -46,7 +46,7 @@ const challengeReducer = (state = initialState, action) => {
 			return { ...state, isSyncing: true, syncMessage: null };
 		}
 		case Actions.SYNC_DONE: {
-			return { ...state, isSyncing: false, syncMessage: { type: 'success', data: action.payload } };
+			return { ...state, isSyncing: false, syncMessage: { type: 'success', data: action.payload }, syncStatus: 'syncing' };
 		}
 		case Actions.SYNC_ERROR: {
 			return { ...state, isSyncing: false, syncMessage: { type: 'error', data: action.payload } };

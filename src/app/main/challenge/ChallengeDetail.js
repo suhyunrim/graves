@@ -439,6 +439,7 @@ function ChallengeDetail() {
 	useEffect(() => {
 		const isSyncing = syncStatus === 'syncing' || (detail && detail.syncStatus === 'syncing');
 		if (isSyncing && groupId && !pollingRef.current) {
+			dispatch(Actions.getSyncStatus(groupId, challengeId));
 			pollingRef.current = setInterval(() => {
 				dispatch(Actions.getSyncStatus(groupId, challengeId));
 			}, 10000);
