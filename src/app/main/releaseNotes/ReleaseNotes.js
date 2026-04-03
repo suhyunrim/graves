@@ -97,7 +97,13 @@ const useStyles = makeStyles(theme => ({
 		fontSize: '1.8rem',
 		fontWeight: 700,
 		color: '#fff',
-		flex: 1
+		flex: 1,
+		minWidth: 0,
+		[theme.breakpoints.down('sm')]: {
+			flex: 'none',
+			width: '100%',
+			order: 10
+		}
 	},
 	releaseDate: {
 		fontFamily: '"Noto Sans KR", sans-serif',
