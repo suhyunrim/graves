@@ -3,6 +3,7 @@ import camilleRiotAuthService from 'app/services/camilleRiotAuthService';
 import store from 'app/store';
 import React from 'react';
 import * as fuseActions from 'app/store/actions';
+import history from '@history';
 import Button from '@material-ui/core/Button';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
@@ -36,31 +37,8 @@ const createCamilleAxios = () => {
 			}
 
 			const isServerDown = !error.response || (error.response.status >= 500 && error.response.status <= 599);
-			if (isServerDown) {
-				store.dispatch(
-					fuseActions.openDialog({
-						children: (
-							<>
-								<DialogTitle style={{ textAlign: 'center', paddingTop: 32 }}>
-									<span role="img" aria-label="tools" style={{ fontSize: '3rem' }}>&#x1F6E0;&#xFE0F;</span>
-								</DialogTitle>
-								<DialogContent style={{ textAlign: 'center', padding: '0 32px 8px' }}>
-									<DialogContentText style={{ fontSize: '1.6rem', fontWeight: 600, color: '#333' }}>
-										서버 점검 중입니다
-									</DialogContentText>
-									<DialogContentText style={{ fontSize: '1.2rem', color: '#888' }}>
-										잠시 후 다시 시도해주세요.
-									</DialogContentText>
-								</DialogContent>
-								<DialogActions style={{ justifyContent: 'center', paddingBottom: 24 }}>
-									<Button onClick={() => store.dispatch(fuseActions.closeDialog())} color="primary" autoFocus>
-										확인
-									</Button>
-								</DialogActions>
-							</>
-						)
-					})
-				);
+			if (isServerDown && !error.config.silentError) {
+				history.replace('/maintenance');
 				return Promise.reject(error);
 			}
 
