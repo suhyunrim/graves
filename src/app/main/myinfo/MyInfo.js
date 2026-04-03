@@ -762,16 +762,6 @@ function MyInfoPage(props) {
 		dispatch(Actions.getMyInfo(user.reprGroup.groupId, puuid));
 	}, [dispatch, user, puuid]);
 
-	// PerfectScrollbar가 content 높이를 제대로 인식하도록 강제 업데이트
-	useEffect(() => {
-		if (scoreInfo) {
-			const timer = setTimeout(() => {
-				window.dispatchEvent(new Event('resize'));
-			}, 700);
-			return () => clearTimeout(timer);
-		}
-	}, [scoreInfo]);
-
 	if (!scoreInfo) {
 		return <FuseLoading />;
 	}
