@@ -689,10 +689,6 @@ function MyInfoPage(props) {
 		return tier.split(' ')[0];
 	};
 
-	const getRatingTierName = () => {
-		return scoreInfo.ratingTier.split(' ')[0];
-	};
-
 	const getRatingTierDisplay = () => {
 		const rating = scoreInfo.defaultRating + scoreInfo.additionalRating;
 		const tierSteps = ['IV', 'III', 'II', 'I'];
@@ -710,6 +706,10 @@ function MyInfoPage(props) {
 			}
 		}
 		return 'IRON IV';
+	};
+
+	const getRatingTierName = () => {
+		return getRatingTierDisplay().split(' ')[0];
 	};
 
 	const getRatingLP = () => {
