@@ -25,6 +25,37 @@ import {
 
 const PAGE_SIZE = 20;
 
+const tierColors = {
+	IRON: '#5C5C5C',
+	BRONZE: '#CD7F32',
+	SILVER: '#C0C0C0',
+	GOLD: '#FFD700',
+	PLATINUM: '#00CED1',
+	EMERALD: '#50C878',
+	DIAMOND: '#B9F2FF',
+	MASTER: '#9932CC',
+	GRANDMASTER: '#FF4500',
+	CHALLENGER: '#F0E68C'
+};
+
+function getTierIconName(tier) {
+	if (!tier) return null;
+	return tier.split(' ')[0];
+}
+
+function getTierColor(tier) {
+	if (!tier) return null;
+	return tierColors[tier.split(' ')[0]] || null;
+}
+
+function getTierShortName(tier) {
+	if (!tier) return '';
+	const parts = tier.split(' ');
+	const tierMap = { IRON: 'I', BRONZE: 'B', SILVER: 'S', GOLD: 'G', PLATINUM: 'P', EMERALD: 'E', DIAMOND: 'D', MASTER: 'M', GRANDMASTER: 'GM', CHALLENGER: 'C' };
+	const rankMap = { I: '1', II: '2', III: '3', IV: '4' };
+	return `${tierMap[parts[0]] || parts[0].charAt(0)}${rankMap[parts[1]] || ''}`;
+}
+
 const useStyles = makeStyles(theme => ({
 	layoutRoot: {
 		background: 'linear-gradient(180deg, #0f0f1a 0%, #1a1a2e 100%)',
@@ -80,6 +111,21 @@ const useStyles = makeStyles(theme => ({
 		[theme.breakpoints.down('sm')]: {
 			fontSize: '2.2rem'
 		}
+	},
+	summaryTier: {
+		display: 'flex',
+		alignItems: 'center',
+		gap: 6,
+		marginTop: 6
+	},
+	summaryTierIcon: {
+		width: 24,
+		height: 24
+	},
+	summaryTierText: {
+		fontFamily: '"Rajdhani", sans-serif',
+		fontSize: '1.4rem',
+		fontWeight: 700
 	},
 	summaryStats: {
 		fontFamily: '"Noto Sans KR", sans-serif',
@@ -699,6 +745,19 @@ function ChallengeUserMatches() {
 							<div className={classes.summaryName}>
 								{userStats ? userStats.name : (detail ? detail.title : 'Challenge')}
 							</div>
+							{userStats && userStats.tier && (
+								<div className={classes.summaryTier}>
+									<img
+										className={classes.summaryTierIcon}
+										src={`/assets/images/ranked-emblems/Emblem_${getTierIconName(userStats.tier)}.webp`}
+										alt={userStats.tier}
+										style={{ filter: `drop-shadow(0 0 4px ${getTierColor(userStats.tier)}40)` }}
+									/>
+									<span className={classes.summaryTierText} style={{ color: getTierColor(userStats.tier) }}>
+										{getTierShortName(userStats.tier)}
+									</span>
+								</div>
+							)}
 							{userStats && (
 								<div className={classes.summaryStats}>
 									<span>
