@@ -93,12 +93,12 @@ const FuseScrollbars = React.forwardRef((props, ref) => {
 	});
 
 	useEffect(() => {
-		if (customScrollbars) {
+		if (customScrollbars && props.enable !== false) {
 			createPs();
 		} else {
 			destroyPs();
 		}
-	}, [createPs, customScrollbars, destroyPs]);
+	}, [createPs, customScrollbars, destroyPs, props.enable]);
 
 	const scrollToTop = useCallback(() => {
 		if (ref && ref.current) {
@@ -135,11 +135,13 @@ const FuseScrollbars = React.forwardRef((props, ref) => {
 			id={props.id}
 			className={clsx(classes.root, props.className)}
 			style={
-				props.customScrollbars && (props.enable || true) && !isMobile
+				props.customScrollbars && props.enable !== false && !isMobile
 					? {
 							position: 'relative',
 							overflow: 'hidden'
 					  }
+					: props.enable === false
+					? { overflow: 'visible' }
 					: {}
 			}
 			ref={ref}

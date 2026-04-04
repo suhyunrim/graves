@@ -180,7 +180,7 @@ const FusePageSimple = React.forwardRef((props, ref) => {
 					{/* > */}
 					<FuseScrollbars
 						className={classes.contentWrapper}
-						enable={props.innerScroll && !props.sidebarInner}
+						enable={!!(props.innerScroll && !props.sidebarInner)}
 					>
 						{props.header && !props.sidebarInner && (
 							<FusePageSimpleHeader header={props.header} classes={classes} />
