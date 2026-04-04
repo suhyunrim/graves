@@ -777,12 +777,17 @@ function ChallengeDetail() {
 												<div className={classes.mobileCardTop}>
 													<div className={`${classes.mobileRank} ${getMobileRankClass(row.rank)}`}>{row.rank}</div>
 													{row.tier && (
-														<img
-															className={classes.tierIcon}
-															src={`/assets/images/ranked-emblems/Emblem_${getTierIconName(row.tier)}.webp`}
-															alt={row.tier}
-															style={{ filter: `drop-shadow(0 0 4px ${getTierColor(row.tier)}40)`, width: 20, height: 20 }}
-														/>
+														<>
+															<img
+																className={classes.tierIcon}
+																src={`/assets/images/ranked-emblems/Emblem_${getTierIconName(row.tier)}.webp`}
+																alt={row.tier}
+																style={{ filter: `drop-shadow(0 0 4px ${getTierColor(row.tier)}40)`, width: 20, height: 20 }}
+															/>
+															<span className={classes.tierBadge} style={{ color: getTierColor(row.tier), fontSize: '1rem' }}>
+																{getTierShortName(row.tier)}
+															</span>
+														</>
 													)}
 													<Link to={`/challenge/${challengeId}/user/${row.puuid}`} className={classes.mobileName}>
 														{row.name}
