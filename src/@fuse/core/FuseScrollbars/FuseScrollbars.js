@@ -140,6 +140,8 @@ const FuseScrollbars = React.forwardRef((props, ref) => {
 							position: 'relative',
 							overflow: 'hidden'
 					  }
+					: props.enable === false
+					? { overflow: 'visible' }
 					: {}
 			}
 			ref={ref}
