@@ -5,7 +5,6 @@ export const LOADING_LEADERBOARD = '[CHALLENGE] LOADING LEADERBOARD';
 export const GET_CHALLENGE_LIST = '[CHALLENGE] GET CHALLENGE LIST';
 export const GET_CHALLENGE_DETAIL = '[CHALLENGE] GET CHALLENGE DETAIL';
 export const GET_LEADERBOARD = '[CHALLENGE] GET LEADERBOARD';
-export const GET_MY_STATS = '[CHALLENGE] GET MY STATS';
 export const GET_USER_MATCHES = '[CHALLENGE] GET USER MATCHES';
 export const TRY_SYNC = '[CHALLENGE] TRY SYNC';
 export const SYNC_DONE = '[CHALLENGE] SYNC DONE';
@@ -51,20 +50,6 @@ export function getLeaderboard(groupId, challengeId) {
 			})
 		);
 	};
-}
-
-export function getMyStats(groupId, challengeId) {
-	const request = createCamilleAxios().get(`/api/challenge/${groupId}/${challengeId}/my-stats`, { silentError: true });
-
-	return dispatch =>
-		request
-			.then(response =>
-				dispatch({
-					type: GET_MY_STATS,
-					payload: response.data.result
-				})
-			)
-			.catch(() => {});
 }
 
 export function getUserMatches(groupId, challengeId, puuid) {

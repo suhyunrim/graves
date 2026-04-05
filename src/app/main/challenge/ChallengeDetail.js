@@ -441,7 +441,6 @@ function ChallengeDetail() {
 	const detail = useSelector(({ Challenge }) => Challenge.challenge.detail);
 	const leaderboard = useSelector(({ Challenge }) => Challenge.challenge.leaderboard);
 	const loadingLeaderboard = useSelector(({ Challenge }) => Challenge.challenge.loadingLeaderboard);
-	const myStats = useSelector(({ Challenge }) => Challenge.challenge.myStats);
 	const syncMessage = useSelector(({ Challenge }) => Challenge.challenge.syncMessage);
 	const syncStatus = useSelector(({ Challenge }) => Challenge.challenge.syncStatus);
 	const syncProgress = useSelector(({ Challenge }) => Challenge.challenge.syncProgress);
@@ -450,6 +449,7 @@ function ChallengeDetail() {
 	const isLoggedIn = Boolean(user && user.reprGroup);
 	const isAdmin = user && user.role && user.role.includes('admin');
 	const myPuuid = localStorage.getItem('camille_riot_puuid');
+	const myStats = myPuuid ? leaderboard.find(entry => entry.puuid === myPuuid) : null;
 
 	const [editOpen, setEditOpen] = useState(false);
 	const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
@@ -460,10 +460,7 @@ function ChallengeDetail() {
 		if (!groupId) return;
 		dispatch(Actions.getChallengeDetail(groupId, challengeId));
 		dispatch(Actions.getLeaderboard(groupId, challengeId));
-		if (isLoggedIn) {
-			dispatch(Actions.getMyStats(groupId, challengeId));
-		}
-	}, [dispatch, groupId, challengeId, isLoggedIn]);
+	}, [dispatch, groupId, challengeId]);
 
 	useEffect(() => {
 		loadData();
@@ -523,11 +520,10 @@ function ChallengeDetail() {
 			setSnack({ open: true, message: '전적 갱신이 완료되었습니다.', type: 'success' });
 			dispatch(Actions.getChallengeDetail(groupId, challengeId));
 			dispatch(Actions.getLeaderboard(groupId, challengeId));
-			if (isLoggedIn) dispatch(Actions.getMyStats(groupId, challengeId));
 			setTimeout(() => setSyncComplete(false), 2000);
 		}
 		prevSyncStatus.current = syncStatus;
-	}, [syncStatus, dispatch, groupId, challengeId, isLoggedIn]);
+	}, [syncStatus, dispatch, groupId, challengeId]);
 
 	function handleSync() {
 		dispatch(Actions.syncChallenge(groupId, challengeId));

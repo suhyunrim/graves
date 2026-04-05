@@ -6,7 +6,6 @@ const initialState = {
 	detail: null,
 	leaderboard: [],
 	loadingLeaderboard: false,
-	myStats: null,
 	userMatches: null,
 	isSyncing: false,
 	syncMessage: null,
@@ -36,9 +35,6 @@ const challengeReducer = (state = initialState, action) => {
 		case Actions.GET_LEADERBOARD: {
 			return { ...state, leaderboard: action.payload, loadingLeaderboard: false };
 		}
-		case Actions.GET_MY_STATS: {
-			return { ...state, myStats: action.payload };
-		}
 		case Actions.GET_USER_MATCHES: {
 			return { ...state, userMatches: action.payload };
 		}
@@ -59,7 +55,7 @@ const challengeReducer = (state = initialState, action) => {
 			};
 		}
 		case Actions.CLEAR_CHALLENGE_DETAIL: {
-			return { ...state, detail: null, leaderboard: [], myStats: null, userMatches: null, syncMessage: null, syncStatus: null, syncProgress: null };
+			return { ...state, detail: null, leaderboard: [], userMatches: null, syncMessage: null, syncStatus: null, syncProgress: null };
 		}
 		default: {
 			return state;
