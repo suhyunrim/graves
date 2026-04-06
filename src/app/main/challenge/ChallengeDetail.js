@@ -18,7 +18,9 @@ import {
 	DialogActions
 } from '@material-ui/core';
 import SyncIcon from '@material-ui/icons/Sync';
-import React, { useEffect, useState, useCallback } from 'react';
+import ArrowUpwardIcon from '@material-ui/icons/ArrowUpward';
+import ArrowDownwardIcon from '@material-ui/icons/ArrowDownward';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams, Link } from 'react-router-dom';
 import reducer from './store/reducers';
@@ -258,6 +260,18 @@ const useStyles = makeStyles(theme => ({
 		padding: '14px 20px',
 		whiteSpace: 'nowrap'
 	},
+	thSortable: {
+		cursor: 'pointer',
+		userSelect: 'none',
+		'&:hover': {
+			color: '#00d4ff'
+		}
+	},
+	sortIcon: {
+		fontSize: '1.2rem',
+		verticalAlign: 'middle',
+		marginLeft: 2
+	},
 	td: {
 		fontFamily: '"Noto Sans KR", sans-serif',
 		fontSize: '1.2rem',
@@ -455,6 +469,26 @@ function ChallengeDetail() {
 	const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
 	const [snack, setSnack] = useState({ open: false, message: '', type: 'success' });
 	const [syncComplete, setSyncComplete] = useState(false);
+	const [sortKey, setSortKey] = useState('rank');
+	const [sortDir, setSortDir] = useState('asc');
+
+	const sortedLeaderboard = useMemo(() => {
+		return [...leaderboard].sort((a, b) => {
+			const av = a[sortKey];
+			const bv = b[sortKey];
+			if (av === bv) return a.rank - b.rank;
+			return sortDir === 'asc' ? av - bv : bv - av;
+		});
+	}, [leaderboard, sortKey, sortDir]);
+
+	function handleSort(key) {
+		if (sortKey === key) {
+			setSortDir(sortDir === 'asc' ? 'desc' : 'asc');
+		} else {
+			setSortKey(key);
+			setSortDir(key === 'rank' ? 'asc' : 'desc');
+		}
+	}
 
 	const loadData = useCallback(() => {
 		if (!groupId) return;
@@ -701,18 +735,55 @@ function ChallengeDetail() {
 									<Table>
 										<TableHead className={classes.tableHead}>
 											<TableRow>
-												<TableCell className={classes.th}>순위</TableCell>
-												<TableCell className={classes.th}>소환사명</TableCell>
-												<TableCell className={classes.th}>판수</TableCell>
-												<TableCell className={classes.th}>승</TableCell>
-												<TableCell className={classes.th}>패</TableCell>
-												<TableCell className={classes.th}>승률</TableCell>
-												{detail.scoringType === 'points' && <TableCell className={classes.th}>포인트</TableCell>}
-												<TableCell className={classes.th}>최대 연승</TableCell>
+												{[
+													{ key: 'rank', label: '순위' },
+													{ key: null, label: '소환사명' },
+													{ key: 'totalGames', label: '판수' },
+													{ key: 'wins', label: '승' },
+													{ key: 'losses', label: '패' },
+													{ key: 'winRate', label: '승률' }
+												].map(col => (
+													<TableCell
+														key={col.label}
+														className={`${classes.th} ${col.key ? classes.thSortable : ''}`}
+														onClick={col.key ? () => handleSort(col.key) : undefined}
+													>
+														{col.label}
+														{sortKey === col.key && (
+															sortDir === 'asc'
+																? <ArrowUpwardIcon className={classes.sortIcon} />
+																: <ArrowDownwardIcon className={classes.sortIcon} />
+														)}
+													</TableCell>
+												))}
+												{detail.scoringType === 'points' && (
+													<TableCell
+														className={`${classes.th} ${classes.thSortable}`}
+														onClick={() => handleSort('points')}
+													>
+														포인트
+														{sortKey === 'points' && (
+															sortDir === 'asc'
+																? <ArrowUpwardIcon className={classes.sortIcon} />
+																: <ArrowDownwardIcon className={classes.sortIcon} />
+														)}
+													</TableCell>
+												)}
+												<TableCell
+													className={`${classes.th} ${classes.thSortable}`}
+													onClick={() => handleSort('bestWinStreak')}
+												>
+													최대 연승
+													{sortKey === 'bestWinStreak' && (
+														sortDir === 'asc'
+															? <ArrowUpwardIcon className={classes.sortIcon} />
+															: <ArrowDownwardIcon className={classes.sortIcon} />
+													)}
+												</TableCell>
 											</TableRow>
 										</TableHead>
 										<TableBody>
-											{leaderboard.map(row => {
+											{sortedLeaderboard.map(row => {
 												const isMe = myPuuid && row.puuid === myPuuid;
 												return (
 													<TableRow key={row.puuid} className={isMe ? classes.highlightRow : ''}>
@@ -766,7 +837,7 @@ function ChallengeDetail() {
 
 								{/* Mobile */}
 								<div className={classes.mobileCardList}>
-									{leaderboard.map(row => {
+									{sortedLeaderboard.map(row => {
 										const isMe = myPuuid && row.puuid === myPuuid;
 										return (
 											<div key={row.puuid} className={classes.mobileCard} style={isMe ? { borderColor: 'rgba(0, 212, 255, 0.4)', background: 'rgba(0, 212, 255, 0.05)' } : {}}>
