@@ -1050,7 +1050,7 @@ function MatchHistoryTable() {
 																className={classes.mobileAvgTierIcon}
 																src={`/assets/images/ranked-emblems/Emblem_${getTierNameFromRating(
 																	match.team1.avgRating
-																)}.png`}
+																)}.webp`}
 																alt={getRatingTierName(match.team1.avgRating)}
 															/>
 															<span
@@ -1089,7 +1089,7 @@ function MatchHistoryTable() {
 																className={classes.mobileAvgTierIcon}
 																src={`/assets/images/ranked-emblems/Emblem_${getTierNameFromRating(
 																	match.team2.avgRating
-																)}.png`}
+																)}.webp`}
 																alt={getRatingTierName(match.team2.avgRating)}
 															/>
 															<span
