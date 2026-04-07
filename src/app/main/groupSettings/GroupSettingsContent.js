@@ -61,18 +61,6 @@ function getTierName(rating) {
 	return match ? match[0] : 'IRON';
 }
 
-function getRatingTierName(rating) {
-	const entries = Object.entries(TIER_THRESHOLDS).sort((a, b) => b[1] - a[1]);
-	const match = entries.find(([, threshold]) => rating >= threshold);
-	if (!match) return 'IRON IV';
-	const [name, threshold] = match;
-	if (isNonStepTier(name)) {
-		const lp = Math.floor((rating - threshold) * 4);
-		return `${name} ${lp}LP`;
-	}
-	return `${name} ${TIER_STEPS[Math.floor((rating - threshold) / 25)]}`;
-}
-
 const TIER_RANK_MAP = { IV: '4', III: '3', II: '2', I: '1' };
 
 function getRatingTierShort(rating) {
