@@ -73,6 +73,22 @@ function getRatingTierName(rating) {
 	return `${name} ${TIER_STEPS[Math.floor((rating - threshold) / 25)]}`;
 }
 
+const TIER_RANK_MAP = { IV: '4', III: '3', II: '2', I: '1' };
+
+function getRatingTierShort(rating) {
+	const entries = Object.entries(TIER_THRESHOLDS).sort((a, b) => b[1] - a[1]);
+	const match = entries.find(([, threshold]) => rating >= threshold);
+	if (!match) return 'I4';
+	const [name, threshold] = match;
+	const abbr = TIER_ABBR[name] || name.charAt(0);
+	if (isNonStepTier(name)) {
+		const lp = Math.floor((rating - threshold) * 4);
+		return `${abbr} ${lp}LP`;
+	}
+	const step = TIER_STEPS[Math.floor((rating - threshold) / 25)];
+	return `${abbr}${TIER_RANK_MAP[step] || ''}`;
+}
+
 // 약어 매핑 (API 전송용)
 const TIER_ABBR = {
 	IRON: 'I',
@@ -92,9 +108,8 @@ const TIER_OPTIONS = [];
 ['IRON', 'BRONZE', 'SILVER', 'GOLD', 'PLATINUM', 'EMERALD', 'DIAMOND'].forEach(tier => {
 	[0, 1, 2, 3].forEach(stepIdx => {
 		const rating = TIER_THRESHOLDS[tier] + stepIdx * 25;
-		const stepLabel = TIER_STEPS[stepIdx];
 		const apiValue = `${TIER_ABBR[tier]}${4 - stepIdx}`;
-		TIER_OPTIONS.push({ label: `${tier} ${stepLabel}`, tierName: tier, rating, apiValue });
+		TIER_OPTIONS.push({ label: `${TIER_ABBR[tier]}${4 - stepIdx}`, tierName: tier, rating, apiValue });
 	});
 });
 ['MASTER', 'GRANDMASTER', 'CHALLENGER'].forEach(tier => {
@@ -102,7 +117,7 @@ const TIER_OPTIONS = [];
 		const rating = TIER_THRESHOLDS[tier] + stepIdx * 25;
 		const lp = stepIdx * 100;
 		const apiValue = `${TIER_ABBR[tier]}${4 - stepIdx}`;
-		TIER_OPTIONS.push({ label: `${tier} ${lp}LP`, tierName: tier, rating, apiValue });
+		TIER_OPTIONS.push({ label: `${TIER_ABBR[tier]} ${lp}LP`, tierName: tier, rating, apiValue });
 	});
 });
 
@@ -128,7 +143,7 @@ const useStyles = makeStyles(theme => ({
 		fontSize: '1.3rem',
 		color: 'rgba(255, 255, 255, 0.7)',
 		borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
-		padding: '14px 20px',
+		padding: '14px 12px',
 		letterSpacing: '0.05em'
 	},
 	bodyCell: {
@@ -136,7 +151,7 @@ const useStyles = makeStyles(theme => ({
 		fontSize: '1.25rem',
 		color: 'rgba(255, 255, 255, 0.85)',
 		borderBottom: '1px solid rgba(255, 255, 255, 0.04)',
-		padding: '12px 20px'
+		padding: '12px 12px'
 	},
 	row: {
 		transition: 'background 0.2s ease',
@@ -462,7 +477,6 @@ function GroupSettingsContent() {
 
 	function renderTier(rating) {
 		const tierName = getTierName(rating);
-		const fullTierName = getRatingTierName(rating);
 		const color = TIER_COLORS[tierName] || '#fff';
 		return (
 			<div className={classes.tierCell}>
@@ -472,7 +486,7 @@ function GroupSettingsContent() {
 					alt={tierName}
 				/>
 				<span className={classes.tierText} style={{ color }}>
-					{fullTierName}
+					{getRatingTierShort(rating)}
 				</span>
 			</div>
 		);
@@ -484,7 +498,7 @@ function GroupSettingsContent() {
 				className={mobile ? classes.tierSelectMobile : classes.tierSelect}
 				value={member.defaultRating}
 				onChange={e => handleTierChange(member.puuid, e.target.value)}
-				renderValue={val => renderTierOption(getTierName(val), getRatingTierName(val))}
+				renderValue={val => renderTierOption(getTierName(val), getRatingTierShort(val))}
 				MenuProps={{
 					PaperProps: {
 						style: {
@@ -524,7 +538,7 @@ function GroupSettingsContent() {
 	function formatDate(dateStr) {
 		if (!dateStr) return '-';
 		const d = new Date(dateStr);
-		const y = d.getFullYear();
+		const y = String(d.getFullYear()).slice(-2);
 		const m = String(d.getMonth() + 1).padStart(2, '0');
 		const day = String(d.getDate()).padStart(2, '0');
 		return `${y}.${m}.${day}`;
