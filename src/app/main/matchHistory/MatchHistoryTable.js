@@ -851,6 +851,61 @@ function MatchHistoryTable() {
 			<Dialog open={dupDialogOpen} onClose={handleDupDialogClose} classes={{ paper: classes.dialogPaper }}>
 				<DialogTitle className={classes.dialogTitle}>매치 복제</DialogTitle>
 				<DialogContent className={classes.dialogContent}>
+					{menuMatch && (
+						<div style={{ display: 'flex', gap: 16, marginBottom: 24 }}>
+							{[menuMatch.team1, menuMatch.team2].map((team, ti) => (
+								<div key={ti} style={{ flex: 1 }}>
+									<div
+										style={{
+											fontFamily: '"Rajdhani", sans-serif',
+											fontSize: '1.1rem',
+											fontWeight: 700,
+											color: 'rgba(255,255,255,0.7)',
+											marginBottom: 8
+										}}
+									>
+										<span role="img" aria-label={ti === 0 ? 'dog' : 'cat'}>
+											{ti === 0 ? '🐶' : '🐱'}
+										</span>{' '}
+										Team {ti + 1}
+									</div>
+									{[...team.players]
+										.sort((a, b) => b.rating - a.rating)
+										.map(player => (
+											<div
+												key={player.puuid}
+												style={{
+													display: 'flex',
+													alignItems: 'center',
+													gap: 6,
+													padding: '3px 0',
+													fontFamily: '"Noto Sans KR", sans-serif',
+													fontSize: '1.1rem',
+													color: '#fff'
+												}}
+											>
+												<img
+													src={`/assets/images/ranked-emblems/Emblem_${getTierIconName(player.tier)}.webp`}
+													alt={player.tier}
+													style={{ width: 20, height: 20 }}
+												/>
+												<span
+													style={{
+														color: getTierColor(player.tier),
+														fontFamily: '"Rajdhani", sans-serif',
+														fontWeight: 700,
+														fontSize: '1rem'
+													}}
+												>
+													{getTierShortName(player.tier)}
+												</span>
+												<span>{player.name}</span>
+											</div>
+										))}
+								</div>
+							))}
+						</div>
+					)}
 					<TextField
 						label="날짜 및 시간"
 						type="datetime-local"
