@@ -6,6 +6,7 @@ import {
 	TableContainer,
 	TableHead,
 	TableRow,
+	TableSortLabel,
 	Button,
 	Dialog,
 	DialogTitle,
@@ -318,6 +319,11 @@ const useStyles = makeStyles(theme => ({
 		display: 'flex',
 		justifyContent: 'flex-end'
 	},
+	sortLabel: {
+		'& .MuiTableSortLabel-icon': {
+			color: 'rgba(255, 255, 255, 0.4) !important'
+		}
+	},
 	tierSelectMobile: {
 		fontFamily: '"Noto Sans KR", sans-serif',
 		fontSize: '1.1rem',
@@ -350,6 +356,8 @@ function GroupSettingsContent() {
 	const user = useSelector(state => state.auth.user);
 	const { members, loading, searchText } = useSelector(({ GroupSettings }) => GroupSettings.groupSettings);
 	const [confirmDialog, setConfirmDialog] = useState(null);
+	const [sortKey, setSortKey] = useState(null);
+	const [sortDir, setSortDir] = useState('asc');
 
 	const groupId = user?.reprGroup?.groupId;
 	const isAdmin = user?.reprGroup?.isAdmin;
@@ -368,7 +376,43 @@ function GroupSettingsContent() {
 		return <FuseLoading />;
 	}
 
+	const handleSort = key => {
+		if (sortKey === key) {
+			setSortDir(sortDir === 'asc' ? 'desc' : 'asc');
+		} else {
+			setSortKey(key);
+			setSortDir('asc');
+		}
+	};
+
+	const getSortValue = (member, key) => {
+		switch (key) {
+			case 'name':
+				return member.name.toLowerCase();
+			case 'rating':
+				return member.defaultRating + member.additionalRating;
+			case 'voice':
+				return member.lastVoiceJoinedAt ? new Date(member.lastVoiceJoinedAt).getTime() : 0;
+			case 'latestMatch':
+				return member.latestMatchDate ? new Date(member.latestMatchDate).getTime() : 0;
+			case 'created':
+				return member.createdAt ? new Date(member.createdAt).getTime() : 0;
+			default:
+				return 0;
+		}
+	};
+
 	const filteredMembers = members.filter(m => m.name.toLowerCase().includes(searchText.toLowerCase()));
+
+	const sortedMembers = sortKey
+		? [...filteredMembers].sort((a, b) => {
+				const aVal = getSortValue(a, sortKey);
+				const bVal = getSortValue(b, sortKey);
+				if (aVal < bVal) return sortDir === 'asc' ? -1 : 1;
+				if (aVal > bVal) return sortDir === 'asc' ? 1 : -1;
+				return 0;
+		  })
+		: filteredMembers;
 
 	function handleBlacklist(member) {
 		setConfirmDialog({ type: 'blacklist', member });
@@ -503,26 +547,11 @@ function GroupSettingsContent() {
 		return `${Math.floor(diffDay / 365)}년 전`;
 	}
 
-	function isDormant(dateStr) {
-		if (!dateStr) return false;
-		const diffDay = Math.floor((new Date() - new Date(dateStr)) / 86400000);
-		return diffDay >= 30;
-	}
-
 	function renderVoiceStatus(dateStr) {
 		if (!dateStr) {
-			return <span className={classes.statsText}>기록 없음</span>;
+			return <span className={classes.statsText}>-</span>;
 		}
-		const dormant = isDormant(dateStr);
-		return (
-			<span
-				className={classes.statsText}
-				style={dormant ? { color: '#ff6b6b' } : { color: 'rgba(255, 255, 255, 0.7)' }}
-			>
-				{formatRelativeTime(dateStr)}
-				{dormant && ' (휴면)'}
-			</span>
-		);
+		return <span className={classes.statsText}>{formatRelativeTime(dateStr)}</span>;
 	}
 
 	function renderConfirmDialog() {
@@ -567,7 +596,7 @@ function GroupSettingsContent() {
 		return (
 			<div className={classes.root}>
 				<div className={classes.cardList}>
-					{filteredMembers.map(member => {
+					{sortedMembers.map(member => {
 						const totalRating = member.defaultRating + member.additionalRating;
 						return (
 							<div
@@ -622,7 +651,16 @@ function GroupSettingsContent() {
 				<Table>
 					<TableHead className={classes.tableHead}>
 						<TableRow>
-							<TableCell className={classes.headCell}>소환사명</TableCell>
+							<TableCell className={classes.headCell}>
+								<TableSortLabel
+									className={classes.sortLabel}
+									active={sortKey === 'name'}
+									direction={sortKey === 'name' ? sortDir : 'asc'}
+									onClick={() => handleSort('name')}
+								>
+									소환사명
+								</TableSortLabel>
+							</TableCell>
 							<TableCell className={classes.headCell}>상태</TableCell>
 							<TableCell className={classes.headCell} align="center">
 								전적
@@ -631,16 +669,44 @@ function GroupSettingsContent() {
 								기본 티어
 							</TableCell>
 							<TableCell className={classes.headCell} align="center">
-								현재 티어
+								<TableSortLabel
+									className={classes.sortLabel}
+									active={sortKey === 'rating'}
+									direction={sortKey === 'rating' ? sortDir : 'asc'}
+									onClick={() => handleSort('rating')}
+								>
+									현재 티어
+								</TableSortLabel>
 							</TableCell>
 							<TableCell className={classes.headCell} align="center">
-								생성일
+								<TableSortLabel
+									className={classes.sortLabel}
+									active={sortKey === 'created'}
+									direction={sortKey === 'created' ? sortDir : 'asc'}
+									onClick={() => handleSort('created')}
+								>
+									생성일
+								</TableSortLabel>
 							</TableCell>
 							<TableCell className={classes.headCell} align="center">
-								최근 경기
+								<TableSortLabel
+									className={classes.sortLabel}
+									active={sortKey === 'latestMatch'}
+									direction={sortKey === 'latestMatch' ? sortDir : 'asc'}
+									onClick={() => handleSort('latestMatch')}
+								>
+									최근 경기
+								</TableSortLabel>
 							</TableCell>
 							<TableCell className={classes.headCell} align="center">
-								보이스 접속
+								<TableSortLabel
+									className={classes.sortLabel}
+									active={sortKey === 'voice'}
+									direction={sortKey === 'voice' ? sortDir : 'asc'}
+									onClick={() => handleSort('voice')}
+								>
+									보이스 접속
+								</TableSortLabel>
 							</TableCell>
 							<TableCell className={classes.headCell} align="center">
 								관리
@@ -648,7 +714,7 @@ function GroupSettingsContent() {
 						</TableRow>
 					</TableHead>
 					<TableBody>
-						{filteredMembers.map(member => {
+						{sortedMembers.map(member => {
 							const totalRating = member.defaultRating + member.additionalRating;
 							return (
 								<TableRow
