@@ -132,7 +132,8 @@ const useStyles = makeStyles(theme => ({
 		color: 'rgba(255, 255, 255, 0.7)',
 		borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
 		padding: '14px 12px',
-		letterSpacing: '0.05em'
+		letterSpacing: '0.05em',
+		whiteSpace: 'nowrap'
 	},
 	bodyCell: {
 		fontFamily: '"Noto Sans KR", sans-serif',
