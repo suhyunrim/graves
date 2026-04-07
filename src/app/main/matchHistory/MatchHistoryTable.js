@@ -570,6 +570,8 @@ function MatchHistoryTable() {
 	const [dupDate, setDupDate] = useState('');
 	const [dupWinTeam, setDupWinTeam] = useState('1');
 	const [dupLoading, setDupLoading] = useState(false);
+	const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
+	const [cancelLoading, setCancelLoading] = useState(false);
 
 	const handleMenuOpen = (event, match) => {
 		event.stopPropagation();
@@ -616,6 +618,30 @@ function MatchHistoryTable() {
 			})
 			.finally(() => {
 				setDupLoading(false);
+			});
+	};
+
+	const handleCancelClick = () => {
+		setMenuAnchorEl(null);
+		setCancelDialogOpen(true);
+	};
+
+	const handleCancelDialogClose = () => {
+		setCancelDialogOpen(false);
+		setMenuMatch(null);
+	};
+
+	const handleCancelSubmit = () => {
+		if (!menuMatch) return;
+		setCancelLoading(true);
+		dispatch(Actions.cancelMatch(user.reprGroup.groupId, menuMatch.gameId))
+			.then(() => {
+				setCancelDialogOpen(false);
+				setMenuMatch(null);
+				dispatch(Actions.getMatchHistory(user.reprGroup.groupId, serverPage, rowsPerPage, searchText));
+			})
+			.finally(() => {
+				setCancelLoading(false);
 			});
 	};
 
@@ -810,6 +836,17 @@ function MatchHistoryTable() {
 					</span>
 					복제
 				</MenuItem>
+				{menuMatch && menuMatch.winTeam && (
+					<MenuItem
+						onClick={handleCancelClick}
+						style={{ fontFamily: '"Noto Sans KR", sans-serif', fontSize: '1.2rem', color: '#ff5252' }}
+					>
+						<span role="img" aria-label="cancel" style={{ marginRight: 8 }}>
+							❌
+						</span>
+						취소
+					</MenuItem>
+				)}
 			</Menu>
 			<Dialog open={dupDialogOpen} onClose={handleDupDialogClose} classes={{ paper: classes.dialogPaper }}>
 				<DialogTitle className={classes.dialogTitle}>매치 복제</DialogTitle>
@@ -866,6 +903,38 @@ function MatchHistoryTable() {
 						disabled={!dupDate || dupLoading}
 					>
 						{dupLoading ? <CircularProgress size={20} color="inherit" /> : '복제'}
+					</Button>
+				</DialogActions>
+			</Dialog>
+			<Dialog open={cancelDialogOpen} onClose={handleCancelDialogClose} classes={{ paper: classes.dialogPaper }}>
+				<DialogTitle className={classes.dialogTitle}>매치 취소</DialogTitle>
+				<DialogContent className={classes.dialogContent}>
+					<span
+						style={{ fontFamily: '"Noto Sans KR", sans-serif', fontSize: '1.3rem', color: 'rgba(255,255,255,0.8)' }}
+					>
+						정말 이 매치를 취소하시겠습니까?
+						<br />
+						<span style={{ color: '#ff5252', fontSize: '1.1rem' }}>
+							레이팅이 롤백되고 명예 투표 데이터가 삭제됩니다.
+						</span>
+					</span>
+				</DialogContent>
+				<DialogActions>
+					<Button onClick={handleCancelDialogClose} className={classes.dialogCancelBtn}>
+						아니오
+					</Button>
+					<Button
+						onClick={handleCancelSubmit}
+						disabled={cancelLoading}
+						style={{
+							background: 'linear-gradient(135deg, #ff5252 0%, #ff1744 100%)',
+							color: '#fff',
+							fontWeight: 700,
+							borderRadius: 8,
+							padding: '6px 20px'
+						}}
+					>
+						{cancelLoading ? <CircularProgress size={20} color="inherit" /> : '취소하기'}
 					</Button>
 				</DialogActions>
 			</Dialog>

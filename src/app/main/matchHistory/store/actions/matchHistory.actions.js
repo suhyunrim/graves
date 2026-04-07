@@ -3,6 +3,7 @@ import createCamilleAxios from 'app/utility/camilleAxios';
 export const GET_MATCH_HISTORY = '[MATCH_HISTORY] GET MATCH HISTORY';
 export const SET_SEARCH_TEXT = '[MATCH_HISTORY] SET SEARCH TEXT';
 export const DUPLICATE_MATCH = '[MATCH_HISTORY] DUPLICATE MATCH';
+export const CANCEL_MATCH = '[MATCH_HISTORY] CANCEL MATCH';
 
 export function setSearchText(event) {
 	return {
@@ -35,6 +36,19 @@ export function duplicateMatch(groupId, matchId, date, winTeam) {
 		request.then(response => {
 			dispatch({
 				type: DUPLICATE_MATCH,
+				payload: response.data
+			});
+			return response.data;
+		});
+}
+
+export function cancelMatch(groupId, matchId) {
+	const request = createCamilleAxios().post(`/api/match/${groupId}/cancel`, { matchId });
+
+	return dispatch =>
+		request.then(response => {
+			dispatch({
+				type: CANCEL_MATCH,
 				payload: response.data
 			});
 			return response.data;
