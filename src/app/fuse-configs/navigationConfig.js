@@ -51,7 +51,7 @@ const navigationConfig = [
 				id: 'achievement-component',
 				title: 'Achievement',
 				type: 'item',
-				icon: 'military_tech',
+				icon: 'stars',
 				url: '/achievement'
 			},
 			{
