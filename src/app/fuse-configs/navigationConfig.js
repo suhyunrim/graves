@@ -48,6 +48,13 @@ const navigationConfig = [
 				url: '/challenge'
 			},
 			{
+				id: 'achievement-component',
+				title: 'Achievement',
+				type: 'item',
+				icon: 'military_tech',
+				url: '/achievement'
+			},
+			{
 				id: 'group-settings-component',
 				title: 'Group Settings',
 				type: 'item',
