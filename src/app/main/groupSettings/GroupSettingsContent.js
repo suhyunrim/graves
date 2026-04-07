@@ -486,6 +486,45 @@ function GroupSettingsContent() {
 		return `${y}.${m}.${day}`;
 	}
 
+	function formatRelativeTime(dateStr) {
+		if (!dateStr) return null;
+		const now = new Date();
+		const d = new Date(dateStr);
+		const diffMs = now - d;
+		const diffMin = Math.floor(diffMs / 60000);
+		const diffHour = Math.floor(diffMin / 60);
+		const diffDay = Math.floor(diffHour / 24);
+
+		if (diffMin < 1) return '방금 전';
+		if (diffMin < 60) return `${diffMin}분 전`;
+		if (diffHour < 24) return `${diffHour}시간 전`;
+		if (diffDay < 30) return `${diffDay}일 전`;
+		if (diffDay < 365) return `${Math.floor(diffDay / 30)}개월 전`;
+		return `${Math.floor(diffDay / 365)}년 전`;
+	}
+
+	function isDormant(dateStr) {
+		if (!dateStr) return false;
+		const diffDay = Math.floor((new Date() - new Date(dateStr)) / 86400000);
+		return diffDay >= 30;
+	}
+
+	function renderVoiceStatus(dateStr) {
+		if (!dateStr) {
+			return <span className={classes.statsText}>기록 없음</span>;
+		}
+		const dormant = isDormant(dateStr);
+		return (
+			<span
+				className={classes.statsText}
+				style={dormant ? { color: '#ff6b6b' } : { color: 'rgba(255, 255, 255, 0.7)' }}
+			>
+				{formatRelativeTime(dateStr)}
+				{dormant && ' (휴면)'}
+			</span>
+		);
+	}
+
 	function renderConfirmDialog() {
 		return (
 			<Dialog
@@ -558,6 +597,10 @@ function GroupSettingsContent() {
 										<span className={classes.cardLabel}>최근 경기</span>
 										<span className={classes.cardValue}>{formatDate(member.latestMatchDate)}</span>
 									</div>
+									<div className={classes.cardField}>
+										<span className={classes.cardLabel}>보이스 접속</span>
+										{renderVoiceStatus(member.lastVoiceJoinedAt)}
+									</div>
 									<div className={`${classes.cardField} ${classes.cardTierRow}`}>
 										<span className={classes.cardLabel}>기본 티어</span>
 										{renderTierSelect(member, true)}
@@ -597,6 +640,9 @@ function GroupSettingsContent() {
 								최근 경기
 							</TableCell>
 							<TableCell className={classes.headCell} align="center">
+								보이스 접속
+							</TableCell>
+							<TableCell className={classes.headCell} align="center">
 								관리
 							</TableCell>
 						</TableRow>
@@ -627,6 +673,9 @@ function GroupSettingsContent() {
 									</TableCell>
 									<TableCell className={classes.bodyCell} align="center">
 										<span className={classes.statsText}>{formatDate(member.latestMatchDate)}</span>
+									</TableCell>
+									<TableCell className={classes.bodyCell} align="center">
+										{renderVoiceStatus(member.lastVoiceJoinedAt)}
 									</TableCell>
 									<TableCell className={classes.bodyCell} align="center">
 										{renderActionBtn(member)}
