@@ -20,12 +20,25 @@ const TIER_COLORS = {
 
 const CATEGORY_LABELS = {
 	match: '매치',
-	games: '경기 수',
-	streak: '연속',
-	tier: '티어'
+	games: '판수',
+	streak: '연승/연패',
+	tier: '티어 달성',
+	voice: '보이스',
+	challenge: '챌린지',
+	underdog: '언더독',
+	late_night: '야식'
 };
 
-const CATEGORY_ORDER = ['match', 'games', 'streak', 'tier'];
+const CATEGORY_ORDER = ['match', 'games', 'streak', 'tier', 'voice', 'challenge', 'underdog', 'late_night'];
+
+function formatDate(dateStr) {
+	if (!dateStr) return '';
+	const d = new Date(dateStr);
+	const y = String(d.getFullYear()).slice(-2);
+	const m = String(d.getMonth() + 1).padStart(2, '0');
+	const day = String(d.getDate()).padStart(2, '0');
+	return `${y}.${m}.${day}`;
+}
 
 const useStyles = makeStyles(theme => ({
 	container: {
@@ -185,6 +198,10 @@ const useStyles = makeStyles(theme => ({
 		fontFamily: '"Noto Sans KR", sans-serif',
 		fontSize: '1.8rem',
 		color: 'rgba(255, 255, 255, 0.4)'
+	},
+	tierEmblem: {
+		width: 36,
+		height: 36
 	}
 }));
 
@@ -235,15 +252,6 @@ function AchievementContent() {
 		}
 	});
 
-	function formatDate(dateStr) {
-		if (!dateStr) return '';
-		const d = new Date(dateStr);
-		const y = String(d.getFullYear()).slice(-2);
-		const m = String(d.getMonth() + 1).padStart(2, '0');
-		const day = String(d.getDate()).padStart(2, '0');
-		return `${y}.${m}.${day}`;
-	}
-
 	return (
 		<div className={classes.container}>
 			<div className={classes.title}>
@@ -258,8 +266,8 @@ function AchievementContent() {
 
 			<div className={classes.summary}>
 				{CATEGORY_ORDER.map(cat => {
-					const items = achievements.filter(a => a.category === cat);
-					if (items.length === 0) return null;
+					const items = grouped[cat];
+					if (!items) return null;
 					const catUnlocked = items.filter(a => a.unlocked).length;
 					return (
 						<div key={cat} className={classes.summaryCard}>
@@ -291,9 +299,17 @@ function AchievementContent() {
 										}
 									>
 										<div className={classes.cardHeader}>
-											<span role="img" aria-label={achievement.name} className={classes.emoji}>
-												{achievement.emoji}
-											</span>
+											{achievement.category === 'tier' ? (
+												<img
+													className={classes.tierEmblem}
+													src={`/assets/images/ranked-emblems/Emblem_${achievement.id.replace('TIER_', '')}.webp`}
+													alt={achievement.name}
+												/>
+											) : (
+												<span role="img" aria-label={achievement.name} className={classes.emoji}>
+													{achievement.emoji}
+												</span>
+											)}
 											<div className={classes.cardInfo}>
 												<div className={classes.cardName}>{achievement.name}</div>
 												<div className={classes.cardDesc}>{achievement.description}</div>
