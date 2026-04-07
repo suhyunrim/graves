@@ -352,15 +352,15 @@ function GroupSettingsContent() {
 	const [confirmDialog, setConfirmDialog] = useState(null);
 
 	const groupId = user?.reprGroup?.groupId;
-	const isAdmin = user?.reprGroup?.isAdmin;
+	const forbidden = useSelector(({ GroupSettings }) => GroupSettings.groupSettings.forbidden);
 
 	useEffect(() => {
-		if (groupId && isAdmin) {
+		if (groupId) {
 			dispatch(Actions.getMembers(groupId));
 		}
-	}, [dispatch, groupId, isAdmin]);
+	}, [dispatch, groupId]);
 
-	if (!isAdmin) {
+	if (forbidden) {
 		return <div className={classes.noAdmin}>관리자 권한이 필요합니다.</div>;
 	}
 
