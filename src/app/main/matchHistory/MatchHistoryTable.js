@@ -582,9 +582,19 @@ function MatchHistoryTable() {
 		setMenuMatch(null);
 	};
 
+	const toLocalDatetimeString = date => {
+		const d = new Date(date);
+		const pad = n => String(n).padStart(2, '0');
+		return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(
+			d.getMinutes()
+		)}`;
+	};
+
 	const handleDuplicateClick = () => {
 		setMenuAnchorEl(null);
-		setDupDate(new Date().toISOString().slice(0, 10));
+		const baseDate = new Date(menuMatch.createdAt);
+		baseDate.setSeconds(baseDate.getSeconds() + 30);
+		setDupDate(toLocalDatetimeString(baseDate));
 		setDupWinTeam(String(menuMatch.winTeam));
 		setDupDialogOpen(true);
 	};
@@ -597,7 +607,8 @@ function MatchHistoryTable() {
 	const handleDuplicateSubmit = () => {
 		if (!menuMatch || !dupDate) return;
 		setDupLoading(true);
-		dispatch(Actions.duplicateMatch(user.reprGroup.groupId, menuMatch.gameId, dupDate, Number(dupWinTeam)))
+		const dateToSend = new Date(dupDate).toISOString();
+		dispatch(Actions.duplicateMatch(user.reprGroup.groupId, menuMatch.gameId, dateToSend, Number(dupWinTeam)))
 			.then(() => {
 				setDupDialogOpen(false);
 				setMenuMatch(null);
@@ -804,8 +815,8 @@ function MatchHistoryTable() {
 				<DialogTitle className={classes.dialogTitle}>매치 복제</DialogTitle>
 				<DialogContent className={classes.dialogContent}>
 					<TextField
-						label="날짜"
-						type="date"
+						label="날짜 및 시간"
+						type="datetime-local"
 						value={dupDate}
 						onChange={e => setDupDate(e.target.value)}
 						className={classes.dialogInput}
