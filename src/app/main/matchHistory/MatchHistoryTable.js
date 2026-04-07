@@ -7,8 +7,24 @@ import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
 import TablePagination from '@material-ui/core/TablePagination';
 import TableRow from '@material-ui/core/TableRow';
+import Dialog from '@material-ui/core/Dialog';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogActions from '@material-ui/core/DialogActions';
+import Button from '@material-ui/core/Button';
+import IconButton from '@material-ui/core/IconButton';
+import TextField from '@material-ui/core/TextField';
+import Radio from '@material-ui/core/Radio';
+import RadioGroup from '@material-ui/core/RadioGroup';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import FormControl from '@material-ui/core/FormControl';
+import FormLabel from '@material-ui/core/FormLabel';
+import SettingsIcon from '@material-ui/icons/Settings';
+import Menu from '@material-ui/core/Menu';
+import MenuItem from '@material-ui/core/MenuItem';
+import CircularProgress from '@material-ui/core/CircularProgress';
 import { makeStyles, withStyles } from '@material-ui/core/styles';
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import * as Actions from './store/actions';
@@ -429,6 +445,85 @@ const useStyles = makeStyles(theme => ({
 		fontWeight: 700,
 		color: 'rgba(255, 255, 255, 0.2)',
 		background: 'rgba(0, 0, 0, 0.2)'
+	},
+	settingsBtn: {
+		color: 'rgba(255, 255, 255, 0.4)',
+		padding: 6,
+		'&:hover': {
+			color: '#00d4ff',
+			backgroundColor: 'rgba(0, 212, 255, 0.1)'
+		}
+	},
+	settingsIcon: {
+		fontSize: '1.6rem'
+	},
+	dialogPaper: {
+		background: 'linear-gradient(135deg, #1a1a2e 0%, #0f0f1a 100%)',
+		border: '1px solid rgba(0, 212, 255, 0.3)',
+		borderRadius: 16,
+		color: '#fff',
+		minWidth: 360
+	},
+	dialogTitle: {
+		fontFamily: '"Rajdhani", "Noto Sans KR", sans-serif',
+		color: '#00d4ff',
+		borderBottom: '1px solid rgba(255, 255, 255, 0.1)'
+	},
+	dialogContent: {
+		paddingTop: '24px !important'
+	},
+	dialogInput: {
+		'& .MuiInputBase-root': {
+			color: '#fff'
+		},
+		'& .MuiInputLabel-root': {
+			color: 'rgba(255, 255, 255, 0.6)'
+		},
+		'& .MuiInput-underline:before': {
+			borderBottomColor: 'rgba(255, 255, 255, 0.2)'
+		},
+		'& .MuiInput-underline:hover:before': {
+			borderBottomColor: 'rgba(0, 212, 255, 0.5)'
+		},
+		'& .MuiInput-underline:after': {
+			borderBottomColor: '#00d4ff'
+		}
+	},
+	formLabel: {
+		color: 'rgba(255, 255, 255, 0.7)',
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.2rem',
+		'&.Mui-focused': {
+			color: '#00d4ff'
+		}
+	},
+	radioLabel: {
+		color: '#fff',
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.3rem'
+	},
+	radio: {
+		color: 'rgba(255, 255, 255, 0.4)',
+		'&.Mui-checked': {
+			color: '#00d4ff'
+		}
+	},
+	dialogCancelBtn: {
+		color: 'rgba(255, 255, 255, 0.5)'
+	},
+	dialogConfirmBtn: {
+		background: 'linear-gradient(135deg, #00d4ff 0%, #0094ff 100%)',
+		color: '#fff',
+		fontWeight: 700,
+		borderRadius: 8,
+		padding: '6px 20px',
+		'&:hover': {
+			background: 'linear-gradient(135deg, #00b8e6 0%, #0080e6 100%)'
+		},
+		'&.Mui-disabled': {
+			background: 'rgba(255, 255, 255, 0.1)',
+			color: 'rgba(255, 255, 255, 0.3)'
+		}
 	}
 }));
 
@@ -463,8 +558,55 @@ function MatchHistoryTable() {
 	const serverPage = useSelector(({ MatchHistory }) => MatchHistory.matchHistory.page);
 	const searchText = useSelector(({ MatchHistory }) => MatchHistory.matchHistory.searchText);
 
+	const isAdmin = user?.reprGroup?.isAdmin;
+
 	const rowsPerPage = 10;
 	const debounceTimer = useRef(null);
+
+	// 복제 관련 상태
+	const [menuAnchorEl, setMenuAnchorEl] = useState(null);
+	const [menuMatch, setMenuMatch] = useState(null);
+	const [dupDialogOpen, setDupDialogOpen] = useState(false);
+	const [dupDate, setDupDate] = useState('');
+	const [dupWinTeam, setDupWinTeam] = useState('1');
+	const [dupLoading, setDupLoading] = useState(false);
+
+	const handleMenuOpen = (event, match) => {
+		event.stopPropagation();
+		setMenuAnchorEl(event.currentTarget);
+		setMenuMatch(match);
+	};
+
+	const handleMenuClose = () => {
+		setMenuAnchorEl(null);
+		setMenuMatch(null);
+	};
+
+	const handleDuplicateClick = () => {
+		setMenuAnchorEl(null);
+		setDupDate(new Date().toISOString().slice(0, 10));
+		setDupWinTeam(String(menuMatch.winTeam));
+		setDupDialogOpen(true);
+	};
+
+	const handleDupDialogClose = () => {
+		setDupDialogOpen(false);
+		setMenuMatch(null);
+	};
+
+	const handleDuplicateSubmit = () => {
+		if (!menuMatch || !dupDate) return;
+		setDupLoading(true);
+		dispatch(Actions.duplicateMatch(user.reprGroup.groupId, menuMatch.gameId, dupDate, Number(dupWinTeam)))
+			.then(() => {
+				setDupDialogOpen(false);
+				setMenuMatch(null);
+				dispatch(Actions.getMatchHistory(user.reprGroup.groupId, 1, rowsPerPage, searchText));
+			})
+			.finally(() => {
+				setDupLoading(false);
+			});
+	};
 
 	useEffect(() => {
 		dispatch(Actions.getMatchHistory(user.reprGroup.groupId, 1, rowsPerPage));
@@ -574,7 +716,10 @@ function MatchHistoryTable() {
 				<span className={classes.tierBadge} style={{ color: getTierColor(player.tier) }}>
 					{getTierShortName(player.tier)}
 				</span>
-				<span className={isPlayerMatched(player.name) ? classes.playerNameHighlight : classes.playerName} onClick={() => history.push(`/userinfo/${player.puuid}`)}>
+				<span
+					className={isPlayerMatched(player.name) ? classes.playerNameHighlight : classes.playerName}
+					onClick={() => history.push(`/userinfo/${player.puuid}`)}
+				>
 					{player.name}
 				</span>
 			</div>
@@ -615,7 +760,10 @@ function MatchHistoryTable() {
 				<span className={classes.mobilePlayerTier} style={{ color: getTierColor(player.tier) }}>
 					{getTierShortName(player.tier)}
 				</span>
-				<span className={isPlayerMatched(player.name) ? classes.mobilePlayerNameHighlight : classes.mobilePlayerName} onClick={() => history.push(`/userinfo/${player.puuid}`)}>
+				<span
+					className={isPlayerMatched(player.name) ? classes.mobilePlayerNameHighlight : classes.mobilePlayerName}
+					onClick={() => history.push(`/userinfo/${player.puuid}`)}
+				>
 					{player.name}
 				</span>
 			</div>
@@ -628,8 +776,94 @@ function MatchHistoryTable() {
 
 	const getDisplayId = index => total - ((serverPage - 1) * rowsPerPage + index);
 
+	const renderDuplicateDialog = () => (
+		<>
+			<Menu
+				anchorEl={menuAnchorEl}
+				open={Boolean(menuAnchorEl)}
+				onClose={handleMenuClose}
+				PaperProps={{
+					style: {
+						background: '#1a1a2e',
+						border: '1px solid rgba(0, 212, 255, 0.3)',
+						color: '#fff'
+					}
+				}}
+			>
+				<MenuItem
+					onClick={handleDuplicateClick}
+					style={{ fontFamily: '"Noto Sans KR", sans-serif', fontSize: '1.2rem' }}
+				>
+					<span role="img" aria-label="copy" style={{ marginRight: 8 }}>
+						📋
+					</span>
+					복제
+				</MenuItem>
+			</Menu>
+			<Dialog open={dupDialogOpen} onClose={handleDupDialogClose} classes={{ paper: classes.dialogPaper }}>
+				<DialogTitle className={classes.dialogTitle}>매치 복제</DialogTitle>
+				<DialogContent className={classes.dialogContent}>
+					<TextField
+						label="날짜"
+						type="date"
+						value={dupDate}
+						onChange={e => setDupDate(e.target.value)}
+						className={classes.dialogInput}
+						fullWidth
+						InputLabelProps={{ shrink: true }}
+						style={{ marginBottom: 24 }}
+					/>
+					<FormControl component="fieldset">
+						<FormLabel component="legend" className={classes.formLabel}>
+							승리팀
+						</FormLabel>
+						<RadioGroup row value={dupWinTeam} onChange={e => setDupWinTeam(e.target.value)}>
+							<FormControlLabel
+								value="1"
+								control={<Radio className={classes.radio} />}
+								label={
+									<span className={classes.radioLabel}>
+										<span role="img" aria-label="dog">
+											🐶
+										</span>{' '}
+										Team 1
+									</span>
+								}
+							/>
+							<FormControlLabel
+								value="2"
+								control={<Radio className={classes.radio} />}
+								label={
+									<span className={classes.radioLabel}>
+										<span role="img" aria-label="cat">
+											🐱
+										</span>{' '}
+										Team 2
+									</span>
+								}
+							/>
+						</RadioGroup>
+					</FormControl>
+				</DialogContent>
+				<DialogActions>
+					<Button onClick={handleDupDialogClose} className={classes.dialogCancelBtn}>
+						취소
+					</Button>
+					<Button
+						onClick={handleDuplicateSubmit}
+						className={classes.dialogConfirmBtn}
+						disabled={!dupDate || dupLoading}
+					>
+						{dupLoading ? <CircularProgress size={20} color="inherit" /> : '복제'}
+					</Button>
+				</DialogActions>
+			</Dialog>
+		</>
+	);
+
 	return (
 		<div className={classes.container}>
+			{isAdmin && renderDuplicateDialog()}
 			<div className={classes.tableWrapper}>
 				{matches && matches.length > 0 ? (
 					<>
@@ -665,6 +899,7 @@ function MatchHistoryTable() {
 													Team 2
 												</span>
 											</TableCell>
+											{isAdmin && <TableCell className={classes.headerCell} style={{ width: 48 }} />}
 										</TableRow>
 									</TableHead>
 									<TableBody>
@@ -751,6 +986,17 @@ function MatchHistoryTable() {
 														</div>
 														<div className={classes.playerList}>{renderPlayers(match.team2.players)}</div>
 													</StyledTableCell>
+													{isAdmin && (
+														<StyledTableCell align="center" style={{ padding: '8px 4px' }}>
+															<IconButton
+																className={classes.settingsBtn}
+																size="small"
+																onClick={e => handleMenuOpen(e, match)}
+															>
+																<SettingsIcon className={classes.settingsIcon} />
+															</IconButton>
+														</StyledTableCell>
+													)}
 												</StyledTableRow>
 											);
 										})}
@@ -769,7 +1015,18 @@ function MatchHistoryTable() {
 										<div key={match.gameId} className={classes.mobileCard}>
 											<div className={classes.mobileCardHeader}>
 												<span className={classes.mobileMatchId}>#{displayId}</span>
-												<span className={classes.mobileDate}>{formatDate(match.createdAt)}</span>
+												<div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+													<span className={classes.mobileDate}>{formatDate(match.createdAt)}</span>
+													{isAdmin && (
+														<IconButton
+															className={classes.settingsBtn}
+															size="small"
+															onClick={e => handleMenuOpen(e, match)}
+														>
+															<SettingsIcon className={classes.settingsIcon} />
+														</IconButton>
+													)}
+												</div>
 											</div>
 											{/* Team 1 */}
 											<div
