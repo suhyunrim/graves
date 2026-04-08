@@ -3,6 +3,7 @@ import FuseLoading from '@fuse/core/FuseLoading';
 import { makeStyles } from '@material-ui/core/styles';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Switch from '@material-ui/core/Switch';
+import Tooltip from '@material-ui/core/Tooltip';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import camilleRiotAuthService from 'app/services/camilleRiotAuthService';
@@ -31,6 +32,18 @@ const CATEGORY_LABELS = {
 	underdog: '언더독',
 	late_night: '야식'
 };
+
+const TIER_ORDER = [
+	'CHALLENGER',
+	'GRANDMASTER',
+	'MASTER',
+	'DIAMOND',
+	'EMERALD',
+	'PLATINUM',
+	'GOLD',
+	'SILVER',
+	'BRONZE'
+];
 
 const CATEGORY_ORDER = [
 	'match',
@@ -78,27 +91,14 @@ const useStyles = makeStyles(theme => ({
 	},
 	summary: {
 		display: 'flex',
-		gap: 16,
+		gap: 12,
 		marginBottom: 32,
-		flexWrap: 'wrap'
+		flexWrap: 'wrap',
+		alignItems: 'center'
 	},
-	summaryCard: {
-		background: 'rgba(255, 255, 255, 0.04)',
-		border: '1px solid rgba(255, 255, 255, 0.08)',
-		borderRadius: 12,
-		padding: '16px 24px',
-		textAlign: 'center'
-	},
-	summaryValue: {
-		fontFamily: '"Rajdhani", sans-serif',
-		fontSize: '2.4rem',
-		fontWeight: 700,
-		color: '#00d4ff'
-	},
-	summaryLabel: {
-		fontFamily: '"Noto Sans KR", sans-serif',
-		fontSize: '1.1rem',
-		color: 'rgba(255, 255, 255, 0.5)'
+	summaryEmblem: {
+		width: 32,
+		height: 32
 	},
 	categorySection: {
 		marginBottom: 32
@@ -379,18 +379,19 @@ function AchievementContent() {
 			</div>
 
 			<div className={classes.summary}>
-				{CATEGORY_ORDER.map(cat => {
-					const items = grouped[cat];
-					if (!items) return null;
-					const catUnlocked = items.filter(a => a.unlocked).length;
-					return (
-						<div key={cat} className={classes.summaryCard}>
-							<div className={classes.summaryValue}>
-								{catUnlocked}/{items.length}
-							</div>
-							<div className={classes.summaryLabel}>{CATEGORY_LABELS[cat] || cat}</div>
-						</div>
-					);
+				{TIER_ORDER.map(tier => {
+					const tierAchievements = unlocked.filter(a => a.tier === tier);
+					if (tierAchievements.length === 0) return null;
+					return tierAchievements.map(a => (
+						<Tooltip key={a.id} title={a.name} arrow placement="top">
+							<img
+								className={classes.summaryEmblem}
+								src={`/assets/images/ranked-emblems/Emblem_${tier}.webp`}
+								alt={a.name}
+								style={{ filter: `drop-shadow(0 0 6px ${TIER_COLORS[tier] || '#fff'}50)` }}
+							/>
+						</Tooltip>
+					));
 				})}
 			</div>
 
