@@ -4,72 +4,72 @@ import { useInView } from 'react-intersection-observer';
 
 const FEATURES = [
 	{
-		emoji: '\uD83C\uDFC6',
+		emoji: '🏆',
 		emojiLabel: 'trophy',
 		title: 'Dashboard',
-		subtitle: '\uC6D4\uAC04 \uC5B4\uC6CC\uB4DC',
+		subtitle: '월간 어워드',
 		description:
-			'\uB9E4\uB2EC \uCD5C\uACE0\uC758 \uD50C\uB808\uC774\uC5B4\uB97C \uC120\uC815\uD569\uB2C8\uB2E4. \uBA85\uC608\uC655, \uCD5C\uB2E4\uD310\uC218, \uCD5C\uACE0\uC2B9\uB960, \uC5F0\uC2B9\uC655, \uBCA0\uC2A4\uD2B8\uB4C0\uC624, \uB77C\uC774\uBC8C, \uC2E0\uC778\uC655, \uAE09\uB4F1\uC655, \uC62C\uBE7C\uBBF8, \uB2E4\uD06C\uD638\uC2A4 \uB4F1 10\uAC00\uC9C0 \uBD80\uBB38\uC758 \uC5B4\uC6CC\uB4DC\uB97C \uD655\uC778\uD558\uC138\uC694.',
+			'매달 최고의 플레이어를 선정합니다. 명예왕, 최다판수, 최고승률, 연승왕, 베스트듀오, 라이벌, 신인왕, 급등왕, 올빼미, 다크호스 등 10가지 부문의 어워드를 확인하세요.',
 		image: '/assets/images/about/dashboard.png',
 		accent: '#FFD700'
 	},
 	{
-		emoji: '\uD83D\uDCCA',
+		emoji: '📊',
 		emojiLabel: 'chart',
 		title: 'Ranking',
-		subtitle: '\uB808\uC774\uD305 & \uD2F0\uC5B4',
+		subtitle: '레이팅 & 티어',
 		description:
-			'\uB0B4\uC804 \uACBD\uAE30 \uACB0\uACFC\uB97C \uBC14\uD0D5\uC73C\uB85C \uB808\uC774\uD305\uC744 \uC0B0\uCD9C\uD558\uACE0, \uC544\uC774\uC5B8\uBD80\uD130 \uCC4C\uB9B0\uC800\uAE4C\uC9C0 LoL \uD2F0\uC5B4 \uC2DC\uC2A4\uD15C\uC73C\uB85C \uBCC0\uD658\uD569\uB2C8\uB2E4. \uC2B9\uB960, \uC804\uC801, LP\uAE4C\uC9C0 \uD55C\uB208\uC5D0.',
+			'내전 경기 결과를 바탕으로 레이팅을 산출하고, 아이언부터 챌린저까지 LoL 티어 시스템으로 변환합니다. 승률, 전적, LP까지 한눈에 확인하세요.',
 		image: '/assets/images/about/ranking.png',
 		accent: '#00d4ff'
 	},
 	{
-		emoji: '\uD83D\uDE4E',
+		emoji: '🙎',
 		emojiLabel: 'person',
 		title: 'MyInfo',
-		subtitle: '\uAC1C\uC778 \uD504\uB85C\uD544',
+		subtitle: '개인 프로필',
 		description:
-			'\uC194\uB85C\uB7AD\uD06C\uC640 \uB0B4\uC804 \uD2F0\uC5B4\uB97C \uB098\uB780\uD788 \uBE44\uAD50\uD558\uACE0, \uB808\uC774\uD305 \uBCC0\uD654 \uCC28\uD2B8\uB85C \uC131\uC7A5 \uCD94\uC774\uB97C \uD655\uC778\uD558\uC138\uC694. \uCD5C\uADFC \uC804\uC801, \uBCA0\uC2A4\uD2B8 \uD300\uC6D0/\uC0C1\uB300 \uD1B5\uACC4\uAE4C\uC9C0.',
+			'솔로랭크와 내전 티어를 나란히 비교하고, 레이팅 변화 차트로 성장 추이를 확인하세요. 최근 전적, 베스트 팀원/상대 통계까지 제공합니다.',
 		image: '/assets/images/about/myinfo.png',
 		accent: '#50C878'
 	},
 	{
-		emoji: '\u2694\uFE0F',
+		emoji: '⚔️',
 		emojiLabel: 'swords',
 		title: 'Match History',
-		subtitle: '\uACBD\uAE30 \uAE30\uB85D',
+		subtitle: '경기 기록',
 		description:
-			'\uBAA8\uB4E0 \uB0B4\uC804 \uACBD\uAE30\uC758 \uC0C1\uC138 \uAE30\uB85D\uC744 \uC870\uD68C\uD558\uC138\uC694. \uD300 \uAD6C\uC131, \uC2B9\uD328 \uACB0\uACFC, \uB808\uC774\uD305 \uBCC0\uB3D9\uC744 \uD655\uC778\uD558\uACE0 MVP \uD22C\uD45C\uB85C \uD65C\uC57D\uD55C \uD50C\uB808\uC774\uC5B4\uB97C \uC120\uC815\uD558\uC138\uC694.',
+			'모든 내전 경기의 상세 기록을 조회하세요. 팀 구성, 승패 결과, 레이팅 변동을 확인하고 MVP 투표로 활약한 플레이어를 선정하세요.',
 		image: '/assets/images/about/match-history.png',
 		accent: '#E74C3C'
 	},
 	{
-		emoji: '\uD83D\uDEA9',
+		emoji: '🚩',
 		emojiLabel: 'flag',
 		title: 'Challenge',
-		subtitle: '\uB0B4\uC804 \uB300\uD68C',
+		subtitle: '내전 대회',
 		description:
-			'\uC9C1\uC811 \uB300\uD68C\uB97C \uB9CC\uB4E4\uACE0 \uCC38\uC5EC\uD558\uC138\uC694. 1v1\uBD80\uD130 5v5\uAE4C\uC9C0 \uB2E4\uC591\uD55C \uD615\uC2DD\uC744 \uC9C0\uC6D0\uD558\uBA70, \uB3C5\uB9BD \uB9AC\uB354\uBCF4\uB4DC\uC640 \uC2B9\uD328 \uAE30\uB85D\uC73C\uB85C \uACBD\uC7C1\uD558\uC138\uC694.',
+			'직접 대회를 만들고 참여하세요. 1v1부터 5v5까지 다양한 형식을 지원하며, 독립 리더보드와 승패 기록으로 경쟁하세요.',
 		image: '/assets/images/about/challenge.png',
 		accent: '#9B59B6'
 	},
 	{
-		emoji: '\u2B50',
+		emoji: '⭐',
 		emojiLabel: 'star',
 		title: 'Achievement',
-		subtitle: '\uC5C5\uC801 \uC2DC\uC2A4\uD15C',
+		subtitle: '업적 시스템',
 		description:
-			'\uB9E4\uCE58, \uD310\uC218, \uC5F0\uC2B9, \uC5F0\uD328, \uD2F0\uC5B4, \uBCF4\uC774\uC2A4, \uCC4C\uB9B0\uC9C0, \uC5B8\uB354\uB3C5, \uC57C\uC2DD \uB4F1 9\uAC1C \uCE74\uD14C\uACE0\uB9AC\uC758 \uC5C5\uC801. \uBE0C\uB860\uC988\uBD80\uD130 \uCC4C\uB9B0\uC800\uAE4C\uC9C0 \uB09C\uC774\uB3C4\uBCC4 \uB4F1\uAE09\uC774 \uBD80\uC5EC\uB429\uB2C8\uB2E4.',
+			'매치, 판수, 연승, 연패, 티어, 보이스, 챌린지, 언더독, 야식 등 9개 카테고리의 업적을 달성하세요. 브론즈부터 챌린저까지 난이도별 등급이 부여됩니다.',
 		image: '/assets/images/about/achievement.png',
 		accent: '#F1C40F'
 	},
 	{
-		emoji: '\uD83C\uDF1F',
+		emoji: '🌟',
 		emojiLabel: 'glowing star',
 		title: 'Honor',
-		subtitle: '\uBA85\uC608 \uC2DC\uC2A4\uD15C',
+		subtitle: '명예 시스템',
 		description:
-			'\uD568\uAED8 \uD50C\uB808\uC774\uD55C \uD300\uC6D0\uC5D0\uAC8C \uBA85\uC608 \uD22C\uD45C\uB85C \uAC10\uC0AC\uB97C \uC804\uD558\uC138\uC694. \uB204\uC801\uB41C \uBA85\uC608 \uD3EC\uC778\uD2B8\uB85C \uB7AD\uD0B9\uC774 \uB9E4\uACA8\uC9C0\uBA70, \uD2B9\uBCC4\uD55C \uCE6D\uD638\uB3C4 \uBD80\uC5EC\uB429\uB2C8\uB2E4.',
+			'함께 플레이한 팀원에게 명예 투표로 감사를 전하세요. 누적된 명예 포인트로 랭킹이 매겨지며, 특별한 칭호도 부여됩니다.',
 		image: '/assets/images/about/honor.png',
 		accent: '#FF69B4'
 	}
@@ -349,13 +349,11 @@ function AboutContent() {
 				<FadeInSection>
 					<img className={classes.heroLogo} src="/assets/images/graves.jpg" alt="Graves" />
 					<h1 className={classes.heroTitle}>GRAVES</h1>
-					<div className={classes.heroSub}>LoL \uB0B4\uC804 \uD1B5\uACC4 & \uB7AD\uD0B9 \uB300\uC2DC\uBCF4\uB4DC</div>
+					<div className={classes.heroSub}>LoL 내전 통계 & 랭킹 대시보드</div>
 					<div className={classes.heroDivider} />
 					<div className={classes.heroDesc}>
-						\uADF8\uB8F9 \uB0B4 LoL \uB0B4\uC804 \uACBD\uAE30\uB97C \uCD94\uC801\uD558\uACE0, \uB808\uC774\uD305
-						\uC2DC\uC2A4\uD15C\uC73C\uB85C \uC2E4\uB825\uC744 \uCE21\uC815\uD558\uBA70, \uB2E4\uC591\uD55C
-						\uC5C5\uC801\uACFC \uC5B4\uC6CC\uB4DC\uB85C \uB0B4\uC804\uC744 \uB354\uC6B1 \uC990\uAC81\uAC8C
-						\uB9CC\uB4E4\uC5B4\uC8FC\uB294 \uD1B5\uACC4 \uB300\uC2DC\uBCF4\uB4DC\uC785\uB2C8\uB2E4.
+						그룹 내 LoL 내전 경기를 추적하고, 레이팅 시스템으로 실력을 측정하며, 다양한 업적과 어워드로 내전을 더욱
+						즐겁게 만들어주는 통계 대시보드입니다.
 					</div>
 				</FadeInSection>
 				<FadeInSection delay={0.3}>
@@ -392,11 +390,8 @@ function AboutContent() {
 			{/* CTA */}
 			<FadeInSection>
 				<div className={classes.cta}>
-					<div className={classes.ctaTitle}>\uC9C0\uAE08 \uC2DC\uC791\uD558\uC138\uC694</div>
-					<div className={classes.ctaSub}>
-						\uB0B4\uC804 \uAE30\uB85D\uC744 \uCD94\uC801\uD558\uACE0, \uD300\uC6D0\uB4E4\uACFC
-						\uACBD\uC7C1\uD558\uC138\uC694
-					</div>
+					<div className={classes.ctaTitle}>지금 시작하세요</div>
+					<div className={classes.ctaSub}>내전 기록을 추적하고, 팀원들과 경쟁하세요</div>
 					<a href="/login" className={classes.ctaButton}>
 						Login
 					</a>
