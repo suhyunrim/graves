@@ -264,7 +264,7 @@ const useStyles = makeStyles(theme => ({
 		alignItems: 'center',
 		gap: 16,
 		padding: '16px 24px',
-		[theme.breakpoints.down('xs')]: {
+		[theme.breakpoints.down('sm')]: {
 			flexDirection: 'column',
 			alignItems: 'stretch',
 			gap: 0,
@@ -277,7 +277,7 @@ const useStyles = makeStyles(theme => ({
 		gap: 12,
 		flex: 1,
 		minWidth: 0,
-		[theme.breakpoints.down('xs')]: {
+		[theme.breakpoints.down('sm')]: {
 			marginBottom: 12
 		}
 	},
@@ -286,7 +286,7 @@ const useStyles = makeStyles(theme => ({
 		alignItems: 'center',
 		gap: 16,
 		flexShrink: 0,
-		[theme.breakpoints.down('xs')]: {
+		[theme.breakpoints.down('sm')]: {
 			justifyContent: 'space-between',
 			paddingTop: 10,
 			borderTop: '1px solid rgba(255, 255, 255, 0.06)'
