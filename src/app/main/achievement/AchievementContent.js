@@ -287,7 +287,8 @@ const useStyles = makeStyles(theme => ({
 		gap: 16,
 		flexShrink: 0,
 		[theme.breakpoints.down('sm')]: {
-			justifyContent: 'space-between',
+			flexWrap: 'wrap',
+			gap: 8,
 			paddingTop: 10,
 			borderTop: '1px solid rgba(255, 255, 255, 0.06)'
 		}
