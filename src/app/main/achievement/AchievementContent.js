@@ -344,15 +344,17 @@ function AchievementContent() {
 	const total = achievements.length;
 
 	const grouped = {};
+	const streakItems = achievements.filter(a => a.category === 'streak');
+	if (streakItems.length > 0) {
+		const wins = streakItems.filter(a => a.id.includes('WIN'));
+		const losses = streakItems.filter(a => !a.id.includes('WIN'));
+		if (wins.length > 0) grouped.streak_win = wins;
+		if (losses.length > 0) grouped.streak_lose = losses;
+	}
 	CATEGORY_ORDER.forEach(cat => {
+		if (cat === 'streak_win' || cat === 'streak_lose') return;
 		const items = achievements.filter(a => a.category === cat);
-		if (items.length === 0) return;
-		if (cat === 'streak') {
-			const wins = items.filter(a => a.id.includes('WIN'));
-			const losses = items.filter(a => !a.id.includes('WIN'));
-			if (wins.length > 0) grouped.streak_win = wins;
-			if (losses.length > 0) grouped.streak_lose = losses;
-		} else {
+		if (items.length > 0) {
 			grouped[cat] = items;
 		}
 	});
