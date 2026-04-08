@@ -408,7 +408,7 @@ function AchievementContent() {
 					.map(a => {
 						const tierColor = TIER_COLORS[a.tier] || '#fff';
 						return (
-							<Tooltip key={a.id} title={a.name} arrow placement="top">
+							<Tooltip key={a.id} title={a.name} arrow placement="top" enterTouchDelay={0} leaveTouchDelay={2000}>
 								<img
 									className={classes.summaryEmblem}
 									src={`/assets/images/ranked-emblems/Emblem_${a.tier}.webp`}
