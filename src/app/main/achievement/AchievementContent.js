@@ -21,6 +21,18 @@ const TIER_COLORS = {
 	CHALLENGER: '#F1C40F'
 };
 
+const TIER_RANK = {
+	CHALLENGER: 9,
+	GRANDMASTER: 8,
+	MASTER: 7,
+	DIAMOND: 6,
+	EMERALD: 5,
+	PLATINUM: 4,
+	GOLD: 3,
+	SILVER: 2,
+	BRONZE: 1
+};
+
 const CATEGORY_LABELS = {
 	match: '매치',
 	games: '판수',
@@ -171,7 +183,14 @@ const useStyles = makeStyles(theme => ({
 		fontWeight: 700,
 		padding: '2px 10px',
 		borderRadius: 6,
-		background: 'rgba(255, 255, 255, 0.08)'
+		background: 'rgba(255, 255, 255, 0.08)',
+		display: 'inline-flex',
+		alignItems: 'center',
+		gap: 4
+	},
+	tierBadgeEmblem: {
+		width: 18,
+		height: 18
 	},
 	rate: {
 		fontFamily: '"Rajdhani", sans-serif',
@@ -372,18 +391,23 @@ function AchievementContent() {
 					if (!items) return null;
 					const highest = [...items].reverse().find(a => a.unlocked);
 					if (!highest) return null;
-					const tierColor = TIER_COLORS[highest.tier] || '#fff';
-					return (
-						<Tooltip key={cat} title={`${CATEGORY_LABELS[cat] || cat} - ${highest.name}`} arrow placement="top">
-							<img
-								className={classes.summaryEmblem}
-								src={`/assets/images/ranked-emblems/Emblem_${highest.tier}.webp`}
-								alt={highest.name}
-								style={{ filter: `drop-shadow(0 0 6px ${tierColor}50)` }}
-							/>
-						</Tooltip>
-					);
-				})}
+					return highest;
+				})
+					.filter(Boolean)
+					.sort((a, b) => (TIER_RANK[b.tier] || 0) - (TIER_RANK[a.tier] || 0))
+					.map(a => {
+						const tierColor = TIER_COLORS[a.tier] || '#fff';
+						return (
+							<Tooltip key={a.id} title={a.name} arrow placement="top">
+								<img
+									className={classes.summaryEmblem}
+									src={`/assets/images/ranked-emblems/Emblem_${a.tier}.webp`}
+									alt={a.name}
+									style={{ filter: `drop-shadow(0 0 6px ${tierColor}50)` }}
+								/>
+							</Tooltip>
+						);
+					})}
 			</div>
 
 			{CATEGORY_ORDER.map(cat => {
@@ -424,6 +448,11 @@ function AchievementContent() {
 												◀
 											</button>
 											<span className={classes.tierBadge} style={{ color: tierColor }}>
+												<img
+													className={classes.tierBadgeEmblem}
+													src={`/assets/images/ranked-emblems/Emblem_${achievement.tier}.webp`}
+													alt={achievement.tier}
+												/>
 												{achievement.tier}
 											</span>
 											<button
