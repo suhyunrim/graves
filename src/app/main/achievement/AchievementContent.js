@@ -23,7 +23,8 @@ const TIER_COLORS = {
 const CATEGORY_LABELS = {
 	match: '매치',
 	games: '판수',
-	streak: '연승/연패',
+	streak_win: '연승',
+	streak_lose: '연패',
 	tier: '티어 달성',
 	voice: '보이스',
 	challenge: '챌린지',
@@ -31,7 +32,17 @@ const CATEGORY_LABELS = {
 	late_night: '야식'
 };
 
-const CATEGORY_ORDER = ['match', 'games', 'streak', 'tier', 'voice', 'challenge', 'underdog', 'late_night'];
+const CATEGORY_ORDER = [
+	'match',
+	'games',
+	'streak_win',
+	'streak_lose',
+	'tier',
+	'voice',
+	'challenge',
+	'underdog',
+	'late_night'
+];
 
 function formatDate(dateStr) {
 	if (!dateStr) return '';
@@ -285,7 +296,13 @@ function AchievementContent() {
 	const grouped = {};
 	CATEGORY_ORDER.forEach(cat => {
 		const items = achievements.filter(a => a.category === cat);
-		if (items.length > 0) {
+		if (items.length === 0) return;
+		if (cat === 'streak') {
+			const wins = items.filter(a => a.id.includes('WIN'));
+			const losses = items.filter(a => !a.id.includes('WIN'));
+			if (wins.length > 0) grouped.streak_win = wins;
+			if (losses.length > 0) grouped.streak_lose = losses;
+		} else {
 			grouped[cat] = items;
 		}
 	});
@@ -354,8 +371,8 @@ function AchievementContent() {
 					displayItems = [allItems[idx]];
 				}
 				return (
-					<div key={cat} className={classes.categorySection}>
-						<div className={classes.categoryTitle}>{CATEGORY_LABELS[cat] || cat}</div>
+					<div key={cat} className={highestOnly ? undefined : classes.categorySection}>
+						{!highestOnly && <div className={classes.categoryTitle}>{CATEGORY_LABELS[cat] || cat}</div>}
 						<div className={classes.grid}>
 							{displayItems.map(achievement => {
 								const tierColor = TIER_COLORS[achievement.tier] || '#fff';
