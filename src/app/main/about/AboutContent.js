@@ -11,6 +11,7 @@ const FEATURES = [
 		description:
 			'매달 최고의 플레이어를 선정합니다. 명예왕, 최다판수, 최고승률, 연승왕, 베스트듀오, 라이벌, 신인왕, 급등왕, 올빼미, 다크호스 등 10가지 부문의 어워드를 확인하세요.',
 		image: '/assets/images/about/dashboard.png',
+		video: '/assets/images/about/dashboard.webm',
 		accent: '#FFD700'
 	},
 	{
@@ -21,6 +22,7 @@ const FEATURES = [
 		description:
 			'내전 경기 결과를 바탕으로 레이팅을 산출하고, 아이언부터 챌린저까지 LoL 티어 시스템으로 변환합니다. 승률, 전적, LP까지 한눈에 확인하세요.',
 		image: '/assets/images/about/ranking.png',
+		video: '/assets/images/about/ranking.webm',
 		accent: '#00d4ff'
 	},
 	{
@@ -31,6 +33,7 @@ const FEATURES = [
 		description:
 			'솔로랭크와 내전 티어를 나란히 비교하고, 레이팅 변화 차트로 성장 추이를 확인하세요. 최근 전적, 베스트 팀원/상대 통계까지 제공합니다.',
 		image: '/assets/images/about/myinfo.png',
+		video: '/assets/images/about/myinfo.webm',
 		accent: '#50C878'
 	},
 	{
@@ -41,6 +44,7 @@ const FEATURES = [
 		description:
 			'모든 내전 경기의 상세 기록을 조회하세요. 팀 구성, 승패 결과, 레이팅 변동을 확인하고 MVP 투표로 활약한 플레이어를 선정하세요.',
 		image: '/assets/images/about/match-history.png',
+		video: '/assets/images/about/match-history.webm',
 		accent: '#E74C3C'
 	},
 	{
@@ -51,6 +55,7 @@ const FEATURES = [
 		description:
 			'직접 대회를 만들고 참여하세요. 1v1부터 5v5까지 다양한 형식을 지원하며, 독립 리더보드와 승패 기록으로 경쟁하세요.',
 		image: '/assets/images/about/challenge.png',
+		video: '/assets/images/about/challenge.webm',
 		accent: '#9B59B6'
 	},
 	{
@@ -61,6 +66,7 @@ const FEATURES = [
 		description:
 			'매치, 판수, 연승, 연패, 티어, 보이스, 챌린지, 언더독, 야식 등 9개 카테고리의 업적을 달성하세요. 브론즈부터 챌린저까지 난이도별 등급이 부여됩니다.',
 		image: '/assets/images/about/achievement.png',
+		video: '/assets/images/about/achievement.webm',
 		accent: '#F1C40F'
 	},
 	{
@@ -71,6 +77,7 @@ const FEATURES = [
 		description:
 			'함께 플레이한 팀원에게 명예 투표로 감사를 전하세요. 누적된 명예 포인트로 랭킹이 매겨지며, 특별한 칭호도 부여됩니다.',
 		image: '/assets/images/about/honor.png',
+		video: '/assets/images/about/honor.webm',
 		accent: '#FF69B4'
 	}
 ];
@@ -254,12 +261,13 @@ const useStyles = makeStyles(theme => ({
 		flex: 1.2,
 		minWidth: 0
 	},
-	featureImage: {
+	featureMedia: {
 		width: '100%',
 		borderRadius: 14,
 		border: '1px solid rgba(255,255,255,0.08)',
 		boxShadow: '0 8px 40px rgba(0,0,0,0.5)',
 		transition: 'transform 0.4s ease, box-shadow 0.4s ease',
+		display: 'block',
 		'&:hover': {
 			transform: 'scale(1.02)',
 			boxShadow: '0 12px 50px rgba(0,0,0,0.6)'
@@ -357,7 +365,15 @@ function AboutContent() {
 					</div>
 				</FadeInSection>
 				<FadeInSection delay={0.3}>
-					<img className={classes.heroScreenshot} src="/assets/images/about/dashboard.png" alt="Dashboard Preview" />
+					<video
+						className={classes.heroScreenshot}
+						src="/assets/images/about/dashboard.webm"
+						poster="/assets/images/about/dashboard.png"
+						autoPlay
+						loop
+						muted
+						playsInline
+					/>
 				</FadeInSection>
 			</div>
 
@@ -379,7 +395,15 @@ function AboutContent() {
 									<div className={classes.featureDesc}>{feature.description}</div>
 								</div>
 								<div className={classes.featureImageWrap}>
-									<img className={classes.featureImage} src={feature.image} alt={feature.title} />
+									<video
+										className={classes.featureMedia}
+										src={feature.video}
+										poster={feature.image}
+										autoPlay
+										loop
+										muted
+										playsInline
+									/>
 								</div>
 							</div>
 						</FadeInSection>
