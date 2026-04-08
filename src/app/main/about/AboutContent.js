@@ -68,20 +68,50 @@ const FEATURES = [
 ];
 
 const useStyles = makeStyles(theme => ({
+	root: {
+		background: 'linear-gradient(135deg, #0a0a14 0%, #0f0f1a 40%, #1a1a2e 70%, #16213e 100%)',
+		minHeight: '100vh',
+		position: 'relative',
+		overflow: 'hidden',
+		'&::before': {
+			content: '""',
+			position: 'absolute',
+			top: 0,
+			left: 0,
+			right: 0,
+			bottom: 0,
+			background: 'radial-gradient(ellipse at 50% 0%, rgba(0, 212, 255, 0.1) 0%, transparent 50%)',
+			pointerEvents: 'none'
+		}
+	},
 	container: {
+		position: 'relative',
 		maxWidth: 1200,
 		margin: '0 auto',
-		padding: '0 28px 60px',
+		padding: '0 28px 80px',
 		[theme.breakpoints.down('xs')]: {
-			padding: '0 16px 40px'
+			padding: '0 16px 48px'
 		}
 	},
 	hero: {
 		textAlign: 'center',
-		padding: '80px 0 60px',
-		position: 'relative',
+		padding: '100px 0 80px',
 		[theme.breakpoints.down('xs')]: {
-			padding: '48px 0 40px'
+			padding: '60px 0 48px'
+		}
+	},
+	heroLogo: {
+		width: 120,
+		height: 120,
+		borderRadius: '50%',
+		objectFit: 'cover',
+		border: '3px solid rgba(0, 212, 255, 0.4)',
+		boxShadow: '0 0 40px rgba(0, 212, 255, 0.3)',
+		marginBottom: 32,
+		[theme.breakpoints.down('xs')]: {
+			width: 80,
+			height: 80,
+			marginBottom: 20
 		}
 	},
 	heroTitle: {
@@ -144,7 +174,7 @@ const useStyles = makeStyles(theme => ({
 		position: 'relative',
 		borderRadius: 20,
 		padding: 32,
-		background: 'linear-gradient(135deg, rgba(26, 26, 46, 0.8) 0%, rgba(15, 15, 26, 0.9) 100%)',
+		background: 'rgba(26, 26, 46, 0.6)',
 		border: '1px solid rgba(255, 255, 255, 0.06)',
 		overflow: 'hidden',
 		transition: 'transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease',
@@ -192,7 +222,6 @@ const useStyles = makeStyles(theme => ({
 		fontFamily: '"Rajdhani", sans-serif',
 		fontSize: '2rem',
 		fontWeight: 700,
-		color: '#fff',
 		letterSpacing: '0.05em',
 		lineHeight: 1.2
 	},
@@ -228,48 +257,53 @@ function AboutContent() {
 	const classes = useStyles();
 
 	return (
-		<div className={classes.container}>
-			<div className={classes.hero}>
-				<h1 className={classes.heroTitle}>GRAVES</h1>
-				<div className={classes.heroSubtitle}>
-					LoL \uB0B4\uC804 \uD1B5\uACC4 & \uB7AD\uD0B9 \uB300\uC2DC\uBCF4\uB4DC
-				</div>
-				<div className={classes.heroDivider} />
-				<div className={classes.heroDesc}>
-					\uADF8\uB8F9 \uB0B4 LoL \uB0B4\uC804 \uACBD\uAE30\uB97C \uCD94\uC801\uD558\uACE0, \uB808\uC774\uD305
-					\uC2DC\uC2A4\uD15C\uC73C\uB85C \uC2E4\uB825\uC744 \uCE21\uC815\uD558\uBA70, \uB2E4\uC591\uD55C
-					\uC5C5\uC801\uACFC \uC5B4\uC6CC\uB4DC\uB85C \uB0B4\uC804\uC744 \uB354\uC6B1 \uC990\uAC81\uAC8C
-					\uB9CC\uB4E4\uC5B4\uC8FC\uB294 \uD1B5\uACC4 \uB300\uC2DC\uBCF4\uB4DC\uC785\uB2C8\uB2E4.
-				</div>
-			</div>
-
-			<div className={classes.grid}>
-				{FEATURES.map(feature => (
-					<div key={feature.title} className={classes.card}>
-						<div
-							className={classes.cardGlow}
-							style={{ background: `linear-gradient(90deg, transparent, ${feature.accent}, transparent)` }}
-						/>
-						<div className={classes.cardHeader}>
-							<div className={classes.cardEmoji}>
-								<span role="img" aria-label={feature.emojiLabel}>
-									{feature.emoji}
-								</span>
-							</div>
-							<div className={classes.cardTitleWrap}>
-								<div className={classes.cardTitle} style={{ color: feature.accent }}>
-									{feature.title}
-								</div>
-								<div className={classes.cardSubtitle}>{feature.subtitle}</div>
-							</div>
-						</div>
-						<div className={classes.cardDesc}>{feature.description}</div>
+		<div className={classes.root}>
+			<div className={classes.container}>
+				<div className={classes.hero}>
+					<img className={classes.heroLogo} src="/assets/images/graves.jpg" alt="Graves" />
+					<h1 className={classes.heroTitle}>GRAVES</h1>
+					<div className={classes.heroSubtitle}>
+						LoL \uB0B4\uC804 \uD1B5\uACC4 & \uB7AD\uD0B9 \uB300\uC2DC\uBCF4\uB4DC
 					</div>
-				))}
-			</div>
+					<div className={classes.heroDivider} />
+					<div className={classes.heroDesc}>
+						\uADF8\uB8F9 \uB0B4 LoL \uB0B4\uC804 \uACBD\uAE30\uB97C \uCD94\uC801\uD558\uACE0, \uB808\uC774\uD305
+						\uC2DC\uC2A4\uD15C\uC73C\uB85C \uC2E4\uB825\uC744 \uCE21\uC815\uD558\uBA70, \uB2E4\uC591\uD55C
+						\uC5C5\uC801\uACFC \uC5B4\uC6CC\uB4DC\uB85C \uB0B4\uC804\uC744 \uB354\uC6B1 \uC990\uAC81\uAC8C
+						\uB9CC\uB4E4\uC5B4\uC8FC\uB294 \uD1B5\uACC4 \uB300\uC2DC\uBCF4\uB4DC\uC785\uB2C8\uB2E4.
+					</div>
+				</div>
 
-			<div className={classes.footer}>
-				<div className={classes.footerText}>Built for competitive communities</div>
+				<div className={classes.grid}>
+					{FEATURES.map(feature => (
+						<div key={feature.title} className={classes.card}>
+							<div
+								className={classes.cardGlow}
+								style={{
+									background: `linear-gradient(90deg, transparent, ${feature.accent}, transparent)`
+								}}
+							/>
+							<div className={classes.cardHeader}>
+								<div className={classes.cardEmoji}>
+									<span role="img" aria-label={feature.emojiLabel}>
+										{feature.emoji}
+									</span>
+								</div>
+								<div className={classes.cardTitleWrap}>
+									<div className={classes.cardTitle} style={{ color: feature.accent }}>
+										{feature.title}
+									</div>
+									<div className={classes.cardSubtitle}>{feature.subtitle}</div>
+								</div>
+							</div>
+							<div className={classes.cardDesc}>{feature.description}</div>
+						</div>
+					))}
+				</div>
+
+				<div className={classes.footer}>
+					<div className={classes.footerText}>Built for competitive communities</div>
+				</div>
 			</div>
 		</div>
 	);
