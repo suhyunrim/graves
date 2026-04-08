@@ -103,6 +103,9 @@ const useStyles = makeStyles(theme => ({
 	categorySection: {
 		marginBottom: 32
 	},
+	categorySectionCompact: {
+		marginBottom: 20
+	},
 	categoryTitle: {
 		fontFamily: '"Rajdhani", "Noto Sans KR", sans-serif',
 		fontSize: '1.6rem',
@@ -371,7 +374,7 @@ function AchievementContent() {
 					displayItems = [allItems[idx]];
 				}
 				return (
-					<div key={cat} className={highestOnly ? undefined : classes.categorySection}>
+					<div key={cat} className={highestOnly ? classes.categorySectionCompact : classes.categorySection}>
 						{!highestOnly && <div className={classes.categoryTitle}>{CATEGORY_LABELS[cat] || cat}</div>}
 						<div className={classes.grid}>
 							{displayItems.map(achievement => {

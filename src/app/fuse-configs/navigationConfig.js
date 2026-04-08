@@ -20,13 +20,6 @@ const navigationConfig = [
 				url: '/myinfo'
 			},
 			{
-				id: 'achievement-component',
-				title: 'Achievement',
-				type: 'item',
-				icon: 'stars',
-				url: '/achievement'
-			},
-			{
 				id: 'ranking-component',
 				title: 'Ranking',
 				type: 'item',
