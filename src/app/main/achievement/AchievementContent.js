@@ -434,7 +434,7 @@ function AchievementContent() {
 													{achievement.tier}
 												</span>
 											)}
-											<span className={classes.rate}>{achievement.achievementRate}% 달성</span>
+											<span className={classes.rate}>{achievement.achievementRate}%의 유저가 달성</span>
 										</div>
 										{achievement.unlocked && achievement.unlockedAt && (
 											<div className={classes.unlockedDate}>{formatDate(achievement.unlockedAt)} 달성</div>
