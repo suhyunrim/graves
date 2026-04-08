@@ -629,6 +629,9 @@ const useStyles = makeStyles(theme => ({
 	},
 	tabs: {
 		marginBottom: 32,
+		animation: '$fadeInUp 0.5s ease forwards',
+		opacity: 0,
+		animationDelay: '0.15s',
 		'& .MuiTabs-indicator': {
 			background: '#00d4ff'
 		}

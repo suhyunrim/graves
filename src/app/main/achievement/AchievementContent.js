@@ -251,6 +251,35 @@ const useStyles = makeStyles(theme => ({
 			opacity: 0.2,
 			cursor: 'default'
 		}
+	},
+	wideCard: {
+		display: 'flex',
+		alignItems: 'center',
+		gap: 16,
+		padding: '16px 24px',
+		[theme.breakpoints.down('xs')]: {
+			flexWrap: 'wrap',
+			padding: 16
+		}
+	},
+	wideCardHeader: {
+		display: 'flex',
+		alignItems: 'center',
+		gap: 12,
+		flex: 1,
+		minWidth: 0
+	},
+	wideCardFooter: {
+		display: 'flex',
+		alignItems: 'center',
+		gap: 16,
+		flexShrink: 0
+	},
+	wideDate: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1rem',
+		color: 'rgba(255, 255, 255, 0.4)',
+		flexShrink: 0
 	}
 }));
 
@@ -376,9 +405,81 @@ function AchievementContent() {
 				return (
 					<div key={cat} className={highestOnly ? classes.categorySectionCompact : classes.categorySection}>
 						{!highestOnly && <div className={classes.categoryTitle}>{CATEGORY_LABELS[cat] || cat}</div>}
-						<div className={classes.grid}>
+						<div className={highestOnly ? undefined : classes.grid}>
 							{displayItems.map(achievement => {
 								const tierColor = TIER_COLORS[achievement.tier] || '#fff';
+								const icon =
+									achievement.category === 'tier' ? (
+										<img
+											className={classes.tierEmblem}
+											src={`/assets/images/ranked-emblems/Emblem_${achievement.id.replace('TIER_', '')}.webp`}
+											alt={achievement.name}
+										/>
+									) : (
+										<span role="img" aria-label={achievement.name} className={classes.emoji}>
+											{achievement.emoji}
+										</span>
+									);
+								const tierBadge =
+									highestOnly && allItems.length > 1 ? (
+										<div className={classes.navRow}>
+											<button
+												type="button"
+												className={classes.navArrow}
+												disabled={idx <= 0}
+												onClick={() => setCurrentIndex(cat, idx - 1)}
+											>
+												◀
+											</button>
+											<span className={classes.tierBadge} style={{ color: tierColor }}>
+												{achievement.tier}
+											</span>
+											<button
+												type="button"
+												className={classes.navArrow}
+												disabled={idx >= allItems.length - 1}
+												onClick={() => setCurrentIndex(cat, idx + 1)}
+											>
+												▶
+											</button>
+										</div>
+									) : (
+										<span className={classes.tierBadge} style={{ color: tierColor }}>
+											{achievement.tier}
+										</span>
+									);
+
+								if (highestOnly) {
+									return (
+										<div
+											key={achievement.id}
+											className={`${classes.card} ${classes.wideCard} ${
+												achievement.unlocked ? classes.cardUnlocked : classes.cardLocked
+											}`}
+											style={
+												achievement.unlocked
+													? { borderColor: `${tierColor}40`, boxShadow: `0 0 12px ${tierColor}15` }
+													: {}
+											}
+										>
+											<div className={classes.wideCardHeader}>
+												{icon}
+												<div className={classes.cardInfo}>
+													<div className={classes.cardName}>{achievement.name}</div>
+													<div className={classes.cardDesc}>{achievement.description}</div>
+												</div>
+											</div>
+											<div className={classes.wideCardFooter}>
+												{tierBadge}
+												<span className={classes.rate}>{achievement.achievementRate}%의 유저가 달성</span>
+												{achievement.unlocked && achievement.unlockedAt && (
+													<span className={classes.wideDate}>{formatDate(achievement.unlockedAt)}</span>
+												)}
+											</div>
+										</div>
+									);
+								}
+
 								return (
 									<div
 										key={achievement.id}
@@ -390,50 +491,14 @@ function AchievementContent() {
 										}
 									>
 										<div className={classes.cardHeader}>
-											{achievement.category === 'tier' ? (
-												<img
-													className={classes.tierEmblem}
-													src={`/assets/images/ranked-emblems/Emblem_${achievement.id.replace('TIER_', '')}.webp`}
-													alt={achievement.name}
-												/>
-											) : (
-												<span role="img" aria-label={achievement.name} className={classes.emoji}>
-													{achievement.emoji}
-												</span>
-											)}
+											{icon}
 											<div className={classes.cardInfo}>
 												<div className={classes.cardName}>{achievement.name}</div>
 												<div className={classes.cardDesc}>{achievement.description}</div>
 											</div>
 										</div>
 										<div className={classes.cardFooter}>
-											{highestOnly && allItems.length > 1 ? (
-												<div className={classes.navRow}>
-													<button
-														type="button"
-														className={classes.navArrow}
-														disabled={idx <= 0}
-														onClick={() => setCurrentIndex(cat, idx - 1)}
-													>
-														◀
-													</button>
-													<span className={classes.tierBadge} style={{ color: tierColor }}>
-														{achievement.tier}
-													</span>
-													<button
-														type="button"
-														className={classes.navArrow}
-														disabled={idx >= allItems.length - 1}
-														onClick={() => setCurrentIndex(cat, idx + 1)}
-													>
-														▶
-													</button>
-												</div>
-											) : (
-												<span className={classes.tierBadge} style={{ color: tierColor }}>
-													{achievement.tier}
-												</span>
-											)}
+											{tierBadge}
 											<span className={classes.rate}>{achievement.achievementRate}%의 유저가 달성</span>
 										</div>
 										{achievement.unlocked && achievement.unlockedAt && (
