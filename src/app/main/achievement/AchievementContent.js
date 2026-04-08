@@ -505,13 +505,13 @@ function AchievementContent() {
 													<div className={classes.cardName}>{achievement.name}</div>
 													<div className={classes.cardDesc}>{achievement.description}</div>
 												</div>
+												{achievement.unlocked && achievement.unlockedAt && (
+													<span className={classes.wideDate}>{formatDate(achievement.unlockedAt)}</span>
+												)}
 											</div>
 											<div className={classes.wideCardFooter}>
 												{tierBadge}
 												<span className={classes.rate}>{achievement.achievementRate}%의 유저가 달성</span>
-												{achievement.unlocked && achievement.unlockedAt && (
-													<span className={classes.wideDate}>{formatDate(achievement.unlockedAt)}</span>
-												)}
 											</div>
 										</div>
 									);
