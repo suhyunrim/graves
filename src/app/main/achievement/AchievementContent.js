@@ -33,18 +33,6 @@ const CATEGORY_LABELS = {
 	late_night: '야식'
 };
 
-const TIER_ORDER = [
-	'CHALLENGER',
-	'GRANDMASTER',
-	'MASTER',
-	'DIAMOND',
-	'EMERALD',
-	'PLATINUM',
-	'GOLD',
-	'SILVER',
-	'BRONZE'
-];
-
 const CATEGORY_ORDER = [
 	'match',
 	'games',
@@ -379,19 +367,22 @@ function AchievementContent() {
 			</div>
 
 			<div className={classes.summary}>
-				{TIER_ORDER.map(tier => {
-					const tierAchievements = unlocked.filter(a => a.tier === tier);
-					if (tierAchievements.length === 0) return null;
-					return tierAchievements.map(a => (
-						<Tooltip key={a.id} title={a.name} arrow placement="top">
+				{CATEGORY_ORDER.map(cat => {
+					const items = grouped[cat];
+					if (!items) return null;
+					const highest = [...items].reverse().find(a => a.unlocked);
+					if (!highest) return null;
+					const tierColor = TIER_COLORS[highest.tier] || '#fff';
+					return (
+						<Tooltip key={cat} title={`${CATEGORY_LABELS[cat] || cat} - ${highest.name}`} arrow placement="top">
 							<img
 								className={classes.summaryEmblem}
-								src={`/assets/images/ranked-emblems/Emblem_${tier}.webp`}
-								alt={a.name}
-								style={{ filter: `drop-shadow(0 0 6px ${TIER_COLORS[tier] || '#fff'}50)` }}
+								src={`/assets/images/ranked-emblems/Emblem_${highest.tier}.webp`}
+								alt={highest.name}
+								style={{ filter: `drop-shadow(0 0 6px ${tierColor}50)` }}
 							/>
 						</Tooltip>
-					));
+					);
 				})}
 			</div>
 
