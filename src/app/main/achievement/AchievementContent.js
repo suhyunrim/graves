@@ -476,6 +476,11 @@ function AchievementContent() {
 										</div>
 									) : (
 										<span className={classes.tierBadge} style={{ color: tierColor }}>
+											<img
+												className={classes.tierBadgeEmblem}
+												src={`/assets/images/ranked-emblems/Emblem_${achievement.tier}.webp`}
+												alt={achievement.tier}
+											/>
 											{achievement.tier}
 										</span>
 									);
