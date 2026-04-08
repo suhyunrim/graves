@@ -9,7 +9,8 @@ const FEATURES = [
 		subtitle: '\uC6D4\uAC04 \uC5B4\uC6CC\uB4DC',
 		description:
 			'\uB9E4\uB2EC \uCD5C\uACE0\uC758 \uD50C\uB808\uC774\uC5B4\uB97C \uC120\uC815\uD569\uB2C8\uB2E4. \uBA85\uC608\uC655, \uCD5C\uB2E4\uD310\uC218, \uCD5C\uACE0\uC2B9\uB960, \uC5F0\uC2B9\uC655, \uBCA0\uC2A4\uD2B8\uB4C0\uC624, \uB77C\uC774\uBC8C, \uC2E0\uC778\uC655, \uAE09\uB4F1\uC655, \uC62C\uBE7C\uBBF8, \uB2E4\uD06C\uD638\uC2A4 \uB4F1 \uB2E4\uC591\uD55C \uBD80\uBB38\uC758 \uC5B4\uC6CC\uB4DC\uB97C \uD655\uC778\uD558\uC138\uC694.',
-		accent: '#FFD700'
+		accent: '#FFD700',
+		image: '/assets/images/about/dashboard.png'
 	},
 	{
 		emoji: '\uD83D\uDCCA',
@@ -18,7 +19,8 @@ const FEATURES = [
 		subtitle: '\uB808\uC774\uD305 & \uD2F0\uC5B4',
 		description:
 			'\uB0B4\uC804 \uACBD\uAE30 \uACB0\uACFC\uB97C \uBC14\uD0D5\uC73C\uB85C \uB808\uC774\uD305\uC744 \uC0B0\uCD9C\uD558\uACE0, \uC544\uC774\uC5B8\uBD80\uD130 \uCC4C\uB9B0\uC800\uAE4C\uC9C0 LoL \uD2F0\uC5B4 \uC2DC\uC2A4\uD15C\uC73C\uB85C \uBCC0\uD658\uD569\uB2C8\uB2E4. \uC2B9\uB960, \uC804\uC801, LP\uAE4C\uC9C0 \uD55C\uB208\uC5D0 \uD655\uC778\uD558\uC138\uC694.',
-		accent: '#00d4ff'
+		accent: '#00d4ff',
+		image: '/assets/images/about/ranking.png'
 	},
 	{
 		emoji: '\uD83D\uDE4E',
@@ -27,7 +29,8 @@ const FEATURES = [
 		subtitle: '\uAC1C\uC778 \uD504\uB85C\uD544',
 		description:
 			'\uC194\uB85C\uB7AD\uD06C\uC640 \uB0B4\uC804 \uD2F0\uC5B4\uB97C \uB098\uB780\uD788 \uBE44\uAD50\uD558\uACE0, \uB808\uC774\uD305 \uBCC0\uD654 \uCC28\uD2B8\uB85C \uC131\uC7A5 \uCD94\uC774\uB97C \uD655\uC778\uD558\uC138\uC694. \uCD5C\uADFC \uC804\uC801, \uBCA0\uC2A4\uD2B8 \uD300\uC6D0/\uC0C1\uB300 \uD1B5\uACC4\uAE4C\uC9C0 \uC81C\uACF5\uD569\uB2C8\uB2E4.',
-		accent: '#50C878'
+		accent: '#50C878',
+		image: '/assets/images/about/myinfo.png'
 	},
 	{
 		emoji: '\u2694\uFE0F',
@@ -36,7 +39,8 @@ const FEATURES = [
 		subtitle: '\uACBD\uAE30 \uAE30\uB85D',
 		description:
 			'\uBAA8\uB4E0 \uB0B4\uC804 \uACBD\uAE30\uC758 \uC0C1\uC138 \uAE30\uB85D\uC744 \uC870\uD68C\uD558\uC138\uC694. \uD300 \uAD6C\uC131, \uC2B9\uD328 \uACB0\uACFC, \uB808\uC774\uD305 \uBCC0\uB3D9\uC744 \uD655\uC778\uD558\uACE0 MVP \uD22C\uD45C\uB85C \uD65C\uC57D\uD55C \uD50C\uB808\uC774\uC5B4\uB97C \uC120\uC815\uD560 \uC218 \uC788\uC2B5\uB2C8\uB2E4.',
-		accent: '#E74C3C'
+		accent: '#E74C3C',
+		image: '/assets/images/about/match-history.png'
 	},
 	{
 		emoji: '\uD83D\uDEA9',
@@ -45,7 +49,8 @@ const FEATURES = [
 		subtitle: '\uB0B4\uC804 \uB300\uD68C',
 		description:
 			'\uC9C1\uC811 \uB300\uD68C\uB97C \uB9CC\uB4E4\uACE0 \uCC38\uC5EC\uD558\uC138\uC694. 1v1\uBD80\uD130 5v5\uAE4C\uC9C0 \uB2E4\uC591\uD55C \uD615\uC2DD\uC744 \uC9C0\uC6D0\uD558\uBA70, \uB3C5\uB9BD\uB41C \uB9AC\uB354\uBCF4\uB4DC\uC640 \uC2B9\uD328 \uAE30\uB85D\uC73C\uB85C \uACBD\uC7C1\uD560 \uC218 \uC788\uC2B5\uB2C8\uB2E4.',
-		accent: '#9B59B6'
+		accent: '#9B59B6',
+		image: '/assets/images/about/challenge.png'
 	},
 	{
 		emoji: '\u2B50',
@@ -54,7 +59,8 @@ const FEATURES = [
 		subtitle: '\uC5C5\uC801 \uC2DC\uC2A4\uD15C',
 		description:
 			'\uB9E4\uCE58, \uD310\uC218, \uC5F0\uC2B9, \uC5F0\uD328, \uD2F0\uC5B4, \uBCF4\uC774\uC2A4, \uCC4C\uB9B0\uC9C0, \uC5B8\uB354\uB3C5, \uC57C\uC2DD \uB4F1 \uB2E4\uC591\uD55C \uCE74\uD14C\uACE0\uB9AC\uC758 \uC5C5\uC801\uC744 \uB2EC\uC131\uD558\uC138\uC694. \uBE0C\uB860\uC988\uBD80\uD130 \uCC4C\uB9B0\uC800\uAE4C\uC9C0 \uB09C\uC774\uB3C4\uBCC4 \uB4F1\uAE09\uC774 \uBD80\uC5EC\uB429\uB2C8\uB2E4.',
-		accent: '#F1C40F'
+		accent: '#F1C40F',
+		image: '/assets/images/about/achievement.png'
 	},
 	{
 		emoji: '\uD83C\uDF1F',
@@ -63,7 +69,8 @@ const FEATURES = [
 		subtitle: '\uBA85\uC608 \uC2DC\uC2A4\uD15C',
 		description:
 			'\uD568\uAED8 \uD50C\uB808\uC774\uD55C \uD300\uC6D0\uC5D0\uAC8C \uBA85\uC608 \uD22C\uD45C\uB85C \uAC10\uC0AC\uB97C \uC804\uD558\uC138\uC694. \uB204\uC801\uB41C \uBA85\uC608 \uD3EC\uC778\uD2B8\uB85C \uB7AD\uD0B9\uC774 \uB9E4\uACA8\uC9C0\uBA70, \uD2B9\uBCC4\uD55C \uCE6D\uD638\uB3C4 \uBD80\uC5EC\uB429\uB2C8\uB2E4.',
-		accent: '#FF69B4'
+		accent: '#FF69B4',
+		image: '/assets/images/about/honor.png'
 	}
 ];
 
@@ -240,6 +247,13 @@ const useStyles = makeStyles(theme => ({
 			fontSize: '1.2rem'
 		}
 	},
+	cardImage: {
+		width: '100%',
+		borderRadius: 12,
+		marginTop: 16,
+		border: '1px solid rgba(255, 255, 255, 0.08)',
+		boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)'
+	},
 	footer: {
 		textAlign: 'center',
 		marginTop: 60,
@@ -297,6 +311,7 @@ function AboutContent() {
 								</div>
 							</div>
 							<div className={classes.cardDesc}>{feature.description}</div>
+							<img className={classes.cardImage} src={feature.image} alt={feature.title} />
 						</div>
 					))}
 				</div>
