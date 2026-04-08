@@ -1,6 +1,8 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import FuseLoading from '@fuse/core/FuseLoading';
 import { makeStyles } from '@material-ui/core/styles';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Switch from '@material-ui/core/Switch';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import camilleRiotAuthService from 'app/services/camilleRiotAuthService';
@@ -202,6 +204,39 @@ const useStyles = makeStyles(theme => ({
 	tierEmblem: {
 		width: 36,
 		height: 36
+	},
+	toggleWrap: {
+		display: 'flex',
+		alignItems: 'center',
+		gap: 8,
+		marginBottom: 24
+	},
+	toggleLabel: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.2rem',
+		color: 'rgba(255, 255, 255, 0.6)',
+		cursor: 'pointer'
+	},
+	navRow: {
+		display: 'flex',
+		alignItems: 'center',
+		gap: 6
+	},
+	navArrow: {
+		background: 'none',
+		border: 'none',
+		color: 'rgba(255, 255, 255, 0.5)',
+		fontSize: '1.4rem',
+		cursor: 'pointer',
+		padding: '0 4px',
+		lineHeight: 1,
+		'&:hover': {
+			color: '#fff'
+		},
+		'&:disabled': {
+			opacity: 0.2,
+			cursor: 'default'
+		}
 	}
 }));
 
@@ -212,6 +247,9 @@ function AchievementContent() {
 
 	const user = useSelector(state => state.auth.user);
 	const { achievements, loading } = useSelector(({ Achievement }) => Achievement.achievement);
+
+	const [highestOnly, setHighestOnly] = useState(true);
+	const [catIndex, setCatIndex] = useState({});
 
 	const puuid = paramPuuid || camilleRiotAuthService.getPuuid();
 	const groupId = user?.reprGroup?.groupId;
@@ -252,6 +290,23 @@ function AchievementContent() {
 		}
 	});
 
+	function getDefaultIndex(cat) {
+		const items = grouped[cat];
+		if (!items) return 0;
+		for (let i = items.length - 1; i >= 0; i -= 1) {
+			if (items[i].unlocked) return i;
+		}
+		return 0;
+	}
+
+	function getCurrentIndex(cat) {
+		return catIndex[cat] !== undefined ? catIndex[cat] : getDefaultIndex(cat);
+	}
+
+	function setCurrentIndex(cat, idx) {
+		setCatIndex(prev => ({ ...prev, [cat]: idx }));
+	}
+
 	return (
 		<div className={classes.container}>
 			<div className={classes.title}>
@@ -262,6 +317,16 @@ function AchievementContent() {
 			</div>
 			<div className={classes.subtitle}>
 				{unlocked.length} / {total} 달성
+			</div>
+
+			<div className={classes.toggleWrap}>
+				<FormControlLabel
+					control={
+						<Switch checked={highestOnly} onChange={() => setHighestOnly(prev => !prev)} color="primary" size="small" />
+					}
+					label="달성한 최고 업적만 보기"
+					classes={{ label: classes.toggleLabel }}
+				/>
 			</div>
 
 			<div className={classes.summary}>
@@ -282,11 +347,17 @@ function AchievementContent() {
 
 			{CATEGORY_ORDER.map(cat => {
 				if (!grouped[cat]) return null;
+				const allItems = grouped[cat];
+				let displayItems = allItems;
+				const idx = getCurrentIndex(cat);
+				if (highestOnly) {
+					displayItems = [allItems[idx]];
+				}
 				return (
 					<div key={cat} className={classes.categorySection}>
 						<div className={classes.categoryTitle}>{CATEGORY_LABELS[cat] || cat}</div>
 						<div className={classes.grid}>
-							{grouped[cat].map(achievement => {
+							{displayItems.map(achievement => {
 								const tierColor = TIER_COLORS[achievement.tier] || '#fff';
 								return (
 									<div
@@ -316,9 +387,33 @@ function AchievementContent() {
 											</div>
 										</div>
 										<div className={classes.cardFooter}>
-											<span className={classes.tierBadge} style={{ color: tierColor }}>
-												{achievement.tier}
-											</span>
+											{highestOnly && allItems.length > 1 ? (
+												<div className={classes.navRow}>
+													<button
+														type="button"
+														className={classes.navArrow}
+														disabled={idx <= 0}
+														onClick={() => setCurrentIndex(cat, idx - 1)}
+													>
+														◀
+													</button>
+													<span className={classes.tierBadge} style={{ color: tierColor }}>
+														{achievement.tier}
+													</span>
+													<button
+														type="button"
+														className={classes.navArrow}
+														disabled={idx >= allItems.length - 1}
+														onClick={() => setCurrentIndex(cat, idx + 1)}
+													>
+														▶
+													</button>
+												</div>
+											) : (
+												<span className={classes.tierBadge} style={{ color: tierColor }}>
+													{achievement.tier}
+												</span>
+											)}
 											<span className={classes.rate}>{achievement.achievementRate}% 달성</span>
 										</div>
 										{achievement.unlocked && achievement.unlockedAt && (
