@@ -11,12 +11,16 @@ import {
 	DialogContentText,
 	DialogActions,
 	Snackbar,
-	CircularProgress
+	CircularProgress,
+	Tabs,
+	Tab
 } from '@material-ui/core';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import withReducer from 'app/store/withReducer';
 import getLatesetRiotDataVersion from 'app/utility/getLatesetRiotDataVersion';
+import AchievementContent from '../achievement/AchievementContent';
+import achievementReducer from '../achievement/store/reducers';
 import MyInfoHeader from './MyInfoHeader';
 import RatingChart from './RatingChart';
 import reducer from './store/reducers';
@@ -622,6 +626,23 @@ const useStyles = makeStyles(theme => ({
 			fontFamily: '"Noto Sans KR", sans-serif',
 			fontWeight: 600
 		}
+	},
+	tabs: {
+		marginBottom: 32,
+		'& .MuiTabs-indicator': {
+			background: '#00d4ff'
+		}
+	},
+	tab: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.4rem',
+		fontWeight: 600,
+		color: 'rgba(255, 255, 255, 0.5)',
+		textTransform: 'none',
+		minWidth: 100,
+		'&.Mui-selected': {
+			color: '#00d4ff'
+		}
 	}
 }));
 
@@ -648,6 +669,7 @@ function MyInfoPage(props) {
 	const honorStats = useSelector(({ MyInfo }) => MyInfo.myInfo.honorStats);
 	const subAccount = useSelector(({ MyInfo }) => MyInfo.myInfo.subAccount);
 
+	const [activeTab, setActiveTab] = useState(0);
 	const [subAccountInput, setSubAccountInput] = useState('');
 	const [subAccountLoading, setSubAccountLoading] = useState(false);
 	const [removeDialogOpen, setRemoveDialogOpen] = useState(false);
@@ -693,9 +715,16 @@ function MyInfoPage(props) {
 		const rating = scoreInfo.defaultRating + scoreInfo.additionalRating;
 		const tierSteps = ['IV', 'III', 'II', 'I'];
 		const bases = [
-			['CHALLENGER', 1150], ['GRANDMASTER', 1000], ['MASTER', 900],
-			['DIAMOND', 800], ['EMERALD', 700], ['PLATINUM', 600],
-			['GOLD', 500], ['SILVER', 400], ['BRONZE', 300], ['IRON', 200]
+			['CHALLENGER', 1150],
+			['GRANDMASTER', 1000],
+			['MASTER', 900],
+			['DIAMOND', 800],
+			['EMERALD', 700],
+			['PLATINUM', 600],
+			['GOLD', 500],
+			['SILVER', 400],
+			['BRONZE', 300],
+			['IRON', 200]
 		];
 		for (const [name, base] of bases) {
 			if (rating >= base) {
@@ -715,16 +744,23 @@ function MyInfoPage(props) {
 	const getRatingLP = () => {
 		const rating = scoreInfo.defaultRating + scoreInfo.additionalRating;
 		const bases = [
-			['CHALLENGER', 1150], ['GRANDMASTER', 1000], ['MASTER', 900],
-			['DIAMOND', 800], ['EMERALD', 700], ['PLATINUM', 600],
-			['GOLD', 500], ['SILVER', 400], ['BRONZE', 300], ['IRON', 200]
+			['CHALLENGER', 1150],
+			['GRANDMASTER', 1000],
+			['MASTER', 900],
+			['DIAMOND', 800],
+			['EMERALD', 700],
+			['PLATINUM', 600],
+			['GOLD', 500],
+			['SILVER', 400],
+			['BRONZE', 300],
+			['IRON', 200]
 		];
 		for (const [name, base] of bases) {
 			if (rating >= base) {
 				if (['MASTER', 'GRANDMASTER', 'CHALLENGER'].includes(name)) {
 					return Math.floor((rating - base) * 4);
 				}
-				return Math.floor((rating - base) % 25 * 4);
+				return Math.floor(((rating - base) % 25) * 4);
 			}
 		}
 		return 0;
@@ -778,7 +814,13 @@ function MyInfoPage(props) {
 			classes={{
 				root: classes.layoutRoot
 			}}
-			header={<MyInfoHeader title={puuid ? 'Player Info' : undefined} subtitle={puuid ? '소환사 정보 및 내전 기록' : undefined} showBack={isOtherUser} />}
+			header={
+				<MyInfoHeader
+					title={puuid ? 'Player Info' : undefined}
+					subtitle={puuid ? '소환사 정보 및 내전 기록' : undefined}
+					showBack={isOtherUser}
+				/>
+			}
 			content={
 				<div className={classes.container}>
 					{/* 프로필 섹션 */}
@@ -805,248 +847,263 @@ function MyInfoPage(props) {
 						</div>
 					</div>
 
-					{/* 랭크 카드들 */}
-					<div className={classes.cardsGrid}>
-						{/* 솔로 랭크 카드 */}
-						<div className={`${classes.rankCard} ${classes.soloRankCard}`}>
-							<div className={classes.cardHeader}>
-								<div className={classes.emblemContainer}>
-									<img
-										className={classes.emblem}
-										src={`/assets/images/ranked-emblems/Emblem_${soloTierName}.webp`}
-										alt={soloTierName}
-										style={{ filter: `drop-shadow(0 0 20px ${soloTierColor.glow})` }}
-									/>
-								</div>
-								<div className={classes.cardTitleWrapper}>
-									<div className={classes.cardLabel}>Solo Rank</div>
-									<div className={classes.tierText} style={{ color: soloTierColor.primary }}>
-										{summonerInfo.rankTier}
-									</div>
-								</div>
-							</div>
-							<div className={classes.statsRow}>
-								<span className={classes.statItem}>
-									{summonerInfo.rankWin}승 {summonerInfo.rankLose}패
-								</span>
-								{summonerInfo.rankWin + summonerInfo.rankLose > 0 && (
-									<span className={`${classes.winRate} ${getWinRateClass(soloWinRate)}`}>{soloWinRate}%</span>
-								)}
-							</div>
-							<div className={classes.decorLine} style={{ color: soloTierColor.primary }} />
-						</div>
+					<Tabs value={activeTab} onChange={(e, v) => setActiveTab(v)} className={classes.tabs}>
+						<Tab label="정보" className={classes.tab} />
+						<Tab label="업적" className={classes.tab} />
+					</Tabs>
 
-						{/* 커스텀 레이팅 카드 */}
-						<div className={`${classes.rankCard} ${classes.customRatingCard}`}>
-							<div className={classes.cardHeader}>
-								<div className={classes.emblemContainer}>
-									<img
-										className={classes.emblem}
-										src={`/assets/images/ranked-emblems/Emblem_${ratingTierName}.webp`}
-										alt={ratingTierName}
-										style={{ filter: `drop-shadow(0 0 20px ${ratingTierColor.glow})` }}
-									/>
-								</div>
-								<div className={classes.cardTitleWrapper}>
-									<div className={classes.cardLabel}>Custom Rating</div>
-									<div className={classes.tierText} style={{ color: ratingTierColor.primary }}>
-										{getRatingTierDisplay()} {getRatingLP()}LP
-									</div>
-								</div>
-							</div>
-							<div className={classes.statsRow}>
-								<span className={classes.statItem}>
-									{scoreInfo.win}승 {scoreInfo.lose}패
-								</span>
-								{scoreInfo.win + scoreInfo.lose > 0 && (
-									<span className={`${classes.winRate} ${getWinRateClass(customWinRate)}`}>{customWinRate}%</span>
-								)}
-							</div>
-							<div className={classes.decorLine} style={{ color: '#00d4ff' }} />
-						</div>
-					</div>
+					{activeTab === 1 && <AchievementContent />}
 
-					{/* 최근 전적 & 연승/연패 통계 */}
-					<div className={classes.statsSection}>
-						<div className={classes.statsGrid}>
-							<div className={classes.statCard}>
-								<div className={classes.statLabel}>최근 10경기</div>
-								<div className={`${classes.statValue} ${getRecentWinRateClass(recentWinRate)}`}>{recentWinRate}%</div>
-								<div className={classes.statSubValue}>
-									{recentWins}승 {recentGames - recentWins}패
-								</div>
-							</div>
-							<div className={classes.statCard}>
-								<div className={classes.statLabel}>최다 연승</div>
-								<div className={`${classes.statValue} ${classes.streakWin}`}>{maxWinStreak}연승</div>
-							</div>
-							<div className={classes.statCard}>
-								<div className={classes.statLabel}>최다 연패</div>
-								<div className={`${classes.statValue} ${classes.streakLose}`}>{maxLoseStreak}연패</div>
-							</div>
-						</div>
-					</div>
-
-					{/* 베스트/워스트 하이라이트 */}
-					<div className={classes.highlightSection}>
-						{bestTeammate && (
-							<div className={classes.highlightCard}>
-								<div className={classes.highlightIcon}>
-									<span role="img" aria-label="best teammate">
-										🤝
-									</span>
-								</div>
-								<div className={classes.highlightContent}>
-									<div className={classes.highlightLabel}>함께하면 승률 최고</div>
-									<div className={classes.highlightName}>{bestTeammate.name}</div>
-									<div className={`${classes.highlightStat} ${classes.highlightBest}`}>
-										{bestTeammate.games}판 ({bestTeammate.wins}승 {bestTeammate.losses}패) {bestTeammate.winRate}%
-									</div>
-								</div>
-							</div>
-						)}
-						{bestOpponent && (
-							<div className={classes.highlightCard}>
-								<div className={classes.highlightIcon}>
-									<span role="img" aria-label="best opponent">
-										💪
-									</span>
-								</div>
-								<div className={classes.highlightContent}>
-									<div className={classes.highlightLabel}>상대 전적 최고</div>
-									<div className={classes.highlightName}>{bestOpponent.name}</div>
-									<div className={`${classes.highlightStat} ${classes.highlightBest}`}>
-										{bestOpponent.games}판 ({bestOpponent.myWins}승 {bestOpponent.myLosses}패) {bestOpponent.winRate}%
-									</div>
-								</div>
-							</div>
-						)}
-						{worstOpponent && (
-							<div className={classes.highlightCard}>
-								<div className={classes.highlightIcon}>
-									<span role="img" aria-label="worst opponent">
-										😰
-									</span>
-								</div>
-								<div className={classes.highlightContent}>
-									<div className={classes.highlightLabel}>상대 전적 최악</div>
-									<div className={classes.highlightName}>{worstOpponent.name}</div>
-									<div className={`${classes.highlightStat} ${classes.highlightWorst}`}>
-										{worstOpponent.games}판 ({worstOpponent.myWins}승 {worstOpponent.myLosses}패){' '}
-										{worstOpponent.winRate}%
-									</div>
-								</div>
-							</div>
-						)}
-					</div>
-
-					{/* 자주 함께한 팀원 / 자주 맞선 상대 */}
-					<div className={classes.relationSection}>
-						<div className={classes.relationCard}>
-							<div className={classes.relationTitle}>
-								<span role="img" aria-label="teammates" className={classes.relationTitleIcon}>
-									👥
-								</span>
-								자주 함께한 팀원 Top 5
-							</div>
-							{topTeammates && topTeammates.length > 0 ? (
-								<div className={classes.relationList}>
-									{topTeammates.map((teammate, index) => (
-										<div key={teammate.puuid} className={classes.relationItem}>
-											<span className={classes.relationRank}>{index + 1}</span>
-											<span className={classes.relationName}>{teammate.name}</span>
-											<div className={classes.relationStats}>
-												<span className={classes.relationGames}>
-													{teammate.games}판 ({teammate.wins}승 {teammate.games - teammate.wins}패)
-												</span>
-												<span className={`${classes.relationWinRate} ${getWinRateClass(teammate.winRate)}`}>
-													{teammate.winRate}%
-												</span>
+					{activeTab === 0 && (
+						<>
+							{/* 랭크 카드들 */}
+							<div className={classes.cardsGrid}>
+								{/* 솔로 랭크 카드 */}
+								<div className={`${classes.rankCard} ${classes.soloRankCard}`}>
+									<div className={classes.cardHeader}>
+										<div className={classes.emblemContainer}>
+											<img
+												className={classes.emblem}
+												src={`/assets/images/ranked-emblems/Emblem_${soloTierName}.webp`}
+												alt={soloTierName}
+												style={{ filter: `drop-shadow(0 0 20px ${soloTierColor.glow})` }}
+											/>
+										</div>
+										<div className={classes.cardTitleWrapper}>
+											<div className={classes.cardLabel}>Solo Rank</div>
+											<div className={classes.tierText} style={{ color: soloTierColor.primary }}>
+												{summonerInfo.rankTier}
 											</div>
 										</div>
-									))}
-								</div>
-							) : (
-								<div className={classes.noData}>데이터가 없습니다</div>
-							)}
-						</div>
-
-						<div className={classes.relationCard}>
-							<div className={classes.relationTitle}>
-								<span role="img" aria-label="opponents" className={classes.relationTitleIcon}>
-									⚔️
-								</span>
-								자주 맞선 상대 Top 5
-							</div>
-							{topOpponents && topOpponents.length > 0 ? (
-								<div className={classes.relationList}>
-									{topOpponents.map((opponent, index) => (
-										<div key={opponent.puuid} className={classes.relationItem}>
-											<span className={classes.relationRank}>{index + 1}</span>
-											<span className={classes.relationName}>{opponent.name}</span>
-											<div className={classes.relationStats}>
-												<span className={classes.relationGames}>
-													{opponent.games}판 ({opponent.myWins}승 {opponent.myLosses}패)
-												</span>
-												<span className={`${classes.relationWinRate} ${getWinRateClass(opponent.winRate)}`}>
-													{opponent.winRate}%
-												</span>
-											</div>
-										</div>
-									))}
-								</div>
-							) : (
-								<div className={classes.noData}>데이터가 없습니다</div>
-							)}
-						</div>
-					</div>
-
-					{/* 레이팅 차트 */}
-					<RatingChart />
-
-					{/* 부캐 설정 */}
-					{isMyPage && isLoggedIn && (
-						<div className={classes.subAccountSection}>
-							<div className={classes.subAccountTitle}>부캐 설정</div>
-							{subAccount ? (
-								<>
-									<div className={classes.subAccountInfo}>
-										<span className={classes.subAccountName}>
-											<span role="img" aria-label="gamepad">&#x1F3AE;</span> {subAccount.name}
+									</div>
+									<div className={classes.statsRow}>
+										<span className={classes.statItem}>
+											{summonerInfo.rankWin}승 {summonerInfo.rankLose}패
 										</span>
-										<Button className={classes.subAccountRemoveBtn} onClick={() => setRemoveDialogOpen(true)}>
-											해제
-										</Button>
+										{summonerInfo.rankWin + summonerInfo.rankLose > 0 && (
+											<span className={`${classes.winRate} ${getWinRateClass(soloWinRate)}`}>{soloWinRate}%</span>
+										)}
 									</div>
-									<div className={classes.subAccountNote}>
-										※ 챌린지에서 부캐 전적이 합산됩니다.
+									<div className={classes.decorLine} style={{ color: soloTierColor.primary }} />
+								</div>
+
+								{/* 커스텀 레이팅 카드 */}
+								<div className={`${classes.rankCard} ${classes.customRatingCard}`}>
+									<div className={classes.cardHeader}>
+										<div className={classes.emblemContainer}>
+											<img
+												className={classes.emblem}
+												src={`/assets/images/ranked-emblems/Emblem_${ratingTierName}.webp`}
+												alt={ratingTierName}
+												style={{ filter: `drop-shadow(0 0 20px ${ratingTierColor.glow})` }}
+											/>
+										</div>
+										<div className={classes.cardTitleWrapper}>
+											<div className={classes.cardLabel}>Custom Rating</div>
+											<div className={classes.tierText} style={{ color: ratingTierColor.primary }}>
+												{getRatingTierDisplay()} {getRatingLP()}LP
+											</div>
+										</div>
 									</div>
-								</>
-							) : (
-								<>
-									<div className={classes.subAccountEmpty}>등록된 부캐가 없습니다.</div>
-									<div className={classes.subAccountForm}>
-										<TextField
-											className={classes.subAccountInput}
-											label="Riot ID (닉네임#태그)"
-											variant="outlined"
-											size="small"
-											value={subAccountInput}
-											onChange={e => setSubAccountInput(e.target.value)}
-											onKeyDown={e => e.key === 'Enter' && handleRegisterSubAccount()}
-											disabled={subAccountLoading}
-										/>
-										<Button
-											className={classes.subAccountRegisterBtn}
-											onClick={handleRegisterSubAccount}
-											disabled={subAccountLoading || !subAccountInput.trim()}
-										>
-											{subAccountLoading ? <CircularProgress size={20} style={{ color: '#000' }} /> : '등록'}
-										</Button>
+									<div className={classes.statsRow}>
+										<span className={classes.statItem}>
+											{scoreInfo.win}승 {scoreInfo.lose}패
+										</span>
+										{scoreInfo.win + scoreInfo.lose > 0 && (
+											<span className={`${classes.winRate} ${getWinRateClass(customWinRate)}`}>{customWinRate}%</span>
+										)}
 									</div>
-								</>
+									<div className={classes.decorLine} style={{ color: '#00d4ff' }} />
+								</div>
+							</div>
+
+							{/* 최근 전적 & 연승/연패 통계 */}
+							<div className={classes.statsSection}>
+								<div className={classes.statsGrid}>
+									<div className={classes.statCard}>
+										<div className={classes.statLabel}>최근 10경기</div>
+										<div className={`${classes.statValue} ${getRecentWinRateClass(recentWinRate)}`}>
+											{recentWinRate}%
+										</div>
+										<div className={classes.statSubValue}>
+											{recentWins}승 {recentGames - recentWins}패
+										</div>
+									</div>
+									<div className={classes.statCard}>
+										<div className={classes.statLabel}>최다 연승</div>
+										<div className={`${classes.statValue} ${classes.streakWin}`}>{maxWinStreak}연승</div>
+									</div>
+									<div className={classes.statCard}>
+										<div className={classes.statLabel}>최다 연패</div>
+										<div className={`${classes.statValue} ${classes.streakLose}`}>{maxLoseStreak}연패</div>
+									</div>
+								</div>
+							</div>
+
+							{/* 베스트/워스트 하이라이트 */}
+							<div className={classes.highlightSection}>
+								{bestTeammate && (
+									<div className={classes.highlightCard}>
+										<div className={classes.highlightIcon}>
+											<span role="img" aria-label="best teammate">
+												🤝
+											</span>
+										</div>
+										<div className={classes.highlightContent}>
+											<div className={classes.highlightLabel}>함께하면 승률 최고</div>
+											<div className={classes.highlightName}>{bestTeammate.name}</div>
+											<div className={`${classes.highlightStat} ${classes.highlightBest}`}>
+												{bestTeammate.games}판 ({bestTeammate.wins}승 {bestTeammate.losses}패) {bestTeammate.winRate}%
+											</div>
+										</div>
+									</div>
+								)}
+								{bestOpponent && (
+									<div className={classes.highlightCard}>
+										<div className={classes.highlightIcon}>
+											<span role="img" aria-label="best opponent">
+												💪
+											</span>
+										</div>
+										<div className={classes.highlightContent}>
+											<div className={classes.highlightLabel}>상대 전적 최고</div>
+											<div className={classes.highlightName}>{bestOpponent.name}</div>
+											<div className={`${classes.highlightStat} ${classes.highlightBest}`}>
+												{bestOpponent.games}판 ({bestOpponent.myWins}승 {bestOpponent.myLosses}패){' '}
+												{bestOpponent.winRate}%
+											</div>
+										</div>
+									</div>
+								)}
+								{worstOpponent && (
+									<div className={classes.highlightCard}>
+										<div className={classes.highlightIcon}>
+											<span role="img" aria-label="worst opponent">
+												😰
+											</span>
+										</div>
+										<div className={classes.highlightContent}>
+											<div className={classes.highlightLabel}>상대 전적 최악</div>
+											<div className={classes.highlightName}>{worstOpponent.name}</div>
+											<div className={`${classes.highlightStat} ${classes.highlightWorst}`}>
+												{worstOpponent.games}판 ({worstOpponent.myWins}승 {worstOpponent.myLosses}패){' '}
+												{worstOpponent.winRate}%
+											</div>
+										</div>
+									</div>
+								)}
+							</div>
+
+							{/* 자주 함께한 팀원 / 자주 맞선 상대 */}
+							<div className={classes.relationSection}>
+								<div className={classes.relationCard}>
+									<div className={classes.relationTitle}>
+										<span role="img" aria-label="teammates" className={classes.relationTitleIcon}>
+											👥
+										</span>
+										자주 함께한 팀원 Top 5
+									</div>
+									{topTeammates && topTeammates.length > 0 ? (
+										<div className={classes.relationList}>
+											{topTeammates.map((teammate, index) => (
+												<div key={teammate.puuid} className={classes.relationItem}>
+													<span className={classes.relationRank}>{index + 1}</span>
+													<span className={classes.relationName}>{teammate.name}</span>
+													<div className={classes.relationStats}>
+														<span className={classes.relationGames}>
+															{teammate.games}판 ({teammate.wins}승 {teammate.games - teammate.wins}패)
+														</span>
+														<span className={`${classes.relationWinRate} ${getWinRateClass(teammate.winRate)}`}>
+															{teammate.winRate}%
+														</span>
+													</div>
+												</div>
+											))}
+										</div>
+									) : (
+										<div className={classes.noData}>데이터가 없습니다</div>
+									)}
+								</div>
+
+								<div className={classes.relationCard}>
+									<div className={classes.relationTitle}>
+										<span role="img" aria-label="opponents" className={classes.relationTitleIcon}>
+											⚔️
+										</span>
+										자주 맞선 상대 Top 5
+									</div>
+									{topOpponents && topOpponents.length > 0 ? (
+										<div className={classes.relationList}>
+											{topOpponents.map((opponent, index) => (
+												<div key={opponent.puuid} className={classes.relationItem}>
+													<span className={classes.relationRank}>{index + 1}</span>
+													<span className={classes.relationName}>{opponent.name}</span>
+													<div className={classes.relationStats}>
+														<span className={classes.relationGames}>
+															{opponent.games}판 ({opponent.myWins}승 {opponent.myLosses}패)
+														</span>
+														<span className={`${classes.relationWinRate} ${getWinRateClass(opponent.winRate)}`}>
+															{opponent.winRate}%
+														</span>
+													</div>
+												</div>
+											))}
+										</div>
+									) : (
+										<div className={classes.noData}>데이터가 없습니다</div>
+									)}
+								</div>
+							</div>
+
+							{/* 레이팅 차트 */}
+							<RatingChart />
+
+							{/* 부캐 설정 - 본인 페이지에서만 */}
+							{isMyPage && isLoggedIn && (
+								<div className={classes.subAccountSection}>
+									<div className={classes.subAccountTitle}>부캐 설정</div>
+									{subAccount ? (
+										<>
+											<div className={classes.subAccountInfo}>
+												<span className={classes.subAccountName}>
+													<span role="img" aria-label="gamepad">
+														&#x1F3AE;
+													</span>{' '}
+													{subAccount.name}
+												</span>
+												<Button className={classes.subAccountRemoveBtn} onClick={() => setRemoveDialogOpen(true)}>
+													해제
+												</Button>
+											</div>
+											<div className={classes.subAccountNote}>※ 챌린지에서 부캐 전적이 합산됩니다.</div>
+										</>
+									) : (
+										<>
+											<div className={classes.subAccountEmpty}>등록된 부캐가 없습니다.</div>
+											<div className={classes.subAccountForm}>
+												<TextField
+													className={classes.subAccountInput}
+													label="Riot ID (닉네임#태그)"
+													variant="outlined"
+													size="small"
+													value={subAccountInput}
+													onChange={e => setSubAccountInput(e.target.value)}
+													onKeyDown={e => e.key === 'Enter' && handleRegisterSubAccount()}
+													disabled={subAccountLoading}
+												/>
+												<Button
+													className={classes.subAccountRegisterBtn}
+													onClick={handleRegisterSubAccount}
+													disabled={subAccountLoading || !subAccountInput.trim()}
+												>
+													{subAccountLoading ? <CircularProgress size={20} style={{ color: '#000' }} /> : '등록'}
+												</Button>
+											</div>
+										</>
+									)}
+								</div>
 							)}
-						</div>
+						</>
 					)}
 
 					{/* 부캐 해제 확인 다이얼로그 */}
@@ -1064,15 +1121,23 @@ function MyInfoPage(props) {
 					>
 						<DialogTitle style={{ fontFamily: '"Noto Sans KR", sans-serif' }}>부캐 해제</DialogTitle>
 						<DialogContent>
-							<DialogContentText style={{ fontFamily: '"Noto Sans KR", sans-serif', color: 'rgba(255, 255, 255, 0.7)' }}>
+							<DialogContentText
+								style={{ fontFamily: '"Noto Sans KR", sans-serif', color: 'rgba(255, 255, 255, 0.7)' }}
+							>
 								부캐를 해제하시겠습니까? 챌린지에서 부캐 전적이 합산되지 않습니다.
 							</DialogContentText>
 						</DialogContent>
 						<DialogActions>
-							<Button onClick={() => setRemoveDialogOpen(false)} style={{ color: 'rgba(255, 255, 255, 0.6)', fontFamily: '"Noto Sans KR", sans-serif' }}>
+							<Button
+								onClick={() => setRemoveDialogOpen(false)}
+								style={{ color: 'rgba(255, 255, 255, 0.6)', fontFamily: '"Noto Sans KR", sans-serif' }}
+							>
 								취소
 							</Button>
-							<Button onClick={handleRemoveSubAccount} style={{ color: '#ff6b6b', fontFamily: '"Noto Sans KR", sans-serif', fontWeight: 700 }}>
+							<Button
+								onClick={handleRemoveSubAccount}
+								style={{ color: '#ff6b6b', fontFamily: '"Noto Sans KR", sans-serif', fontWeight: 700 }}
+							>
 								해제
 							</Button>
 						</DialogActions>
@@ -1092,4 +1157,4 @@ function MyInfoPage(props) {
 	);
 }
 
-export default withReducer('MyInfo', reducer)(MyInfoPage);
+export default withReducer('MyInfo', reducer)(withReducer('Achievement', achievementReducer)(MyInfoPage));

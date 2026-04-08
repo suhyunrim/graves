@@ -20,6 +20,13 @@ const navigationConfig = [
 				url: '/myinfo'
 			},
 			{
+				id: 'achievement-component',
+				title: 'Achievement',
+				type: 'item',
+				icon: 'stars',
+				url: '/achievement'
+			},
+			{
 				id: 'ranking-component',
 				title: 'Ranking',
 				type: 'item',
@@ -46,13 +53,6 @@ const navigationConfig = [
 				type: 'item',
 				icon: 'flag',
 				url: '/challenge'
-			},
-			{
-				id: 'achievement-component',
-				title: 'Achievement',
-				type: 'item',
-				icon: 'stars',
-				url: '/achievement'
 			},
 			{
 				id: 'group-settings-component',
