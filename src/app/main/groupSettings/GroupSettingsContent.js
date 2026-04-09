@@ -186,12 +186,6 @@ const useStyles = makeStyles(theme => ({
 	rowLeftGuild: {
 		opacity: 0.55
 	},
-	leftGuildText: {
-		fontFamily: '"Noto Sans KR", sans-serif',
-		fontSize: '1rem',
-		color: 'rgba(255, 165, 0, 0.7)',
-		marginTop: 2
-	},
 	blacklistBtn: {
 		fontFamily: '"Noto Sans KR", sans-serif',
 		fontSize: '1.1rem',
@@ -418,6 +412,11 @@ function GroupSettingsContent() {
 				return member.latestMatchDate ? new Date(member.latestMatchDate).getTime() : 0;
 			case 'created':
 				return member.createdAt ? new Date(member.createdAt).getTime() : 0;
+			case 'status': {
+				const left = member.leftGuildAt ? 3 : 0;
+				const role = member.role === 'admin' ? 0 : member.role === 'outsider' ? 2 : 1;
+				return left + role;
+			}
 			default:
 				return 0;
 		}
@@ -479,12 +478,6 @@ function GroupSettingsContent() {
 		const chipClass =
 			role === 'admin' ? classes.chipAdmin : role === 'outsider' ? classes.chipOutsider : classes.chipMember;
 		return <Chip label={ROLE_LABELS[role] || role} className={chipClass} size="small" />;
-	}
-
-	function formatLeftGuildDate(dateStr) {
-		if (!dateStr) return null;
-		const d = new Date(dateStr);
-		return `${d.getMonth() + 1}/${d.getDate()} 탈퇴`;
 	}
 
 	function renderTier(rating) {
@@ -638,11 +631,6 @@ function GroupSettingsContent() {
 										{member.leftGuildAt && <Chip label="서버 탈퇴" className={classes.chipLeftGuild} size="small" />}
 									</div>
 								</div>
-								{member.leftGuildAt && (
-									<div className={classes.leftGuildText} style={{ marginBottom: 8 }}>
-										{formatLeftGuildDate(member.leftGuildAt)}
-									</div>
-								)}
 								<div className={classes.cardBody}>
 									<div className={classes.cardField}>
 										<span className={classes.cardLabel}>전적</span>
@@ -697,7 +685,16 @@ function GroupSettingsContent() {
 									소환사명
 								</TableSortLabel>
 							</TableCell>
-							<TableCell className={classes.headCell}>상태</TableCell>
+							<TableCell className={classes.headCell}>
+								<TableSortLabel
+									className={classes.sortLabel}
+									active={sortKey === 'status'}
+									direction={sortKey === 'status' ? sortDir : 'asc'}
+									onClick={() => handleSort('status')}
+								>
+									상태
+								</TableSortLabel>
+							</TableCell>
 							<TableCell className={classes.headCell} align="center">
 								전적
 							</TableCell>
@@ -767,7 +764,6 @@ function GroupSettingsContent() {
 												<>
 													{' '}
 													<Chip label="서버 탈퇴" className={classes.chipLeftGuild} size="small" />
-													<div className={classes.leftGuildText}>{formatLeftGuildDate(member.leftGuildAt)}</div>
 												</>
 											)}
 										</div>
