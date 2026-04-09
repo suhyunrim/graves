@@ -85,7 +85,7 @@ const useStyles = makeStyles(theme => ({
 	}
 }));
 
-function GroupSettingsHeader() {
+function GroupSettingsHeader({ subtitle, showSearch }) {
 	const classes = useStyles();
 	const dispatch = useDispatch();
 	const searchText = useSelector(({ GroupSettings }) => GroupSettings.groupSettings.searchText);
@@ -96,17 +96,19 @@ function GroupSettingsHeader() {
 				Group Settings
 			</Typography>
 			<div className={classes.subtitleRow}>
-				<Typography className={classes.subtitle}>그룹 멤버 관리</Typography>
-				<div className={classes.searchWrapper}>
-					<SearchIcon className={classes.searchIcon} />
-					<InputBase
-						className={classes.searchInput}
-						placeholder="소환사 검색..."
-						value={searchText}
-						onChange={ev => dispatch(Actions.setSearchText(ev))}
-						inputProps={{ 'aria-label': 'search' }}
-					/>
-				</div>
+				<Typography className={classes.subtitle}>{subtitle}</Typography>
+				{showSearch && (
+					<div className={classes.searchWrapper}>
+						<SearchIcon className={classes.searchIcon} />
+						<InputBase
+							className={classes.searchInput}
+							placeholder="소환사 검색..."
+							value={searchText}
+							onChange={ev => dispatch(Actions.setSearchText(ev))}
+							inputProps={{ 'aria-label': 'search' }}
+						/>
+					</div>
+				)}
 			</div>
 		</div>
 	);
