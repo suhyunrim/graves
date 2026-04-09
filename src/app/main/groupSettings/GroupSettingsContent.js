@@ -16,6 +16,8 @@ import {
 	Chip,
 	Select,
 	MenuItem,
+	Checkbox,
+	ListItemText,
 	useMediaQuery
 } from '@material-ui/core';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
@@ -277,6 +279,21 @@ const useStyles = makeStyles(theme => ({
 		fontFamily: '"Noto Sans KR", sans-serif',
 		fontSize: '1.2rem'
 	},
+	statusFilterSelect: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.2rem',
+		color: 'rgba(255, 255, 255, 0.7)',
+		fontWeight: 700,
+		letterSpacing: '0.05em',
+		'&:before, &:after': { display: 'none' },
+		'& .MuiSelect-icon': { color: 'rgba(255, 255, 255, 0.4)' },
+		'& .MuiSelect-select': { paddingRight: 24 }
+	},
+	statusMenuItem: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.15rem',
+		padding: '4px 12px'
+	},
 	// Mobile card styles
 	cardList: {
 		display: 'flex',
@@ -373,6 +390,7 @@ function GroupSettingsContent() {
 	const [confirmDialog, setConfirmDialog] = useState(null);
 	const [sortKey, setSortKey] = useState(null);
 	const [sortDir, setSortDir] = useState('asc');
+	const [statusFilter, setStatusFilter] = useState(['admin', 'member', 'outsider', 'leftGuild']);
 
 	const groupId = user?.reprGroup?.groupId;
 	const isAdmin = user?.reprGroup?.isAdmin;
@@ -412,17 +430,20 @@ function GroupSettingsContent() {
 				return member.latestMatchDate ? new Date(member.latestMatchDate).getTime() : 0;
 			case 'created':
 				return member.createdAt ? new Date(member.createdAt).getTime() : 0;
-			case 'status': {
-				const left = member.leftGuildAt ? 3 : 0;
-				const role = member.role === 'admin' ? 0 : member.role === 'outsider' ? 2 : 1;
-				return left + role;
-			}
 			default:
 				return 0;
 		}
 	};
 
-	const filteredMembers = members.filter(m => m.name.toLowerCase().includes(searchText.toLowerCase()));
+	function getStatusKeys(member) {
+		const keys = [member.role];
+		if (member.leftGuildAt) keys.push('leftGuild');
+		return keys;
+	}
+
+	const filteredMembers = members
+		.filter(m => m.name.toLowerCase().includes(searchText.toLowerCase()))
+		.filter(m => getStatusKeys(m).some(k => statusFilter.includes(k)));
 
 	const sortedMembers = sortKey
 		? [...filteredMembers].sort((a, b) => {
@@ -686,14 +707,34 @@ function GroupSettingsContent() {
 								</TableSortLabel>
 							</TableCell>
 							<TableCell className={classes.headCell}>
-								<TableSortLabel
-									className={classes.sortLabel}
-									active={sortKey === 'status'}
-									direction={sortKey === 'status' ? sortDir : 'asc'}
-									onClick={() => handleSort('status')}
+								<Select
+									className={classes.statusFilterSelect}
+									multiple
+									value={statusFilter}
+									onChange={e => setStatusFilter(e.target.value)}
+									renderValue={() => `상태${statusFilter.length < 4 ? ` (${statusFilter.length})` : ''}`}
+									MenuProps={{
+										PaperProps: {
+											style: {
+												background: '#1a1a2e',
+												border: '1px solid rgba(0, 212, 255, 0.3)',
+												color: '#fff'
+											}
+										}
+									}}
 								>
-									상태
-								</TableSortLabel>
+									{[
+										{ value: 'admin', label: '관리자' },
+										{ value: 'member', label: '멤버' },
+										{ value: 'outsider', label: '추방됨' },
+										{ value: 'leftGuild', label: '서버 탈퇴' }
+									].map(opt => (
+										<MenuItem key={opt.value} value={opt.value} className={classes.statusMenuItem}>
+											<Checkbox checked={statusFilter.includes(opt.value)} size="small" style={{ color: '#00d4ff' }} />
+											<ListItemText primary={opt.label} />
+										</MenuItem>
+									))}
+								</Select>
 							</TableCell>
 							<TableCell className={classes.headCell} align="center">
 								전적
