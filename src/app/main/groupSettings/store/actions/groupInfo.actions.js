@@ -2,8 +2,8 @@ import createCamilleAxios from 'app/utility/camilleAxios';
 
 export const GET_GROUP_INFO = '[GROUP_INFO] GET INFO';
 export const GET_GROUP_INFO_LOADING = '[GROUP_INFO] LOADING';
-export const UPDATE_GROUP_NAME = '[GROUP_INFO] UPDATE NAME';
-export const UPDATE_SETTINGS = '[GROUP_INFO] UPDATE SETTINGS';
+export const SET_GROUP_NAME = '[GROUP_INFO] SET NAME';
+export const SET_GROUP_SETTINGS = '[GROUP_INFO] SET SETTINGS';
 
 export function getGroupInfo(groupId) {
 	return dispatch => {
@@ -22,19 +22,26 @@ export function getGroupInfo(groupId) {
 
 export function updateGroupName(groupId, groupName) {
 	return dispatch => {
+		dispatch({ type: SET_GROUP_NAME, payload: groupName });
+
 		const request = createCamilleAxios().patch(`/api/group/${groupId}/name`, { groupName });
 
-		return request.then(() => dispatch(getGroupInfo(groupId)));
+		return request.catch(err => {
+			dispatch(getGroupInfo(groupId));
+			throw err;
+		});
 	};
 }
 
 export function updateGroupSettings(groupId, settings) {
 	return dispatch => {
+		dispatch({ type: SET_GROUP_SETTINGS, payload: settings });
+
 		const request = createCamilleAxios().patch(`/api/group/${groupId}/settings`, settings);
 
-		return request.then(response => {
+		return request.catch(err => {
 			dispatch(getGroupInfo(groupId));
-			return response;
+			throw err;
 		});
 	};
 }

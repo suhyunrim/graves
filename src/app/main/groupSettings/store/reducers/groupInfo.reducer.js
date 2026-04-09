@@ -13,6 +13,12 @@ const groupInfoReducer = (state = initialState, action) => {
 		case Actions.GET_GROUP_INFO: {
 			return { ...state, info: action.payload, loading: false };
 		}
+		case Actions.SET_GROUP_NAME: {
+			return { ...state, info: { ...state.info, groupName: action.payload } };
+		}
+		case Actions.SET_GROUP_SETTINGS: {
+			return { ...state, info: { ...state.info, settings: { ...state.info.settings, ...action.payload } } };
+		}
 		default: {
 			return state;
 		}
