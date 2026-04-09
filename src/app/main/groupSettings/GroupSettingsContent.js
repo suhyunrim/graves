@@ -495,10 +495,21 @@ function GroupSettingsContent() {
 		);
 	}
 
-	function getRoleChip(role) {
-		const chipClass =
-			role === 'admin' ? classes.chipAdmin : role === 'outsider' ? classes.chipOutsider : classes.chipMember;
-		return <Chip label={ROLE_LABELS[role] || role} className={chipClass} size="small" />;
+	function renderStatus(member) {
+		const chips = [];
+		if (member.role === 'admin') {
+			chips.push(<Chip key="admin" label="관리자" className={classes.chipAdmin} size="small" />);
+		}
+		if (member.role === 'outsider') {
+			chips.push(<Chip key="outsider" label="추방됨" className={classes.chipOutsider} size="small" />);
+		}
+		if (member.leftGuildAt) {
+			chips.push(<Chip key="left" label="서버 탈퇴" className={classes.chipLeftGuild} size="small" />);
+		}
+		if (chips.length === 0) {
+			return <span className={classes.statsText}>-</span>;
+		}
+		return <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>{chips}</div>;
 	}
 
 	function renderTier(rating) {
@@ -647,10 +658,7 @@ function GroupSettingsContent() {
 							>
 								<div className={classes.cardHeader}>
 									<span className={classes.cardName}>{member.name}</span>
-									<div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
-										{getRoleChip(member.role)}
-										{member.leftGuildAt && <Chip label="서버 탈퇴" className={classes.chipLeftGuild} size="small" />}
-									</div>
+									{renderStatus(member)}
 								</div>
 								<div className={classes.cardBody}>
 									<div className={classes.cardField}>
@@ -798,17 +806,7 @@ function GroupSettingsContent() {
 									}`}
 								>
 									<TableCell className={classes.bodyCell}>{member.name}</TableCell>
-									<TableCell className={classes.bodyCell}>
-										<div>
-											{getRoleChip(member.role)}
-											{member.leftGuildAt && (
-												<>
-													{' '}
-													<Chip label="서버 탈퇴" className={classes.chipLeftGuild} size="small" />
-												</>
-											)}
-										</div>
-									</TableCell>
+									<TableCell className={classes.bodyCell}>{renderStatus(member)}</TableCell>
 									<TableCell className={classes.bodyCell} align="center">
 										<span className={classes.statsText}>
 											{member.win}W {member.lose}L
