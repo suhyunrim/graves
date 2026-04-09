@@ -374,12 +374,6 @@ const useStyles = makeStyles(theme => ({
 	}
 }));
 
-const ROLE_LABELS = {
-	admin: '관리자',
-	member: '멤버',
-	outsider: '추방됨'
-};
-
 function GroupSettingsContent() {
 	const classes = useStyles();
 	const dispatch = useDispatch();
