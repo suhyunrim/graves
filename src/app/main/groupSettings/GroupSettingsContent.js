@@ -175,6 +175,23 @@ const useStyles = makeStyles(theme => ({
 		color: '#ff6b6b',
 		border: '1px solid rgba(255, 107, 107, 0.3)'
 	},
+	chipLeftGuild: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1rem',
+		fontWeight: 600,
+		background: 'rgba(255, 165, 0, 0.15)',
+		color: '#ffa500',
+		border: '1px solid rgba(255, 165, 0, 0.3)'
+	},
+	rowLeftGuild: {
+		opacity: 0.55
+	},
+	leftGuildText: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1rem',
+		color: 'rgba(255, 165, 0, 0.7)',
+		marginTop: 2
+	},
 	blacklistBtn: {
 		fontFamily: '"Noto Sans KR", sans-serif',
 		fontSize: '1.1rem',
@@ -464,6 +481,12 @@ function GroupSettingsContent() {
 		return <Chip label={ROLE_LABELS[role] || role} className={chipClass} size="small" />;
 	}
 
+	function formatLeftGuildDate(dateStr) {
+		if (!dateStr) return null;
+		const d = new Date(dateStr);
+		return `${d.getMonth() + 1}/${d.getDate()} 탈퇴`;
+	}
+
 	function renderTier(rating) {
 		const tierName = getTierName(rating);
 		const color = TIER_COLORS[tierName] || '#fff';
@@ -604,12 +627,22 @@ function GroupSettingsContent() {
 						return (
 							<div
 								key={member.puuid}
-								className={`${classes.card} ${member.role === 'outsider' ? classes.cardOutsider : ''}`}
+								className={`${classes.card} ${member.role === 'outsider' ? classes.cardOutsider : ''} ${
+									member.leftGuildAt ? classes.rowLeftGuild : ''
+								}`}
 							>
 								<div className={classes.cardHeader}>
 									<span className={classes.cardName}>{member.name}</span>
-									{getRoleChip(member.role)}
+									<div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+										{getRoleChip(member.role)}
+										{member.leftGuildAt && <Chip label="서버 탈퇴" className={classes.chipLeftGuild} size="small" />}
+									</div>
 								</div>
+								{member.leftGuildAt && (
+									<div className={classes.leftGuildText} style={{ marginBottom: 8 }}>
+										{formatLeftGuildDate(member.leftGuildAt)}
+									</div>
+								)}
 								<div className={classes.cardBody}>
 									<div className={classes.cardField}>
 										<span className={classes.cardLabel}>전적</span>
@@ -722,10 +755,23 @@ function GroupSettingsContent() {
 							return (
 								<TableRow
 									key={member.puuid}
-									className={`${classes.row} ${member.role === 'outsider' ? classes.rowOutsider : ''}`}
+									className={`${classes.row} ${member.role === 'outsider' ? classes.rowOutsider : ''} ${
+										member.leftGuildAt ? classes.rowLeftGuild : ''
+									}`}
 								>
 									<TableCell className={classes.bodyCell}>{member.name}</TableCell>
-									<TableCell className={classes.bodyCell}>{getRoleChip(member.role)}</TableCell>
+									<TableCell className={classes.bodyCell}>
+										<div>
+											{getRoleChip(member.role)}
+											{member.leftGuildAt && (
+												<>
+													{' '}
+													<Chip label="서버 탈퇴" className={classes.chipLeftGuild} size="small" />
+													<div className={classes.leftGuildText}>{formatLeftGuildDate(member.leftGuildAt)}</div>
+												</>
+											)}
+										</div>
+									</TableCell>
 									<TableCell className={classes.bodyCell} align="center">
 										<span className={classes.statsText}>
 											{member.win}W {member.lose}L
