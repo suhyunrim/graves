@@ -7,6 +7,7 @@ import reducer from './store/reducers';
 import GroupSettingsHeader from './GroupSettingsHeader';
 import GroupSettingsContent from './GroupSettingsContent';
 import TempVoiceContent from './TempVoiceContent';
+import AuditLogContent from './AuditLogContent';
 
 const useStyles = makeStyles(() => ({
 	layoutRoot: {
@@ -44,7 +45,7 @@ function GroupSettings() {
 	const classes = useStyles();
 	const [tab, setTab] = useState(0);
 
-	const SUBTITLES = ['그룹 멤버 관리', '임시 음성 채널 생성기 관리'];
+	const SUBTITLES = ['그룹 멤버 관리', '임시 음성 채널 생성기 관리', '시스템 활동 로그'];
 
 	return (
 		<FusePageSimple
@@ -58,10 +59,12 @@ function GroupSettings() {
 						<Tabs className={classes.tabs} value={tab} onChange={(_, v) => setTab(v)}>
 							<Tab className={classes.tab} label="멤버 관리" />
 							<Tab className={classes.tab} label="디코 채널 관리" />
+							<Tab className={classes.tab} label="시스템 로그" />
 						</Tabs>
 					</div>
 					{tab === 0 && <GroupSettingsContent />}
 					{tab === 1 && <TempVoiceContent />}
+					{tab === 2 && <AuditLogContent />}
 				</>
 			}
 		/>
