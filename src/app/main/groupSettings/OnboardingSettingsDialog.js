@@ -43,9 +43,9 @@ function getPositionIconUrl(positionKey) {
 	const nameMap = {
 		TOP: 'top',
 		JUNGLE: 'jungle',
-		MIDDLE: 'mid',
-		BOTTOM: 'bot',
-		UTILITY: 'sup'
+		MIDDLE: 'middle',
+		BOTTOM: 'bottom',
+		UTILITY: 'utility'
 	};
 	return `https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-clash/global/default/assets/images/position-selector/positions/icon-position-${nameMap[positionKey]}.png`;
 }
@@ -108,6 +108,10 @@ const useStyles = makeStyles(theme => ({
 			color: '#fff',
 			fontFamily: '"Noto Sans KR", sans-serif',
 			fontSize: '1.15rem'
+		},
+		'& .MuiSelect-root': {
+			display: 'flex',
+			alignItems: 'center'
 		},
 		'& .MuiInputLabel-root': {
 			color: 'rgba(255, 255, 255, 0.6)',
@@ -228,7 +232,9 @@ const useStyles = makeStyles(theme => ({
 		padding: '40px 0'
 	},
 	menuItem: {
-		fontFamily: '"Noto Sans KR", sans-serif'
+		fontFamily: '"Noto Sans KR", sans-serif',
+		display: 'flex',
+		alignItems: 'center'
 	}
 }));
 
