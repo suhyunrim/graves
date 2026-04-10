@@ -7,7 +7,10 @@ import {
 	Button,
 	TextField,
 	MenuItem,
-	CircularProgress
+	CircularProgress,
+	Radio,
+	RadioGroup,
+	FormControlLabel
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import { useDispatch, useSelector } from 'react-redux';
@@ -36,13 +39,28 @@ const TIERS = [
 
 const NONE_VALUE = '__none__';
 
+function getPositionIconUrl(positionKey) {
+	const nameMap = {
+		TOP: 'top',
+		JUNGLE: 'jungle',
+		MIDDLE: 'mid',
+		BOTTOM: 'bot',
+		UTILITY: 'sup'
+	};
+	return `https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-clash/global/default/assets/images/position-selector/positions/icon-position-${nameMap[positionKey]}.png`;
+}
+
+function getTierIconUrl(tierKey) {
+	return `/assets/images/ranked-emblems/Emblem_${tierKey}.webp`;
+}
+
 const useStyles = makeStyles(theme => ({
 	paper: {
 		background: 'linear-gradient(135deg, #1a1a2e 0%, #0f0f1a 100%)',
 		color: '#fff',
 		borderRadius: 20,
 		border: '1px solid rgba(0, 212, 255, 0.3)',
-		minWidth: 480,
+		minWidth: 520,
 		maxHeight: '80vh',
 		[theme.breakpoints.down('xs')]: {
 			minWidth: 'auto',
@@ -66,6 +84,49 @@ const useStyles = makeStyles(theme => ({
 		marginBottom: 12,
 		'&:first-child': {
 			marginTop: 8
+		}
+	},
+	sectionDesc: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.05rem',
+		color: 'rgba(255, 255, 255, 0.4)',
+		marginBottom: 12,
+		lineHeight: 1.5
+	},
+	roleRow: {
+		display: 'flex',
+		alignItems: 'center',
+		gap: 12,
+		marginBottom: 12,
+		[theme.breakpoints.down('xs')]: {
+			gap: 8
+		}
+	},
+	selectorField: {
+		flex: 1,
+		'& .MuiInputBase-root': {
+			color: '#fff',
+			fontFamily: '"Noto Sans KR", sans-serif',
+			fontSize: '1.15rem'
+		},
+		'& .MuiInputLabel-root': {
+			color: 'rgba(255, 255, 255, 0.6)',
+			fontFamily: '"Noto Sans KR", sans-serif'
+		},
+		'& .MuiOutlinedInput-notchedOutline': {
+			borderColor: 'rgba(255, 255, 255, 0.2)'
+		},
+		'& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline': {
+			borderColor: 'rgba(0, 212, 255, 0.5)'
+		},
+		'& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline': {
+			borderColor: '#00d4ff'
+		},
+		'& .MuiInputLabel-root.Mui-focused': {
+			color: '#00d4ff'
+		},
+		'& .MuiSelect-icon': {
+			color: 'rgba(255, 255, 255, 0.5)'
 		}
 	},
 	field: {
@@ -95,6 +156,20 @@ const useStyles = makeStyles(theme => ({
 			color: 'rgba(255, 255, 255, 0.5)'
 		}
 	},
+	menuItemIcon: {
+		width: 20,
+		height: 20,
+		marginRight: 8,
+		verticalAlign: 'middle',
+		objectFit: 'contain'
+	},
+	tierIcon: {
+		width: 24,
+		height: 24,
+		marginRight: 8,
+		verticalAlign: 'middle',
+		objectFit: 'contain'
+	},
 	roleColor: {
 		display: 'inline-block',
 		width: 12,
@@ -102,6 +177,21 @@ const useStyles = makeStyles(theme => ({
 		borderRadius: '50%',
 		marginRight: 8,
 		verticalAlign: 'middle'
+	},
+	radioGroup: {
+		flexDirection: 'row',
+		gap: 8
+	},
+	radioLabel: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.15rem',
+		color: 'rgba(255, 255, 255, 0.85)',
+		'& .MuiRadio-root': {
+			color: 'rgba(255, 255, 255, 0.4)'
+		},
+		'& .MuiRadio-colorSecondary.Mui-checked': {
+			color: '#00d4ff'
+		}
 	},
 	cancelBtn: {
 		color: 'rgba(255, 255, 255, 0.7)',
@@ -142,32 +232,17 @@ const useStyles = makeStyles(theme => ({
 	}
 }));
 
-function buildInitialPositionRoles(settings) {
-	const saved = settings?.onboardingPositionRoles || {};
-	const result = {};
-	POSITIONS.forEach(p => {
-		result[p.key] = saved[p.key] || null;
-	});
-	return result;
-}
-
-function buildInitialTierRoles(settings) {
-	const saved = settings?.onboardingTierRoles || {};
-	const result = {};
-	TIERS.forEach(t => {
-		result[t.key] = saved[t.key] || null;
-	});
-	return result;
-}
-
 function OnboardingSettingsDialog({ open, onClose, groupId }) {
 	const classes = useStyles();
 	const dispatch = useDispatch();
 	const { info, discordRoles } = useSelector(({ GroupSettings }) => GroupSettings.groupInfo);
 
-	const [roleId, setRoleId] = useState(info?.settings?.onboardingRoleId || null);
-	const [positionRoles, setPositionRoles] = useState(() => buildInitialPositionRoles(info?.settings));
-	const [tierRoles, setTierRoles] = useState(() => buildInitialTierRoles(info?.settings));
+	const [roleId, setRoleId] = useState(null);
+	const [selectedPosition, setSelectedPosition] = useState('TOP');
+	const [positionRoles, setPositionRoles] = useState({});
+	const [selectedTier, setSelectedTier] = useState('IRON');
+	const [tierRoles, setTierRoles] = useState({});
+	const [verifyMethod, setVerifyMethod] = useState('nickname');
 	const [rolesLoading, setRolesLoading] = useState(true);
 	const [rolesError, setRolesError] = useState('');
 	const [saving, setSaving] = useState(false);
@@ -189,25 +264,31 @@ function OnboardingSettingsDialog({ open, onClose, groupId }) {
 	useEffect(() => {
 		if (open && info?.settings) {
 			setRoleId(info.settings.onboardingRoleId || null);
-			setPositionRoles(buildInitialPositionRoles(info.settings));
-			setTierRoles(buildInitialTierRoles(info.settings));
+			setVerifyMethod(info.settings.onboardingVerifyMethod || 'nickname');
+			const savedPos = info.settings.onboardingPositionRoles || {};
+			const pr = {};
+			POSITIONS.forEach(p => {
+				pr[p.key] = savedPos[p.key] || null;
+			});
+			setPositionRoles(pr);
+			const savedTier = info.settings.onboardingTierRoles || {};
+			const tr = {};
+			TIERS.forEach(t => {
+				tr[t.key] = savedTier[t.key] || null;
+			});
+			setTierRoles(tr);
+			setSelectedPosition('TOP');
+			setSelectedTier('IRON');
 		}
 	}, [open, info]);
-
-	function handlePositionChange(key, value) {
-		setPositionRoles(prev => ({ ...prev, [key]: value === NONE_VALUE ? null : value }));
-	}
-
-	function handleTierChange(key, value) {
-		setTierRoles(prev => ({ ...prev, [key]: value === NONE_VALUE ? null : value }));
-	}
 
 	function handleSave() {
 		setSaving(true);
 		const settings = {
 			onboardingRoleId: roleId,
 			onboardingPositionRoles: positionRoles,
-			onboardingTierRoles: tierRoles
+			onboardingTierRoles: tierRoles,
+			onboardingVerifyMethod: verifyMethod
 		};
 		dispatch(Actions.updateGroupSettings(groupId, settings))
 			.then(() => {
@@ -219,17 +300,17 @@ function OnboardingSettingsDialog({ open, onClose, groupId }) {
 			});
 	}
 
-	function renderRoleSelect(label, value, onChange) {
+	function renderRoleDropdown(value, onChange) {
 		return (
 			<TextField
-				className={classes.field}
-				label={label}
+				className={classes.selectorField}
 				value={value || NONE_VALUE}
 				onChange={e => onChange(e.target.value === NONE_VALUE ? null : e.target.value)}
 				variant="outlined"
 				fullWidth
 				select
 				size="small"
+				label="역할"
 			>
 				<MenuItem value={NONE_VALUE} className={classes.menuItem}>
 					없음
@@ -256,14 +337,78 @@ function OnboardingSettingsDialog({ open, onClose, groupId }) {
 				{rolesError && <div className={classes.errorText}>{rolesError}</div>}
 				{!rolesLoading && !rolesError && (
 					<>
+						{/* 계정 인증 방식 */}
+						<div className={classes.sectionTitle}>계정 인증 방식</div>
+						<RadioGroup
+							className={classes.radioGroup}
+							value={verifyMethod}
+							onChange={e => setVerifyMethod(e.target.value)}
+						>
+							<FormControlLabel
+								value="nickname"
+								control={<Radio />}
+								label="닉네임 입력"
+								className={classes.radioLabel}
+							/>
+							<FormControlLabel
+								value="riot"
+								control={<Radio />}
+								label="라이엇 계정 연동"
+								className={classes.radioLabel}
+							/>
+						</RadioGroup>
+
+						{/* 기본 인증 역할 */}
 						<div className={classes.sectionTitle}>기본 인증 역할</div>
-						{renderRoleSelect('온보딩 완료 시 부여할 역할', roleId, setRoleId)}
+						{renderRoleDropdown(roleId, setRoleId)}
 
+						{/* 포지션별 역할 */}
 						<div className={classes.sectionTitle}>포지션별 역할</div>
-						{POSITIONS.map(p => renderRoleSelect(p.label, positionRoles[p.key], v => handlePositionChange(p.key, v)))}
+						<div className={classes.roleRow}>
+							<TextField
+								className={classes.selectorField}
+								value={selectedPosition}
+								onChange={e => setSelectedPosition(e.target.value)}
+								variant="outlined"
+								fullWidth
+								select
+								size="small"
+								label="포지션"
+							>
+								{POSITIONS.map(p => (
+									<MenuItem key={p.key} value={p.key} className={classes.menuItem}>
+										<img className={classes.menuItemIcon} src={getPositionIconUrl(p.key)} alt={p.label} />
+										{p.label}
+									</MenuItem>
+								))}
+							</TextField>
+							{renderRoleDropdown(positionRoles[selectedPosition], v =>
+								setPositionRoles(prev => ({ ...prev, [selectedPosition]: v }))
+							)}
+						</div>
 
+						{/* 티어별 역할 */}
 						<div className={classes.sectionTitle}>티어별 역할</div>
-						{TIERS.map(t => renderRoleSelect(t.label, tierRoles[t.key], v => handleTierChange(t.key, v)))}
+						<div className={classes.roleRow}>
+							<TextField
+								className={classes.selectorField}
+								value={selectedTier}
+								onChange={e => setSelectedTier(e.target.value)}
+								variant="outlined"
+								fullWidth
+								select
+								size="small"
+								label="티어"
+							>
+								{TIERS.map(t => (
+									<MenuItem key={t.key} value={t.key} className={classes.menuItem}>
+										<img className={classes.tierIcon} src={getTierIconUrl(t.key)} alt={t.label} />
+										{t.label}
+									</MenuItem>
+								))}
+							</TextField>
+							{renderRoleDropdown(tierRoles[selectedTier], v => setTierRoles(prev => ({ ...prev, [selectedTier]: v })))}
+						</div>
 					</>
 				)}
 			</DialogContent>
