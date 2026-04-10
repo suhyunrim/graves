@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { TextField, Switch, Snackbar, IconButton, useMediaQuery } from '@material-ui/core';
+import { TextField, Switch, Snackbar, IconButton, Button, useMediaQuery } from '@material-ui/core';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
 import CheckIcon from '@material-ui/icons/Check';
 import CloseIcon from '@material-ui/icons/Close';
 import EditIcon from '@material-ui/icons/Edit';
+import SettingsIcon from '@material-ui/icons/Settings';
 import FuseLoading from '@fuse/core/FuseLoading';
 import { useDispatch, useSelector } from 'react-redux';
 import * as Actions from './store/actions';
+import OnboardingSettingsDialog from './OnboardingSettingsDialog';
 
 const useStyles = makeStyles(theme => ({
 	root: {
@@ -191,6 +193,30 @@ const useStyles = makeStyles(theme => ({
 		marginTop: 4,
 		lineHeight: 1.5
 	},
+	settingRight: {
+		display: 'flex',
+		alignItems: 'center',
+		gap: 8
+	},
+	settingBtn: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.05rem',
+		fontWeight: 600,
+		color: '#00d4ff',
+		borderColor: 'rgba(0, 212, 255, 0.4)',
+		borderRadius: 8,
+		padding: '4px 12px',
+		textTransform: 'none',
+		minWidth: 'auto',
+		'&:hover': {
+			borderColor: '#00d4ff',
+			background: 'rgba(0, 212, 255, 0.08)'
+		},
+		'&.Mui-disabled': {
+			color: 'rgba(255, 255, 255, 0.2)',
+			borderColor: 'rgba(255, 255, 255, 0.08)'
+		}
+	},
 	switch: {
 		'& .MuiSwitch-switchBase.Mui-checked': {
 			color: '#00d4ff'
@@ -220,6 +246,7 @@ function GroupInfoContent() {
 	const [editingName, setEditingName] = useState(false);
 	const [nameValue, setNameValue] = useState('');
 	const [snackMsg, setSnackMsg] = useState('');
+	const [onboardingDialogOpen, setOnboardingDialogOpen] = useState(false);
 
 	const groupId = user?.reprGroup?.groupId;
 	const isAdmin = user?.reprGroup?.isAdmin;
@@ -263,6 +290,18 @@ function GroupInfoContent() {
 	function handleNameKeyDown(e) {
 		if (e.key === 'Enter') saveName();
 		if (e.key === 'Escape') cancelEditName();
+	}
+
+	function handleToggleOnboarding() {
+		const next = !info.settings.onboardingEnabled;
+		dispatch(Actions.updateGroupSettings(groupId, { onboardingEnabled: next }))
+			.then(() => setSnackMsg(next ? '온보딩이 활성화되었습니다.' : '온보딩이 비활성화되었습니다.'))
+			.catch(() => setSnackMsg('설정 변경에 실패했습니다.'));
+	}
+
+	function handleOnboardingDialogClose(msg) {
+		setOnboardingDialogOpen(false);
+		if (msg) setSnackMsg(msg);
 	}
 
 	function handleToggleVoteMode() {
@@ -375,7 +414,35 @@ function GroupInfoContent() {
 						onChange={handleToggleVoteMode}
 					/>
 				</div>
+				<div className={classes.settingRow}>
+					<div className={classes.settingInfo}>
+						<div className={classes.settingLabel}>온보딩</div>
+						<div className={classes.settingDesc}>
+							신규 유저가 서버 입장 시 봇이 DM으로 포지션/티어/닉네임 등록을 진행하고, 완료 시 Discord 역할을 자동
+							부여합니다.
+						</div>
+					</div>
+					<div className={classes.settingRight}>
+						<Button
+							className={classes.settingBtn}
+							variant="outlined"
+							size="small"
+							disabled={!info.settings?.onboardingEnabled}
+							onClick={() => setOnboardingDialogOpen(true)}
+							startIcon={<SettingsIcon style={{ fontSize: 16 }} />}
+						>
+							설정
+						</Button>
+						<Switch
+							className={classes.switch}
+							checked={Boolean(info.settings?.onboardingEnabled)}
+							onChange={handleToggleOnboarding}
+						/>
+					</div>
+				</div>
 			</div>
+
+			<OnboardingSettingsDialog open={onboardingDialogOpen} onClose={handleOnboardingDialogClose} groupId={groupId} />
 
 			<Snackbar
 				className={classes.snackbar}

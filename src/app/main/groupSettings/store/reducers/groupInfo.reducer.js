@@ -2,7 +2,8 @@ import * as Actions from '../actions/groupInfo.actions';
 
 const initialState = {
 	info: null,
-	loading: false
+	loading: false,
+	discordRoles: []
 };
 
 const groupInfoReducer = (state = initialState, action) => {
@@ -18,6 +19,9 @@ const groupInfoReducer = (state = initialState, action) => {
 		}
 		case Actions.SET_GROUP_SETTINGS: {
 			return { ...state, info: { ...state.info, settings: { ...state.info.settings, ...action.payload } } };
+		}
+		case Actions.GET_DISCORD_ROLES: {
+			return { ...state, discordRoles: action.payload };
 		}
 		default: {
 			return state;

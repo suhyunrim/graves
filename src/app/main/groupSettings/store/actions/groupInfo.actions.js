@@ -4,6 +4,7 @@ export const GET_GROUP_INFO = '[GROUP_INFO] GET INFO';
 export const GET_GROUP_INFO_LOADING = '[GROUP_INFO] LOADING';
 export const SET_GROUP_NAME = '[GROUP_INFO] SET NAME';
 export const SET_GROUP_SETTINGS = '[GROUP_INFO] SET SETTINGS';
+export const GET_DISCORD_ROLES = '[GROUP_INFO] GET DISCORD ROLES';
 
 export function getGroupInfo(groupId) {
 	return dispatch => {
@@ -43,5 +44,18 @@ export function updateGroupSettings(groupId, settings) {
 			dispatch(getGroupInfo(groupId));
 			throw err;
 		});
+	};
+}
+
+export function getDiscordRoles(groupId) {
+	return dispatch => {
+		const request = createCamilleAxios().get(`/api/group/${groupId}/discord-roles`);
+
+		return request.then(response =>
+			dispatch({
+				type: GET_DISCORD_ROLES,
+				payload: response.data
+			})
+		);
 	};
 }
