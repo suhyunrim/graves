@@ -430,9 +430,9 @@ function GroupSettingsContent() {
 	};
 
 	function getStatusKeys(member) {
-		const keys = [member.role];
-		if (member.leftGuildAt) keys.push('leftGuild');
-		return keys;
+		if (member.role === 'outsider') return ['outsider'];
+		if (member.leftGuildAt) return ['leftGuild'];
+		return [member.role];
 	}
 
 	const filteredMembers = members
