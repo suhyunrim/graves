@@ -355,6 +355,12 @@ const useStyles = makeStyles(theme => ({
 		display: 'flex',
 		justifyContent: 'flex-end'
 	},
+	subAccountText: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1rem',
+		color: 'rgba(255, 255, 255, 0.35)',
+		marginTop: 2
+	},
 	sortLabel: {
 		'& .MuiTableSortLabel-icon': {
 			color: 'rgba(255, 255, 255, 0.4) !important'
@@ -662,7 +668,14 @@ function GroupSettingsContent() {
 								}`}
 							>
 								<div className={classes.cardHeader}>
-									<span className={classes.cardName}>{member.name}</span>
+									<div>
+										<span className={classes.cardName}>{member.name}</span>
+										{member.subAccounts && member.subAccounts.length > 0 && (
+											<div className={classes.subAccountText}>
+												부캐: {member.subAccounts.map(s => s.name).join(', ')}
+											</div>
+										)}
+									</div>
 									{renderStatus(member)}
 								</div>
 								<div className={classes.cardBody}>
@@ -810,7 +823,14 @@ function GroupSettingsContent() {
 										member.leftGuildAt ? classes.rowLeftGuild : ''
 									}`}
 								>
-									<TableCell className={classes.bodyCell}>{member.name}</TableCell>
+									<TableCell className={classes.bodyCell}>
+									{member.name}
+									{member.subAccounts && member.subAccounts.length > 0 && (
+										<div className={classes.subAccountText}>
+											부캐: {member.subAccounts.map(s => s.name).join(', ')}
+										</div>
+									)}
+								</TableCell>
 									<TableCell className={classes.bodyCell}>{renderStatus(member)}</TableCell>
 									<TableCell className={classes.bodyCell} align="center">
 										<span className={classes.statsText}>
