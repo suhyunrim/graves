@@ -1,6 +1,7 @@
 import FuseSplashScreen from '@fuse/core/FuseSplashScreen';
 import * as userActions from 'app/auth/store/actions';
 import camilleRiotAuthService from 'app/services/camilleRiotAuthService';
+import { isSampleMode } from 'app/main/sample/sampleStorage';
 import * as Actions from 'app/store/actions';
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
@@ -19,6 +20,13 @@ class Auth extends Component {
 
 	camilleRiotAuthCheck = () =>
 		new Promise(resolve => {
+			// 샘플 모드면 서버 인증을 건너뛰고 바로 샘플 유저 설정
+			if (isSampleMode()) {
+				this.props.enterSampleMode();
+				resolve();
+				return;
+			}
+
 			camilleRiotAuthService.init(success => {
 				if (!success) {
 					resolve();
@@ -52,6 +60,7 @@ function mapDispatchToProps(dispatch) {
 	return bindActionCreators(
 		{
 			logout: userActions.logoutUser,
+			enterSampleMode: userActions.enterSampleMode,
 			retrieveGroupList: userActions.retrieveGroupList,
 			retrieveDiscordUser: userActions.retrieveDiscordUser,
 			showMessage: Actions.showMessage,

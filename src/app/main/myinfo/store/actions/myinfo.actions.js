@@ -1,4 +1,6 @@
 import createCamilleAxios from 'app/utility/camilleAxios';
+import { isSampleMode } from 'app/main/sample/sampleStorage';
+import { getSampleMyInfoData } from 'app/main/sample/sampleData';
 
 const qs = require('querystring');
 
@@ -15,6 +17,17 @@ export const SET_SUB_ACCOUNT = '[MYINFO] SET SUB ACCOUNT';
 // const getKDA = champData => (getAverageKills(champData) + getAverageAssists(champData)) / getAverageDeaths(champData);
 
 export function getMyInfo(groupId, puuid) {
+	if (isSampleMode()) {
+		return dispatch => {
+			setTimeout(() => {
+				dispatch({
+					type: GET_MYINFO,
+					payload: getSampleMyInfoData(puuid)
+				});
+			}, 300);
+		};
+	}
+
 	const params = { groupId };
 	if (puuid) params.puuid = puuid;
 	const request = createCamilleAxios().get('/api/user/getInfo', {
@@ -57,6 +70,13 @@ export function getMyInfo(groupId, puuid) {
 }
 
 export function registerSubAccount(riotId, groupId) {
+	if (isSampleMode()) {
+		return dispatch => {
+			dispatch({ type: SET_SUB_ACCOUNT, payload: { name: riotId } });
+			return Promise.resolve({ message: '부캐가 등록되었습니다. (샘플)' });
+		};
+	}
+
 	const request = createCamilleAxios().post('/api/user/sub-account', { riotId, groupId }, { silentError: true });
 
 	return dispatch =>
@@ -70,6 +90,13 @@ export function registerSubAccount(riotId, groupId) {
 }
 
 export function removeSubAccount(groupId) {
+	if (isSampleMode()) {
+		return dispatch => {
+			dispatch({ type: SET_SUB_ACCOUNT, payload: null });
+			return Promise.resolve();
+		};
+	}
+
 	const request = createCamilleAxios().delete('/api/user/sub-account', { data: { groupId }, silentError: true });
 
 	return dispatch =>
@@ -82,6 +109,13 @@ export function removeSubAccount(groupId) {
 }
 
 export function refreshChampionScores(groupId) {
+	if (isSampleMode()) {
+		return dispatch => {
+			dispatch({ type: TRY_REFRESH_CHAMPION_SCORES });
+			setTimeout(() => dispatch({ type: REFRESH_CHAMPION_SCORES }), 500);
+		};
+	}
+
 	return dispatch => {
 		dispatch({
 			type: TRY_REFRESH_CHAMPION_SCORES

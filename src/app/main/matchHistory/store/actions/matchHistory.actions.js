@@ -1,4 +1,6 @@
 import createCamilleAxios from 'app/utility/camilleAxios';
+import { isSampleMode } from 'app/main/sample/sampleStorage';
+import { getSampleMatchHistoryData } from 'app/main/sample/sampleData';
 
 export const GET_MATCH_HISTORY = '[MATCH_HISTORY] GET MATCH HISTORY';
 export const SET_SEARCH_TEXT = '[MATCH_HISTORY] SET SEARCH TEXT';
@@ -13,6 +15,17 @@ export function setSearchText(event) {
 }
 
 export function getMatchHistory(groupId, page = 1, limit = 10, search = '') {
+	if (isSampleMode()) {
+		return dispatch => {
+			setTimeout(() => {
+				dispatch({
+					type: GET_MATCH_HISTORY,
+					payload: getSampleMatchHistoryData(page, limit)
+				});
+			}, 300);
+		};
+	}
+
 	const params = { page, limit };
 	if (search) params.search = search;
 
@@ -30,6 +43,10 @@ export function getMatchHistory(groupId, page = 1, limit = 10, search = '') {
 }
 
 export function duplicateMatch(groupId, matchId, date, winTeam) {
+	if (isSampleMode()) {
+		return () => Promise.resolve({ success: true });
+	}
+
 	const request = createCamilleAxios().post(`/api/match/${groupId}/duplicate`, { matchId, date, winTeam });
 
 	return dispatch =>
@@ -43,6 +60,10 @@ export function duplicateMatch(groupId, matchId, date, winTeam) {
 }
 
 export function cancelMatch(groupId, matchId) {
+	if (isSampleMode()) {
+		return () => Promise.resolve({ success: true });
+	}
+
 	const request = createCamilleAxios().post(`/api/match/${groupId}/cancel`, { matchId });
 
 	return dispatch =>
