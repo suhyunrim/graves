@@ -4,7 +4,6 @@ import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
 import { useDispatch } from 'react-redux';
 import history from '@history';
-import { enableSampleMode } from './sampleStorage';
 import * as userActions from 'app/auth/store/actions';
 
 const useStyles = makeStyles(() => ({
@@ -67,7 +66,6 @@ function SampleLanding() {
 	const dispatch = useDispatch();
 
 	function handleStart() {
-		enableSampleMode();
 		dispatch(userActions.enterSampleMode());
 		history.push('/dashboard');
 	}

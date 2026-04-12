@@ -1,5 +1,6 @@
 const SAMPLE_MODE_KEY = 'graves_sample_mode';
 const SAMPLE_DATA_KEY = 'graves_sample_data';
+export const SAMPLE_MY_PUUID = 'sample-puuid-01';
 
 export function isSampleMode() {
 	return localStorage.getItem(SAMPLE_MODE_KEY) === 'true';
@@ -7,8 +8,7 @@ export function isSampleMode() {
 
 export function enableSampleMode() {
 	localStorage.setItem(SAMPLE_MODE_KEY, 'true');
-	// MyInfo 페이지에서 "나"를 식별하기 위해 puuid 설정
-	localStorage.setItem('camille_riot_puuid', 'sample-puuid-01');
+	localStorage.setItem('camille_riot_puuid', SAMPLE_MY_PUUID);
 }
 
 export function disableSampleMode() {
