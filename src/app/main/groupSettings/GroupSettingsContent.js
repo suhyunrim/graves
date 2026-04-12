@@ -439,19 +439,26 @@ function GroupSettingsContent() {
 		return [member.role];
 	}
 
+	function getStatusPriority(member) {
+		if (member.role === 'admin') return 1;
+		if (member.role === 'outsider') return 4;
+		if (member.leftGuildAt) return 3;
+		return 2;
+	}
+
 	const filteredMembers = members
 		.filter(m => m.name.toLowerCase().includes(searchText.toLowerCase()))
 		.filter(m => getStatusKeys(m).some(k => statusFilter.includes(k)));
 
-	const sortedMembers = sortKey
-		? [...filteredMembers].sort((a, b) => {
-				const aVal = getSortValue(a, sortKey);
-				const bVal = getSortValue(b, sortKey);
-				if (aVal < bVal) return sortDir === 'asc' ? -1 : 1;
-				if (aVal > bVal) return sortDir === 'asc' ? 1 : -1;
-				return 0;
-		  })
-		: filteredMembers;
+	const sortedMembers = [...filteredMembers].sort((a, b) => {
+		if (sortKey) {
+			const aVal = getSortValue(a, sortKey);
+			const bVal = getSortValue(b, sortKey);
+			if (aVal < bVal) return sortDir === 'asc' ? -1 : 1;
+			if (aVal > bVal) return sortDir === 'asc' ? 1 : -1;
+		}
+		return getStatusPriority(a) - getStatusPriority(b);
+	});
 
 	function handleBlacklist(member) {
 		setConfirmDialog({ type: 'blacklist', member });
