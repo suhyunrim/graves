@@ -26,6 +26,12 @@ const useStyles = makeStyles(() => ({
 			background: '#00d4ff',
 			height: 3,
 			borderRadius: '3px 3px 0 0'
+		},
+		'& .MuiTabs-scrollButtons': {
+			color: 'rgba(255, 255, 255, 0.5)',
+			'&.Mui-disabled': {
+				opacity: 0.2
+			}
 		}
 	},
 	tab: {
@@ -57,7 +63,13 @@ function GroupSettings() {
 			content={
 				<>
 					<div className={classes.tabsWrapper}>
-						<Tabs className={classes.tabs} value={tab} onChange={(_, v) => setTab(v)}>
+						<Tabs
+							className={classes.tabs}
+							value={tab}
+							onChange={(_, v) => setTab(v)}
+							variant="scrollable"
+							scrollButtons="auto"
+						>
 							<Tab className={classes.tab} label="방 설정" />
 							<Tab className={classes.tab} label="멤버 관리" />
 							<Tab className={classes.tab} label="디코 채널 관리" />
