@@ -5,8 +5,8 @@ import CheckIcon from '@material-ui/icons/Check';
 import CloseIcon from '@material-ui/icons/Close';
 import EditIcon from '@material-ui/icons/Edit';
 import SettingsIcon from '@material-ui/icons/Settings';
-import FuseLoading from '@fuse/core/FuseLoading';
 import { useDispatch, useSelector } from 'react-redux';
+import { SettingsSkeleton } from '../components/SkeletonLoaders';
 import * as Actions from './store/actions';
 import OnboardingSettingsDialog from './OnboardingSettingsDialog';
 
@@ -262,7 +262,7 @@ function GroupInfoContent() {
 	}
 
 	if (loading || !info) {
-		return <FuseLoading />;
+		return <SettingsSkeleton />;
 	}
 
 	function startEditName() {

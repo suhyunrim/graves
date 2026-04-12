@@ -368,4 +368,69 @@ function AchievementSkeleton() {
 	);
 }
 
-export { DashboardSkeleton, RankingTableSkeleton, MatchHistorySkeleton, MyInfoSkeleton, AchievementSkeleton };
+function ChampionTableSkeleton() {
+	const classes = useSkeletonStyles();
+	return (
+		<div className={classes.tableContainer}>
+			<Skeleton
+				{...skeletonProps}
+				variant="text"
+				width={200}
+				height={24}
+				style={{ ...skeletonProps.style, marginBottom: 16 }}
+			/>
+			<div className={classes.tableWrapper}>
+				{Array.from({ length: 8 }).map((_, i) => (
+					<div key={i} className={classes.tableRow}>
+						<Skeleton {...skeletonProps} variant="circle" width={36} height={36} />
+						<Skeleton {...skeletonProps} variant="text" width={80} height={18} />
+						<Skeleton {...skeletonProps} variant="text" width={50} height={18} />
+						<Skeleton {...skeletonProps} variant="text" width={50} height={18} />
+						<Skeleton {...skeletonProps} variant="text" width={50} height={18} />
+						<Skeleton {...skeletonProps} variant="text" width={60} height={18} />
+					</div>
+				))}
+			</div>
+		</div>
+	);
+}
+
+function SettingsSkeleton() {
+	return (
+		<div style={{ padding: '24px 28px' }}>
+			{Array.from({ length: 5 }).map((_, i) => (
+				<div
+					key={i}
+					style={{
+						display: 'flex',
+						alignItems: 'center',
+						gap: 16,
+						padding: '14px 0',
+						borderBottom: '1px solid rgba(255, 255, 255, 0.05)'
+					}}
+				>
+					<Skeleton {...skeletonProps} variant="circle" width={32} height={32} />
+					<Skeleton {...skeletonProps} variant="text" width="30%" height={18} />
+					<div style={{ flex: 1 }} />
+					<Skeleton
+						{...skeletonProps}
+						variant="rect"
+						width={80}
+						height={28}
+						style={{ ...skeletonProps.style, borderRadius: 6 }}
+					/>
+				</div>
+			))}
+		</div>
+	);
+}
+
+export {
+	DashboardSkeleton,
+	RankingTableSkeleton,
+	MatchHistorySkeleton,
+	MyInfoSkeleton,
+	AchievementSkeleton,
+	ChampionTableSkeleton,
+	SettingsSkeleton
+};

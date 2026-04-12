@@ -1,5 +1,4 @@
 import FuseScrollbars from '@fuse/core/FuseScrollbars';
-import FuseLoading from '@fuse/core/FuseLoading';
 import _ from '@lodash';
 import getLatesetRiotDataVersion from 'app/utility/getLatesetRiotDataVersion';
 import Table from '@material-ui/core/Table';
@@ -13,6 +12,7 @@ import React, { useEffect, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { getKDAColor, getWinRateColor } from 'app/utility/statisticsColor';
+import { ChampionTableSkeleton } from '../components/SkeletonLoaders';
 import * as Actions from './store/actions';
 
 const useStyles = makeStyles(theme => ({
@@ -185,7 +185,7 @@ function MyInfoTable(props) {
 	};
 
 	if (!championInfos.data) {
-		return <FuseLoading />;
+		return <ChampionTableSkeleton />;
 	}
 
 	return (

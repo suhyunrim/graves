@@ -4,8 +4,8 @@ import { makeStyles, useTheme } from '@material-ui/core/styles';
 import NavigateBeforeIcon from '@material-ui/icons/NavigateBefore';
 import NavigateNextIcon from '@material-ui/icons/NavigateNext';
 import LanguageIcon from '@material-ui/icons/Language';
-import FuseLoading from '@fuse/core/FuseLoading';
 import { useDispatch, useSelector } from 'react-redux';
+import { SettingsSkeleton } from '../components/SkeletonLoaders';
 import * as Actions from './store/actions';
 
 const ACTION_LABELS = {
@@ -350,7 +350,7 @@ function AuditLogContent() {
 	}
 
 	if (loading) {
-		return <FuseLoading />;
+		return <SettingsSkeleton />;
 	}
 
 	const totalPages = Math.ceil(total / limit) || 1;

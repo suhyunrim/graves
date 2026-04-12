@@ -11,8 +11,8 @@ import {
 	useMediaQuery
 } from '@material-ui/core';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
-import FuseLoading from '@fuse/core/FuseLoading';
 import { useDispatch, useSelector } from 'react-redux';
+import { SettingsSkeleton } from '../components/SkeletonLoaders';
 import * as Actions from './store/actions';
 
 const useStyles = makeStyles(theme => ({
@@ -268,7 +268,7 @@ function TempVoiceContent() {
 	}
 
 	if (loading) {
-		return <FuseLoading />;
+		return <SettingsSkeleton />;
 	}
 
 	const generatorMap = {};
