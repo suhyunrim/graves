@@ -1,12 +1,13 @@
 import FusePageSimple from '@fuse/core/FusePageSimple';
 import withReducer from 'app/store/withReducer';
 import { makeStyles } from '@material-ui/core/styles';
-import { Typography, Button, Snackbar, CircularProgress } from '@material-ui/core';
+import { Typography, Button, Snackbar } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
 import PeopleIcon from '@material-ui/icons/People';
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
+import { ChallengeListSkeleton } from '../components/SkeletonLoaders';
 import reducer from './store/reducers';
 import * as Actions from './store/actions';
 import ChallengeFormDialog from './ChallengeFormDialog';
@@ -233,9 +234,7 @@ function ChallengeList() {
 			content={
 				<div className={classes.container}>
 					{loadingList ? (
-						<div className={classes.loadingWrapper}>
-							<CircularProgress style={{ color: '#00d4ff' }} />
-						</div>
+						<ChallengeListSkeleton />
 					) : list && list.length > 0 ? (
 						<div className={classes.cardGrid}>
 							{list.map(c => {

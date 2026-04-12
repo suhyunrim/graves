@@ -1,12 +1,13 @@
 import FusePageSimple from '@fuse/core/FusePageSimple';
 import withReducer from 'app/store/withReducer';
 import { makeStyles } from '@material-ui/core/styles';
-import { CircularProgress, Button } from '@material-ui/core';
+import { Button } from '@material-ui/core';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 import React, { useEffect, useState, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams, Link } from 'react-router-dom';
+import { ChallengeDetailSkeleton } from '../components/SkeletonLoaders';
 import reducer from './store/reducers';
 import * as Actions from './store/actions';
 import { formatShortDateTime } from './challengeUtils';
@@ -721,7 +722,7 @@ function ChallengeUserMatches() {
 		return (
 			<FusePageSimple
 				classes={{ root: classes.layoutRoot }}
-				content={<div className={classes.loadingWrapper}><CircularProgress style={{ color: '#00d4ff' }} /></div>}
+				content={<ChallengeDetailSkeleton />}
 			/>
 		);
 	}
@@ -782,7 +783,7 @@ function ChallengeUserMatches() {
 			content={
 				<div className={classes.container}>
 					{!userMatches ? (
-						<div className={classes.loadingWrapper}><CircularProgress style={{ color: '#00d4ff' }} /></div>
+						<ChallengeDetailSkeleton />
 					) : userMatches.length === 0 ? (
 						<div className={classes.emptyState}><div className={classes.emptyText}>매치 기록이 없습니다</div></div>
 					) : (

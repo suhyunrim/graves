@@ -425,6 +425,78 @@ function SettingsSkeleton() {
 	);
 }
 
+function ChallengeListSkeleton() {
+	const classes = useSkeletonStyles();
+	return (
+		<div
+			style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 16, padding: 24 }}
+		>
+			{Array.from({ length: 6 }).map((_, i) => (
+				<div key={i} className={classes.achievementCard}>
+					<div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
+						<Skeleton {...skeletonProps} variant="text" width="50%" height={20} />
+						<Skeleton
+							{...skeletonProps}
+							variant="rect"
+							width={60}
+							height={22}
+							style={{ ...skeletonProps.style, borderRadius: 12 }}
+						/>
+					</div>
+					<Skeleton
+						{...skeletonProps}
+						variant="rect"
+						width={80}
+						height={22}
+						style={{ ...skeletonProps.style, borderRadius: 6, marginBottom: 8 }}
+					/>
+					<Skeleton {...skeletonProps} variant="text" width="70%" height={14} />
+					<div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 12 }}>
+						<Skeleton {...skeletonProps} variant="text" width={60} height={16} />
+						<Skeleton {...skeletonProps} variant="text" width={40} height={16} />
+					</div>
+				</div>
+			))}
+		</div>
+	);
+}
+
+function ChallengeDetailSkeleton() {
+	const classes = useSkeletonStyles();
+	return (
+		<div style={{ padding: 24, maxWidth: 1200, margin: '0 auto' }}>
+			<Skeleton
+				{...skeletonProps}
+				variant="text"
+				width="40%"
+				height={28}
+				style={{ ...skeletonProps.style, marginBottom: 8 }}
+			/>
+			<div style={{ display: 'flex', gap: 12, marginBottom: 24 }}>
+				<Skeleton
+					{...skeletonProps}
+					variant="rect"
+					width={80}
+					height={26}
+					style={{ ...skeletonProps.style, borderRadius: 12 }}
+				/>
+				<Skeleton {...skeletonProps} variant="text" width={150} height={18} />
+			</div>
+			<div className={classes.tableWrapper}>
+				{Array.from({ length: 8 }).map((_, i) => (
+					<div key={i} className={classes.tableRow}>
+						<Skeleton {...skeletonProps} variant="text" width={30} height={22} />
+						<Skeleton {...skeletonProps} variant="text" width={100} height={18} />
+						<Skeleton {...skeletonProps} variant="text" width={50} height={18} />
+						<Skeleton {...skeletonProps} variant="text" width={50} height={18} />
+						<Skeleton {...skeletonProps} variant="text" width={60} height={18} />
+					</div>
+				))}
+			</div>
+		</div>
+	);
+}
+
 export {
 	DashboardSkeleton,
 	RankingTableSkeleton,
@@ -432,5 +504,7 @@ export {
 	MyInfoSkeleton,
 	AchievementSkeleton,
 	ChampionTableSkeleton,
-	SettingsSkeleton
+	SettingsSkeleton,
+	ChallengeListSkeleton,
+	ChallengeDetailSkeleton
 };

@@ -23,6 +23,7 @@ import ArrowDownwardIcon from '@material-ui/icons/ArrowDownward';
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams, Link } from 'react-router-dom';
+import { ChallengeDetailSkeleton } from '../components/SkeletonLoaders';
 import reducer from './store/reducers';
 import * as Actions from './store/actions';
 import ChallengeFormDialog from './ChallengeFormDialog';
@@ -605,11 +606,7 @@ function ChallengeDetail() {
 		return (
 			<FusePageSimple
 				classes={{ root: classes.layoutRoot }}
-				content={
-					<div className={classes.loadingWrapper}>
-						<CircularProgress style={{ color: '#00d4ff' }} />
-					</div>
-				}
+				content={<ChallengeDetailSkeleton />}
 			/>
 		);
 	}
