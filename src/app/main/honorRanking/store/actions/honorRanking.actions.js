@@ -1,10 +1,23 @@
 import createCamilleAxios from 'app/utility/camilleAxios';
+import { isSampleMode } from 'app/main/sample/sampleStorage';
+import { getSampleHonorRankingData } from 'app/main/sample/sampleData';
 
 export const GET_HONOR_RANKING = '[HONOR RANKING] GET HONOR RANKING';
 export const SET_SEARCH_TEXT = '[HONOR RANKING] SET SEARCH TEXT';
 export const SET_PERIOD = '[HONOR RANKING] SET PERIOD';
 
 export function getHonorRanking(groupId, since, until) {
+	if (isSampleMode()) {
+		return dispatch => {
+			setTimeout(() => {
+				dispatch({
+					type: GET_HONOR_RANKING,
+					payload: getSampleHonorRankingData()
+				});
+			}, 300);
+		};
+	}
+
 	const params = { limit: 50 };
 	if (since) {
 		params.since = since;
