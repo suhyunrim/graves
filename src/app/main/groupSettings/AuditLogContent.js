@@ -216,9 +216,9 @@ const useStyles = makeStyles(theme => ({
 		},
 		[theme.breakpoints.down('sm')]: {
 			flexDirection: 'column',
-			alignItems: 'flex-start',
-			gap: 8,
-			padding: '14px 14px'
+			alignItems: 'stretch',
+			gap: 6,
+			padding: '12px 14px'
 		}
 	},
 	logTime: {
@@ -227,7 +227,11 @@ const useStyles = makeStyles(theme => ({
 		fontWeight: 600,
 		color: 'rgba(255, 255, 255, 0.4)',
 		minWidth: 100,
-		whiteSpace: 'nowrap'
+		whiteSpace: 'nowrap',
+		[theme.breakpoints.down('sm')]: {
+			minWidth: 'auto',
+			fontSize: '1.1rem'
+		}
 	},
 	logActor: {
 		fontFamily: '"Noto Sans KR", sans-serif',
@@ -236,7 +240,8 @@ const useStyles = makeStyles(theme => ({
 		color: '#fff',
 		minWidth: 100,
 		[theme.breakpoints.down('sm')]: {
-			minWidth: 'auto'
+			minWidth: 'auto',
+			fontSize: '1.15rem'
 		}
 	},
 	logAction: {
@@ -253,7 +258,9 @@ const useStyles = makeStyles(theme => ({
 		textOverflow: 'ellipsis',
 		whiteSpace: 'nowrap',
 		[theme.breakpoints.down('sm')]: {
-			whiteSpace: 'normal'
+			whiteSpace: 'normal',
+			width: '100%',
+			fontSize: '1rem'
 		}
 	},
 	logSource: {

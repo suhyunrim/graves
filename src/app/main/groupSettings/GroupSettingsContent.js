@@ -325,7 +325,11 @@ const useStyles = makeStyles(theme => ({
 	cardBody: {
 		display: 'grid',
 		gridTemplateColumns: '1fr 1fr',
-		gap: '10px 16px'
+		gap: '10px 16px',
+		[theme.breakpoints.down('xs')]: {
+			gridTemplateColumns: '1fr',
+			gap: 8
+		}
 	},
 	cardField: {
 		display: 'flex',

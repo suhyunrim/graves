@@ -104,6 +104,7 @@ const useStyles = makeStyles(theme => ({
 		color: '#fff',
 		textShadow: '0 0 20px rgba(0, 212, 255, 0.5)',
 		margin: 0,
+		wordBreak: 'break-word',
 		[theme.breakpoints.down('sm')]: {
 			fontSize: '2.2rem'
 		}

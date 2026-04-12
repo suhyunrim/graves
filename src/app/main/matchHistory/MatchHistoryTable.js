@@ -462,7 +462,11 @@ const useStyles = makeStyles(theme => ({
 		border: '1px solid rgba(0, 212, 255, 0.3)',
 		borderRadius: 16,
 		color: '#fff',
-		minWidth: 360
+		minWidth: 360,
+		[theme.breakpoints.down('xs')]: {
+			minWidth: 'auto',
+			margin: 16
+		}
 	},
 	dialogTitle: {
 		fontFamily: '"Rajdhani", "Noto Sans KR", sans-serif',

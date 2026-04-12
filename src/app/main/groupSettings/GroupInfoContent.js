@@ -143,7 +143,8 @@ const useStyles = makeStyles(theme => ({
 		gap: 12,
 		marginBottom: 16,
 		[theme.breakpoints.down('sm')]: {
-			gridTemplateColumns: 'repeat(2, 1fr)'
+			gridTemplateColumns: 'repeat(2, 1fr)',
+			gap: 8
 		}
 	},
 	statCard: {
