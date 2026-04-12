@@ -8,6 +8,7 @@ import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import * as FuseActions from 'app/store/actions/fuse';
 import CamilleRiotAuthService from 'app/services/camilleRiotAuthService';
+import { enableSampleMode, disableSampleMode } from 'app/main/sample/sampleStorage';
 
 export const SET_TOKEN_DATA = '[USER] SET TOKEN DATA';
 export const RETRIEVE_GROUP_LIST = '[USER] RETRIEVE GROUP LIST';
@@ -132,14 +133,14 @@ export function removeUserData() {
 }
 
 export function enterSampleMode() {
-	return {
-		type: ENTER_SAMPLE_MODE
+	return dispatch => {
+		enableSampleMode();
+		dispatch({ type: ENTER_SAMPLE_MODE });
 	};
 }
 
 export function logoutUser() {
 	return (dispatch, getState) => {
-		const { disableSampleMode } = require('app/main/sample/sampleStorage');
 		disableSampleMode();
 
 		CamilleRiotAuthService.logout();

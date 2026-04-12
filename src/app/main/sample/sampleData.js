@@ -1,4 +1,4 @@
-import { getSampleData } from './sampleStorage';
+import { getSampleData, SAMPLE_MY_PUUID } from './sampleStorage';
 
 // ============================================================
 // 샘플 플레이어 풀 (36명)
@@ -42,8 +42,7 @@ const PLAYERS = [
 	{ name: '윌', puuid: 'sample-puuid-36', riotId: 'Will#KR1' }
 ];
 
-// "나" = 첫 번째 플레이어 (페이커)
-const MY_PUUID = 'sample-puuid-01';
+const MY_PUUID = SAMPLE_MY_PUUID;
 
 // ============================================================
 // 유틸리티
@@ -265,14 +264,7 @@ function getDefaultMyInfoData(puuid) {
 
 	const bestTeammate = { ...topTeammates[0], losses: topTeammates[0].games - topTeammates[0].wins };
 	const bestOpponent = { ...topOpponents[0] };
-	const worstOpponent = {
-		puuid: topOpponents[9].puuid,
-		name: topOpponents[9].name,
-		games: topOpponents[9].games,
-		myWins: topOpponents[9].myWins,
-		myLosses: topOpponents[9].myLosses,
-		winRate: topOpponents[9].winRate
-	};
+	const worstOpponent = { ...topOpponents[9] };
 
 	const defaultRating = Math.round(rating * 0.6);
 	const additionalRating = rating - defaultRating;
