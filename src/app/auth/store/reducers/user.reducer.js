@@ -79,6 +79,20 @@ const user = (state = initialState, action) => {
 		case Actions.USER_LOGGED_OUT: {
 			return initialState;
 		}
+		case Actions.ENTER_SAMPLE_MODE: {
+			const sampleGroup = { groupId: 'sample-group', groupName: 'Sample Group' };
+			return {
+				...state,
+				role: ['admin'],
+				groupList: [sampleGroup],
+				reprGroup: sampleGroup,
+				data: {
+					...state.data,
+					displayName: 'Sample Group',
+					photoURL: 'assets/images/avatars/Ahri.jpeg'
+				}
+			};
+		}
 		default: {
 			return state;
 		}

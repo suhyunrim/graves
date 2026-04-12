@@ -8,6 +8,7 @@ import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import * as FuseActions from 'app/store/actions/fuse';
 import CamilleRiotAuthService from 'app/services/camilleRiotAuthService';
+import { enableSampleMode, disableSampleMode } from 'app/main/sample/sampleStorage';
 
 export const SET_TOKEN_DATA = '[USER] SET TOKEN DATA';
 export const RETRIEVE_GROUP_LIST = '[USER] RETRIEVE GROUP LIST';
@@ -16,6 +17,7 @@ export const SET_GROUP_LIST = '[USER] SET GROUP LIST';
 export const REMOVE_USER_DATA = '[USER] REMOVE DATA';
 export const USER_LOGGED_OUT = '[USER] LOGGED OUT';
 export const CHANGE_GROUP = '[USER] CHANGE GROUP';
+export const ENTER_SAMPLE_MODE = '[USER] ENTER SAMPLE MODE';
 
 export function retrieveGroupList() {
 	const createCamilleAxios = require('app/utility/camilleAxios').default;
@@ -130,8 +132,17 @@ export function removeUserData() {
 	};
 }
 
+export function enterSampleMode() {
+	return dispatch => {
+		enableSampleMode();
+		dispatch({ type: ENTER_SAMPLE_MODE });
+	};
+}
+
 export function logoutUser() {
 	return (dispatch, getState) => {
+		disableSampleMode();
+
 		CamilleRiotAuthService.logout();
 
 		history.push({

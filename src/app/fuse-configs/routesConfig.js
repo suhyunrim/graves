@@ -13,10 +13,12 @@ import ReleaseNotesConfig from 'app/main/releaseNotes/ReleaseNotesConfig';
 import AchievementConfig from 'app/main/achievement/AchievementConfig';
 import LoginPageConfig from 'app/main/login/LoginPageConfig';
 import MaintenanceConfig from 'app/main/maintenance/MaintenanceConfig';
+import SampleConfig from 'app/main/sample/SampleConfig';
 
 const routeConfigs = [
 	...authRoleExamplesConfigs,
 	LoginPageConfig,
+	SampleConfig,
 	DashboardConfig,
 	MyInfoConfig,
 	RankingConfig,
