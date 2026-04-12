@@ -10,6 +10,7 @@ import { makeStyles, withStyles } from '@material-ui/core/styles';
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, withRouter } from 'react-router-dom';
+import { RankingTableSkeleton } from '../components/SkeletonLoaders';
 import * as Actions from './store/actions';
 import RankingTableHead from './RankingTableHeader';
 
@@ -372,6 +373,7 @@ function RankingTable(props) {
 	const classes = useStyles();
 	const dispatch = useDispatch();
 	const ranking = useSelector(({ Ranking }) => Ranking.ranking.data);
+	const rankingLoading = useSelector(({ Ranking }) => Ranking.ranking.loading);
 	const searchText = useSelector(({ Ranking }) => Ranking.ranking.searchText);
 	const period = useSelector(({ Ranking }) => Ranking.ranking.period);
 	const isRefreshingGroupRating = useSelector(({ Ranking }) => Ranking.ranking.isRefreshingGroupRating);
@@ -523,6 +525,10 @@ function RankingTable(props) {
 		page * rowsPerPage,
 		page * rowsPerPage + rowsPerPage
 	);
+
+	if (rankingLoading && (!data || data.length === 0)) {
+		return <RankingTableSkeleton />;
+	}
 
 	return (
 		<div className={classes.container}>

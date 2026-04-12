@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import FuseLoading from '@fuse/core/FuseLoading';
 import FusePageSimple from '@fuse/core/FusePageSimple';
 import { makeStyles } from '@material-ui/core/styles';
 import {
@@ -19,6 +18,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import withReducer from 'app/store/withReducer';
 import getLatesetRiotDataVersion from 'app/utility/getLatesetRiotDataVersion';
+import { MyInfoSkeleton } from '../components/SkeletonLoaders';
 import AchievementContent from '../achievement/AchievementContent';
 import achievementReducer from '../achievement/store/reducers';
 import MyInfoHeader from './MyInfoHeader';
@@ -802,7 +802,13 @@ function MyInfoPage(props) {
 	}, [dispatch, user, puuid]);
 
 	if (!scoreInfo) {
-		return <FuseLoading />;
+		return (
+			<FusePageSimple
+				classes={{ root: classes.layoutRoot }}
+				header={<MyInfoHeader showBack={isOtherUser} />}
+				content={<MyInfoSkeleton />}
+			/>
+		);
 	}
 
 	const soloTierName = getSoloRankTierName();

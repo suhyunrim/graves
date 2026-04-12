@@ -2,6 +2,7 @@ import * as Actions from '../actions';
 
 const initialState = {
 	data: [],
+	loading: false,
 	searchText: '',
 	period: 'all',
 	isRefreshingGroupRating: false
@@ -9,10 +10,17 @@ const initialState = {
 
 const rankingReducer = (state = initialState, action) => {
 	switch (action.type) {
+		case Actions.GET_RANKING_LOADING: {
+			return {
+				...state,
+				loading: true
+			};
+		}
 		case Actions.GET_RANKING: {
 			return {
 				...state,
-				data: action.payload
+				data: action.payload,
+				loading: false
 			};
 		}
 		case Actions.SET_SEARCH_TEXT: {

@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import FuseLoading from '@fuse/core/FuseLoading';
 import { makeStyles } from '@material-ui/core/styles';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Switch from '@material-ui/core/Switch';
@@ -7,6 +6,7 @@ import Tooltip from '@material-ui/core/Tooltip';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import camilleRiotAuthService from 'app/services/camilleRiotAuthService';
+import { AchievementSkeleton } from '../components/SkeletonLoaders';
 import * as Actions from './store/actions';
 
 const TIER_COLORS = {
@@ -322,7 +322,7 @@ function AchievementContent() {
 	}, [dispatch, groupId, puuid]);
 
 	if (loading) {
-		return <FuseLoading />;
+		return <AchievementSkeleton />;
 	}
 
 	if (!achievements || achievements.length === 0) {

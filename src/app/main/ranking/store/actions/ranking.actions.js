@@ -3,6 +3,7 @@ import createCamilleAxios from 'app/utility/camilleAxios';
 const qs = require('querystring');
 
 export const GET_RANKING = '[RANKING] GET RANKING';
+export const GET_RANKING_LOADING = '[RANKING] GET RANKING LOADING';
 export const SET_SEARCH_TEXT = '[RANKING] SET SEARCH TEXT';
 export const SET_PERIOD = '[RANKING] SET PERIOD';
 export const TRY_REFRESH_GROUP_RATING = '[RANKING] TRY REFRESH GROUP RATING';
@@ -11,25 +12,29 @@ export const REFRESH_GROUP_RATING = '[RANKING] REFRESH GROUP RATING';
 export function getRanking(groupName) {
 	const request = createCamilleAxios().get('/api/group/ranking', { params: { groupName } });
 
-	return dispatch =>
+	return dispatch => {
+		dispatch({ type: GET_RANKING_LOADING });
 		request.then(response =>
 			dispatch({
 				type: GET_RANKING,
 				payload: response.data.result
 			})
 		);
+	};
 }
 
 export function getPeriodRanking(groupId, startDate, endDate) {
 	const request = createCamilleAxios().get('/api/group/ranking/period', { params: { groupId, startDate, endDate } });
 
-	return dispatch =>
+	return dispatch => {
+		dispatch({ type: GET_RANKING_LOADING });
 		request.then(response =>
 			dispatch({
 				type: GET_RANKING,
 				payload: response.data.result
 			})
 		);
+	};
 }
 
 export function setPeriod(period) {

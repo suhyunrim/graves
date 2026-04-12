@@ -1,5 +1,4 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import FuseLoading from '@fuse/core/FuseLoading';
 import FusePageSimple from '@fuse/core/FusePageSimple';
 import { makeStyles } from '@material-ui/core/styles';
 import IconButton from '@material-ui/core/IconButton';
@@ -7,6 +6,7 @@ import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
 import { useDispatch, useSelector } from 'react-redux';
 import withReducer from 'app/store/withReducer';
+import { DashboardSkeleton } from '../components/SkeletonLoaders';
 import DashboardHeader from './DashboardHeader';
 import reducer from './store/reducers';
 import * as Actions from './store/actions';
@@ -389,7 +389,13 @@ function Dashboard() {
 	const isCurrentMonth = month === getCurrentMonth();
 
 	if (loading || !data) {
-		return <FuseLoading />;
+		return (
+			<FusePageSimple
+				classes={{ root: classes.layoutRoot }}
+				header={<DashboardHeader />}
+				content={<DashboardSkeleton />}
+			/>
+		);
 	}
 
 	const formatMonth = (monthStr) => {

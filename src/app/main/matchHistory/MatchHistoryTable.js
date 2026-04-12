@@ -1,5 +1,4 @@
 import FuseScrollbars from '@fuse/core/FuseScrollbars';
-import FuseLoading from '@fuse/core/FuseLoading';
 import Hidden from '@material-ui/core/Hidden';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
@@ -27,6 +26,7 @@ import { makeStyles, withStyles } from '@material-ui/core/styles';
 import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom';
+import { MatchHistorySkeleton } from '../components/SkeletonLoaders';
 import * as Actions from './store/actions';
 
 const tierColors = {
@@ -808,7 +808,7 @@ function MatchHistoryTable() {
 	};
 
 	if (!matches) {
-		return <FuseLoading />;
+		return <MatchHistorySkeleton />;
 	}
 
 	const getDisplayId = index => total - ((serverPage - 1) * rowsPerPage + index);
