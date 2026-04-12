@@ -1,4 +1,11 @@
 import createCamilleAxios from 'app/utility/camilleAxios';
+import { isSampleMode } from 'app/main/sample/sampleStorage';
+import {
+	getSampleChallengeListData,
+	getSampleChallengeDetailData,
+	getSampleLeaderboardData,
+	getSampleUserMatchesData
+} from 'app/main/sample/sampleData';
 
 export const LOADING_LIST = '[CHALLENGE] LOADING LIST';
 export const LOADING_LEADERBOARD = '[CHALLENGE] LOADING LEADERBOARD';
@@ -13,6 +20,13 @@ export const GET_SYNC_STATUS = '[CHALLENGE] GET SYNC STATUS';
 export const CLEAR_CHALLENGE_DETAIL = '[CHALLENGE] CLEAR CHALLENGE DETAIL';
 
 export function getChallengeList(groupId) {
+	if (isSampleMode()) {
+		return dispatch => {
+			dispatch({ type: LOADING_LIST });
+			setTimeout(() => dispatch({ type: GET_CHALLENGE_LIST, payload: getSampleChallengeListData() }), 300);
+		};
+	}
+
 	const request = createCamilleAxios().get(`/api/challenge/${groupId}/list`);
 
 	return dispatch => {
@@ -27,6 +41,12 @@ export function getChallengeList(groupId) {
 }
 
 export function getChallengeDetail(groupId, challengeId) {
+	if (isSampleMode()) {
+		return dispatch => {
+			setTimeout(() => dispatch({ type: GET_CHALLENGE_DETAIL, payload: getSampleChallengeDetailData(challengeId) }), 300);
+		};
+	}
+
 	const request = createCamilleAxios().get(`/api/challenge/${groupId}/${challengeId}`);
 
 	return dispatch =>
@@ -39,6 +59,13 @@ export function getChallengeDetail(groupId, challengeId) {
 }
 
 export function getLeaderboard(groupId, challengeId) {
+	if (isSampleMode()) {
+		return dispatch => {
+			dispatch({ type: LOADING_LEADERBOARD });
+			setTimeout(() => dispatch({ type: GET_LEADERBOARD, payload: getSampleLeaderboardData() }), 300);
+		};
+	}
+
 	const request = createCamilleAxios().get(`/api/challenge/${groupId}/${challengeId}/leaderboard`);
 
 	return dispatch => {
@@ -53,6 +80,12 @@ export function getLeaderboard(groupId, challengeId) {
 }
 
 export function getUserMatches(groupId, challengeId, puuid) {
+	if (isSampleMode()) {
+		return dispatch => {
+			setTimeout(() => dispatch({ type: GET_USER_MATCHES, payload: getSampleUserMatchesData(puuid) }), 300);
+		};
+	}
+
 	const request = createCamilleAxios().get(`/api/challenge/${groupId}/${challengeId}/user/${puuid}/matches`);
 
 	return dispatch =>
@@ -66,6 +99,13 @@ export function getUserMatches(groupId, challengeId, puuid) {
 
 
 export function syncChallenge(groupId, challengeId) {
+	if (isSampleMode()) {
+		return dispatch => {
+			dispatch({ type: TRY_SYNC });
+			setTimeout(() => dispatch({ type: SYNC_DONE, payload: {} }), 500);
+		};
+	}
+
 	return dispatch => {
 		dispatch({ type: TRY_SYNC });
 
@@ -84,6 +124,12 @@ export function syncChallenge(groupId, challengeId) {
 }
 
 export function getSyncStatus(groupId, challengeId) {
+	if (isSampleMode()) {
+		return dispatch => {
+			dispatch({ type: GET_SYNC_STATUS, payload: { syncStatus: 'idle', syncProgress: null } });
+		};
+	}
+
 	const request = createCamilleAxios().get(`/api/challenge/${groupId}/${challengeId}/sync-status`, { silentError: true });
 
 	return dispatch =>
@@ -98,14 +144,17 @@ export function getSyncStatus(groupId, challengeId) {
 }
 
 export function createChallenge(groupId, data) {
+	if (isSampleMode()) return Promise.resolve({ data: { result: { id: 'sample-new' } } });
 	return createCamilleAxios().post(`/api/challenge/${groupId}`, data);
 }
 
 export function updateChallenge(groupId, challengeId, data) {
+	if (isSampleMode()) return Promise.resolve({ data: { result: {} } });
 	return createCamilleAxios().put(`/api/challenge/${groupId}/${challengeId}`, data);
 }
 
 export function cancelChallenge(groupId, challengeId) {
+	if (isSampleMode()) return Promise.resolve({ data: { result: {} } });
 	return createCamilleAxios().post(`/api/challenge/${groupId}/${challengeId}/cancel`);
 }
 
