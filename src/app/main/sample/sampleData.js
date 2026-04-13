@@ -447,7 +447,7 @@ function getDefaultLeaderboardData() {
 		puuid: p.puuid,
 		name: p.name,
 		rank: i + 1,
-		games: 30 - i,
+		totalGames: 30 - i,
 		wins: Math.max(20 - i, 3),
 		losses: Math.max(10 + Math.floor(i / 2) - 2, 1),
 		winRate: winRate(Math.max(20 - i, 3), Math.max(10 + Math.floor(i / 2) - 2, 1)),
