@@ -179,11 +179,10 @@ const useStyles = makeStyles(theme => ({
 		background: 'linear-gradient(135deg, #1a1a2e 0%, #0f0f1a 100%)',
 		borderRadius: 16,
 		border: '1px solid rgba(0, 212, 255, 0.25)',
-		padding: '16px 24px',
+		padding: '18px 24px',
 		marginBottom: 20,
 		display: 'flex',
 		alignItems: 'center',
-		gap: 16,
 		cursor: 'pointer',
 		transition: 'all 0.2s ease',
 		'&:hover': {
@@ -192,7 +191,8 @@ const useStyles = makeStyles(theme => ({
 		},
 		[theme.breakpoints.down('xs')]: {
 			padding: '14px 16px',
-			gap: 12
+			flexWrap: 'wrap',
+			gap: 8
 		}
 	},
 	myRankingCardUnranked: {
@@ -204,54 +204,56 @@ const useStyles = makeStyles(theme => ({
 	},
 	myRankingLabel: {
 		fontFamily: '"Noto Sans KR", sans-serif',
-		fontSize: '1.1rem',
-		color: 'rgba(255, 255, 255, 0.5)',
-		whiteSpace: 'nowrap'
+		fontSize: '1rem',
+		color: 'rgba(0, 212, 255, 0.7)',
+		background: 'rgba(0, 212, 255, 0.1)',
+		padding: '2px 10px',
+		borderRadius: 8,
+		marginRight: 8
 	},
 	myRankingRank: {
-		fontFamily: '"Rajdhani", sans-serif',
-		fontSize: '2.4rem',
-		fontWeight: 700,
-		color: '#00d4ff',
-		minWidth: 40,
+		padding: '0 24px',
 		textAlign: 'center',
 		[theme.breakpoints.down('xs')]: {
-			fontSize: '2rem'
+			padding: '0 12px'
+		}
+	},
+	myRankingName: {
+		padding: '0 24px',
+		minWidth: 120,
+		[theme.breakpoints.down('xs')]: {
+			padding: '0 12px',
+			minWidth: 0
 		}
 	},
 	myRankingTier: {
 		display: 'flex',
 		alignItems: 'center',
-		gap: 10,
+		gap: 12,
+		padding: '0 24px',
+		minWidth: 200,
 		[theme.breakpoints.down('xs')]: {
-			display: 'none'
+			padding: '0 12px',
+			minWidth: 0
 		}
 	},
-	myRankingStats: {
-		display: 'flex',
-		alignItems: 'center',
-		marginLeft: 'auto',
-		whiteSpace: 'nowrap',
+	myRankingStat: {
+		padding: '0 24px',
+		textAlign: 'center',
+		minWidth: 50,
 		[theme.breakpoints.down('xs')]: {
-			display: 'none'
+			padding: '0 8px'
 		}
-	},
-	myRankingStatLabel: {
-		fontFamily: '"Noto Sans KR", sans-serif',
-		fontSize: '1.1rem',
-		color: 'rgba(255, 255, 255, 0.4)',
-		marginLeft: 2
 	},
 	myRankingReason: {
 		fontFamily: '"Noto Sans KR", sans-serif',
 		fontSize: '1.05rem',
 		color: 'rgba(255, 255, 255, 0.4)',
-		marginTop: 4
+		marginTop: 2
 	},
 	myRankingInfo: {
 		display: 'flex',
 		flexDirection: 'column',
-		flex: 1,
 		minWidth: 0
 	},
 	// Mobile card styles
@@ -624,50 +626,59 @@ function RankingTable(props) {
 
 		const cardContent = (
 			<>
-				<div>
-					<div className={classes.myRankingLabel}>내 랭킹</div>
-					<div className={`${classes.myRankingRank} ${getRankClass(isRanked ? myRanking.ranking : 0)}`}>
-						{isRanked ? `#${myRanking.ranking}` : '-'}
+				<span className={classes.myRankingLabel}>내 랭킹</span>
+				<div className={classes.myRankingRank}>
+					<span className={`${classes.rankingNumber} ${getRankClass(isRanked ? myRanking.ranking : 0)}`}>
+						{isRanked ? myRanking.ranking : '-'}
+					</span>
+				</div>
+				<div className={classes.myRankingName}>
+					<div className={classes.myRankingInfo}>
+						<Link to={`/userinfo/${myRanking.puuid}`} className={classes.playerName} onClick={e => e.stopPropagation()}>
+							{myRanking.name}
+						</Link>
+						{!isRanked && myRanking.reason && (
+							<div className={classes.myRankingReason}>{myRanking.reason}(으)로 랭킹에 미표시</div>
+						)}
 					</div>
 				</div>
-				<div className={classes.myRankingInfo}>
-					<Link to={`/userinfo/${myRanking.puuid}`} className={classes.playerName} onClick={e => e.stopPropagation()}>
-						{myRanking.name}
-					</Link>
-					{!isRanked && myRanking.reason && (
-						<div className={classes.myRankingReason}>{myRanking.reason}(으)로 랭킹에 미표시</div>
+				<div className={classes.myRankingTier}>
+					{hasRating ? (
+						<>
+							<img
+								className={classes.tierEmblem}
+								src={`/assets/images/ranked-emblems/Emblem_${tierName}.webp`}
+								alt={tierName}
+								style={{ filter: `drop-shadow(0 0 8px ${tierColor}40)` }}
+							/>
+							<div className={classes.tierInfo}>
+								<span className={classes.tierName} style={{ color: tierColor }}>
+									{getRatingTierName(myRanking.rating)}
+								</span>
+								<span className={classes.tierLP}>{getTierPoint(myRanking.rating)} LP</span>
+							</div>
+						</>
+					) : (
+						<span className={classes.tierName} style={{ color: 'rgba(255,255,255,0.4)' }}>
+							-
+						</span>
 					)}
 				</div>
-				{hasRating && (
-					<div className={classes.myRankingTier}>
-						<img
-							className={classes.tierEmblem}
-							src={`/assets/images/ranked-emblems/Emblem_${tierName}.webp`}
-							alt={tierName}
-							style={{ filter: `drop-shadow(0 0 8px ${tierColor}40)`, width: 40, height: 40 }}
-						/>
-						<div className={classes.tierInfo}>
-							<span className={classes.tierName} style={{ color: tierColor }}>
-								{getRatingTierName(myRanking.rating)}
-							</span>
-							<span className={classes.tierLP}>{getTierPoint(myRanking.rating)} LP</span>
-						</div>
-					</div>
-				)}
-				<div className={classes.myRankingStats}>
+				<div className={classes.myRankingStat}>
 					<span className={classes.statNumber}>{games}</span>
-					<span className={classes.myRankingStatLabel}>판</span>
-					<span className={classes.statNumber} style={{ color: '#4dabf7', marginLeft: 12 }}>
+				</div>
+				<div className={classes.myRankingStat}>
+					<span className={classes.statNumber} style={{ color: '#4dabf7' }}>
 						{myRanking.win}
 					</span>
-					<span className={classes.myRankingStatLabel}>승</span>
-					<span className={classes.statNumber} style={{ color: '#ff6b6b', marginLeft: 12 }}>
+				</div>
+				<div className={classes.myRankingStat}>
+					<span className={classes.statNumber} style={{ color: '#ff6b6b' }}>
 						{myRanking.lose}
 					</span>
-					<span className={classes.myRankingStatLabel}>패</span>
-					<span className={`${classes.winRate} ${getWinRateClass(myRanking.winRate)}`} style={{ marginLeft: 16 }}>
-						{myRanking.winRate}%
-					</span>
+				</div>
+				<div className={classes.myRankingStat}>
+					<span className={`${classes.winRate} ${getWinRateClass(myRanking.winRate)}`}>{myRanking.winRate}%</span>
 				</div>
 			</>
 		);
