@@ -219,38 +219,28 @@ const useStyles = makeStyles(theme => ({
 			fontSize: '2rem'
 		}
 	},
-	myRankingName: {
-		fontFamily: '"Noto Sans KR", sans-serif',
-		fontSize: '1.4rem',
-		fontWeight: 600,
-		color: '#fff',
-		[theme.breakpoints.down('xs')]: {
-			fontSize: '1.2rem'
-		}
-	},
 	myRankingTier: {
 		display: 'flex',
 		alignItems: 'center',
-		gap: 8
-	},
-	myRankingEmblem: {
-		width: 32,
-		height: 32
-	},
-	myRankingTierText: {
-		fontFamily: '"Rajdhani", sans-serif',
-		fontSize: '1.3rem',
-		fontWeight: 700
+		gap: 10,
+		[theme.breakpoints.down('xs')]: {
+			display: 'none'
+		}
 	},
 	myRankingStats: {
-		fontFamily: '"Noto Sans KR", sans-serif',
-		fontSize: '1.2rem',
-		color: 'rgba(255, 255, 255, 0.7)',
+		display: 'flex',
+		alignItems: 'center',
 		marginLeft: 'auto',
 		whiteSpace: 'nowrap',
 		[theme.breakpoints.down('xs')]: {
-			fontSize: '1.05rem'
+			display: 'none'
 		}
+	},
+	myRankingStatLabel: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.1rem',
+		color: 'rgba(255, 255, 255, 0.4)',
+		marginLeft: 2
 	},
 	myRankingReason: {
 		fontFamily: '"Noto Sans KR", sans-serif',
@@ -630,34 +620,54 @@ function RankingTable(props) {
 		const tierColor = tierColors[tierName] || '#fff';
 		const isRanked = myRanking.ranking != null;
 
+		const games = myRanking.win + myRanking.lose;
+
 		const cardContent = (
 			<>
 				<div>
 					<div className={classes.myRankingLabel}>내 랭킹</div>
-					<div className={classes.myRankingRank}>{isRanked ? `#${myRanking.ranking}` : '-'}</div>
+					<div className={`${classes.myRankingRank} ${getRankClass(isRanked ? myRanking.ranking : 0)}`}>
+						{isRanked ? `#${myRanking.ranking}` : '-'}
+					</div>
 				</div>
 				<div className={classes.myRankingInfo}>
-					<div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-						<span className={classes.myRankingName}>{myRanking.name}</span>
-						{hasRating && (
-							<div className={classes.myRankingTier}>
-								<img
-									className={classes.myRankingEmblem}
-									src={`/assets/images/ranked-emblems/Emblem_${tierName}.webp`}
-									alt={tierName}
-								/>
-								<span className={classes.myRankingTierText} style={{ color: tierColor }}>
-									{getRatingTierName(myRanking.rating)}
-								</span>
-							</div>
-						)}
-					</div>
+					<Link to={`/userinfo/${myRanking.puuid}`} className={classes.playerName} onClick={e => e.stopPropagation()}>
+						{myRanking.name}
+					</Link>
 					{!isRanked && myRanking.reason && (
 						<div className={classes.myRankingReason}>{myRanking.reason}(으)로 랭킹에 미표시</div>
 					)}
 				</div>
+				{hasRating && (
+					<div className={classes.myRankingTier}>
+						<img
+							className={classes.tierEmblem}
+							src={`/assets/images/ranked-emblems/Emblem_${tierName}.webp`}
+							alt={tierName}
+							style={{ filter: `drop-shadow(0 0 8px ${tierColor}40)`, width: 40, height: 40 }}
+						/>
+						<div className={classes.tierInfo}>
+							<span className={classes.tierName} style={{ color: tierColor }}>
+								{getRatingTierName(myRanking.rating)}
+							</span>
+							<span className={classes.tierLP}>{getTierPoint(myRanking.rating)} LP</span>
+						</div>
+					</div>
+				)}
 				<div className={classes.myRankingStats}>
-					{myRanking.win}승 {myRanking.lose}패 ({myRanking.winRate}%)
+					<span className={classes.statNumber}>{games}</span>
+					<span className={classes.myRankingStatLabel}>판</span>
+					<span className={classes.statNumber} style={{ color: '#4dabf7', marginLeft: 12 }}>
+						{myRanking.win}
+					</span>
+					<span className={classes.myRankingStatLabel}>승</span>
+					<span className={classes.statNumber} style={{ color: '#ff6b6b', marginLeft: 12 }}>
+						{myRanking.lose}
+					</span>
+					<span className={classes.myRankingStatLabel}>패</span>
+					<span className={`${classes.winRate} ${getWinRateClass(myRanking.winRate)}`} style={{ marginLeft: 16 }}>
+						{myRanking.winRate}%
+					</span>
 				</div>
 			</>
 		);
