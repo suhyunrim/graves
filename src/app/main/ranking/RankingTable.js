@@ -73,6 +73,7 @@ const useStyles = makeStyles(theme => ({
 		fontWeight: 600,
 		color: '#fff',
 		textDecoration: 'none',
+		display: 'inline',
 		transition: 'color 0.2s ease',
 		'&:hover': {
 			color: '#00d4ff'
