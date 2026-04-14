@@ -770,7 +770,7 @@ function RankingTable(props) {
 								<Table>
 									<RankingTableHead order={order} onRequestSort={handleRequestSort} rowCount={data.length} />
 									<TableBody>
-										{page === 0 && renderMyRankingRow()}
+										{renderMyRankingRow()}
 										{sortedData.map((n, idx) => {
 											const rank = n.ranking != null ? n.ranking : page * rowsPerPage + idx + 1;
 											const hasRating = n.rating != null;
@@ -881,7 +881,7 @@ function RankingTable(props) {
 								))}
 							</div>
 							<div className={classes.mobileCardList}>
-								{page === 0 && renderMyRankingMobileCard()}
+								{renderMyRankingMobileCard()}
 								{sortedData.map((n, idx) => {
 									const rank = n.ranking != null ? n.ranking : page * rowsPerPage + idx + 1;
 									const hasRating = n.rating != null;
