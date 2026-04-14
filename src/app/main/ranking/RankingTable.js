@@ -73,6 +73,7 @@ const useStyles = makeStyles(theme => ({
 		fontWeight: 600,
 		color: '#fff',
 		textDecoration: 'none',
+		display: 'inline',
 		transition: 'color 0.2s ease',
 		'&:hover': {
 			color: '#00d4ff'
@@ -174,6 +175,69 @@ const useStyles = makeStyles(theme => ({
 		fontSize: '1.8rem',
 		color: 'rgba(255, 255, 255, 0.4)'
 	},
+	// My Ranking row
+	myRankingRow: {
+		background: 'linear-gradient(135deg, rgba(0, 212, 255, 0.1) 0%, rgba(0, 102, 255, 0.06) 100%)',
+		cursor: 'pointer',
+		'&:hover': {
+			background: 'linear-gradient(135deg, rgba(0, 212, 255, 0.15) 0%, rgba(0, 102, 255, 0.1) 100%)'
+		},
+		'& td': {
+			borderBottom: '2px solid rgba(0, 212, 255, 0.4)'
+		},
+		'& td:first-child': {
+			boxShadow: 'inset 3px 0 0 #00d4ff'
+		}
+	},
+	myRankingRowUnranked: {
+		cursor: 'default',
+		'&:hover': {
+			background: 'linear-gradient(135deg, rgba(0, 212, 255, 0.1) 0%, rgba(0, 102, 255, 0.06) 100%)'
+		}
+	},
+	myRankingLabel: {
+		fontFamily: '"Rajdhani", "Noto Sans KR", sans-serif',
+		fontSize: '0.95rem',
+		fontWeight: 700,
+		letterSpacing: '0.08em',
+		textTransform: 'uppercase',
+		color: '#00d4ff',
+		background: 'rgba(0, 212, 255, 0.12)',
+		padding: '2px 8px',
+		borderRadius: 4,
+		marginRight: 8,
+		border: '1px solid rgba(0, 212, 255, 0.25)'
+	},
+	myRankingReason: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.05rem',
+		color: 'rgba(255, 255, 255, 0.4)',
+		marginTop: 2
+	},
+	// Mobile my ranking card
+	myRankingMobileCard: {
+		background: 'linear-gradient(135deg, rgba(0, 212, 255, 0.1) 0%, rgba(0, 102, 255, 0.06) 100%)',
+		borderRadius: 16,
+		padding: '16px',
+		marginBottom: 12,
+		border: '1px solid rgba(0, 212, 255, 0.3)',
+		position: 'relative'
+	},
+	myRankingMobileLabel: {
+		position: 'absolute',
+		top: -9,
+		left: 12,
+		fontFamily: '"Rajdhani", "Noto Sans KR", sans-serif',
+		fontSize: '0.9rem',
+		fontWeight: 700,
+		letterSpacing: '0.08em',
+		textTransform: 'uppercase',
+		color: '#00d4ff',
+		background: '#0f0f1a',
+		padding: '1px 8px',
+		borderRadius: 4,
+		border: '1px solid rgba(0, 212, 255, 0.3)'
+	},
 	// Mobile card styles
 	mobileCardList: {
 		padding: '16px'
@@ -237,7 +301,8 @@ const useStyles = makeStyles(theme => ({
 		whiteSpace: 'nowrap',
 		overflow: 'hidden',
 		textOverflow: 'ellipsis',
-		display: 'block',
+		display: 'inline-block',
+		maxWidth: '100%',
 		transition: 'color 0.2s ease',
 		'&:hover': {
 			color: '#00d4ff'
@@ -373,6 +438,7 @@ function RankingTable(props) {
 	const classes = useStyles();
 	const dispatch = useDispatch();
 	const ranking = useSelector(({ Ranking }) => Ranking.ranking.data);
+	const myRanking = useSelector(({ Ranking }) => Ranking.ranking.myRanking);
 	const rankingLoading = useSelector(({ Ranking }) => Ranking.ranking.loading);
 	const searchText = useSelector(({ Ranking }) => Ranking.ranking.searchText);
 	const period = useSelector(({ Ranking }) => Ranking.ranking.period);
@@ -515,6 +581,174 @@ function RankingTable(props) {
 		return classes.winRateLow;
 	}
 
+	function handleMyRankingClick() {
+		if (!myRanking || myRanking.ranking == null) return;
+		const targetPage = Math.floor((myRanking.ranking - 1) / rowsPerPage);
+		setPage(targetPage);
+		setTimeout(() => {
+			const row = document.querySelector(`[data-puuid="${myRanking.puuid}"]`);
+			if (row) {
+				row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+				row.style.transition = 'background-color 0.3s ease';
+				row.style.backgroundColor = 'rgba(0, 212, 255, 0.15)';
+				setTimeout(() => {
+					row.style.backgroundColor = '';
+				}, 1500);
+			}
+		}, 100);
+	}
+
+	function renderMyRankingRow() {
+		if (!myRanking) return null;
+		const hasRating = myRanking.rating != null;
+		const tierName = hasRating ? getTierName(myRanking.rating) : 'UNRANKED';
+		const tierColor = tierColors[tierName] || '#fff';
+		const isRanked = myRanking.ranking != null;
+		const rank = isRanked ? myRanking.ranking : '-';
+		const games = myRanking.win + myRanking.lose;
+
+		return (
+			<StyledTableRow
+				className={`${classes.myRankingRow} ${!isRanked ? classes.myRankingRowUnranked : ''}`}
+				onClick={isRanked ? handleMyRankingClick : undefined}
+				style={isRanked ? { cursor: 'pointer' } : undefined}
+			>
+				<StyledTableCell>
+					<span className={classes.myRankingLabel}>MY</span>
+					<span className={`${classes.rankingNumber} ${getRankClass(isRanked ? myRanking.ranking : 0)}`}>{rank}</span>
+				</StyledTableCell>
+				<StyledTableCell>
+					<Link to={`/userinfo/${myRanking.puuid}`} className={classes.playerName} onClick={e => e.stopPropagation()}>
+						{myRanking.name}
+					</Link>
+					{!isRanked && myRanking.reason && (
+						<div className={classes.myRankingReason}>{myRanking.reason}(으)로 랭킹에 미표시</div>
+					)}
+				</StyledTableCell>
+				<StyledTableCell>
+					{hasRating ? (
+						<div className={classes.tierWrapper}>
+							<img
+								className={classes.tierEmblem}
+								src={`/assets/images/ranked-emblems/Emblem_${tierName}.webp`}
+								alt={tierName}
+								style={{ filter: `drop-shadow(0 0 8px ${tierColor}40)` }}
+							/>
+							<div className={classes.tierInfo}>
+								<span className={classes.tierName} style={{ color: tierColor }}>
+									{getRatingTierName(myRanking.rating)}
+								</span>
+								<span className={classes.tierLP}>{getTierPoint(myRanking.rating)} LP</span>
+							</div>
+						</div>
+					) : (
+						<span className={classes.tierName} style={{ color: 'rgba(255,255,255,0.4)' }}>
+							-
+						</span>
+					)}
+				</StyledTableCell>
+				<StyledTableCell>
+					<span className={classes.statNumber}>{games}</span>
+				</StyledTableCell>
+				<StyledTableCell>
+					<span className={classes.statNumber} style={{ color: '#4dabf7' }}>
+						{myRanking.win}
+					</span>
+				</StyledTableCell>
+				<StyledTableCell>
+					<span className={classes.statNumber} style={{ color: '#ff6b6b' }}>
+						{myRanking.lose}
+					</span>
+				</StyledTableCell>
+				<StyledTableCell>
+					<span className={`${classes.winRate} ${getWinRateClass(myRanking.winRate)}`}>{myRanking.winRate}%</span>
+				</StyledTableCell>
+			</StyledTableRow>
+		);
+	}
+
+	function renderMyRankingMobileCard() {
+		if (!myRanking) return null;
+		const hasRating = myRanking.rating != null;
+		const tierName = hasRating ? getTierName(myRanking.rating) : 'UNRANKED';
+		const tierColor = tierColors[tierName] || '#fff';
+		const isRanked = myRanking.ranking != null;
+		const rank = isRanked ? myRanking.ranking : '-';
+
+		const mobileInner = (
+			<>
+				<span className={classes.myRankingMobileLabel}>MY RANKING</span>
+				<div className={classes.mobileCardTop}>
+					<div className={`${classes.mobileRankBadge} ${getMobileRankClass(isRanked ? myRanking.ranking : 0)}`}>
+						{rank}
+					</div>
+					<div className={classes.mobilePlayerInfo}>
+						<Link
+							to={`/userinfo/${myRanking.puuid}`}
+							className={classes.mobilePlayerName}
+							onClick={e => e.stopPropagation()}
+						>
+							{myRanking.name}
+						</Link>
+						{hasRating && (
+							<div className={classes.mobileTierRow}>
+								<img
+									className={classes.mobileTierEmblem}
+									src={`/assets/images/ranked-emblems/Emblem_${tierName}.webp`}
+									alt={tierName}
+								/>
+								<span className={classes.mobileTierText} style={{ color: tierColor }}>
+									{getRatingTierName(myRanking.rating)}
+								</span>
+								<span className={classes.mobileLPText}>{getTierPoint(myRanking.rating)} LP</span>
+							</div>
+						)}
+						{!isRanked && myRanking.reason && (
+							<div className={classes.myRankingReason}>{myRanking.reason}(으)로 랭킹에 미표시</div>
+						)}
+					</div>
+				</div>
+				<div className={classes.mobileStats}>
+					<div className={classes.mobileStatItem}>
+						<span className={classes.mobileStatLabel}>판수</span>
+						<span className={classes.mobileStatValue}>{myRanking.win + myRanking.lose}</span>
+					</div>
+					<div className={classes.mobileStatItem}>
+						<span className={classes.mobileStatLabel}>승</span>
+						<span className={`${classes.mobileStatValue} ${classes.mobileWinValue}`}>{myRanking.win}</span>
+					</div>
+					<div className={classes.mobileStatItem}>
+						<span className={classes.mobileStatLabel}>패</span>
+						<span className={`${classes.mobileStatValue} ${classes.mobileLoseValue}`}>{myRanking.lose}</span>
+					</div>
+					<div className={classes.mobileStatItem}>
+						<span className={classes.mobileStatLabel}>승률</span>
+						<span className={`${classes.mobileWinRateValue} ${getWinRateClass(myRanking.winRate)}`}>
+							{myRanking.winRate}%
+						</span>
+					</div>
+				</div>
+			</>
+		);
+
+		if (isRanked) {
+			return (
+				<div
+					className={classes.myRankingMobileCard}
+					onClick={handleMyRankingClick}
+					onKeyDown={e => e.key === 'Enter' && handleMyRankingClick()}
+					role="button"
+					tabIndex={0}
+					style={{ cursor: 'pointer' }}
+				>
+					{mobileInner}
+				</div>
+			);
+		}
+
+		return <div className={classes.myRankingMobileCard}>{mobileInner}</div>;
+	}
+
 	const isPeriod = period !== 'all';
 	const getSortValue = o => {
 		if (order.id === 'games') return o.win + o.lose;
@@ -541,6 +775,7 @@ function RankingTable(props) {
 								<Table>
 									<RankingTableHead order={order} onRequestSort={handleRequestSort} rowCount={data.length} />
 									<TableBody>
+										{renderMyRankingRow()}
 										{sortedData.map((n, idx) => {
 											const rank = n.ranking != null ? n.ranking : page * rowsPerPage + idx + 1;
 											const hasRating = n.rating != null;
@@ -548,7 +783,7 @@ function RankingTable(props) {
 											const tierColor = tierColors[tierName] || '#fff';
 
 											return (
-												<StyledTableRow key={n.riotId || n.puuid}>
+												<StyledTableRow key={n.riotId || n.puuid} data-puuid={n.puuid}>
 													<StyledTableCell>
 														<span className={`${classes.rankingNumber} ${getRankClass(rank)}`}>{rank}</span>
 													</StyledTableCell>
@@ -651,6 +886,7 @@ function RankingTable(props) {
 								))}
 							</div>
 							<div className={classes.mobileCardList}>
+								{renderMyRankingMobileCard()}
 								{sortedData.map((n, idx) => {
 									const rank = n.ranking != null ? n.ranking : page * rowsPerPage + idx + 1;
 									const hasRating = n.rating != null;
@@ -658,7 +894,7 @@ function RankingTable(props) {
 									const tierColor = tierColors[tierName] || '#fff';
 
 									return (
-										<div key={n.riotId || n.puuid} className={classes.mobileCard}>
+										<div key={n.riotId || n.puuid} className={classes.mobileCard} data-puuid={n.puuid}>
 											<div className={classes.mobileCardTop}>
 												<div className={`${classes.mobileRankBadge} ${getMobileRankClass(rank)}`}>{rank}</div>
 												<div className={classes.mobilePlayerInfo}>
