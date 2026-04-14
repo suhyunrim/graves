@@ -87,9 +87,12 @@ const useStyles = makeStyles(theme => ({
 	},
 	summaryGrid: {
 		display: 'grid',
-		gridTemplateColumns: 'repeat(4, 1fr)',
+		gridTemplateColumns: 'repeat(5, 1fr)',
 		gap: 16,
 		marginBottom: 24,
+		[theme.breakpoints.down('md')]: {
+			gridTemplateColumns: 'repeat(3, 1fr)'
+		},
 		[theme.breakpoints.down('sm')]: {
 			gridTemplateColumns: 'repeat(2, 1fr)'
 		},
@@ -387,11 +390,20 @@ function BalanceReport() {
 		fetchReport();
 	}, [fetchReport]);
 
+	function getBalanceColor(label) {
+		if (label === '좋음') return COLORS.green;
+		if (label === '보통') return COLORS.yellow;
+		if (label === '나쁨') return COLORS.orange;
+		if (label === '매우 나쁨') return COLORS.red;
+		return COLORS.gray;
+	}
+
 	function renderSummary() {
 		if (!report) return null;
-		const { summary, setAnalysis } = report;
+		const { summary, setAnalysis, positionAnalysis } = report;
 		const twoZeroRate = setAnalysis ? setAnalysis.twoZero.rate : 0;
 		const twoOneRate = setAnalysis ? setAnalysis.twoOne.rate : 0;
+		const balanceLabel = positionAnalysis ? positionAnalysis.avgPositionBalance : '-';
 
 		return (
 			<div className={classes.summaryGrid}>
@@ -442,6 +454,20 @@ function BalanceReport() {
 					</div>
 					<div className={classes.summarySub}>
 						예상 {summary.expectedWinRate ? summary.expectedWinRate.toFixed(1) : '-'}%
+					</div>
+				</div>
+				<div className={classes.summaryCard}>
+					<div className={classes.summaryLabel}>
+						포지션 균형
+						<InfoTip
+							title="양팀의 메인 포지션 적합도 점수 차이 기반. 5개 포지션별 팀원의 메인 포지션 숙련도 합산 (최대 500)"
+							classes={classes}
+						/>
+					</div>
+					<div>
+						<span className={classes.summaryValue} style={{ color: getBalanceColor(balanceLabel), fontSize: '2.4rem' }}>
+							{balanceLabel}
+						</span>
 					</div>
 				</div>
 			</div>
