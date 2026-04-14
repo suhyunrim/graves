@@ -301,7 +301,8 @@ const useStyles = makeStyles(theme => ({
 		whiteSpace: 'nowrap',
 		overflow: 'hidden',
 		textOverflow: 'ellipsis',
-		display: 'block',
+		display: 'inline-block',
+		maxWidth: '100%',
 		transition: 'color 0.2s ease',
 		'&:hover': {
 			color: '#00d4ff'
