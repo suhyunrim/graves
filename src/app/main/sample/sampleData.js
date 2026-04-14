@@ -367,4 +367,154 @@ export function getSampleAchievementData() {
 	return getSampleData('achievement') || getDefaultAchievementData();
 }
 
+// ============================================================
+// 챌린지 데이터
+// ============================================================
+const CHAMPION_NAMES = [
+	'Ahri', 'Zed', 'Yasuo', 'LeeSin', 'Thresh', 'Jinx', 'Lux', 'Ezreal',
+	'KaiSa', 'Akali', 'Garen', 'Darius', 'Vayne', 'Riven', 'Jhin', 'Syndra',
+	'Orianna', 'Yone', 'Viego', 'Graves'
+];
+
+function getDefaultChallengeListData() {
+	return [
+		{
+			id: 'sample-challenge-1',
+			title: '4월 솔랭 챌린지',
+			gameType: 'soloRank',
+			scoringType: 'points',
+			status: 'active',
+			startAt: '2026-04-01T00:00:00Z',
+			endAt: '2026-04-30T23:59:59Z',
+			activePlayerCount: 24,
+			description: '4월 한 달간 솔로랭크 포인트를 모아보세요!'
+		},
+		{
+			id: 'sample-challenge-2',
+			title: '3월 칼바람 대회',
+			gameType: 'aram',
+			scoringType: 'wins',
+			status: 'ended',
+			startAt: '2026-03-01T00:00:00Z',
+			endAt: '2026-03-31T23:59:59Z',
+			activePlayerCount: 30,
+			description: '칼바람 나락에서 가장 많이 승리하세요!'
+		},
+		{
+			id: 'sample-challenge-3',
+			title: '5월 승률 챌린지',
+			gameType: 'soloRank',
+			scoringType: 'winRate',
+			status: 'scheduled',
+			startAt: '2026-05-01T00:00:00Z',
+			endAt: '2026-05-31T23:59:59Z',
+			activePlayerCount: 0,
+			description: '최소 20판 이상, 최고 승률을 기록하세요!'
+		}
+	];
+}
+
+export function getSampleChallengeListData() {
+	return getSampleData('challengeList') || getDefaultChallengeListData();
+}
+
+function getDefaultChallengeDetailData(challengeId) {
+	const challenges = getDefaultChallengeListData();
+	const found = challenges.find(c => c.id === challengeId);
+	if (found) {
+		return {
+			...found,
+			syncStatus: 'idle',
+			syncProgress: null,
+			lastSyncAt: '2026-04-11T18:30:00Z'
+		};
+	}
+	return {
+		...challenges[0],
+		id: challengeId,
+		syncStatus: 'idle',
+		syncProgress: null,
+		lastSyncAt: '2026-04-11T18:30:00Z'
+	};
+}
+
+export function getSampleChallengeDetailData(challengeId) {
+	return getSampleData(`challengeDetail_${challengeId}`) || getDefaultChallengeDetailData(challengeId);
+}
+
+function getDefaultLeaderboardData() {
+	return PLAYERS.slice(0, 24).map((p, i) => ({
+		puuid: p.puuid,
+		name: p.name,
+		rank: i + 1,
+		totalGames: 30 - i,
+		wins: Math.max(20 - i, 3),
+		losses: Math.max(10 + Math.floor(i / 2) - 2, 1),
+		winRate: winRate(Math.max(20 - i, 3), Math.max(10 + Math.floor(i / 2) - 2, 1)),
+		points: Math.max(150 - i * 6, 10)
+	}));
+}
+
+export function getSampleLeaderboardData() {
+	return getSampleData('leaderboard') || getDefaultLeaderboardData();
+}
+
+function getDefaultUserMatchesData(puuid) {
+	const targetPuuid = puuid || MY_PUUID;
+	const matches = [];
+	for (let i = 0; i < 15; i++) {
+		const d = new Date(2026, 3, 10);
+		d.setDate(d.getDate() - i);
+		const win = i % 3 !== 0;
+		const champIdx = (i * 3) % CHAMPION_NAMES.length;
+		const myTeamId = 100;
+		const participants = [];
+		for (let j = 0; j < 10; j++) {
+			const teamId = j < 5 ? 100 : 200;
+			const pIdx = (i * 7 + j) % PLAYERS.length;
+			const isMe = j === 0;
+			participants.push({
+				puuid: isMe ? targetPuuid : PLAYERS[pIdx].puuid,
+				riotIdGameName: isMe ? PLAYERS.find(p => p.puuid === targetPuuid)?.name || '페이커' : PLAYERS[pIdx].name,
+				championName: CHAMPION_NAMES[(champIdx + j) % CHAMPION_NAMES.length],
+				teamId,
+				win: teamId === myTeamId ? win : !win,
+				kills: 5 + (j * 3 + i) % 10,
+				deaths: 2 + (j * 2 + i) % 8,
+				assists: 3 + (j + i * 2) % 12,
+				totalMinionsKilled: 120 + j * 15,
+				neutralMinionsKilled: 20 + j * 5,
+				timePlayed: 1800 + i * 30,
+				goldEarned: 10000 + j * 1000,
+				totalDamageDealtToChampions: 15000 + j * 2000,
+				item0: 3006, item1: 3031, item2: 3094, item3: 3046, item4: 3036, item5: 3072,
+				summoner1Id: 4, summoner2Id: 7,
+				perks: { styles: [{ style: 8000 }] },
+				doubleKills: j === 0 ? 2 : 0,
+				tripleKills: 0,
+				quadraKills: 0,
+				pentaKills: 0
+			});
+		}
+		matches.push({
+			matchId: `sample-cm-${String(i + 1).padStart(3, '0')}`,
+			gameCreation: d.getTime(),
+			gameDuration: 1800 + i * 30,
+			puuid: targetPuuid,
+			championName: CHAMPION_NAMES[champIdx],
+			win,
+			kills: participants[0].kills,
+			deaths: participants[0].deaths,
+			assists: participants[0].assists,
+			participants,
+			groupMembers: PLAYERS.slice(0, 5).map(p => ({ puuid: p.puuid, name: p.name }))
+		});
+	}
+	return matches;
+}
+
+export function getSampleUserMatchesData(puuid) {
+	return getSampleData(`userMatches_${puuid}`) || getDefaultUserMatchesData(puuid);
+}
+
 export { MY_PUUID, PLAYERS };

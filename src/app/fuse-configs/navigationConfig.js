@@ -48,6 +48,13 @@ const navigationConfig = [
 				url: '/challenge'
 			},
 			{
+				id: 'balance-report-component',
+				title: 'Balancing Report',
+				type: 'item',
+				icon: 'assessment',
+				url: '/balance-report'
+			},
+			{
 				id: 'group-settings-component',
 				title: 'Group Settings',
 				type: 'item',
