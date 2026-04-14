@@ -176,18 +176,21 @@ const useStyles = makeStyles(theme => ({
 	},
 	// My Ranking card
 	myRankingCard: {
-		background: 'linear-gradient(135deg, #1a1a2e 0%, #0f0f1a 100%)',
+		position: 'relative',
+		background: 'linear-gradient(135deg, rgba(0, 212, 255, 0.08) 0%, rgba(0, 102, 255, 0.05) 100%)',
 		borderRadius: 16,
-		border: '1px solid rgba(0, 212, 255, 0.25)',
+		border: '1px solid rgba(0, 212, 255, 0.3)',
 		padding: '18px 24px',
 		marginBottom: 20,
 		display: 'flex',
 		alignItems: 'center',
 		cursor: 'pointer',
 		transition: 'all 0.2s ease',
+		boxShadow: '0 0 20px rgba(0, 212, 255, 0.08)',
 		'&:hover': {
-			borderColor: 'rgba(0, 212, 255, 0.5)',
-			background: 'rgba(0, 212, 255, 0.05)'
+			borderColor: 'rgba(0, 212, 255, 0.6)',
+			boxShadow: '0 0 30px rgba(0, 212, 255, 0.15)',
+			background: 'linear-gradient(135deg, rgba(0, 212, 255, 0.12) 0%, rgba(0, 102, 255, 0.08) 100%)'
 		},
 		[theme.breakpoints.down('xs')]: {
 			padding: '14px 16px',
@@ -198,18 +201,25 @@ const useStyles = makeStyles(theme => ({
 	myRankingCardUnranked: {
 		cursor: 'default',
 		'&:hover': {
-			borderColor: 'rgba(0, 212, 255, 0.25)',
-			background: 'linear-gradient(135deg, #1a1a2e 0%, #0f0f1a 100%)'
+			borderColor: 'rgba(0, 212, 255, 0.3)',
+			boxShadow: '0 0 20px rgba(0, 212, 255, 0.08)',
+			background: 'linear-gradient(135deg, rgba(0, 212, 255, 0.08) 0%, rgba(0, 102, 255, 0.05) 100%)'
 		}
 	},
 	myRankingLabel: {
-		fontFamily: '"Noto Sans KR", sans-serif',
-		fontSize: '1rem',
-		color: 'rgba(0, 212, 255, 0.7)',
-		background: 'rgba(0, 212, 255, 0.1)',
-		padding: '2px 10px',
-		borderRadius: 8,
-		marginRight: 8
+		position: 'absolute',
+		top: -10,
+		left: 16,
+		fontFamily: '"Rajdhani", "Noto Sans KR", sans-serif',
+		fontSize: '1.05rem',
+		fontWeight: 700,
+		letterSpacing: '0.08em',
+		textTransform: 'uppercase',
+		color: '#00d4ff',
+		background: 'linear-gradient(135deg, #1a1a2e 0%, #0f0f1a 100%)',
+		padding: '1px 12px',
+		borderRadius: 6,
+		border: '1px solid rgba(0, 212, 255, 0.3)'
 	},
 	myRankingRank: {
 		padding: '0 24px',
@@ -626,7 +636,6 @@ function RankingTable(props) {
 
 		const cardContent = (
 			<>
-				<span className={classes.myRankingLabel}>내 랭킹</span>
 				<div className={classes.myRankingRank}>
 					<span className={`${classes.rankingNumber} ${getRankClass(isRanked ? myRanking.ranking : 0)}`}>
 						{isRanked ? myRanking.ranking : '-'}
@@ -692,12 +701,18 @@ function RankingTable(props) {
 					tabIndex={0}
 					onKeyDown={e => e.key === 'Enter' && handleMyRankingClick()}
 				>
+					<span className={classes.myRankingLabel}>MY RANKING</span>
 					{cardContent}
 				</div>
 			);
 		}
 
-		return <div className={`${classes.myRankingCard} ${classes.myRankingCardUnranked}`}>{cardContent}</div>;
+		return (
+			<div className={`${classes.myRankingCard} ${classes.myRankingCardUnranked}`}>
+				<span className={classes.myRankingLabel}>MY RANKING</span>
+				{cardContent}
+			</div>
+		);
 	}
 
 	const isPeriod = period !== 'all';
