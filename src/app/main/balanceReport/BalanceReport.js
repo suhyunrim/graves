@@ -1,7 +1,8 @@
 import FusePageSimple from '@fuse/core/FusePageSimple';
 import withReducer from 'app/store/withReducer';
 import { makeStyles } from '@material-ui/core/styles';
-import { Typography, CircularProgress } from '@material-ui/core';
+import { Typography, CircularProgress, Tooltip, IconButton } from '@material-ui/core';
+import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
 import React, { useEffect, useState, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Line, Bar, Doughnut } from 'react-chartjs-2';
@@ -86,9 +87,15 @@ const useStyles = makeStyles(theme => ({
 	},
 	summaryGrid: {
 		display: 'grid',
-		gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+		gridTemplateColumns: 'repeat(4, 1fr)',
 		gap: 16,
-		marginBottom: 28
+		marginBottom: 24,
+		[theme.breakpoints.down('sm')]: {
+			gridTemplateColumns: 'repeat(2, 1fr)'
+		},
+		[theme.breakpoints.down('xs')]: {
+			gridTemplateColumns: '1fr'
+		}
 	},
 	summaryCard: {
 		background: 'linear-gradient(135deg, #1a1a2e 0%, #0f0f1a 100%)',
@@ -101,7 +108,11 @@ const useStyles = makeStyles(theme => ({
 		fontFamily: '"Noto Sans KR", sans-serif',
 		fontSize: '1.2rem',
 		color: 'rgba(255,255,255,0.5)',
-		marginBottom: 8
+		marginBottom: 8,
+		display: 'flex',
+		alignItems: 'center',
+		justifyContent: 'center',
+		gap: 4
 	},
 	summaryValue: {
 		fontFamily: '"Rajdhani", sans-serif',
@@ -115,9 +126,24 @@ const useStyles = makeStyles(theme => ({
 		color: 'rgba(255,255,255,0.4)',
 		marginLeft: 4
 	},
-	sectionGrid: {
+	summarySub: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.1rem',
+		color: 'rgba(255,255,255,0.35)',
+		marginTop: 4
+	},
+	grid2: {
 		display: 'grid',
 		gridTemplateColumns: 'repeat(2, 1fr)',
+		gap: 20,
+		marginBottom: 20,
+		[theme.breakpoints.down('sm')]: {
+			gridTemplateColumns: '1fr'
+		}
+	},
+	grid3: {
+		display: 'grid',
+		gridTemplateColumns: 'repeat(3, 1fr)',
 		gap: 20,
 		marginBottom: 20,
 		[theme.breakpoints.down('sm')]: {
@@ -172,78 +198,60 @@ const useStyles = makeStyles(theme => ({
 	table: {
 		width: '100%',
 		borderCollapse: 'separate',
-		borderSpacing: '0 6px'
+		borderSpacing: '0 4px'
 	},
 	th: {
 		fontFamily: '"Noto Sans KR", sans-serif',
-		fontSize: '1.15rem',
+		fontSize: '1.1rem',
 		fontWeight: 600,
 		color: 'rgba(255,255,255,0.5)',
-		padding: '8px 12px',
+		padding: '6px 10px',
 		textAlign: 'left',
 		borderBottom: '1px solid rgba(255,255,255,0.08)'
 	},
 	td: {
 		fontFamily: '"Noto Sans KR", sans-serif',
-		fontSize: '1.25rem',
+		fontSize: '1.15rem',
 		color: '#fff',
-		padding: '10px 12px'
+		padding: '8px 10px'
 	},
 	barInline: {
 		display: 'flex',
 		alignItems: 'center',
-		gap: 10
+		gap: 8
 	},
 	barBg: {
 		flex: 1,
-		height: 8,
+		height: 6,
 		background: 'rgba(255,255,255,0.08)',
-		borderRadius: 4,
+		borderRadius: 3,
 		overflow: 'hidden'
 	},
 	barFill: {
 		height: '100%',
-		borderRadius: 4,
+		borderRadius: 3,
 		transition: 'width 0.6s ease'
 	},
 	barLabel: {
 		fontFamily: '"Rajdhani", sans-serif',
-		fontSize: '1.3rem',
+		fontSize: '1.2rem',
 		fontWeight: 600,
-		minWidth: 48,
+		minWidth: 44,
 		textAlign: 'right'
 	},
-	setGrid: {
-		display: 'grid',
-		gridTemplateColumns: '1fr 1fr',
-		gap: 12,
-		[theme.breakpoints.down('xs')]: {
-			gridTemplateColumns: '1fr'
-		}
+	infoIcon: {
+		color: 'rgba(255,255,255,0.3)',
+		fontSize: '1.4rem',
+		padding: 2
 	},
-	setCard: {
-		background: 'rgba(255,255,255,0.04)',
-		borderRadius: 12,
-		padding: '16px 20px',
-		textAlign: 'center'
-	},
-	setLabel: {
+	tooltip: {
 		fontFamily: '"Noto Sans KR", sans-serif',
-		fontSize: '1.15rem',
-		color: 'rgba(255,255,255,0.5)',
-		marginBottom: 6
-	},
-	setCount: {
-		fontFamily: '"Rajdhani", sans-serif',
-		fontSize: '2.4rem',
-		fontWeight: 700,
-		color: '#fff'
-	},
-	setDetail: {
-		fontFamily: '"Noto Sans KR", sans-serif',
-		fontSize: '1.1rem',
-		color: 'rgba(255,255,255,0.4)',
-		marginTop: 4
+		fontSize: '1.2rem',
+		lineHeight: 1.5,
+		padding: '8px 12px',
+		maxWidth: 280,
+		background: 'rgba(15, 15, 26, 0.95)',
+		border: '1px solid rgba(0, 212, 255, 0.3)'
 	},
 	loadingWrapper: {
 		display: 'flex',
@@ -263,32 +271,29 @@ const useStyles = makeStyles(theme => ({
 		fontFamily: '"Noto Sans KR", sans-serif',
 		fontSize: '1.8rem',
 		color: 'rgba(255, 255, 255, 0.4)'
-	},
-	positionIcon: {
-		width: 20,
-		height: 20,
-		verticalAlign: 'middle',
-		marginRight: 6
 	}
 }));
 
-const CHART_COLORS = {
+const COLORS = {
 	cyan: '#00d4ff',
 	blue: '#0066ff',
 	green: '#51cf66',
 	yellow: '#ffd43b',
 	red: '#ff6b6b',
 	purple: '#9775fa',
-	orange: '#ff922b'
+	orange: '#ff922b',
+	gray: '#868e96'
 };
 
-const POSITION_LABELS = { TOP: '탑', JUNGLE: '정글', MID: '미드', ADC: '원딜', SUPPORT: '서포터' };
-const POSITION_ICONS = {
-	TOP: '/assets/images/positions/TOP.png',
-	JUNGLE: '/assets/images/positions/JUNGLE.png',
-	MID: '/assets/images/positions/MID.png',
-	ADC: '/assets/images/positions/ADC.png',
-	SUPPORT: '/assets/images/positions/SUPPORT.png'
+const POSITION_LABELS = {
+	TOP: '탑',
+	JUNGLE: '정글',
+	MID: '미드',
+	MIDDLE: '미드',
+	ADC: '원딜',
+	BOTTOM: '원딜',
+	SUPPORT: '서포터',
+	UTILITY: '서포터'
 };
 
 const chartTooltipBase = {
@@ -318,10 +323,47 @@ const tickStyle = {
 };
 
 function getWinRateColor(rate) {
-	if (rate >= 55) return CHART_COLORS.red;
-	if (rate >= 52) return CHART_COLORS.orange;
-	if (rate >= 48) return CHART_COLORS.green;
-	return CHART_COLORS.cyan;
+	if (rate >= 55) return COLORS.red;
+	if (rate >= 52) return COLORS.orange;
+	if (rate >= 48) return COLORS.green;
+	return COLORS.cyan;
+}
+
+// Chart.js 2.x plugin: 50% 기준선
+const baselinePlugin = {
+	afterDraw(chart) {
+		const yAxis = chart.scales['y-axis-0'];
+		if (!yAxis) return;
+		const yPixel = yAxis.getPixelForValue(50);
+		if (yPixel == null) return;
+		const { ctx } = chart;
+		ctx.save();
+		ctx.beginPath();
+		ctx.setLineDash([6, 4]);
+		ctx.moveTo(chart.chartArea.left, yPixel);
+		ctx.lineTo(chart.chartArea.right, yPixel);
+		ctx.strokeStyle = 'rgba(255, 255, 255, 0.25)';
+		ctx.lineWidth = 1.5;
+		ctx.stroke();
+		ctx.restore();
+
+		ctx.save();
+		ctx.fillStyle = 'rgba(255, 255, 255, 0.35)';
+		ctx.font = '11px "Noto Sans KR", sans-serif';
+		ctx.textAlign = 'right';
+		ctx.fillText('50%', chart.chartArea.right - 4, yPixel - 6);
+		ctx.restore();
+	}
+};
+
+function InfoTip({ title, classes }) {
+	return (
+		<Tooltip title={title} classes={{ tooltip: classes.tooltip }} placement="top" arrow>
+			<IconButton className={classes.infoIcon} size="small">
+				<InfoOutlinedIcon style={{ fontSize: 'inherit' }} />
+			</IconButton>
+		</Tooltip>
+	);
 }
 
 function BalanceReport() {
@@ -347,21 +389,39 @@ function BalanceReport() {
 
 	function renderSummary() {
 		if (!report) return null;
-		const { summary, totalMatches } = report;
+		const { summary, setAnalysis } = report;
+		const twoZeroRate = setAnalysis ? setAnalysis.twoZero.rate : 0;
+		const twoOneRate = setAnalysis ? setAnalysis.twoOne.rate : 0;
+
 		return (
 			<div className={classes.summaryGrid}>
 				<div className={classes.summaryCard}>
-					<div className={classes.summaryLabel}>총 매치 수</div>
+					<div className={classes.summaryLabel}>
+						총 세트 수
+						<InfoTip title="세트: 같은 10명이 24시간 이내에 한 2~3경기 묶음 (3판 2선)" classes={classes} />
+					</div>
 					<div>
-						<span className={classes.summaryValue}>{totalMatches}</span>
-						<span className={classes.summaryUnit}>판</span>
+						<span className={classes.summaryValue}>{setAnalysis ? setAnalysis.totalSets : 0}</span>
+						<span className={classes.summaryUnit}>세트</span>
 					</div>
 				</div>
 				<div className={classes.summaryCard}>
-					<div className={classes.summaryLabel}>레이팅 우위팀 승률</div>
+					<div className={classes.summaryLabel}>
+						2:0 비율
+						<InfoTip title="2:0으로 끝난 세트 비율. 낮을수록 접전이 많다는 의미" classes={classes} />
+					</div>
 					<div>
-						<span className={classes.summaryValue} style={{ color: getWinRateColor(summary.favoredTeamWinRate) }}>
-							{summary.favoredTeamWinRate.toFixed(1)}
+						<span className={classes.summaryValue} style={{ color: twoZeroRate > 60 ? COLORS.red : COLORS.green }}>
+							{twoZeroRate.toFixed(1)}
+						</span>
+						<span className={classes.summaryUnit}>%</span>
+					</div>
+				</div>
+				<div className={classes.summaryCard}>
+					<div className={classes.summaryLabel}>2:1 비율</div>
+					<div>
+						<span className={classes.summaryValue} style={{ color: COLORS.cyan }}>
+							{twoOneRate.toFixed(1)}
 						</span>
 						<span className={classes.summaryUnit}>%</span>
 					</div>
@@ -380,62 +440,78 @@ function BalanceReport() {
 	function renderRatingBrackets() {
 		if (!report || !report.ratingBrackets) return null;
 		const { ratingBrackets } = report;
-		const maxCount = Math.max(...ratingBrackets.map(b => b.count), 1);
+
+		const data = {
+			labels: ratingBrackets.map(b => b.label),
+			datasets: [
+				{
+					label: '우위팀 승률',
+					data: ratingBrackets.map(b => b.favoredWinRate),
+					backgroundColor: ratingBrackets.map(b => `${getWinRateColor(b.favoredWinRate)}60`),
+					borderColor: ratingBrackets.map(b => getWinRateColor(b.favoredWinRate)),
+					borderWidth: 1.5
+				}
+			]
+		};
+
+		const options = {
+			responsive: true,
+			maintainAspectRatio: false,
+			legend: { display: false },
+			plugins: { baselinePlugin: true },
+			scales: {
+				xAxes: [{ gridLines: gridLineStyle, ticks: tickStyle }],
+				yAxes: [
+					{
+						gridLines: gridLineStyle,
+						ticks: { ...tickStyle, min: 0, max: 100, stepSize: 25, callback: v => `${v}%` }
+					}
+				]
+			},
+			tooltips: {
+				...chartTooltipBase,
+				callbacks: {
+					label: item => {
+						const b = ratingBrackets[item.index];
+						return `승률 ${b.favoredWinRate.toFixed(1)}% (${b.count}판)`;
+					}
+				}
+			}
+		};
 
 		return (
 			<div className={classes.card}>
-				<div className={classes.cardTitle}>레이팅 차이 구간별 분석</div>
-				<table className={classes.table}>
-					<thead>
-						<tr>
-							<th className={classes.th}>구간</th>
-							<th className={classes.th}>매치 수</th>
-							<th className={classes.th} style={{ width: '45%' }}>
-								우위팀 승률
-							</th>
-						</tr>
-					</thead>
-					<tbody>
-						{ratingBrackets.map(b => (
-							<tr key={b.label}>
-								<td className={classes.td}>{b.label}</td>
-								<td className={classes.td}>{b.count}판</td>
-								<td className={classes.td}>
-									<div className={classes.barInline}>
-										<div className={classes.barBg} style={{ flex: `0 0 ${Math.round((b.count / maxCount) * 100)}%` }}>
-											<div
-												className={classes.barFill}
-												style={{
-													width: `${b.favoredWinRate}%`,
-													background: getWinRateColor(b.favoredWinRate)
-												}}
-											/>
-										</div>
-										<span className={classes.barLabel} style={{ color: getWinRateColor(b.favoredWinRate) }}>
-											{b.favoredWinRate.toFixed(1)}%
-										</span>
-									</div>
-								</td>
-							</tr>
-						))}
-					</tbody>
-				</table>
+				<div className={classes.cardTitle}>
+					레이팅 차이 구간별 승률
+					<InfoTip title="레이팅 우위팀: 매칭 시점 팀 레이팅 합이 높은 팀" classes={classes} />
+				</div>
+				<div className={classes.chartContainer}>
+					<Bar data={data} options={options} plugins={[baselinePlugin]} />
+				</div>
 			</div>
 		);
 	}
 
-	function renderTierSpread() {
-		if (!report || !report.tierSpread) return null;
-		const { tierSpread } = report;
+	function renderPositionScoreImpact() {
+		if (!report || !report.setAnalysis || !report.setAnalysis.positionScoreImpact) return null;
+		const { positionScoreImpact } = report.setAnalysis;
 
 		const data = {
-			labels: tierSpread.map(t => t.label),
+			labels: positionScoreImpact.map(p => p.label),
 			datasets: [
 				{
-					label: '우위팀 승률',
-					data: tierSpread.map(t => t.favoredWinRate),
-					backgroundColor: tierSpread.map(t => `${getWinRateColor(t.favoredWinRate)}40`),
-					borderColor: tierSpread.map(t => getWinRateColor(t.favoredWinRate)),
+					label: '2:0 비율',
+					data: positionScoreImpact.map(p => p.twoZeroRate),
+					backgroundColor: positionScoreImpact.map(p => {
+						if (p.twoZeroRate >= 65) return `${COLORS.red}60`;
+						if (p.twoZeroRate >= 55) return `${COLORS.orange}60`;
+						return `${COLORS.green}60`;
+					}),
+					borderColor: positionScoreImpact.map(p => {
+						if (p.twoZeroRate >= 65) return COLORS.red;
+						if (p.twoZeroRate >= 55) return COLORS.orange;
+						return COLORS.green;
+					}),
 					borderWidth: 1.5
 				}
 			]
@@ -450,7 +526,7 @@ function BalanceReport() {
 				yAxes: [
 					{
 						gridLines: gridLineStyle,
-						ticks: { ...tickStyle, min: 0, max: 100, callback: v => `${v}%` }
+						ticks: { ...tickStyle, min: 0, max: 100, stepSize: 25, callback: v => `${v}%` }
 					}
 				]
 			},
@@ -458,8 +534,8 @@ function BalanceReport() {
 				...chartTooltipBase,
 				callbacks: {
 					label: item => {
-						const bracket = tierSpread[item.index];
-						return `승률 ${bracket.favoredWinRate.toFixed(1)}% (${bracket.count}판)`;
+						const p = positionScoreImpact[item.index];
+						return `2:0 비율 ${p.twoZeroRate.toFixed(1)}% (${p.totalSets}세트)`;
 					}
 				}
 			}
@@ -467,187 +543,15 @@ function BalanceReport() {
 
 		return (
 			<div className={classes.card}>
-				<div className={classes.cardTitle}>팀 내 티어 편차별 분석</div>
+				<div className={classes.cardTitle}>
+					포지션 점수 차이 vs 2:0 비율
+					<InfoTip
+						title="포지션 점수 차이: 양팀 포지션 적합도 점수의 차이. 포지션 균형이 안 맞을수록 2:0으로 끝날 확률이 높음 → 플랜 선택 시 포지션 분포를 고려하세요"
+						classes={classes}
+					/>
+				</div>
 				<div className={classes.chartContainer}>
-					<Bar data={data} options={options} />
-				</div>
-			</div>
-		);
-	}
-
-	function renderPositionAnalysis() {
-		if (!report || !report.positionAnalysis) return null;
-		const { positionAnalysis } = report;
-
-		return (
-			<div className={classes.cardFull}>
-				<div className={classes.cardTitle}>포지션 분석</div>
-				<div className={classes.summaryGrid} style={{ marginBottom: 20 }}>
-					<div className={classes.summaryCard} style={{ border: 'none', background: 'rgba(255,255,255,0.04)' }}>
-						<div className={classes.summaryLabel}>평균 포지션 적합도</div>
-						<div>
-							<span className={classes.summaryValue} style={{ fontSize: '2.4rem' }}>
-								{positionAnalysis.avgPositionScore.toFixed(0)}
-							</span>
-							<span className={classes.summaryUnit}>/ 500</span>
-						</div>
-					</div>
-					<div className={classes.summaryCard} style={{ border: 'none', background: 'rgba(255,255,255,0.04)' }}>
-						<div className={classes.summaryLabel}>평균 커버 포지션</div>
-						<div>
-							<span className={classes.summaryValue} style={{ fontSize: '2.4rem' }}>
-								{positionAnalysis.avgPositionCoverage.toFixed(1)}
-							</span>
-							<span className={classes.summaryUnit}>/ 5</span>
-						</div>
-					</div>
-				</div>
-				<div className={classes.sectionGrid}>
-					{renderScoreBrackets(positionAnalysis.scoreBrackets)}
-					{renderOverlappedPositions(positionAnalysis.mostOverlappedPositions)}
-				</div>
-			</div>
-		);
-	}
-
-	function renderScoreBrackets(scoreBrackets) {
-		if (!scoreBrackets) return null;
-
-		const data = {
-			labels: scoreBrackets.map(s => s.label),
-			datasets: [
-				{
-					data: scoreBrackets.map(s => s.count),
-					backgroundColor: [
-						CHART_COLORS.red,
-						CHART_COLORS.orange,
-						CHART_COLORS.yellow,
-						CHART_COLORS.green,
-						CHART_COLORS.cyan
-					],
-					borderWidth: 0
-				}
-			]
-		};
-
-		const options = {
-			responsive: true,
-			maintainAspectRatio: false,
-			legend: {
-				position: 'bottom',
-				labels: {
-					fontColor: 'rgba(255,255,255,0.6)',
-					fontSize: 12,
-					fontFamily: '"Noto Sans KR", sans-serif',
-					padding: 16
-				}
-			},
-			tooltips: {
-				...chartTooltipBase,
-				callbacks: {
-					label: item => {
-						const bracket = scoreBrackets[item.index];
-						return `${bracket.count}판 (승률 ${bracket.favoredWinRate.toFixed(1)}%)`;
-					}
-				}
-			}
-		};
-
-		return (
-			<div>
-				<div className={classes.cardTitle} style={{ fontSize: '1.5rem' }}>
-					적합도 구간별 분포
-				</div>
-				<div style={{ height: 240 }}>
-					<Doughnut data={data} options={options} />
-				</div>
-			</div>
-		);
-	}
-
-	function renderOverlappedPositions(positions) {
-		if (!positions) return null;
-		const maxRate = Math.max(...positions.map(p => p.rate), 1);
-
-		return (
-			<div>
-				<div className={classes.cardTitle} style={{ fontSize: '1.5rem' }}>
-					포지션 겹침 빈도
-				</div>
-				<table className={classes.table}>
-					<thead>
-						<tr>
-							<th className={classes.th}>포지션</th>
-							<th className={classes.th}>횟수</th>
-							<th className={classes.th} style={{ width: '50%' }}>
-								비율
-							</th>
-						</tr>
-					</thead>
-					<tbody>
-						{positions.map(p => (
-							<tr key={p.position}>
-								<td className={classes.td}>
-									{POSITION_ICONS[p.position] && (
-										<img src={POSITION_ICONS[p.position]} alt="" className={classes.positionIcon} />
-									)}
-									{POSITION_LABELS[p.position] || p.position}
-								</td>
-								<td className={classes.td}>{p.count}</td>
-								<td className={classes.td}>
-									<div className={classes.barInline}>
-										<div className={classes.barBg}>
-											<div
-												className={classes.barFill}
-												style={{
-													width: `${(p.rate / maxRate) * 100}%`,
-													background: CHART_COLORS.purple
-												}}
-											/>
-										</div>
-										<span className={classes.barLabel} style={{ color: CHART_COLORS.purple }}>
-											{p.rate.toFixed(1)}%
-										</span>
-									</div>
-								</td>
-							</tr>
-						))}
-					</tbody>
-				</table>
-			</div>
-		);
-	}
-
-	function renderSetAnalysis() {
-		if (!report || !report.setAnalysis) return null;
-		const { setAnalysis } = report;
-
-		return (
-			<div className={classes.card}>
-				<div className={classes.cardTitle}>세트 분석</div>
-				<div className={classes.setGrid}>
-					<div className={classes.setCard}>
-						<div className={classes.setLabel}>총 세트</div>
-						<div className={classes.setCount}>{setAnalysis.totalSets}</div>
-					</div>
-					<div className={classes.setCard}>
-						<div className={classes.setLabel}>단독 매치</div>
-						<div className={classes.setCount}>{setAnalysis.singleMatches}</div>
-					</div>
-					<div className={classes.setCard}>
-						<div className={classes.setLabel}>2:0 세트</div>
-						<div className={classes.setCount}>{setAnalysis.twoZero.count}</div>
-						<div className={classes.setDetail}>
-							우위팀 {setAnalysis.twoZero.favoredWin} / 열세팀 {setAnalysis.twoZero.underdogWin}
-						</div>
-					</div>
-					<div className={classes.setCard}>
-						<div className={classes.setLabel}>2:1 세트</div>
-						<div className={classes.setCount}>{setAnalysis.twoOne.count}</div>
-						<div className={classes.setDetail}>
-							우위팀 {setAnalysis.twoOne.favoredWin} / 열세팀 {setAnalysis.twoOne.underdogWin}
-						</div>
-					</div>
+					<Bar data={data} options={options} plugins={[baselinePlugin]} />
 				</div>
 			</div>
 		);
@@ -661,14 +565,14 @@ function BalanceReport() {
 			labels: monthlyTrend.map(m => m.month),
 			datasets: [
 				{
-					label: '우위팀 승률',
+					label: '우위팀 승률 (%)',
 					data: monthlyTrend.map(m => m.favoredWinRate),
 					fill: false,
-					borderColor: CHART_COLORS.cyan,
-					backgroundColor: CHART_COLORS.cyan,
+					borderColor: COLORS.cyan,
+					backgroundColor: COLORS.cyan,
 					pointRadius: 5,
 					pointHoverRadius: 8,
-					pointBackgroundColor: CHART_COLORS.cyan,
+					pointBackgroundColor: COLORS.cyan,
 					pointBorderColor: '#fff',
 					pointBorderWidth: 2,
 					tension: 0.3,
@@ -678,11 +582,11 @@ function BalanceReport() {
 					label: '평균 레이팅 차이',
 					data: monthlyTrend.map(m => m.avgRatingDiff),
 					fill: true,
-					borderColor: CHART_COLORS.purple,
-					backgroundColor: `${CHART_COLORS.purple}20`,
+					borderColor: COLORS.purple,
+					backgroundColor: `${COLORS.purple}20`,
 					pointRadius: 5,
 					pointHoverRadius: 8,
-					pointBackgroundColor: CHART_COLORS.purple,
+					pointBackgroundColor: COLORS.purple,
 					pointBorderColor: '#fff',
 					pointBorderWidth: 2,
 					tension: 0.3,
@@ -709,21 +613,13 @@ function BalanceReport() {
 						id: 'winrate',
 						position: 'left',
 						gridLines: gridLineStyle,
-						ticks: {
-							...tickStyle,
-							min: 30,
-							max: 70,
-							callback: v => `${v}%`
-						}
+						ticks: { ...tickStyle, min: 30, max: 70, callback: v => `${v}%` }
 					},
 					{
 						id: 'diff',
 						position: 'right',
 						gridLines: { drawOnChartArea: false },
-						ticks: {
-							...tickStyle,
-							callback: v => `${v}점`
-						}
+						ticks: { ...tickStyle, callback: v => `${v}점` }
 					}
 				]
 			},
@@ -748,6 +644,164 @@ function BalanceReport() {
 				<div className={classes.chartContainer} style={{ height: 320 }}>
 					<Line data={data} options={options} />
 				</div>
+			</div>
+		);
+	}
+
+	function renderPositionOverlap() {
+		if (!report || !report.positionAnalysis || !report.positionAnalysis.mostOverlappedPositions) return null;
+		const { mostOverlappedPositions } = report.positionAnalysis;
+
+		const data = {
+			labels: mostOverlappedPositions.map(p => POSITION_LABELS[p.position] || p.position),
+			datasets: [
+				{
+					data: mostOverlappedPositions.map(p => p.count),
+					backgroundColor: [COLORS.red, COLORS.green, COLORS.cyan, COLORS.yellow, COLORS.purple],
+					borderWidth: 0
+				}
+			]
+		};
+
+		const options = {
+			responsive: true,
+			maintainAspectRatio: false,
+			legend: {
+				position: 'bottom',
+				labels: {
+					fontColor: 'rgba(255,255,255,0.6)',
+					fontSize: 12,
+					fontFamily: '"Noto Sans KR", sans-serif',
+					padding: 12
+				}
+			},
+			tooltips: {
+				...chartTooltipBase,
+				callbacks: {
+					label: item => {
+						const p = mostOverlappedPositions[item.index];
+						return `${p.count}회 (${p.rate.toFixed(1)}%)`;
+					}
+				}
+			}
+		};
+
+		return (
+			<div className={classes.card}>
+				<div className={classes.cardTitle}>포지션 겹침 빈도</div>
+				<div style={{ height: 260 }}>
+					<Doughnut data={data} options={options} />
+				</div>
+			</div>
+		);
+	}
+
+	function renderSetResult() {
+		if (!report || !report.setAnalysis) return null;
+		const { setAnalysis } = report;
+
+		const data = {
+			labels: ['2:0', '2:1', '미완료'],
+			datasets: [
+				{
+					data: [setAnalysis.twoZero.count, setAnalysis.twoOne.count, setAnalysis.incomplete],
+					backgroundColor: [COLORS.red, COLORS.cyan, COLORS.gray],
+					borderWidth: 0
+				}
+			]
+		};
+
+		const options = {
+			responsive: true,
+			maintainAspectRatio: false,
+			legend: {
+				position: 'bottom',
+				labels: {
+					fontColor: 'rgba(255,255,255,0.6)',
+					fontSize: 12,
+					fontFamily: '"Noto Sans KR", sans-serif',
+					padding: 12
+				}
+			},
+			tooltips: {
+				...chartTooltipBase,
+				callbacks: {
+					label: (item, chartData) => {
+						const count = chartData.datasets[0].data[item.index];
+						const label = chartData.labels[item.index];
+						if (label === '2:0') {
+							return `${count}세트 (우위 ${setAnalysis.twoZero.favoredWin} / 열세 ${setAnalysis.twoZero.underdogWin})`;
+						}
+						if (label === '2:1') {
+							return `${count}세트 (우위 ${setAnalysis.twoOne.favoredWin} / 열세 ${setAnalysis.twoOne.underdogWin})`;
+						}
+						return `${count}세트`;
+					}
+				}
+			}
+		};
+
+		return (
+			<div className={classes.card}>
+				<div className={classes.cardTitle}>
+					세트 결과 비율
+					<InfoTip title="세트: 같은 10명이 24시간 이내에 연속으로 한 2~3경기 묶음 (3판 2선)" classes={classes} />
+				</div>
+				<div style={{ height: 260 }}>
+					<Doughnut data={data} options={options} />
+				</div>
+			</div>
+		);
+	}
+
+	function renderTierSpread() {
+		if (!report || !report.tierSpread) return null;
+		const { tierSpread } = report;
+
+		return (
+			<div className={classes.card}>
+				<div className={classes.cardTitle}>팀 내 티어 분포</div>
+				<table className={classes.table}>
+					<thead>
+						<tr>
+							<th className={classes.th}>구간</th>
+							<th className={classes.th}>매치</th>
+							<th className={classes.th} style={{ width: '45%' }}>
+								우위팀 승률
+							</th>
+						</tr>
+					</thead>
+					<tbody>
+						{tierSpread.map(t => (
+							<tr key={t.label}>
+								<td className={classes.td} style={{ fontSize: '1.05rem' }}>
+									{t.label}
+								</td>
+								<td className={classes.td}>{t.count}</td>
+								<td className={classes.td}>
+									{t.count > 0 ? (
+										<div className={classes.barInline}>
+											<div className={classes.barBg}>
+												<div
+													className={classes.barFill}
+													style={{
+														width: `${t.favoredWinRate}%`,
+														background: getWinRateColor(t.favoredWinRate)
+													}}
+												/>
+											</div>
+											<span className={classes.barLabel} style={{ color: getWinRateColor(t.favoredWinRate) }}>
+												{t.favoredWinRate.toFixed(1)}%
+											</span>
+										</div>
+									) : (
+										<span style={{ color: 'rgba(255,255,255,0.25)' }}>-</span>
+									)}
+								</td>
+							</tr>
+						))}
+					</tbody>
+				</table>
 			</div>
 		);
 	}
@@ -801,13 +855,16 @@ function BalanceReport() {
 					{!loading && report && (
 						<>
 							{renderSummary()}
-							{renderMonthlyTrend()}
-							<div className={classes.sectionGrid}>
+							<div className={classes.grid2}>
 								{renderRatingBrackets()}
+								{renderPositionScoreImpact()}
+							</div>
+							{renderMonthlyTrend()}
+							<div className={classes.grid3}>
+								{renderPositionOverlap()}
+								{renderSetResult()}
 								{renderTierSpread()}
 							</div>
-							{renderPositionAnalysis()}
-							<div className={classes.sectionGrid}>{renderSetAnalysis()}</div>
 						</>
 					)}
 				</div>
