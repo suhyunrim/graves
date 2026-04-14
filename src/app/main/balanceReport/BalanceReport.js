@@ -397,18 +397,18 @@ function BalanceReport() {
 			<div className={classes.summaryGrid}>
 				<div className={classes.summaryCard}>
 					<div className={classes.summaryLabel}>
-						총 세트 수
-						<InfoTip title="세트: 같은 10명이 24시간 이내에 한 2~3경기 묶음 (3판 2선)" classes={classes} />
+						총 경기 수
+						<InfoTip title="경기: 같은 10명이 24시간 이내에 한 2~3판 묶음 (3판 2선)" classes={classes} />
 					</div>
 					<div>
 						<span className={classes.summaryValue}>{setAnalysis ? setAnalysis.totalSets : 0}</span>
-						<span className={classes.summaryUnit}>세트</span>
+						<span className={classes.summaryUnit}>경기</span>
 					</div>
 				</div>
 				<div className={classes.summaryCard}>
 					<div className={classes.summaryLabel}>
 						2:0 비율
-						<InfoTip title="2:0으로 끝난 세트 비율. 낮을수록 접전이 많다는 의미" classes={classes} />
+						<InfoTip title="2:0으로 끝난 경기 비율. 낮을수록 접전이 많다는 의미" classes={classes} />
 					</div>
 					<div>
 						<span className={classes.summaryValue} style={{ color: twoZeroRate > 60 ? COLORS.red : COLORS.green }}>
@@ -427,10 +427,21 @@ function BalanceReport() {
 					</div>
 				</div>
 				<div className={classes.summaryCard}>
-					<div className={classes.summaryLabel}>평균 레이팅 차이</div>
+					<div className={classes.summaryLabel}>
+						높은 팀 승률
+						<InfoTip
+							title="매칭 시점 팀 내전 티어 합이 높은 팀의 승률. 50%에 가까울수록 균형 잡힌 매칭"
+							classes={classes}
+						/>
+					</div>
 					<div>
-						<span className={classes.summaryValue}>{summary.avgRatingDiff.toFixed(1)}</span>
-						<span className={classes.summaryUnit}>점</span>
+						<span className={classes.summaryValue} style={{ color: getWinRateColor(summary.favoredTeamWinRate) }}>
+							{summary.favoredTeamWinRate.toFixed(1)}
+						</span>
+						<span className={classes.summaryUnit}>%</span>
+					</div>
+					<div className={classes.summarySub}>
+						예상 {summary.expectedWinRate ? summary.expectedWinRate.toFixed(1) : '-'}%
 					</div>
 				</div>
 			</div>
@@ -445,11 +456,25 @@ function BalanceReport() {
 			labels: ratingBrackets.map(b => b.label),
 			datasets: [
 				{
-					label: '우위팀 승률',
+					type: 'bar',
+					label: '실제 승률',
 					data: ratingBrackets.map(b => b.favoredWinRate),
 					backgroundColor: ratingBrackets.map(b => `${getWinRateColor(b.favoredWinRate)}60`),
 					borderColor: ratingBrackets.map(b => getWinRateColor(b.favoredWinRate)),
 					borderWidth: 1.5
+				},
+				{
+					type: 'line',
+					label: '예상 승률',
+					data: ratingBrackets.map(b => b.expectedWinRate || 0),
+					fill: false,
+					borderColor: 'rgba(255, 255, 255, 0.5)',
+					borderDash: [6, 4],
+					borderWidth: 2,
+					pointRadius: 6,
+					pointBackgroundColor: '#fff',
+					pointBorderColor: 'rgba(255, 255, 255, 0.8)',
+					pointBorderWidth: 2
 				}
 			]
 		};
@@ -457,8 +482,14 @@ function BalanceReport() {
 		const options = {
 			responsive: true,
 			maintainAspectRatio: false,
-			legend: { display: false },
-			plugins: { baselinePlugin: true },
+			legend: {
+				labels: {
+					fontColor: 'rgba(255,255,255,0.6)',
+					fontSize: 11,
+					fontFamily: '"Noto Sans KR", sans-serif',
+					padding: 16
+				}
+			},
 			scales: {
 				xAxes: [{ gridLines: gridLineStyle, ticks: tickStyle }],
 				yAxes: [
@@ -470,10 +501,14 @@ function BalanceReport() {
 			},
 			tooltips: {
 				...chartTooltipBase,
+				mode: 'index',
+				intersect: false,
+				displayColors: true,
 				callbacks: {
 					label: item => {
 						const b = ratingBrackets[item.index];
-						return `승률 ${b.favoredWinRate.toFixed(1)}% (${b.count}판)`;
+						if (item.datasetIndex === 0) return `실제 ${b.favoredWinRate.toFixed(1)}% (${b.count}판)`;
+						return `예상 ${(b.expectedWinRate || 0).toFixed(1)}%`;
 					}
 				}
 			}
@@ -482,8 +517,11 @@ function BalanceReport() {
 		return (
 			<div className={classes.card}>
 				<div className={classes.cardTitle}>
-					레이팅 차이 구간별 승률
-					<InfoTip title="레이팅 우위팀: 매칭 시점 팀 레이팅 합이 높은 팀" classes={classes} />
+					티어 차이별 높은 팀 승률
+					<InfoTip
+						title="실제 승률이 예상보다 높으면 티어 외 요소(포지션 등)가 영향을 주고 있다는 의미"
+						classes={classes}
+					/>
 				</div>
 				<div className={classes.chartContainer}>
 					<Bar data={data} options={options} plugins={[baselinePlugin]} />
@@ -535,7 +573,7 @@ function BalanceReport() {
 				callbacks: {
 					label: item => {
 						const p = positionScoreImpact[item.index];
-						return `2:0 비율 ${p.twoZeroRate.toFixed(1)}% (${p.totalSets}세트)`;
+						return `2:0 비율 ${p.twoZeroRate.toFixed(1)}% (${p.totalSets}경기)`;
 					}
 				}
 			}
@@ -544,9 +582,9 @@ function BalanceReport() {
 		return (
 			<div className={classes.card}>
 				<div className={classes.cardTitle}>
-					포지션 점수 차이 vs 2:0 비율
+					포지션 균형별 2:0 비율
 					<InfoTip
-						title="포지션 점수 차이: 양팀 포지션 적합도 점수의 차이. 포지션 균형이 안 맞을수록 2:0으로 끝날 확률이 높음 → 플랜 선택 시 포지션 분포를 고려하세요"
+						title="포지션 균형: 양팀의 포지션 적합도 점수 차이 기반 (5개 포지션별 팀원 최고 숙련도 합산, 최대 500). 균형이 나쁠수록 2:0으로 끝날 확률이 높음"
 						classes={classes}
 					/>
 				</div>
@@ -565,7 +603,7 @@ function BalanceReport() {
 			labels: monthlyTrend.map(m => m.month),
 			datasets: [
 				{
-					label: '우위팀 승률 (%)',
+					label: '높은 팀 승률 (%)',
 					data: monthlyTrend.map(m => m.favoredWinRate),
 					fill: false,
 					borderColor: COLORS.cyan,
@@ -579,8 +617,8 @@ function BalanceReport() {
 					yAxisID: 'winrate'
 				},
 				{
-					label: '평균 레이팅 차이',
-					data: monthlyTrend.map(m => m.avgRatingDiff),
+					label: '인당 평균 티어 차이',
+					data: monthlyTrend.map(m => m.avgPerPlayerDiff || m.avgRatingDiff),
 					fill: true,
 					borderColor: COLORS.purple,
 					backgroundColor: `${COLORS.purple}20`,
@@ -632,7 +670,7 @@ function BalanceReport() {
 					label: item => {
 						const m = monthlyTrend[item.index];
 						if (item.datasetIndex === 0) return `승률 ${m.favoredWinRate.toFixed(1)}% (${m.matchCount}판)`;
-						return `레이팅 차이 ${m.avgRatingDiff.toFixed(1)}점`;
+						return `인당 차이 ${(m.avgPerPlayerDiff || m.avgRatingDiff).toFixed(1)}점`;
 					}
 				}
 			}
@@ -730,12 +768,12 @@ function BalanceReport() {
 						const count = chartData.datasets[0].data[item.index];
 						const label = chartData.labels[item.index];
 						if (label === '2:0') {
-							return `${count}세트 (우위 ${setAnalysis.twoZero.favoredWin} / 열세 ${setAnalysis.twoZero.underdogWin})`;
+							return `${count}경기 (우위 ${setAnalysis.twoZero.favoredWin} / 열세 ${setAnalysis.twoZero.underdogWin})`;
 						}
 						if (label === '2:1') {
-							return `${count}세트 (우위 ${setAnalysis.twoOne.favoredWin} / 열세 ${setAnalysis.twoOne.underdogWin})`;
+							return `${count}경기 (우위 ${setAnalysis.twoOne.favoredWin} / 열세 ${setAnalysis.twoOne.underdogWin})`;
 						}
-						return `${count}세트`;
+						return `${count}경기`;
 					}
 				}
 			}
@@ -744,8 +782,8 @@ function BalanceReport() {
 		return (
 			<div className={classes.card}>
 				<div className={classes.cardTitle}>
-					세트 결과 비율
-					<InfoTip title="세트: 같은 10명이 24시간 이내에 연속으로 한 2~3경기 묶음 (3판 2선)" classes={classes} />
+					경기 결과 비율
+					<InfoTip title="경기: 같은 10명이 24시간 이내에 연속으로 한 3판 2선 묶음" classes={classes} />
 				</div>
 				<div style={{ height: 260 }}>
 					<Doughnut data={data} options={options} />
@@ -760,14 +798,14 @@ function BalanceReport() {
 
 		return (
 			<div className={classes.card}>
-				<div className={classes.cardTitle}>팀 내 티어 분포</div>
+				<div className={classes.cardTitle}>팀 내 티어 편차</div>
 				<table className={classes.table}>
 					<thead>
 						<tr>
 							<th className={classes.th}>구간</th>
 							<th className={classes.th}>매치</th>
 							<th className={classes.th} style={{ width: '45%' }}>
-								우위팀 승률
+								높은 팀 승률
 							</th>
 						</tr>
 					</thead>
