@@ -182,7 +182,10 @@ const useStyles = makeStyles(theme => ({
 			background: 'linear-gradient(135deg, rgba(0, 212, 255, 0.15) 0%, rgba(0, 102, 255, 0.1) 100%)'
 		},
 		'& td': {
-			borderBottom: '2px solid rgba(0, 212, 255, 0.25)'
+			borderBottom: '2px solid rgba(0, 212, 255, 0.4)'
+		},
+		'& td:first-child': {
+			boxShadow: 'inset 3px 0 0 #00d4ff'
 		}
 	},
 	myRankingRowUnranked: {
