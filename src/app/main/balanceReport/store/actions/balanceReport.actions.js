@@ -15,7 +15,7 @@ export function getBalanceReport(groupId, startDate, endDate) {
 			.then(response =>
 				dispatch({
 					type: GET_REPORT,
-					payload: response.data.result
+					payload: response.data
 				})
 			)
 			.catch(() => dispatch({ type: REPORT_ERROR }));
