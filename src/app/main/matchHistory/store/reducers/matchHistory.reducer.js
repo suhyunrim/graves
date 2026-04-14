@@ -1,7 +1,7 @@
 import * as Actions from '../actions';
 
 const initialState = {
-	matches: [],
+	matches: null,
 	total: 0,
 	page: 1,
 	totalPages: 0,

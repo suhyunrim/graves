@@ -497,6 +497,49 @@ function ChallengeDetailSkeleton() {
 	);
 }
 
+function ReleaseNotesSkeleton() {
+	const classes = useSkeletonStyles();
+	return (
+		<div className={classes.tableContainer} style={{ maxWidth: 900 }}>
+			{Array.from({ length: 4 }).map((_, i) => (
+				<div
+					key={i}
+					style={{
+						background: 'linear-gradient(135deg, #1a1a2e 0%, #0f0f1a 100%)',
+						borderRadius: 20,
+						border: '1px solid rgba(0, 212, 255, 0.2)',
+						padding: '28px 32px',
+						marginBottom: 20
+					}}
+				>
+					<div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16, flexWrap: 'wrap' }}>
+						<Skeleton
+							{...skeletonProps}
+							variant="rect"
+							width={70}
+							height={30}
+							style={{ ...skeletonProps.style, borderRadius: 10 }}
+						/>
+						<Skeleton {...skeletonProps} variant="text" width="40%" height={22} />
+						<div style={{ flex: 1 }} />
+						<Skeleton {...skeletonProps} variant="text" width={80} height={16} />
+					</div>
+					{Array.from({ length: 3 }).map((__, j) => (
+						<Skeleton
+							key={j}
+							{...skeletonProps}
+							variant="text"
+							width={`${70 - j * 15}%`}
+							height={16}
+							style={{ ...skeletonProps.style, marginBottom: 8, marginLeft: 20 }}
+						/>
+					))}
+				</div>
+			))}
+		</div>
+	);
+}
+
 export {
 	DashboardSkeleton,
 	RankingTableSkeleton,
@@ -506,5 +549,6 @@ export {
 	ChampionTableSkeleton,
 	SettingsSkeleton,
 	ChallengeListSkeleton,
-	ChallengeDetailSkeleton
+	ChallengeDetailSkeleton,
+	ReleaseNotesSkeleton
 };

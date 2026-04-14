@@ -6,6 +6,7 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import * as fuseActions from 'app/store/actions';
 import axios from 'axios';
+import { ReleaseNotesSkeleton } from 'app/main/components/SkeletonLoaders';
 
 const STORAGE_KEY = 'graves_last_seen_version';
 
@@ -162,11 +163,13 @@ function ReleaseNotes() {
 	const classes = useStyles();
 	const dispatch = useDispatch();
 	const [releases, setReleases] = useState([]);
+	const [loading, setLoading] = useState(true);
 	const lastSeenVersion = localStorage.getItem(STORAGE_KEY);
 
 	useEffect(() => {
 		axios.get('/release-notes.json').then(response => {
 			setReleases(response.data);
+			setLoading(false);
 			if (response.data.length > 0) {
 				localStorage.setItem(STORAGE_KEY, response.data[0].version);
 				dispatch(
@@ -191,14 +194,13 @@ function ReleaseNotes() {
 			}
 			content={
 				<div className={classes.container}>
-					{releases.length > 0 ? (
+					{loading ? (
+						<ReleaseNotesSkeleton />
+					) : releases.length > 0 ? (
 						releases.map(release => {
 							const isNew = lastSeenVersion && compareVersions(release.version, lastSeenVersion) > 0;
 							return (
-								<div
-									key={release.version}
-									className={`${classes.releaseCard} ${isNew ? classes.releaseCardNew : ''}`}
-								>
+								<div key={release.version} className={`${classes.releaseCard} ${isNew ? classes.releaseCardNew : ''}`}>
 									<div className={classes.releaseHeader}>
 										<span className={classes.versionBadge}>v{release.version}</span>
 										<span className={classes.releaseTitle}>{release.title}</span>
