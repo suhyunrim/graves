@@ -26,7 +26,8 @@ export function getRanking(groupName) {
 		request.then(response =>
 			dispatch({
 				type: GET_RANKING,
-				payload: response.data.result
+				payload: response.data.result,
+				myRanking: response.data.myRanking || null
 			})
 		);
 	};

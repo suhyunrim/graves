@@ -2,6 +2,7 @@ import * as Actions from '../actions';
 
 const initialState = {
 	data: [],
+	myRanking: null,
 	loading: false,
 	searchText: '',
 	period: 'all',
@@ -20,6 +21,7 @@ const rankingReducer = (state = initialState, action) => {
 			return {
 				...state,
 				data: action.payload,
+				myRanking: action.myRanking != null ? action.myRanking : state.myRanking,
 				loading: false
 			};
 		}
