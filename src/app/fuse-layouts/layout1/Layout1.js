@@ -74,7 +74,7 @@ const useStyles = makeStyles()((theme) => ({
 		flex: '1 1 auto',
 		flexDirection: 'column',
 		width: '100%',
-		'-webkit-overflow-scrolling': 'touch',
+		WebkitOverflowScrolling: 'touch',
 		zIndex: 2
 	}
 }));

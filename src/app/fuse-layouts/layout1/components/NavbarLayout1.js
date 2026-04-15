@@ -20,7 +20,7 @@ const useStyles = makeStyles({
 	content: {
 		overflowX: 'hidden',
 		overflowY: 'auto',
-		'-webkit-overflow-scrolling': 'touch',
+		WebkitOverflowScrolling: 'touch',
 		background: 'transparent',
 		'&::-webkit-scrollbar': {
 			width: 6

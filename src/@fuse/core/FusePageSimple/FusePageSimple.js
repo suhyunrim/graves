@@ -57,7 +57,7 @@ const useStyles = makeStyles()((theme) => ({
      contentCardWrapperInnerSidebar: {
          display                     : 'block',
          overflow                    : 'auto!important',
-         '-webkit-overflow-scrolling': 'touch',
+         WebkitOverflowScrolling: 'touch',
          '&.ps'                      : {
              overflow: 'hidden!important'
          },
@@ -70,7 +70,7 @@ const useStyles = makeStyles()((theme) => ({
 		flexDirection: 'column',
 		flex: '1 1 auto',
 		overflow: 'auto',
-		'-webkit-overflow-scrolling': 'touch',
+		WebkitOverflowScrolling: 'touch',
 		zIndex: 9999
 	},
 	toolbar: {
