@@ -13,7 +13,7 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 const createCamilleAxios = () => {
 	const instance = axios.create();
 
-	instance.defaults.baseURL = process.env.REACT_APP_CAMILLE_HOST;
+	instance.defaults.baseURL = import.meta.env.VITE_CAMILLE_HOST;
 
 	const discordToken = camilleRiotAuthService.getDiscordToken();
 	if (discordToken) {

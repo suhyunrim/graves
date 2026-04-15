@@ -9,7 +9,7 @@ request
 	})
 	.catch(e => {
 		console.error(e);
-		dataVersion = process.env.REACT_APP_RIOT_DATA_VERSION;
+		dataVersion = import.meta.env.VITE_RIOT_DATA_VERSION;
 	});
 
 export default () => dataVersion;

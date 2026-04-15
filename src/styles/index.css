@@ -1,6 +1,8 @@
-@import-normalize ;
-
 @import 'tailwind-base.css';
+@import 'print.css';
+@import 'tables.css';
+@import 'prism.css';
+@import 'tailwind.css';
 
 body.no-animate *,
 body.no-animate *::before,
@@ -112,11 +114,3 @@ input:-webkit-autofill:active {
     caret-color: #ffffff !important;
     transition: background-color 9999s ease-out;
 }
-
-@import 'print.css';
-
-@import 'tables.css';
-
-@import 'prism.css';
-
-@import 'tailwind.css';
