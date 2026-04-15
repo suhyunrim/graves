@@ -5,7 +5,7 @@ import React from 'react';
 import reducer from './store/reducers';
 import AchievementContent from './AchievementContent';
 
-const useStyles = makeStyles({
+const useStyles = makeStyles()({
 	layoutRoot: {
 		background: 'linear-gradient(180deg, #0f0f1a 0%, #1a1a2e 100%)',
 		minHeight: '100vh'

@@ -226,7 +226,7 @@ const useStyles = makeStyles()((theme) => ({
 	}
 }));
 
-const StyledTableCell = withStyles(() => ({
+const StyledTableCell = withStyles(TableCell, () => ({
 	head: {
 		backgroundColor: 'rgba(255, 193, 7, 0.08)',
 		color: 'rgba(255, 255, 255, 0.7)',
@@ -244,16 +244,16 @@ const StyledTableCell = withStyles(() => ({
 		borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
 		padding: '18px 24px'
 	}
-}))(TableCell);
+}));
 
-const StyledTableRow = withStyles(() => ({
+const StyledTableRow = withStyles(TableRow, () => ({
 	root: {
 		transition: 'background-color 0.2s ease',
 		'&:hover': {
 			backgroundColor: 'rgba(255, 193, 7, 0.05)'
 		}
 	}
-}))(TableRow);
+}));
 
 const emojiAriaLabels = {
 	'\u{1F31F}': 'glowing star',

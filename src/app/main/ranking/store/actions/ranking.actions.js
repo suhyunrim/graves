@@ -2,7 +2,6 @@ import createCamilleAxios from 'app/utility/camilleAxios';
 import { isSampleMode } from 'app/main/sample/sampleStorage';
 import { getSampleRankingData } from 'app/main/sample/sampleData';
 
-const qs = require('querystring');
 
 export const GET_RANKING = '[RANKING] GET RANKING';
 export const GET_RANKING_LOADING = '[RANKING] GET RANKING LOADING';
@@ -81,7 +80,7 @@ export function refreshGroupRating(groupName) {
 			type: TRY_REFRESH_GROUP_RATING
 		});
 
-		const request = createCamilleAxios().post('/api/group/refresh-rating', qs.stringify({ groupName }));
+		const request = createCamilleAxios().post('/api/group/refresh-rating', new URLSearchParams({ groupName }).toString());
 
 		request.finally(() => {
 			dispatch({

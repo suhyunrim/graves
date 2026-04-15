@@ -139,7 +139,7 @@ const FusePageSimple = React.forwardRef((props, ref) => {
 	const leftSidebarRef = useRef(null);
 	const rightSidebarRef = useRef(null);
 	const rootRef = useRef(null);
-	const classes = useStyles(props);
+	const { classes } = useStyles(props);
 
 	React.useImperativeHandle(ref, () => ({
 		rootRef,

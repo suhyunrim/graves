@@ -55,7 +55,7 @@ const useStyles = makeStyles()((theme) => ({
 function FuseNavHorizontalGroup(props) {
 	const userRole = useSelector(({ auth }) => auth.user.role);
 
-	const classes = useStyles(props);
+	const { classes } = useStyles(props);
 	const [opened, setOpened] = useState(false);
 	const { item, nestedLevel, dense } = props;
 	const theme = useTheme();

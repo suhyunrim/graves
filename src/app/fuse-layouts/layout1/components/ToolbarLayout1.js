@@ -37,7 +37,7 @@ function ToolbarLayout1(props) {
 	const config = useSelector(({ fuse }) => fuse.settings.current.layout.config);
 	const toolbarTheme = useSelector(({ fuse }) => fuse.settings.toolbarTheme);
 
-	const classes = useStyles(props);
+	const { classes } = useStyles(props);
 
 	return (
         <StyledEngineProvider injectFirst>

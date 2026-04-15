@@ -44,7 +44,7 @@ function NavbarWrapperLayout2(props) {
 	const navbarTheme = useSelector(({ fuse }) => fuse.settings.navbarTheme);
 	const navbar = useSelector(({ fuse }) => fuse.navbar);
 
-	const classes = useStyles(props);
+	const { classes } = useStyles(props);
 
 	return (
         <>

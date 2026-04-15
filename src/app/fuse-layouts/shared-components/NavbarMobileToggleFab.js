@@ -53,7 +53,7 @@ const useStyles = makeStyles()((theme) => ({
 }));
 
 function NavbarMobileToggleFab(props) {
-	const classes = useStyles(props);
+	const { classes } = useStyles(props);
 	const config = useSelector(({ fuse }) => fuse.settings.current.layout.config);
 
 	const dispatch = useDispatch();

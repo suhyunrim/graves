@@ -56,7 +56,7 @@ function FuseLayout(props) {
 
 	const appContext = useContext(AppContext);
 	const { routes } = appContext;
-	const classes = useStyles(props);
+	const { classes } = useStyles(props);
 	const location = useLocation();
 	const { pathname } = location;
 	const matched = matchRoutes(routes, pathname)[0];

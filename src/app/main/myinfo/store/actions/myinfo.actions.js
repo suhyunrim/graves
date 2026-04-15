@@ -2,7 +2,6 @@ import createCamilleAxios from 'app/utility/camilleAxios';
 import { isSampleMode } from 'app/main/sample/sampleStorage';
 import { getSampleMyInfoData } from 'app/main/sample/sampleData';
 
-const qs = require('querystring');
 
 export const GET_MYINFO = '[MYINFO] GET MYINFO';
 export const REFRESH_CHAMPION_SCORES = '[MYINFO] REFRESH CHAMPION SCORES';
@@ -121,7 +120,7 @@ export function refreshChampionScores(groupId) {
 			type: TRY_REFRESH_CHAMPION_SCORES
 		});
 
-		const request = createCamilleAxios().post('/api/user/calculateChampionScore', qs.stringify({ groupId }));
+		const request = createCamilleAxios().post('/api/user/calculateChampionScore', new URLSearchParams({ groupId }).toString());
 
 		request.then(response => {
 			if (response.status !== 200) return;

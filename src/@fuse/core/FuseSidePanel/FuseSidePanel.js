@@ -165,7 +165,7 @@ const useStyles = makeStyles()((theme) => ({
 
 function FuseSidePanel({ position = 'left', opened: openedProp = true, ...restProps }) {
 	const props = { position, opened: openedProp, ...restProps };
-	const classes = useStyles(props);
+	const { classes } = useStyles(props);
 	const [opened, setOpened] = useState(openedProp);
 	const [mobileOpen, setMobileOpen] = useState(false);
 
