@@ -75,9 +75,13 @@
 		"build": "vite build",
 		"preview": "vite preview",
 		"lint": "eslint",
-		"test:smoke": "playwright test --project=smoke",
-		"test:e2e": "playwright test --project=e2e",
-		"test:e2e:ui": "playwright test --ui",
+		"test:smoke": "npx playwright test --project=smoke",
+		"test:content": "npx playwright test --project=content",
+		"test:e2e": "npx playwright test --project=e2e",
+		"test:visual": "npx playwright test --project=visual",
+		"test:visual:update": "npx playwright test --project=visual --update-snapshots",
+		"test:all": "npx playwright test",
+		"test:e2e:ui": "npx playwright test --ui",
 		"test:save-auth": "npx playwright codegen --save-storage=tests/auth.json http://localhost:5173/login"
 	}
 }

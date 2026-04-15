@@ -24,6 +24,13 @@ export default defineConfig({
 			}
 		},
 		{
+			name: 'content',
+			testDir: './tests/content',
+			use: {
+				viewport: { width: 1280, height: 720 }
+			}
+		},
+		{
 			name: 'setup',
 			testMatch: /auth\.setup\.ts/
 		},
@@ -33,6 +40,13 @@ export default defineConfig({
 			dependencies: ['setup'],
 			use: {
 				storageState: 'tests/auth.json',
+				viewport: { width: 1280, height: 720 }
+			}
+		},
+		{
+			name: 'visual',
+			testDir: './tests/visual',
+			use: {
 				viewport: { width: 1280, height: 720 }
 			}
 		}

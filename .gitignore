@@ -9,6 +9,10 @@
 /test-results
 /playwright-report
 /tests/auth.json
+/tests/screenshots/
+/tests/debug-*
+/tests/smoke-*
+/tests/*-auth.json
 
 # production
 /build
