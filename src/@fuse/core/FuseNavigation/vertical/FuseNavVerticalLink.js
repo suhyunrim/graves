@@ -14,13 +14,13 @@ import { useDispatch, useSelector } from 'react-redux';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import FuseNavBadge from '../FuseNavBadge';
 
-const useStyles = makeStyles()((theme) => ({
-	item: props => ({
+const useStyles = makeStyles()((theme, params) => ({
+	item: {
 		height: 40,
 		width: 'calc(100% - 16px)',
 		borderRadius: '0 20px 20px 0',
 		paddingRight: 12,
-		paddingLeft: props.itemPadding > 80 ? 80 : props.itemPadding,
+		paddingLeft: params.itemPadding > 80 ? 80 : params.itemPadding,
 		'&.active': {
 			backgroundColor: theme.palette.secondary.main,
 			color: `${theme.palette.secondary.contrastText}!important`,
@@ -39,7 +39,7 @@ const useStyles = makeStyles()((theme) => ({
 		'& .list-item-text': {},
 		color: theme.palette.text.primary,
 		textDecoration: 'none!important'
-	})
+	}
 }));
 
 function FuseNavVerticalLink(props) {

@@ -13,17 +13,17 @@ import { useDispatch, useSelector } from 'react-redux';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import FuseNavItem from '../FuseNavItem';
 
-const useStyles = makeStyles()((theme) => ({
-	item: props => ({
+const useStyles = makeStyles()((theme, params) => ({
+	item: {
 		height: 40,
 		width: 'calc(100% - 16px)',
 		borderRadius: '0 20px 20px 0',
 		paddingRight: 12,
-		paddingLeft: props.itemPadding > 80 ? 80 : props.itemPadding,
+		paddingLeft: params.itemPadding > 80 ? 80 : params.itemPadding,
 		'&.active > .list-subheader-text': {
 			fontWeight: 700
 		}
-	})
+	}
 }));
 
 function FuseNavVerticalGroup(props) {

@@ -1,6 +1,6 @@
 import _ from '@lodash';
 import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
+import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
 import React from 'react';
 
@@ -17,9 +17,9 @@ function DemoSidebarContent() {
 		<div>
 			<List dense>
 				{generate(
-					<ListItem button>
+					<ListItemButton>
 						<ListItemText primary="Single-line item" />
-					</ListItem>
+					</ListItemButton>
 				)}
 			</List>
 		</div>
