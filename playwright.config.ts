@@ -17,6 +17,13 @@ export default defineConfig({
 	},
 	projects: [
 		{
+			name: 'smoke',
+			testDir: './tests/smoke',
+			use: {
+				viewport: { width: 1280, height: 720 }
+			}
+		},
+		{
 			name: 'setup',
 			testMatch: /auth\.setup\.ts/
 		},
