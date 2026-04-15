@@ -13,8 +13,9 @@ export default function globalSetup(config: FullConfig) {
 
 	const needsAuth = runningProjects.some(name => name === 'e2e' || name === 'setup');
 
-	// --project=smoke 으로 실행하면 auth 체크 스킵
-	if (process.argv.some(arg => arg.includes('smoke'))) return;
+	// smoke, content, visual 프로젝트는 자체 로그인하므로 auth.json 불필요
+	const skipAuthProjects = ['smoke', 'content', 'visual'];
+	if (process.argv.some(arg => skipAuthProjects.some(p => arg.includes(p)))) return;
 
 	if (needsAuth && !existsSync(AUTH_PATH)) {
 		console.log('');

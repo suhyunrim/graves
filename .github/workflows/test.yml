@@ -1,0 +1,34 @@
+name: Test
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - run: yarn install --frozen-lockfile
+
+      - run: npx playwright install --with-deps chromium
+
+      - name: Check backend health
+        run: curl -sf https://zeroboom.lol/api/health || echo "BACKEND_DOWN=true" >> $GITHUB_ENV
+
+      - name: Run smoke tests
+        if: env.BACKEND_DOWN != 'true'
+        run: yarn test:smoke
+
+      - name: Run content tests
+        if: env.BACKEND_DOWN != 'true'
+        run: yarn test:content
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: playwright-report/
