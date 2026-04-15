@@ -22,9 +22,10 @@ const IGNORED_CONSOLE_ERRORS = [
 	'401',
 	'403',
 	'ResizeObserver loop',
-	// MUI/tss-react 개발 경고 (크래시 아님, 추후 정리 대상)
+	// MUI/tss-react/emotion 개발 경고 (크래시 아님, 추후 정리 대상)
 	'Functions that are interpolated in css calls',
 	'non-boolean attribute',
+	'nth-child',
 ];
 
 function shouldIgnoreConsoleError(text: string): boolean {
