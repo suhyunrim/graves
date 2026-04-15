@@ -73,6 +73,4 @@ function NavbarMobileToggleFab(props) {
 	);
 }
 
-NavbarMobileToggleFab.defaultProps = {};
-
 export default NavbarMobileToggleFab;

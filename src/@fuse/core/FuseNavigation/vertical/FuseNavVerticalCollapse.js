@@ -7,7 +7,7 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import { makeStyles } from '@material-ui/core/styles';
 import clsx from 'clsx';
-import PropTypes from 'prop-types';
+
 import React, { useEffect, useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
@@ -128,28 +128,13 @@ function FuseNavVerticalCollapse(props) {
 			{item.children && (
 				<Collapse in={open} className="collapse-children">
 					{item.children.map(_item => (
-						<FuseNavItem
-							key={_item.id}
-							type={`vertical-${_item.type}`}
-							item={_item}
-							nestedLevel={nestedLevel + 1}
-						/>
+						<FuseNavItem key={_item.id} type={`vertical-${_item.type}`} item={_item} nestedLevel={nestedLevel + 1} />
 					))}
 				</Collapse>
 			)}
 		</ul>
 	);
 }
-
-FuseNavVerticalCollapse.propTypes = {
-	item: PropTypes.shape({
-		id: PropTypes.string.isRequired,
-		title: PropTypes.string,
-		icon: PropTypes.string,
-		children: PropTypes.array
-	})
-};
-FuseNavVerticalCollapse.defaultProps = {};
 
 const NavVerticalCollapse = withRouter(React.memo(FuseNavVerticalCollapse));
 

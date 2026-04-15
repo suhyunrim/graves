@@ -4,22 +4,12 @@ import Card from '@material-ui/core/Card';
 import Icon from '@material-ui/core/Icon';
 import Tab from '@material-ui/core/Tab';
 import Tabs from '@material-ui/core/Tabs';
-import PropTypes from 'prop-types';
 import React, { useState } from 'react';
 import DemoFrame from './DemoFrame';
 
-const propTypes = {
-	raw: PropTypes.object,
-	currentTabIndex: PropTypes.number
-};
-
-const defaultProps = {
-	currentTabIndex: 0
-};
-
 function FuseExample(props) {
-	const [currentTab, setCurrentTab] = useState(props.currentTabIndex);
-	const { component: Component, raw, iframe, className } = props;
+	const { component: Component, raw, iframe, className, currentTabIndex = 0 } = props;
+	const [currentTab, setCurrentTab] = useState(currentTabIndex);
 
 	function handleChange(event, value) {
 		setCurrentTab(value);
@@ -66,8 +56,5 @@ function FuseExample(props) {
 		</Card>
 	);
 }
-
-FuseExample.propTypes = propTypes;
-FuseExample.defaultProps = defaultProps;
 
 export default FuseExample;

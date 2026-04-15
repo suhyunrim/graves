@@ -42,10 +42,7 @@ function renderInputComponent(inputProps) {
 						variant="outlined"
 						{...other}
 					/>
-					<Icon
-						className="absolute top-0 ltr:right-0 rtl:left-0 h-48 w-48 p-12 pointer-events-none"
-						color="action"
-					>
+					<Icon className="absolute top-0 ltr:right-0 rtl:left-0 h-48 w-48 p-12 pointer-events-none" color="action">
 						search
 					</Icon>
 				</>
@@ -216,7 +213,14 @@ function reducer(state, action) {
 	}
 }
 
+const defaultTrigger = (
+	<IconButton className="w-64 h-64">
+		<Icon>search</Icon>
+	</IconButton>
+);
+
 function FuseSearch(props) {
+	const { trigger = defaultTrigger, variant = 'full' } = props;
 	const userRole = useSelector(({ auth }) => auth.user.role);
 	const navigation = useSelector(({ fuse }) => fuse.navigation);
 
@@ -301,14 +305,14 @@ function FuseSearch(props) {
 		renderSuggestion
 	};
 
-	switch (props.variant) {
+	switch (variant) {
 		case 'basic': {
 			return (
 				<div className={clsx('flex items-center w-full', props.className)} ref={popperNode}>
 					<Autosuggest
 						{...autosuggestProps}
 						inputProps={{
-							variant: props.variant,
+							variant,
 							classes,
 							placeholder: 'Search',
 							value: state.searchText,
@@ -339,9 +343,7 @@ function FuseSearch(props) {
 										style={{ width: popperNode.current ? popperNode.current.clientWidth : null }}
 									>
 										{options.children}
-										{state.noSuggestions && (
-											<Typography className="px-16 py-12">No results..</Typography>
-										)}
+										{state.noSuggestions && <Typography className="px-16 py-12">No results..</Typography>}
 									</Paper>
 								</div>
 							</Popper>
@@ -355,7 +357,7 @@ function FuseSearch(props) {
 				<div className={clsx(classes.root, 'flex', props.className)}>
 					<Tooltip title="Click to search" placement="bottom">
 						<div onClick={showSearch} onKeyDown={showSearch} role="button" tabIndex={0}>
-							{props.trigger}
+							{trigger}
 						</div>
 					</Tooltip>
 
@@ -393,17 +395,11 @@ function FuseSearch(props) {
 														square
 														{...options.containerProps}
 														style={{
-															width: popperNode.current
-																? popperNode.current.clientWidth
-																: null
+															width: popperNode.current ? popperNode.current.clientWidth : null
 														}}
 													>
 														{options.children}
-														{state.noSuggestions && (
-															<Typography className="px-16 py-12">
-																No results..
-															</Typography>
-														)}
+														{state.noSuggestions && <Typography className="px-16 py-12">No results..</Typography>}
 													</Paper>
 												</div>
 											</Popper>
@@ -424,15 +420,5 @@ function FuseSearch(props) {
 		}
 	}
 }
-
-FuseSearch.propTypes = {};
-FuseSearch.defaultProps = {
-	trigger: (
-		<IconButton className="w-64 h-64">
-			<Icon>search</Icon>
-		</IconButton>
-	),
-	variant: 'full' // basic, full
-};
 
 export default withRouter(React.memo(FuseSearch));

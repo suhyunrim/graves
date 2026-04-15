@@ -9,7 +9,7 @@ import ListItemText from '@material-ui/core/ListItemText';
 import Paper from '@material-ui/core/Paper';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
 import clsx from 'clsx';
-import PropTypes from 'prop-types';
+
 import React, { useState, useMemo } from 'react';
 import * as ReactDOM from 'react-dom';
 import { useTranslation } from 'react-i18next';
@@ -134,11 +134,7 @@ function FuseNavHorizontalCollapse(props) {
 					)}
 				</Reference>
 				{ReactDOM.createPortal(
-					<Popper
-						placement={theme.direction === 'ltr' ? 'right' : 'left'}
-						eventsEnabled={opened}
-						positionFixed
-					>
+					<Popper placement={theme.direction === 'ltr' ? 'right' : 'left'} eventsEnabled={opened} positionFixed>
 						{({ ref, style, placement, arrowProps }) =>
 							opened && (
 								<div
@@ -151,19 +147,9 @@ function FuseNavHorizontalCollapse(props) {
 									className={clsx(classes.popper, { [classes.popperClose]: !opened })}
 								>
 									<Grow in={opened} id="menu-list-grow" style={{ transformOrigin: '0 0 0' }}>
-										<Paper
-											onMouseEnter={() => handleToggle(true)}
-											onMouseLeave={() => handleToggle(false)}
-										>
+										<Paper onMouseEnter={() => handleToggle(true)} onMouseLeave={() => handleToggle(false)}>
 											{item.children && (
-												<ul
-													className={clsx(
-														classes.children,
-														'popper-navigation-list',
-														dense && 'dense',
-														'px-0'
-													)}
-												>
+												<ul className={clsx(classes.children, 'popper-navigation-list', dense && 'dense', 'px-0')}>
 													{item.children.map(_item => (
 														<FuseNavItem
 															key={_item.id}
@@ -187,17 +173,6 @@ function FuseNavHorizontalCollapse(props) {
 		</ul>
 	);
 }
-
-FuseNavHorizontalCollapse.propTypes = {
-	item: PropTypes.shape({
-		id: PropTypes.string.isRequired,
-		title: PropTypes.string,
-		icon: PropTypes.string,
-		children: PropTypes.array
-	})
-};
-
-FuseNavHorizontalCollapse.defaultProps = {};
 
 const NavHorizontalCollapse = withRouter(React.memo(FuseNavHorizontalCollapse));
 

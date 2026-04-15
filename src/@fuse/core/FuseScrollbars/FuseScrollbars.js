@@ -3,7 +3,6 @@ import clsx from 'clsx';
 import MobileDetect from 'mobile-detect';
 import PerfectScrollbar from 'perfect-scrollbar';
 import 'perfect-scrollbar/css/perfect-scrollbar.css';
-import PropTypes from 'prop-types';
 import React, { createRef, useCallback, useEffect, useRef } from 'react';
 import { connect } from 'react-redux';
 import withRouterAndRef from '../withRouterAndRef/withRouterAndRef';
@@ -29,16 +28,26 @@ const useStyles = makeStyles(theme => ({
 	root: {}
 }));
 
-const FuseScrollbars = React.forwardRef((props, ref) => {
-	ref = ref || createRef();
+const FuseScrollbars = React.forwardRef(({
+	className: classNameProp = '',
+	enable = true,
+	scrollToTopOnChildChange = false,
+	scrollToTopOnRouteChange = false,
+	option = { wheelPropagation: true },
+	customScrollbars,
+	children,
+	id,
+	history,
+	...restProps
+}, forwardedRef) => {
+	const ref = forwardedRef || createRef();
 	const ps = useRef(null);
 	const handlerByEvent = useRef(new Map());
 	const classes = useStyles();
-	const { customScrollbars } = props;
 
 	const hookUpEvents = useCallback(() => {
 		Object.keys(handlerNameByEvent).forEach(key => {
-			const callback = props[handlerNameByEvent[key]];
+			const callback = restProps[handlerNameByEvent[key]];
 			if (callback) {
 				const handler = () => callback(ref.current);
 				handlerByEvent.current.set(key, handler);
@@ -76,10 +85,10 @@ const FuseScrollbars = React.forwardRef((props, ref) => {
 			return;
 		}
 
-		ps.current = new PerfectScrollbar(ref.current, props.option);
+		ps.current = new PerfectScrollbar(ref.current, option);
 
 		hookUpEvents();
-	}, [hookUpEvents, props.option, ref]);
+	}, [hookUpEvents, option, ref]);
 
 	useEffect(() => {
 		function updatePs() {
@@ -93,12 +102,12 @@ const FuseScrollbars = React.forwardRef((props, ref) => {
 	});
 
 	useEffect(() => {
-		if (customScrollbars && props.enable !== false) {
+		if (customScrollbars && enable !== false) {
 			createPs();
 		} else {
 			destroyPs();
 		}
-	}, [createPs, customScrollbars, destroyPs, props.enable]);
+	}, [createPs, customScrollbars, destroyPs, enable]);
 
 	const scrollToTop = useCallback(() => {
 		if (ref && ref.current) {
@@ -107,19 +116,19 @@ const FuseScrollbars = React.forwardRef((props, ref) => {
 	}, [ref]);
 
 	useEffect(() => {
-		if (props.scrollToTopOnChildChange) {
+		if (scrollToTopOnChildChange) {
 			scrollToTop();
 		}
-	}, [scrollToTop, props.children, props.scrollToTopOnChildChange]);
+	}, [scrollToTop, children, scrollToTopOnChildChange]);
 
 	useEffect(
 		() =>
-			props.history.listen(() => {
-				if (props.scrollToTopOnRouteChange) {
+			history.listen(() => {
+				if (scrollToTopOnRouteChange) {
 					scrollToTop();
 				}
 			}),
-		[scrollToTop, props.history, props.scrollToTopOnRouteChange]
+		[scrollToTop, history, scrollToTopOnRouteChange]
 	);
 
 	useEffect(
@@ -132,21 +141,21 @@ const FuseScrollbars = React.forwardRef((props, ref) => {
 	// console.info('render::ps');
 	return (
 		<div
-			id={props.id}
-			className={clsx(classes.root, props.className)}
+			id={id}
+			className={clsx(classes.root, classNameProp)}
 			style={
-				props.customScrollbars && props.enable !== false && !isMobile
+				customScrollbars && enable !== false && !isMobile
 					? {
 							position: 'relative',
 							overflow: 'hidden'
 					  }
-					: props.enable === false
+					: enable === false
 					? { overflow: 'visible' }
 					: {}
 			}
 			ref={ref}
 		>
-			{props.children}
+			{children}
 		</div>
 	);
 });
@@ -156,41 +165,5 @@ function mapStateToProps({ fuse }) {
 		customScrollbars: fuse.settings.current.customScrollbars
 	};
 }
-
-FuseScrollbars.propTypes = {
-	onScrollY: PropTypes.func,
-	onScrollX: PropTypes.func,
-	onScrollUp: PropTypes.func,
-	onScrollDown: PropTypes.func,
-	onScrollLeft: PropTypes.func,
-	onScrollRight: PropTypes.func,
-	onYReachStart: PropTypes.func,
-	onYReachEnd: PropTypes.func,
-	onXReachStart: PropTypes.func,
-	onXReachEnd: PropTypes.func,
-	scrollToTopOnRouteChange: PropTypes.bool,
-	scrollToTopOnChildChange: PropTypes.bool
-};
-
-FuseScrollbars.defaultProps = {
-	className: '',
-	enable: true,
-	scrollToTopOnChildChange: false,
-	scrollToTopOnRouteChange: false,
-	option: {
-		wheelPropagation: true
-	},
-	ref: undefined,
-	onScrollY: undefined,
-	onScrollX: undefined,
-	onScrollUp: undefined,
-	onScrollDown: undefined,
-	onScrollLeft: undefined,
-	onScrollRight: undefined,
-	onYReachStart: undefined,
-	onYReachEnd: undefined,
-	onXReachStart: undefined,
-	onXReachEnd: undefined
-};
 
 export default connect(mapStateToProps, null, null, { forwardRef: true })(withRouterAndRef(FuseScrollbars));

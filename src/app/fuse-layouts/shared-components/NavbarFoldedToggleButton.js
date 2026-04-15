@@ -5,13 +5,13 @@ import * as Actions from 'app/store/actions';
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
-function NavbarFoldedToggleButton(props) {
+function NavbarFoldedToggleButton({ className, children = <Icon>menu</Icon> }) {
 	const dispatch = useDispatch();
 	const settings = useSelector(({ fuse }) => fuse.settings.current);
 
 	return (
 		<IconButton
-			className={props.className}
+			className={className}
 			onClick={() => {
 				dispatch(
 					Actions.setDefaultSettings(
@@ -21,13 +21,9 @@ function NavbarFoldedToggleButton(props) {
 			}}
 			color="inherit"
 		>
-			{props.children}
+			{children}
 		</IconButton>
 	);
 }
-
-NavbarFoldedToggleButton.defaultProps = {
-	children: <Icon>menu</Icon>
-};
 
 export default NavbarFoldedToggleButton;

@@ -3,22 +3,18 @@ import clsx from 'clsx';
 import React from 'react';
 import { useSelector } from 'react-redux';
 
-function Navigation(props) {
+function Navigation({ className, layout = 'vertical', dense, active }) {
 	const navigation = useSelector(({ fuse }) => fuse.navigation);
 
 	return (
 		<FuseNavigation
-			className={clsx('navigation', props.className)}
+			className={clsx('navigation', className)}
 			navigation={navigation}
-			layout={props.layout}
-			dense={props.dense}
-			active={props.active}
+			layout={layout}
+			dense={dense}
+			active={active}
 		/>
 	);
 }
-
-Navigation.defaultProps = {
-	layout: 'vertical'
-};
 
 export default React.memo(Navigation);

@@ -1,5 +1,4 @@
 import * as Prism from 'prismjs';
-import PropTypes from 'prop-types';
 import React, { useEffect, useRef } from 'react';
 import './prism-languages';
 
@@ -59,7 +58,7 @@ function FuseHighlight(props) {
 		return sourceRaw;
 	}
 
-	const { className, component: Wrapper } = props;
+	const { className, component: Wrapper = 'code' } = props;
 
 	return (
 		<Wrapper ref={domNode} className={className}>
@@ -67,12 +66,5 @@ function FuseHighlight(props) {
 		</Wrapper>
 	);
 }
-
-FuseHighlight.propTypes = {
-	component: PropTypes.node
-};
-FuseHighlight.defaultProps = {
-	component: 'code'
-};
 
 export default React.memo(FuseHighlight);
