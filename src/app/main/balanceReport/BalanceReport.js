@@ -22,7 +22,7 @@ import {
 import { DatePicker } from '@mui/x-date-pickers';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, ArcElement, Title, ChartTooltip, Filler, Legend);
-import moment from 'moment';
+import { subMonths, format as formatDate } from 'date-fns';
 import reducer from './store/reducers';
 import * as Actions from './store/actions';
 
@@ -389,12 +389,12 @@ function BalanceReport() {
 	const user = useSelector(state => state.auth.user);
 	const groupId = user && user.reprGroup ? user.reprGroup.groupId : null;
 
-	const [startDate, setStartDate] = useState(moment().subtract(3, 'months'));
-	const [endDate, setEndDate] = useState(moment());
+	const [startDate, setStartDate] = useState(subMonths(new Date(), 3));
+	const [endDate, setEndDate] = useState(new Date());
 
 	const fetchReport = useCallback(() => {
 		if (groupId) {
-			dispatch(Actions.getBalanceReport(groupId, startDate.format('YYYY-MM-DD'), endDate.format('YYYY-MM-DD')));
+			dispatch(Actions.getBalanceReport(groupId, formatDate(startDate, 'yyyy-MM-dd'), formatDate(endDate, 'yyyy-MM-dd')));
 		}
 	}, [dispatch, groupId, startDate, endDate]);
 
@@ -906,7 +906,7 @@ function BalanceReport() {
 						<DatePicker
 							value={startDate}
 							onChange={date => date && setStartDate(date)}
-							format="YYYY-MM-DD"
+							format="yyyy-MM-dd"
 							maxDate={endDate}
 							autoOk
 							variant="inline"
@@ -915,9 +915,9 @@ function BalanceReport() {
 						<DatePicker
 							value={endDate}
 							onChange={date => date && setEndDate(date)}
-							format="YYYY-MM-DD"
+							format="yyyy-MM-dd"
 							minDate={startDate}
-							maxDate={moment()}
+							maxDate={new Date()}
 							autoOk
 							variant="inline"
 						/>

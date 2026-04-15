@@ -1,11 +1,11 @@
 import Typography from '@mui/material/Typography';
 import clsx from 'clsx';
-import moment from 'moment';
+import { addDays, differenceInSeconds } from 'date-fns';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 function FuseCountdown(props) {
-	const { onComplete, endDate: endDateProp = moment().add(15, 'days') } = props;
-	const [endDate] = useState(moment.isMoment(endDateProp) ? endDateProp : moment(endDateProp));
+	const { onComplete, endDate: endDateProp = addDays(new Date(), 15) } = props;
+	const [endDate] = useState(endDateProp instanceof Date ? endDateProp : new Date(endDateProp));
 	const [countdown, setCountdown] = useState({
 		days: 0,
 		hours: 0,
@@ -22,19 +22,17 @@ function FuseCountdown(props) {
 	}, [onComplete]);
 
 	const tick = useCallback(() => {
-		const currDate = moment();
-		const diff = endDate.diff(currDate, 'seconds');
+		const now = new Date();
+		const diff = differenceInSeconds(endDate, now);
 		if (diff < 0) {
 			complete();
 			return;
 		}
-		const timeLeft = moment.duration(diff, 'seconds');
-		setCountdown({
-			days: timeLeft.asDays().toFixed(0),
-			hours: timeLeft.hours(),
-			minutes: timeLeft.minutes(),
-			seconds: timeLeft.seconds()
-		});
+		const days = Math.floor(diff / 86400);
+		const hours = Math.floor((diff % 86400) / 3600);
+		const minutes = Math.floor((diff % 3600) / 60);
+		const seconds = diff % 60;
+		setCountdown({ days, hours, minutes, seconds });
 	}, [complete, endDate]);
 
 	useEffect(() => {

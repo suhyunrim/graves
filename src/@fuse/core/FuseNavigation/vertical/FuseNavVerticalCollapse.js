@@ -15,19 +15,19 @@ import { useLocation } from 'react-router-dom';
 import FuseNavBadge from '../FuseNavBadge';
 import FuseNavItem from '../FuseNavItem';
 
-const useStyles = makeStyles()((theme) => ({
+const useStyles = makeStyles()((theme, params) => ({
 	root: {
 		padding: 0,
 		'&.open': {
 			backgroundColor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,.015)' : 'rgba(0,0,0,.04)'
 		}
 	},
-	item: props => ({
+	item: {
 		height: 40,
 		width: 'calc(100% - 16px)',
 		borderRadius: '0 20px 20px 0',
 		paddingRight: 12,
-		paddingLeft: props.itemPadding > 80 ? 80 : props.itemPadding,
+		paddingLeft: params.itemPadding > 80 ? 80 : params.itemPadding,
 		color: theme.palette.text.primary,
 		'&.active > .list-item-text > span': {
 			fontWeight: 600
@@ -35,7 +35,7 @@ const useStyles = makeStyles()((theme) => ({
 		'& .list-item-icon': {
 			marginRight: 16
 		}
-	})
+	}
 }));
 
 function needsToBeOpened(location, item) {

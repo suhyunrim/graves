@@ -1,8 +1,7 @@
 import { fuseDark } from '@fuse/colors';
 import _ from '@lodash';
 import { lightBlue, red } from '@mui/material/colors';
-import { createTheme, adaptV4Theme } from '@mui/material/styles';
-import qs from 'qs';
+import { createTheme } from '@mui/material/styles';
 
 /**
  * SETTINGS DEFAULTS
@@ -20,18 +19,13 @@ export const defaultSettings = {
 };
 
 export function getParsedQuerySettings() {
-	const parsedQueryString = qs.parse(window.location.search, { ignoreQueryPrefix: true });
+	const params = new URLSearchParams(window.location.search);
+	const defaultSettingsParam = params.get('defaultSettings');
 
-	if (parsedQueryString && parsedQueryString.defaultSettings) {
-		return JSON.parse(parsedQueryString.defaultSettings);
+	if (defaultSettingsParam) {
+		return JSON.parse(defaultSettingsParam);
 	}
 	return {};
-
-	// Generating route params from settings
-	/* const settings = qs.stringify({
-        defaultSettings: JSON.stringify(defaultSettings, {strictNullHandling: true})
-    });
-    console.info(settings); */
 }
 
 /**
@@ -43,8 +37,6 @@ export const defaultThemeOptions = {
 		fontWeightLight: 300,
 		fontWeightRegular: 400,
 		fontWeightMedium: 600,
-		useNextVariants: true,
-		suppressDeprecationWarnings: true
 	}
 };
 
@@ -94,7 +86,7 @@ export const defaultThemes = {
 };
 
 export function extendThemeWithMixins(obj) {
-	const theme = createTheme(adaptV4Theme(obj));
+	const theme = createTheme(obj);
 	return {
 		border: (width = 1) => ({
 			borderWidth: width,
@@ -127,7 +119,7 @@ export function extendThemeWithMixins(obj) {
 export function mainThemeVariations(theme) {
 	return {
 		mainThemeDark: createTheme(
-			adaptV4Theme(_.merge({}, defaultThemeOptions, theme, {
+			_.merge({}, defaultThemeOptions, theme, {
 				palette: {
 					mode: 'dark',
 					background: {
@@ -136,10 +128,10 @@ export function mainThemeVariations(theme) {
 					}
 				},
 				...mustHaveThemeOptions
-			}))
+			})
 		),
 		mainThemeLight: createTheme(
-			adaptV4Theme(_.merge({}, defaultThemeOptions, theme, {
+			_.merge({}, defaultThemeOptions, theme, {
 				palette: {
 					mode: 'light',
 					background: {
@@ -148,7 +140,7 @@ export function mainThemeVariations(theme) {
 					}
 				},
 				...mustHaveThemeOptions
-			}))
+			})
 		)
 	};
 }

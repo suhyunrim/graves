@@ -15,13 +15,13 @@ import { useDispatch, useSelector } from 'react-redux';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import FuseNavBadge from '../FuseNavBadge';
 
-const useStyles = makeStyles()((theme) => ({
-	item: props => ({
+const useStyles = makeStyles()((theme, params) => ({
+	item: {
 		height: 48,
 		width: 'calc(100% - 16px)',
 		borderRadius: '0 24px 24px 0',
 		paddingRight: 16,
-		paddingLeft: props.itemPadding > 80 ? 80 : props.itemPadding,
+		paddingLeft: params.itemPadding > 80 ? 80 : params.itemPadding,
 		marginBottom: 4,
 		color: 'rgba(255, 255, 255, 0.7)',
 		cursor: 'pointer',
@@ -54,7 +54,7 @@ const useStyles = makeStyles()((theme) => ({
 			transition: 'color 0.3s ease'
 		},
 		'& .list-item-text': {}
-	}),
+	},
 	listItemText: {
 		'& .MuiTypography-root': {
 			fontFamily: '"Noto Sans KR", sans-serif',
