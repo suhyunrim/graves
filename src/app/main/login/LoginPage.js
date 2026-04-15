@@ -230,7 +230,7 @@ function LoginPage() {
 	}
 
 	function handleDiscordLogin() {
-		window.location.href = `${process.env.REACT_APP_CAMILLE_HOST}api/auth/discord`;
+		window.location.href = `${import.meta.env.VITE_CAMILLE_HOST}api/auth/discord`;
 	}
 
 	if (isPending) return <FuseSplashScreen />;

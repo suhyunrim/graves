@@ -9,7 +9,7 @@ import React, { useContext, useMemo, useCallback, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { matchRoutes } from 'react-router-config';
 import { useLocation } from 'react-router-dom';
-import * as Velocity from 'velocity-animate';
+import Velocity from 'velocity-animate';
 import { defaults as Chartjs2Defaults } from 'react-chartjs-2';
 
 const useStyles = makeStyles(theme => ({
