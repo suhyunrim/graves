@@ -77,7 +77,7 @@ const useStyles = makeStyles()((theme) => ({
 		flex: '1 1 auto',
 		height: '100%',
 		overflow: 'auto',
-		'-webkit-overflow-scrolling': 'touch'
+		WebkitOverflowScrolling: 'touch'
 	},
 	sidebarWrapper: {
 		position: 'absolute',
@@ -125,7 +125,7 @@ const useStyles = makeStyles()((theme) => ({
 		color: theme.palette.text.primary,
 		[theme.breakpoints.up('lg')]: {
 			overflow: 'auto',
-			'-webkit-overflow-scrolling': 'touch'
+			WebkitOverflowScrolling: 'touch'
 		}
 	},
 	backdrop: {

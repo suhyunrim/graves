@@ -1,43 +1,30 @@
-import React from 'react';
-import { VelocityComponent } from 'velocity-react';
-import 'velocity-animate/velocity.ui';
+import React, { useEffect, useRef } from 'react';
 
 const FuseAnimate = React.forwardRef(({
 	animation = 'transition.fadeIn',
 	runOnMount = true,
-	targetQuerySelector = null,
-	interruptBehavior = 'stop',
-	visibility = 'visible',
 	duration = 300,
 	delay = 50,
-	easing = [0.4, 0.0, 0.2, 1],
-	display = null,
 	children,
 	...rest
 }, ref) => {
-	const clonedChildren = React.cloneElement(children, {
-		style: {
-			...children.style,
-			visibility: 'hidden'
-		}
-	});
-	return (
-		<VelocityComponent
-			ref={ref}
-			animation={animation}
-			runOnMount={runOnMount}
-			targetQuerySelector={targetQuerySelector}
-			interruptBehavior={interruptBehavior}
-			visibility={visibility}
-			duration={duration}
-			delay={delay}
-			easing={easing}
-			display={display}
-			{...rest}
-		>
-			{clonedChildren}
-		</VelocityComponent>
-	);
+	const innerRef = useRef(null);
+	const resolvedRef = ref || innerRef;
+
+	useEffect(() => {
+		if (!runOnMount) return;
+		const el = resolvedRef.current;
+		if (!el) return;
+
+		el.style.opacity = '0';
+		el.style.transition = `opacity ${duration}ms ease ${delay}ms`;
+
+		requestAnimationFrame(() => {
+			el.style.opacity = '1';
+		});
+	}, [runOnMount, duration, delay, resolvedRef]);
+
+	return React.cloneElement(React.Children.only(children), { ref: resolvedRef, ...rest });
 });
 
 export default React.memo(FuseAnimate);
