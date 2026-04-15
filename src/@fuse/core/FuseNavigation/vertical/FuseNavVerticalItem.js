@@ -11,7 +11,7 @@ import clsx from 'clsx';
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
-import { withRouter } from 'react-router-dom';
+
 import useMediaQuery from '@mui/material/useMediaQuery';
 import FuseNavBadge from '../FuseNavBadge';
 
@@ -88,10 +88,9 @@ function FuseNavVerticalItem(props) {
 			button
 			component={NavLinkAdapter}
 			to={item.url}
-			activeClassName="active"
-			className={clsx(classes.item, 'list-item')}
+			className={({ isActive }) => clsx(classes.item, 'list-item', isActive && 'active')}
 			onClick={ev => mdDown && dispatch(Actions.navbarCloseMobile())}
-			exact={item.exact}
+			end={item.exact}
 		>
 			{item.icon && (
 				<Icon className="list-item-icon text-18 flex-shrink-0" color="action">
@@ -110,6 +109,6 @@ function FuseNavVerticalItem(props) {
 	);
 }
 
-const NavVerticalItem = withRouter(React.memo(FuseNavVerticalItem));
+const NavVerticalItem = React.memo(FuseNavVerticalItem);
 
 export default NavVerticalItem;

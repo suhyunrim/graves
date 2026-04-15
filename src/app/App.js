@@ -7,13 +7,22 @@ import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment';
 import React from 'react';
 import * as Sentry from '@sentry/react';
 import Provider from 'react-redux/es/components/Provider';
-import { Router } from 'react-router-dom';
+import { BrowserRouter, useNavigate } from 'react-router-dom';
 import AppContext from './AppContext';
 import { Auth } from './auth';
 import routes from './fuse-configs/routesConfig';
 import store from './store';
 import './utility/getLatesetRiotDataVersion';
 import './main/releaseNotes/releaseNoteBadge';
+
+/** BrowserRouter 내부에서 navigate 함수를 @history 유틸리티에 등록 */
+function NavigationSetter() {
+	const navigate = useNavigate();
+	React.useEffect(() => {
+		history.setNavigate(navigate);
+	}, [navigate]);
+	return null;
+}
 
 const SentryFallback = () => (
 	<div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
@@ -32,13 +41,14 @@ const App = () => {
 				<Provider store={store}>
 					<LocalizationProvider dateAdapter={AdapterMoment}>
 						<Auth>
-							<Router history={history}>
+							<BrowserRouter>
+								<NavigationSetter />
 								<FuseAuthorization>
 									<FuseTheme>
 										<FuseLayout />
 									</FuseTheme>
 								</FuseAuthorization>
-							</Router>
+							</BrowserRouter>
 						</Auth>
 					</LocalizationProvider>
 				</Provider>

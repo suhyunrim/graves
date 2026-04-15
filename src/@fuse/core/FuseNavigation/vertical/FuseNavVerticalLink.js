@@ -10,7 +10,7 @@ import clsx from 'clsx';
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
-import { withRouter } from 'react-router-dom';
+
 import useMediaQuery from '@mui/material/useMediaQuery';
 import FuseNavBadge from '../FuseNavBadge';
 
@@ -87,6 +87,6 @@ function FuseNavVerticalLink(props) {
 	);
 }
 
-const NavVerticalLink = withRouter(React.memo(FuseNavVerticalLink));
+const NavVerticalLink = React.memo(FuseNavVerticalLink);
 
 export default NavVerticalLink;

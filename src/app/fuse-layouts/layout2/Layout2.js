@@ -7,7 +7,7 @@ import AppContext from 'app/AppContext';
 import clsx from 'clsx';
 import React from 'react';
 import { useSelector } from 'react-redux';
-import { renderRoutes } from 'react-router-config';
+import { Routes, Route } from 'react-router-dom';
 import FooterLayout2 from './components/FooterLayout2';
 import LeftSideLayout2 from './components/LeftSideLayout2';
 import NavbarWrapperLayout2 from './components/NavbarWrapperLayout2';
@@ -86,7 +86,13 @@ function Layout2(props) {
 							<FuseDialog />
 
 							<div className="flex flex-auto flex-col relative h-full">
-								<FuseSuspense>{renderRoutes(routes)}</FuseSuspense>
+								<FuseSuspense>
+									<Routes>
+										{routes.map((route, i) => (
+											<Route key={i} path={route.path || '*'} element={<route.component />} />
+										))}
+									</Routes>
+								</FuseSuspense>
 
 								{props.children}
 

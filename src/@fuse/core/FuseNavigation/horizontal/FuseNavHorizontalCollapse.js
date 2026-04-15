@@ -16,7 +16,7 @@ import * as ReactDOM from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { Manager, Popper, Reference } from 'react-popper';
 import { useSelector } from 'react-redux';
-import { withRouter } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import FuseNavBadge from '../FuseNavBadge';
 import FuseNavItem from '../FuseNavItem';
 
@@ -53,6 +53,7 @@ const useStyles = makeStyles()((theme) => ({
 
 function FuseNavHorizontalCollapse(props) {
 	const userRole = useSelector(({ auth }) => auth.user.role);
+	const location = useLocation();
 
 	const { classes } = useStyles(props);
 	const [opened, setOpened] = useState(false);
@@ -102,7 +103,7 @@ function FuseNavHorizontalCollapse(props) {
 									'list-item',
 									classes.button,
 									opened && 'open',
-									isUrlInChildren(item, props.location.pathname) && 'active'
+									isUrlInChildren(item, location.pathname) && 'active'
 								)}
 								onMouseEnter={() => handleToggle(true)}
 								onMouseLeave={() => handleToggle(false)}
@@ -179,6 +180,6 @@ function FuseNavHorizontalCollapse(props) {
     );
 }
 
-const NavHorizontalCollapse = withRouter(React.memo(FuseNavHorizontalCollapse));
+const NavHorizontalCollapse = React.memo(FuseNavHorizontalCollapse);
 
 export default NavHorizontalCollapse;

@@ -3,7 +3,7 @@ import { Typography } from '@mui/material';
 import IconButton from '@mui/material/IconButton';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { makeStyles } from 'tss-react/mui';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 const useStyles = makeStyles()((theme) => ({
 	root: {
@@ -55,7 +55,7 @@ const useStyles = makeStyles()((theme) => ({
 
 function MyInfoHeader({ title, subtitle, showBack }) {
 	const { classes } = useStyles();
-	const history = useHistory();
+	const navigate = useNavigate();
 
 	return (
         <div className={classes.root}>
@@ -63,7 +63,7 @@ function MyInfoHeader({ title, subtitle, showBack }) {
 				{showBack && (
 					<IconButton
                         className={classes.backButton}
-                        onClick={() => history.goBack()}
+                        onClick={() => navigate(-1)}
                         size="large">
 						<ArrowBackIcon />
 					</IconButton>

@@ -18,7 +18,7 @@ import _ from '@lodash';
 import React, { useEffect, useReducer, useRef } from 'react';
 import Autosuggest from 'react-autosuggest';
 import { useSelector } from 'react-redux';
-import { withRouter } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 function renderInputComponent(inputProps) {
 	const { variant, classes, inputRef = () => {}, ref, ...other } = inputProps;
@@ -221,6 +221,7 @@ const defaultTrigger = (
 
 function FuseSearch(props) {
 	const { trigger = defaultTrigger, variant = 'full' } = props;
+	const navigate = useNavigate();
 	const userRole = useSelector(({ auth }) => auth.user.role);
 	const navigation = useSelector(({ fuse }) => fuse.navigation);
 
@@ -273,7 +274,7 @@ function FuseSearch(props) {
 		if (!suggestion.url) {
 			return;
 		}
-		props.history.push(suggestion.url);
+		navigate(suggestion.url);
 		hideSearch();
 	}
 
@@ -420,4 +421,4 @@ function FuseSearch(props) {
 	}
 }
 
-export default withRouter(React.memo(FuseSearch));
+export default React.memo(FuseSearch);

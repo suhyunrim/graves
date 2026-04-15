@@ -11,7 +11,7 @@ import clsx from 'clsx';
 import React, { useEffect, useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
-import { withRouter } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import FuseNavBadge from '../FuseNavBadge';
 import FuseNavItem from '../FuseNavItem';
 
@@ -64,7 +64,8 @@ function isUrlInChildren(parent, url) {
 
 function FuseNavVerticalCollapse(props) {
 	const userRole = useSelector(({ auth }) => auth.user.role);
-	const [open, setOpen] = useState(() => needsToBeOpened(props.location, props.item));
+	const location = useLocation();
+	const [open, setOpen] = useState(() => needsToBeOpened(location, props.item));
 	const { item, nestedLevel } = props;
 	const { classes } = useStyles({
 		itemPadding: nestedLevel > 0 ? 40 + nestedLevel * 16 : 24
@@ -72,13 +73,13 @@ function FuseNavVerticalCollapse(props) {
 	const { t } = useTranslation('navigation');
 
 	useEffect(() => {
-		if (needsToBeOpened(props.location, props.item)) {
+		if (needsToBeOpened(location, props.item)) {
 			if (!open) {
 				setOpen(true);
 			}
 		}
 		// eslint-disable-next-line
-	}, [props.location, props.item]);
+	}, [location, props.item]);
 
 	function handleClick() {
 		setOpen(!open);
@@ -135,6 +136,6 @@ function FuseNavVerticalCollapse(props) {
     );
 }
 
-const NavVerticalCollapse = withRouter(React.memo(FuseNavVerticalCollapse));
+const NavVerticalCollapse = React.memo(FuseNavVerticalCollapse);
 
 export default NavVerticalCollapse;

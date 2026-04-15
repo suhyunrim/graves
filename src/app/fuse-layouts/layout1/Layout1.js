@@ -7,7 +7,7 @@ import AppContext from 'app/AppContext';
 import clsx from 'clsx';
 import React, { useContext } from 'react';
 import { useSelector } from 'react-redux';
-import { renderRoutes } from 'react-router-config';
+import { Routes, Route } from 'react-router-dom';
 import FooterLayout1 from './components/FooterLayout1';
 import LeftSideLayout1 from './components/LeftSideLayout1';
 import NavbarWrapperLayout1 from './components/NavbarWrapperLayout1';
@@ -113,7 +113,13 @@ function Layout1(props) {
 									<div className={classes.content}>
 										<FuseDialog />
 
-										<FuseSuspense>{renderRoutes(routes)}</FuseSuspense>
+										<FuseSuspense>
+										<Routes>
+											{routes.map((route, i) => (
+												<Route key={i} path={route.path || '*'} element={<route.component />} />
+											))}
+										</Routes>
+									</FuseSuspense>
 
 										{props.children}
 									</div>
@@ -164,7 +170,13 @@ function Layout1(props) {
 
 									<FuseDialog />
 
-									<FuseSuspense>{renderRoutes(routes)}</FuseSuspense>
+									<FuseSuspense>
+										<Routes>
+											{routes.map((route, i) => (
+												<Route key={i} path={route.path || '*'} element={<route.component />} />
+											))}
+										</Routes>
+									</FuseSuspense>
 
 									{props.children}
 

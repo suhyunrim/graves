@@ -1,5 +1,5 @@
 import React from 'react';
-import { Redirect } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 import FuseUtils from '@fuse/utils';
 import authRoleExamplesConfigs from 'app/main/auth/authRoleExamplesConfigs';
 import DashboardConfig from 'app/main/dashboard/DashboardConfig';
@@ -37,10 +37,11 @@ const routes = [
 	...FuseUtils.generateRoutesFromConfigs(routeConfigs),
 	{
 		path: '/',
-		component: () => <Redirect to="/dashboard" />
+		component: () => <Navigate to="/dashboard" replace />
 	},
 	{
-		component: () => <Redirect to="/pages/errors/error-404" />
+		path: '*',
+		component: () => <Navigate to="/pages/errors/error-404" replace />
 	}
 ];
 
