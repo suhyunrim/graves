@@ -8,7 +8,7 @@
 /coverage
 /test-results
 /playwright-report
-/e2e/screenshots
+/tests/auth.json
 
 # production
 /build

@@ -1,7 +1,8 @@
 import { defineConfig } from '@playwright/test';
 
 export default defineConfig({
-	testDir: './e2e',
+	globalSetup: './tests/global-setup.ts',
+	testDir: './tests',
 	timeout: 30000,
 	expect: {
 		timeout: 10000
@@ -10,19 +11,28 @@ export default defineConfig({
 	retries: 0,
 	reporter: 'html',
 	use: {
-		baseURL: 'http://localhost:3001',
+		baseURL: 'http://localhost:5173',
 		screenshot: 'on',
 		trace: 'on-first-retry'
 	},
 	projects: [
 		{
-			name: 'chromium',
-			use: { browserName: 'chromium', viewport: { width: 1280, height: 720 } }
+			name: 'setup',
+			testMatch: /auth\.setup\.ts/
+		},
+		{
+			name: 'e2e',
+			testDir: './tests/e2e',
+			dependencies: ['setup'],
+			use: {
+				storageState: 'tests/auth.json',
+				viewport: { width: 1280, height: 720 }
+			}
 		}
 	],
 	webServer: {
 		command: 'yarn dev',
-		url: 'http://localhost:3001',
+		url: 'http://localhost:5173',
 		reuseExistingServer: true,
 		timeout: 60000
 	}
