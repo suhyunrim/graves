@@ -8,15 +8,17 @@ const jsxInJsPlugin = {
 	name: 'jsx-in-js',
 	enforce: 'pre',
 	load(id) {
-		if (id.match(/src[/\\].*\.js$/) && !id.includes('node_modules')) {
+		if (id.match(/src[/\\].*\.jsx?$/) && !id.includes('node_modules')) {
 			const code = readFileSync(id, 'utf-8');
 			const result = transformSync(code, {
 				loader: 'jsx',
 				jsx: 'transform',
 				jsxFactory: 'React.createElement',
-				jsxFragment: 'React.Fragment'
+				jsxFragment: 'React.Fragment',
+				sourcefile: id,
+				sourcemap: false
 			});
-			return { code: result.code, map: result.map };
+			return { code: result.code, map: null };
 		}
 		return null;
 	}
