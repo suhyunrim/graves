@@ -26,7 +26,7 @@ import { makeStyles } from 'tss-react/mui';
 import { withStyles } from 'tss-react/mui';
 import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { MatchHistorySkeleton } from '../components/SkeletonLoaders';
 import * as Actions from './store/actions';
 
@@ -555,7 +555,7 @@ const StyledTableRow = withStyles(TableRow, (theme) => ({
 function MatchHistoryTable() {
 	const { classes } = useStyles();
 	const dispatch = useDispatch();
-	const history = useHistory();
+	const navigate = useNavigate();
 
 	const user = useSelector(state => state.auth.user);
 	const matches = useSelector(({ MatchHistory }) => MatchHistory.matchHistory.matches);
@@ -760,7 +760,7 @@ function MatchHistoryTable() {
 				</span>
 				<span
 					className={isPlayerMatched(player.name) ? classes.playerNameHighlight : classes.playerName}
-					onClick={() => history.push(`/userinfo/${player.puuid}`)}
+					onClick={() => navigate(`/userinfo/${player.puuid}`)}
 				>
 					{player.name}
 				</span>
@@ -804,7 +804,7 @@ function MatchHistoryTable() {
 				</span>
 				<span
 					className={isPlayerMatched(player.name) ? classes.mobilePlayerNameHighlight : classes.mobilePlayerName}
-					onClick={() => history.push(`/userinfo/${player.puuid}`)}
+					onClick={() => navigate(`/userinfo/${player.puuid}`)}
 				>
 					{player.name}
 				</span>

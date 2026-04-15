@@ -10,7 +10,6 @@ import TableRow from '@mui/material/TableRow';
 import { makeStyles } from 'tss-react/mui';
 import { withStyles } from 'tss-react/mui';
 import React, { useEffect, useState } from 'react';
-import { withRouter } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { getKDAColor, getWinRateColor } from 'app/utility/statisticsColor';
 import { ChampionTableSkeleton } from '../components/SkeletonLoaders';
@@ -280,4 +279,4 @@ function MyInfoTable(props) {
     );
 }
 
-export default withRouter(MyInfoTable);
+export default MyInfoTable;

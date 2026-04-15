@@ -8,7 +8,6 @@ import clsx from 'clsx';
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
-import { withRouter } from 'react-router-dom';
 import FuseNavBadge from '../FuseNavBadge';
 
 const useStyles = makeStyles()((theme) => ({
@@ -73,6 +72,6 @@ function FuseNavHorizontalLink(props) {
 	);
 }
 
-const NavHorizontalLink = withRouter(React.memo(FuseNavHorizontalLink));
+const NavHorizontalLink = React.memo(FuseNavHorizontalLink);
 
 export default NavHorizontalLink;

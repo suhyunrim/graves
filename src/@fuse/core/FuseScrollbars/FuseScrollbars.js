@@ -5,7 +5,7 @@ import PerfectScrollbar from 'perfect-scrollbar';
 import 'perfect-scrollbar/css/perfect-scrollbar.css';
 import React, { createRef, useCallback, useEffect, useRef } from 'react';
 import { connect } from 'react-redux';
-import withRouterAndRef from '../withRouterAndRef/withRouterAndRef';
+import { useLocation } from 'react-router-dom';
 
 const md = new MobileDetect(window.navigator.userAgent);
 const isMobile = md.mobile();
@@ -28,7 +28,7 @@ const useStyles = makeStyles()((theme) => ({
 	root: {}
 }));
 
-const FuseScrollbars = React.forwardRef(({
+const FuseScrollbarsInner = React.forwardRef(({
 	className: classNameProp = '',
 	enable = true,
 	scrollToTopOnChildChange = false,
@@ -37,13 +37,13 @@ const FuseScrollbars = React.forwardRef(({
 	customScrollbars,
 	children,
 	id,
-	history,
 	...restProps
 }, forwardedRef) => {
 	const ref = forwardedRef || createRef();
 	const ps = useRef(null);
 	const handlerByEvent = useRef(new Map());
 	const { classes } = useStyles();
+	const location = useLocation();
 
 	const hookUpEvents = useCallback(() => {
 		Object.keys(handlerNameByEvent).forEach(key => {
@@ -121,15 +121,11 @@ const FuseScrollbars = React.forwardRef(({
 		}
 	}, [scrollToTop, children, scrollToTopOnChildChange]);
 
-	useEffect(
-		() =>
-			history.listen(() => {
-				if (scrollToTopOnRouteChange) {
-					scrollToTop();
-				}
-			}),
-		[scrollToTop, history, scrollToTopOnRouteChange]
-	);
+	useEffect(() => {
+		if (scrollToTopOnRouteChange) {
+			scrollToTop();
+		}
+	}, [scrollToTop, location.pathname, scrollToTopOnRouteChange]);
 
 	useEffect(
 		() => () => {
@@ -166,4 +162,4 @@ function mapStateToProps({ fuse }) {
 	};
 }
 
-export default connect(mapStateToProps, null, null, { forwardRef: true })(withRouterAndRef(FuseScrollbars));
+export default connect(mapStateToProps, null, null, { forwardRef: true })(FuseScrollbarsInner);

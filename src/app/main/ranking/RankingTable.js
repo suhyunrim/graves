@@ -10,7 +10,7 @@ import { makeStyles } from 'tss-react/mui';
 import { withStyles } from 'tss-react/mui';
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Link, withRouter } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { RankingTableSkeleton } from '../components/SkeletonLoaders';
 import * as Actions from './store/actions';
 import RankingTableHead from './RankingTableHeader';
@@ -977,4 +977,4 @@ function RankingTable(props) {
     );
 }
 
-export default withRouter(RankingTable);
+export default RankingTable;

@@ -7,7 +7,7 @@ import * as Actions from 'app/store/actions';
 import { generateSettings } from 'app/store/reducers/fuse/settings.reducer';
 import React, { useContext, useMemo, useCallback, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { matchRoutes } from 'react-router-config';
+import { matchRoutes } from 'react-router-dom';
 import { useLocation } from 'react-router-dom';
 import { defaults as Chartjs2Defaults } from 'react-chartjs-2';
 
@@ -59,7 +59,8 @@ function FuseLayout(props) {
 	const { classes } = useStyles(props);
 	const location = useLocation();
 	const { pathname } = location;
-	const matched = matchRoutes(routes, pathname)[0];
+	const matches = matchRoutes(routes, pathname);
+	const matched = matches?.[0] || null;
 	const newSettings = useRef(null);
 
 	const shouldAwaitRender = useCallback(() => {

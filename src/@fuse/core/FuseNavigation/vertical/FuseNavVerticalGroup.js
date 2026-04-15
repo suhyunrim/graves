@@ -9,7 +9,7 @@ import clsx from 'clsx';
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
-import { withRouter } from 'react-router-dom';
+
 import useMediaQuery from '@mui/material/useMediaQuery';
 import FuseNavItem from '../FuseNavItem';
 
@@ -68,6 +68,6 @@ function FuseNavVerticalGroup(props) {
 	);
 }
 
-const NavVerticalGroup = withRouter(React.memo(FuseNavVerticalGroup));
+const NavVerticalGroup = React.memo(FuseNavVerticalGroup);
 
 export default NavVerticalGroup;

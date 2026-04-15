@@ -52,10 +52,6 @@ export function retrieveGroupList() {
 					return;
 				}
 
-				history.location.state = {
-					redirectUrl: 'dashboard'
-				};
-
 				dispatch({
 					type: RETRIEVE_GROUP_LIST,
 					payload: groupList
@@ -63,9 +59,6 @@ export function retrieveGroupList() {
 			})
 			.catch(e => {
 				console.error(e);
-				history.location.state = {
-					redirectUrl: 'login'
-				};
 			});
 }
 
@@ -88,9 +81,6 @@ export function retrieveDiscordUser() {
 				return dispatch(retrieveGroupList());
 			})
 			.catch(e => {
-				history.location.state = {
-					redirectUrl: 'login'
-				};
 				return Promise.reject(e);
 			});
 }

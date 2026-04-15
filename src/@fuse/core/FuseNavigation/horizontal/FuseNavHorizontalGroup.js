@@ -16,7 +16,7 @@ import * as ReactDOM from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { Manager, Popper, Reference } from 'react-popper';
 import { useSelector } from 'react-redux';
-import { withRouter } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import FuseNavItem from '../FuseNavItem';
 
 const useStyles = makeStyles()((theme) => ({
@@ -54,6 +54,7 @@ const useStyles = makeStyles()((theme) => ({
 
 function FuseNavHorizontalGroup(props) {
 	const userRole = useSelector(({ auth }) => auth.user.role);
+	const location = useLocation();
 
 	const { classes } = useStyles(props);
 	const [opened, setOpened] = useState(false);
@@ -103,7 +104,7 @@ function FuseNavHorizontalGroup(props) {
 								classes.root,
 								'relative',
 								`level-${nestedLevel}`,
-								isUrlInChildren(item, props.location.pathname) && 'active'
+								isUrlInChildren(item, location.pathname) && 'active'
 							)}
 							onMouseEnter={() => handleToggle(true)}
 							onMouseLeave={() => handleToggle(false)}
@@ -192,6 +193,6 @@ function FuseNavHorizontalGroup(props) {
     );
 }
 
-const NavHorizontalGroup = withRouter(React.memo(FuseNavHorizontalGroup));
+const NavHorizontalGroup = React.memo(FuseNavHorizontalGroup);
 
 export default NavHorizontalGroup;
