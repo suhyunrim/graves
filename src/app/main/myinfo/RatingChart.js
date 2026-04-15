@@ -1,7 +1,20 @@
 import React from 'react';
 import { Line } from 'react-chartjs-2';
+import {
+	Chart as ChartJS,
+	CategoryScale,
+	LinearScale,
+	PointElement,
+	LineElement,
+	Title,
+	Tooltip,
+	Filler,
+	Legend
+} from 'chart.js';
 import { useSelector } from 'react-redux';
 import { makeStyles } from 'tss-react/mui';
+
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Filler, Legend);
 
 const useStyles = makeStyles()((theme) => ({
 	chartCard: {
@@ -185,59 +198,55 @@ function RatingChart() {
 	const chartOptions = {
 		responsive: true,
 		maintainAspectRatio: false,
-		legend: {
-			display: false
+		plugins: {
+			legend: {
+				display: false
+			},
+			tooltip: {
+				backgroundColor: 'rgba(15, 15, 26, 0.95)',
+				titleColor: '#fff',
+				titleFont: { size: 16, family: '"Noto Sans KR", sans-serif' },
+				bodyColor: '#00d4ff',
+				bodyFont: { size: 18, family: '"Rajdhani", sans-serif' },
+				borderColor: 'rgba(0, 212, 255, 0.3)',
+				borderWidth: 1,
+				cornerRadius: 8,
+				displayColors: false,
+				padding: 14,
+				callbacks: {
+					label: (tooltipItem) => {
+						const index = tooltipItem.dataIndex;
+						const rating = dailyHistory[index].rating;
+						const tierInfo = getTierFromRating(rating);
+						const tierLabel = tierInfo.division
+							? `${tierInfo.tier} ${tierInfo.division} ${tierInfo.lp}LP`
+							: `${tierInfo.tier} ${tierInfo.lp}LP`;
+						return `${tierLabel} (${rating}p)`;
+					}
+				}
+			}
 		},
 		scales: {
-			xAxes: [{
-				gridLines: {
-					color: 'rgba(255, 255, 255, 0.05)',
-					zeroLineColor: 'rgba(255, 255, 255, 0.1)'
+			x: {
+				grid: {
+					color: 'rgba(255, 255, 255, 0.05)'
 				},
 				ticks: {
-					fontColor: 'rgba(255, 255, 255, 0.6)',
-					fontSize: 15,
-					fontFamily: '"Noto Sans KR", sans-serif'
+					color: 'rgba(255, 255, 255, 0.6)',
+					font: { size: 15, family: '"Noto Sans KR", sans-serif' }
 				}
-			}],
-			yAxes: [{
-				gridLines: {
-					color: 'rgba(255, 255, 255, 0.05)',
-					zeroLineColor: 'rgba(255, 255, 255, 0.1)'
+			},
+			y: {
+				min: Math.max(0, minTierValue),
+				max: maxTierValue,
+				grid: {
+					color: 'rgba(255, 255, 255, 0.05)'
 				},
 				ticks: {
-					min: Math.max(0, minTierValue),
-					max: maxTierValue,
 					stepSize: 1,
 					callback: value => tierValueToLabel(value),
-					fontColor: 'rgba(255, 255, 255, 0.6)',
-					fontSize: 14,
-					fontFamily: '"Rajdhani", sans-serif'
-				}
-			}]
-		},
-		tooltips: {
-			backgroundColor: 'rgba(15, 15, 26, 0.95)',
-			titleFontColor: '#fff',
-			titleFontSize: 16,
-			titleFontFamily: '"Noto Sans KR", sans-serif',
-			bodyFontColor: '#00d4ff',
-			bodyFontSize: 18,
-			bodyFontFamily: '"Rajdhani", sans-serif',
-			borderColor: 'rgba(0, 212, 255, 0.3)',
-			borderWidth: 1,
-			cornerRadius: 8,
-			displayColors: false,
-			padding: 14,
-			callbacks: {
-				label: (tooltipItem) => {
-					const index = tooltipItem.index;
-					const rating = dailyHistory[index].rating;
-					const tierInfo = getTierFromRating(rating);
-					const tierLabel = tierInfo.division
-						? `${tierInfo.tier} ${tierInfo.division} ${tierInfo.lp}LP`
-						: `${tierInfo.tier} ${tierInfo.lp}LP`;
-					return `${tierLabel} (${rating}p)`;
+					color: 'rgba(255, 255, 255, 0.6)',
+					font: { size: 14, family: '"Rajdhani", sans-serif' }
 				}
 			}
 		}

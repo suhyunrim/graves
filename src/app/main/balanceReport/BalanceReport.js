@@ -6,7 +6,22 @@ import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import React, { useEffect, useState, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Line, Bar, Doughnut } from 'react-chartjs-2';
+import {
+	Chart as ChartJS,
+	CategoryScale,
+	LinearScale,
+	PointElement,
+	LineElement,
+	BarElement,
+	ArcElement,
+	Title,
+	Tooltip as ChartTooltip,
+	Filler,
+	Legend
+} from 'chart.js';
 import { DatePicker } from '@mui/x-date-pickers';
+
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, ArcElement, Title, ChartTooltip, Filler, Legend);
 import moment from 'moment';
 import reducer from './store/reducers';
 import * as Actions from './store/actions';
@@ -301,12 +316,10 @@ const POSITION_LABELS = {
 
 const chartTooltipBase = {
 	backgroundColor: 'rgba(15, 15, 26, 0.95)',
-	titleFontColor: '#fff',
-	titleFontSize: 14,
-	titleFontFamily: '"Noto Sans KR", sans-serif',
-	bodyFontColor: '#00d4ff',
-	bodyFontSize: 14,
-	bodyFontFamily: '"Rajdhani", sans-serif',
+	titleColor: '#fff',
+	titleFont: { size: 14, family: '"Noto Sans KR", sans-serif' },
+	bodyColor: '#00d4ff',
+	bodyFont: { size: 14, family: '"Rajdhani", sans-serif' },
 	borderColor: 'rgba(0, 212, 255, 0.3)',
 	borderWidth: 1,
 	cornerRadius: 8,
@@ -314,15 +327,13 @@ const chartTooltipBase = {
 	padding: 10
 };
 
-const gridLineStyle = {
-	color: 'rgba(255, 255, 255, 0.05)',
-	zeroLineColor: 'rgba(255, 255, 255, 0.1)'
+const gridStyle = {
+	color: 'rgba(255, 255, 255, 0.05)'
 };
 
 const tickStyle = {
-	fontColor: 'rgba(255, 255, 255, 0.6)',
-	fontSize: 12,
-	fontFamily: '"Noto Sans KR", sans-serif'
+	color: 'rgba(255, 255, 255, 0.6)',
+	font: { size: 12, family: '"Noto Sans KR", sans-serif' }
 };
 
 function getWinRateColor(rate) {
@@ -332,10 +343,11 @@ function getWinRateColor(rate) {
 	return COLORS.cyan;
 }
 
-// Chart.js 2.x plugin: 50% 기준선
+// Chart.js v4 plugin: 50% 기준선
 const baselinePlugin = {
+	id: 'baselinePlug',
 	afterDraw(chart) {
-		const yAxis = chart.scales['y-axis-0'];
+		const yAxis = chart.scales.y;
 		if (!yAxis) return;
 		const yPixel = yAxis.getPixelForValue(50);
 		if (yPixel == null) return;
@@ -508,34 +520,35 @@ function BalanceReport() {
 		const options = {
 			responsive: true,
 			maintainAspectRatio: false,
-			legend: {
-				labels: {
-					fontColor: 'rgba(255,255,255,0.6)',
-					fontSize: 11,
-					fontFamily: '"Noto Sans KR", sans-serif',
-					padding: 16
+			plugins: {
+				legend: {
+					labels: {
+						color: 'rgba(255,255,255,0.6)',
+						font: { size: 11, family: '"Noto Sans KR", sans-serif' },
+						padding: 16
+					}
+				},
+				tooltip: {
+					...chartTooltipBase,
+					mode: 'index',
+					intersect: false,
+					displayColors: true,
+					callbacks: {
+						label: item => {
+							const b = ratingBrackets[item.dataIndex];
+							if (item.datasetIndex === 0) return `실제 ${b.favoredWinRate.toFixed(1)}% (${b.count}판)`;
+							return `예상 ${(b.expectedWinRate || 0).toFixed(1)}%`;
+						}
+					}
 				}
 			},
 			scales: {
-				xAxes: [{ gridLines: gridLineStyle, ticks: tickStyle }],
-				yAxes: [
-					{
-						gridLines: gridLineStyle,
-						ticks: { ...tickStyle, min: 0, max: 100, stepSize: 25, callback: v => `${v}%` }
-					}
-				]
-			},
-			tooltips: {
-				...chartTooltipBase,
-				mode: 'index',
-				intersect: false,
-				displayColors: true,
-				callbacks: {
-					label: item => {
-						const b = ratingBrackets[item.index];
-						if (item.datasetIndex === 0) return `실제 ${b.favoredWinRate.toFixed(1)}% (${b.count}판)`;
-						return `예상 ${(b.expectedWinRate || 0).toFixed(1)}%`;
-					}
+				x: { grid: gridStyle, ticks: tickStyle },
+				y: {
+					grid: gridStyle,
+					min: 0,
+					max: 100,
+					ticks: { ...tickStyle, stepSize: 25, callback: v => `${v}%` }
 				}
 			}
 		};
@@ -584,23 +597,25 @@ function BalanceReport() {
 		const options = {
 			responsive: true,
 			maintainAspectRatio: false,
-			legend: { display: false },
-			scales: {
-				xAxes: [{ gridLines: gridLineStyle, ticks: tickStyle }],
-				yAxes: [
-					{
-						gridLines: gridLineStyle,
-						ticks: { ...tickStyle, min: 0, max: 100, stepSize: 25, callback: v => `${v}%` }
+			plugins: {
+				legend: { display: false },
+				tooltip: {
+					...chartTooltipBase,
+					callbacks: {
+						label: item => {
+							const p = positionScoreImpact[item.dataIndex];
+							return `2:0 비율 ${p.twoZeroRate.toFixed(1)}% (${p.totalSets}경기)`;
+						}
 					}
-				]
+				}
 			},
-			tooltips: {
-				...chartTooltipBase,
-				callbacks: {
-					label: item => {
-						const p = positionScoreImpact[item.index];
-						return `2:0 비율 ${p.twoZeroRate.toFixed(1)}% (${p.totalSets}경기)`;
-					}
+			scales: {
+				x: { grid: gridStyle, ticks: tickStyle },
+				y: {
+					grid: gridStyle,
+					min: 0,
+					max: 100,
+					ticks: { ...tickStyle, stepSize: 25, callback: v => `${v}%` }
 				}
 			}
 		};
@@ -654,7 +669,8 @@ function BalanceReport() {
 					pointBorderColor: '#fff',
 					pointBorderWidth: 2,
 					tension: 0.3,
-					yAxisID: 'diff'
+					yAxisID: 'diff',
+					order: 1
 				}
 			]
 		};
@@ -662,42 +678,43 @@ function BalanceReport() {
 		const options = {
 			responsive: true,
 			maintainAspectRatio: false,
-			legend: {
-				labels: {
-					fontColor: 'rgba(255,255,255,0.6)',
-					fontSize: 12,
-					fontFamily: '"Noto Sans KR", sans-serif',
-					padding: 20
+			plugins: {
+				legend: {
+					labels: {
+						color: 'rgba(255,255,255,0.6)',
+						font: { size: 12, family: '"Noto Sans KR", sans-serif' },
+						padding: 20
+					}
+				},
+				tooltip: {
+					...chartTooltipBase,
+					mode: 'index',
+					intersect: false,
+					displayColors: true,
+					callbacks: {
+						label: item => {
+							const m = monthlyTrend[item.dataIndex];
+							if (item.datasetIndex === 0) return `승률 ${m.favoredWinRate.toFixed(1)}% (${m.matchCount}판)`;
+							return `인당 차이 ${(m.avgPerPlayerDiff || m.avgRatingDiff).toFixed(1)}점`;
+						}
+					}
 				}
 			},
 			scales: {
-				xAxes: [{ gridLines: gridLineStyle, ticks: tickStyle }],
-				yAxes: [
-					{
-						id: 'winrate',
-						position: 'left',
-						gridLines: gridLineStyle,
-						ticks: { ...tickStyle, min: 30, max: 70, callback: v => `${v}%` }
-					},
-					{
-						id: 'diff',
-						position: 'right',
-						gridLines: { drawOnChartArea: false },
-						ticks: { ...tickStyle, callback: v => `${v}점` }
-					}
-				]
-			},
-			tooltips: {
-				...chartTooltipBase,
-				mode: 'index',
-				intersect: false,
-				displayColors: true,
-				callbacks: {
-					label: item => {
-						const m = monthlyTrend[item.index];
-						if (item.datasetIndex === 0) return `승률 ${m.favoredWinRate.toFixed(1)}% (${m.matchCount}판)`;
-						return `인당 차이 ${(m.avgPerPlayerDiff || m.avgRatingDiff).toFixed(1)}점`;
-					}
+				x: { grid: gridStyle, ticks: tickStyle },
+				winrate: {
+					type: 'linear',
+					position: 'left',
+					grid: gridStyle,
+					min: 30,
+					max: 70,
+					ticks: { ...tickStyle, callback: v => `${v}%` }
+				},
+				diff: {
+					type: 'linear',
+					position: 'right',
+					grid: { drawOnChartArea: false },
+					ticks: { ...tickStyle, callback: v => `${v}점` }
 				}
 			}
 		};
@@ -730,21 +747,22 @@ function BalanceReport() {
 		const options = {
 			responsive: true,
 			maintainAspectRatio: false,
-			legend: {
-				position: 'bottom',
-				labels: {
-					fontColor: 'rgba(255,255,255,0.6)',
-					fontSize: 12,
-					fontFamily: '"Noto Sans KR", sans-serif',
-					padding: 12
-				}
-			},
-			tooltips: {
-				...chartTooltipBase,
-				callbacks: {
-					label: item => {
-						const p = mostOverlappedPositions[item.index];
-						return `${p.count}회 (${p.rate.toFixed(1)}%)`;
+			plugins: {
+				legend: {
+					position: 'bottom',
+					labels: {
+						color: 'rgba(255,255,255,0.6)',
+						font: { size: 12, family: '"Noto Sans KR", sans-serif' },
+						padding: 12
+					}
+				},
+				tooltip: {
+					...chartTooltipBase,
+					callbacks: {
+						label: item => {
+							const p = mostOverlappedPositions[item.dataIndex];
+							return `${p.count}회 (${p.rate.toFixed(1)}%)`;
+						}
 					}
 				}
 			}
@@ -778,28 +796,29 @@ function BalanceReport() {
 		const options = {
 			responsive: true,
 			maintainAspectRatio: false,
-			legend: {
-				position: 'bottom',
-				labels: {
-					fontColor: 'rgba(255,255,255,0.6)',
-					fontSize: 12,
-					fontFamily: '"Noto Sans KR", sans-serif',
-					padding: 12
-				}
-			},
-			tooltips: {
-				...chartTooltipBase,
-				callbacks: {
-					label: (item, chartData) => {
-						const count = chartData.datasets[0].data[item.index];
-						const label = chartData.labels[item.index];
-						if (label === '2:0') {
-							return `${count}경기 (우위 ${setAnalysis.twoZero.favoredWin} / 열세 ${setAnalysis.twoZero.underdogWin})`;
+			plugins: {
+				legend: {
+					position: 'bottom',
+					labels: {
+						color: 'rgba(255,255,255,0.6)',
+						font: { size: 12, family: '"Noto Sans KR", sans-serif' },
+						padding: 12
+					}
+				},
+				tooltip: {
+					...chartTooltipBase,
+					callbacks: {
+						label: item => {
+							const count = item.raw;
+							const label = item.label;
+							if (label === '2:0') {
+								return `${count}경기 (우위 ${setAnalysis.twoZero.favoredWin} / 열세 ${setAnalysis.twoZero.underdogWin})`;
+							}
+							if (label === '2:1') {
+								return `${count}경기 (우위 ${setAnalysis.twoOne.favoredWin} / 열세 ${setAnalysis.twoOne.underdogWin})`;
+							}
+							return `${count}경기`;
 						}
-						if (label === '2:1') {
-							return `${count}경기 (우위 ${setAnalysis.twoOne.favoredWin} / 열세 ${setAnalysis.twoOne.underdogWin})`;
-						}
-						return `${count}경기`;
 					}
 				}
 			}

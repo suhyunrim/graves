@@ -9,7 +9,7 @@ import React, { useContext, useMemo, useCallback, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { matchRoutes } from 'react-router-dom';
 import { useLocation } from 'react-router-dom';
-import { defaults as Chartjs2Defaults } from 'react-chartjs-2';
+import { defaults as Chartjs2Defaults } from 'chart.js';
 
 const useStyles = makeStyles()((theme) => ({
 	'@global': {
@@ -93,12 +93,10 @@ function FuseLayout(props) {
 		function AnimationToggle(_settings) {
 			if (!_settings.animations) {
 				document.body.classList.add('no-animate');
-				Chartjs2Defaults.global.animation.duration = 0;
-				Chartjs2Defaults.global.hover.animationDuration = 0;
+				Chartjs2Defaults.animation = false;
 			} else {
 				document.body.classList.remove('no-animate');
-				Chartjs2Defaults.global.animation.duration = 1000;
-				Chartjs2Defaults.global.hover.animationDuration = 400;
+				Chartjs2Defaults.animation = { duration: 1000 };
 			}
 		}
 
