@@ -34,7 +34,8 @@ const useStyles = makeStyles({
 	}
 });
 
-function FuseShortcuts(props) {
+function FuseShortcuts({ variant = 'horizontal', ...restProps }) {
+	const props = { variant, ...restProps };
 	const dispatch = useDispatch();
 	const shortcuts = useSelector(({ auth }) => auth.user.data.shortcuts);
 	const navigationData = useSelector(({ fuse }) => fuse.navigation);
@@ -216,10 +217,5 @@ function FuseShortcuts(props) {
 		</div>
 	);
 }
-
-FuseShortcuts.propTypes = {};
-FuseShortcuts.defaultProps = {
-	variant: 'horizontal'
-};
 
 export default React.memo(FuseShortcuts);

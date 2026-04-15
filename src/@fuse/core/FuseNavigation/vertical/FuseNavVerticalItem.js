@@ -6,7 +6,7 @@ import ListItemText from '@material-ui/core/ListItemText';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
 import * as Actions from 'app/store/actions';
 import clsx from 'clsx';
-import PropTypes from 'prop-types';
+
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
@@ -108,17 +108,6 @@ function FuseNavVerticalItem(props) {
 		</ListItem>
 	);
 }
-
-FuseNavVerticalItem.propTypes = {
-	item: PropTypes.shape({
-		id: PropTypes.string.isRequired,
-		title: PropTypes.string,
-		icon: PropTypes.string,
-		url: PropTypes.string
-	})
-};
-
-FuseNavVerticalItem.defaultProps = {};
 
 const NavVerticalItem = withRouter(React.memo(FuseNavVerticalItem));
 

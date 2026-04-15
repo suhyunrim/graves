@@ -1,7 +1,6 @@
 import FuseScrollbars from '@fuse/core/FuseScrollbars';
 import { makeStyles } from '@material-ui/core/styles';
 import clsx from 'clsx';
-import * as PropTypes from 'prop-types';
 import React, { useRef } from 'react';
 import FusePageCardedHeader from './FusePageCardedHeader';
 import FusePageCardedSidebar from './FusePageCardedSidebar';
@@ -214,20 +213,5 @@ const FusePageCarded = React.forwardRef((props, ref) => {
 		</div>
 	);
 });
-
-FusePageCarded.propTypes = {
-	rightSidebarHeader: PropTypes.node,
-	rightSidebarContent: PropTypes.node,
-	rightSidebarVariant: PropTypes.node,
-	leftSidebarHeader: PropTypes.node,
-	leftSidebarContent: PropTypes.node,
-	leftSidebarVariant: PropTypes.node,
-	header: PropTypes.node,
-	content: PropTypes.node,
-	contentToolbar: PropTypes.node,
-	innerScroll: PropTypes.bool
-};
-
-FusePageCarded.defaultProps = {};
 
 export default React.memo(FusePageCarded);

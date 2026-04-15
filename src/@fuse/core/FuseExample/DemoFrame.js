@@ -7,7 +7,6 @@ import {
 } from '@material-ui/core/styles';
 import { create } from 'jss';
 import jssExtend from 'jss-plugin-extend';
-import PropTypes from 'prop-types';
 import React from 'react';
 import Frame from 'react-frame-component';
 
@@ -96,10 +95,5 @@ class DemoFrame extends React.Component {
 	}
 }
 
-DemoFrame.propTypes = {
-	children: PropTypes.node.isRequired,
-	classes: PropTypes.object.isRequired,
-	theme: PropTypes.object.isRequired
-};
 
 export default withStyles(styles, { withTheme: true })(DemoFrame);

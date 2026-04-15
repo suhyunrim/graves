@@ -1,6 +1,5 @@
 import { makeStyles } from '@material-ui/core/styles';
 import clsx from 'clsx';
-import PropTypes from 'prop-types';
 import React from 'react';
 
 const useStyles = makeStyles(theme => ({
@@ -34,14 +33,5 @@ function FuseNavBadge(props) {
 		</div>
 	);
 }
-
-FuseNavBadge.propTypes = {
-	badge: PropTypes.shape({
-		title: PropTypes.node,
-		bg: PropTypes.string,
-		fg: PropTypes.string
-	})
-};
-FuseNavBadge.defaultProps = {};
 
 export default React.memo(FuseNavBadge);

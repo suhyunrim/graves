@@ -163,9 +163,10 @@ const useStyles = makeStyles(theme => ({
 	}
 }));
 
-function FuseSidePanel(props) {
+function FuseSidePanel({ position = 'left', opened: openedProp = true, ...restProps }) {
+	const props = { position, opened: openedProp, ...restProps };
 	const classes = useStyles(props);
-	const [opened, setOpened] = useState(props.opened);
+	const [opened, setOpened] = useState(openedProp);
 	const [mobileOpen, setMobileOpen] = useState(false);
 
 	function toggleOpened() {
@@ -228,11 +229,5 @@ function FuseSidePanel(props) {
 		</>
 	);
 }
-
-FuseSidePanel.propTypes = {};
-FuseSidePanel.defaultProps = {
-	position: 'left',
-	opened: true
-};
 
 export default React.memo(FuseSidePanel);

@@ -2,7 +2,6 @@ import Divider from '@material-ui/core/Divider';
 import List from '@material-ui/core/List';
 import { makeStyles } from '@material-ui/core/styles';
 import clsx from 'clsx';
-import PropTypes from 'prop-types';
 import React from 'react';
 import FuseNavHorizontalCollapse from './horizontal/FuseNavHorizontalCollapse';
 import FuseNavHorizontalGroup from './horizontal/FuseNavHorizontalGroup';
@@ -98,7 +97,7 @@ const useStyles = makeStyles(theme => ({
 
 function FuseNavigation(props) {
 	const classes = useStyles(props);
-	const { navigation, layout, active, dense, className } = props;
+	const { navigation, layout = 'vertical', active, dense, className } = props;
 
 	const verticalNav = (
 		<List
@@ -154,13 +153,5 @@ function FuseNavigation(props) {
 		return null;
 	}
 }
-
-FuseNavigation.propTypes = {
-	navigation: PropTypes.array.isRequired
-};
-
-FuseNavigation.defaultProps = {
-	layout: 'vertical'
-};
 
 export default React.memo(FuseNavigation);

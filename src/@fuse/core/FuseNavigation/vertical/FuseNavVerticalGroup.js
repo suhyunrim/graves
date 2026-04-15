@@ -4,7 +4,7 @@ import ListSubheader from '@material-ui/core/ListSubheader';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
 import * as Actions from 'app/store/actions';
 import clsx from 'clsx';
-import PropTypes from 'prop-types';
+
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
@@ -53,36 +53,19 @@ function FuseNavVerticalGroup(props) {
 				to={item.url}
 				role="button"
 			>
-				<span className="list-subheader-text uppercase text-12">
-					{item.translate ? t(item.translate) : item.title}
-				</span>
+				<span className="list-subheader-text uppercase text-12">{item.translate ? t(item.translate) : item.title}</span>
 			</ListSubheader>
 
 			{item.children && (
 				<>
 					{item.children.map(_item => (
-						<FuseNavItem
-							key={_item.id}
-							type={`vertical-${_item.type}`}
-							item={_item}
-							nestedLevel={nestedLevel}
-						/>
+						<FuseNavItem key={_item.id} type={`vertical-${_item.type}`} item={_item} nestedLevel={nestedLevel} />
 					))}
 				</>
 			)}
 		</>
 	);
 }
-
-FuseNavVerticalGroup.propTypes = {
-	item: PropTypes.shape({
-		id: PropTypes.string.isRequired,
-		title: PropTypes.string,
-		children: PropTypes.array
-	})
-};
-
-FuseNavVerticalGroup.defaultProps = {};
 
 const NavVerticalGroup = withRouter(React.memo(FuseNavVerticalGroup));
 

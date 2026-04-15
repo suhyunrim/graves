@@ -4,23 +4,19 @@ import * as Actions from 'app/store/actions';
 import React from 'react';
 import { useDispatch } from 'react-redux';
 
-function NavbarMobileToggleButton(props) {
+function NavbarMobileToggleButton({ className, children = <Icon>menu</Icon> }) {
 	const dispatch = useDispatch();
 
 	return (
 		<IconButton
-			className={props.className}
+			className={className}
 			onClick={ev => dispatch(Actions.navbarToggleMobile())}
 			color="inherit"
 			disableRipple
 		>
-			{props.children}
+			{children}
 		</IconButton>
 	);
 }
-
-NavbarMobileToggleButton.defaultProps = {
-	children: <Icon>menu</Icon>
-};
 
 export default NavbarMobileToggleButton;

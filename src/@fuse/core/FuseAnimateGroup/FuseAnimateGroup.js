@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 import React from 'react';
 import { VelocityTransitionGroup } from 'velocity-react';
 import 'velocity-animate/velocity.ui';
@@ -20,31 +19,26 @@ const leaveAnimationDefaults = {
 	delay: 0
 };
 
-function FuseAnimateGroup(props) {
+function FuseAnimateGroup({
+	enter = enterAnimationDefaults,
+	leave = leaveAnimationDefaults,
+	easing = [0.4, 0.0, 0.2, 1],
+	runOnMount = true,
+	enterHideStyle = { visibility: 'visible' },
+	enterShowStyle = { visibility: 'hidden' },
+	...rest
+}) {
 	return (
 		<VelocityTransitionGroup
-			{...props}
-			enter={{ ...enterAnimationDefaults, ...props.enter }}
-			leave={{ ...leaveAnimationDefaults, ...props.leave }}
+			easing={easing}
+			runOnMount={runOnMount}
+			enterHideStyle={enterHideStyle}
+			enterShowStyle={enterShowStyle}
+			{...rest}
+			enter={{ ...enterAnimationDefaults, ...enter }}
+			leave={{ ...leaveAnimationDefaults, ...leave }}
 		/>
 	);
 }
-
-FuseAnimateGroup.propTypes = {
-	children: PropTypes.any
-};
-
-FuseAnimateGroup.defaultProps = {
-	enter: enterAnimationDefaults,
-	leave: leaveAnimationDefaults,
-	easing: [0.4, 0.0, 0.2, 1],
-	runOnMount: true,
-	enterHideStyle: {
-		visibility: 'visible'
-	},
-	enterShowStyle: {
-		visibility: 'hidden'
-	}
-};
 
 export default React.memo(FuseAnimateGroup);

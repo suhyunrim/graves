@@ -1,7 +1,6 @@
 import FuseScrollbars from '@fuse/core/FuseScrollbars';
 import { makeStyles } from '@material-ui/core/styles';
 import clsx from 'clsx';
-import * as PropTypes from 'prop-types';
 import React, { useRef } from 'react';
 import FusePageSimpleHeader from './FusePageSimpleHeader';
 import FusePageSimpleSidebar from './FusePageSimpleSidebar';
@@ -210,21 +209,5 @@ const FusePageSimple = React.forwardRef((props, ref) => {
 		</div>
 	);
 });
-
-FusePageSimple.propTypes = {
-	leftSidebarHeader: PropTypes.node,
-	leftSidebarContent: PropTypes.node,
-	leftSidebarVariant: PropTypes.node,
-	rightSidebarHeader: PropTypes.node,
-	rightSidebarContent: PropTypes.node,
-	rightSidebarVariant: PropTypes.node,
-	header: PropTypes.node,
-	content: PropTypes.node,
-	contentToolbar: PropTypes.node,
-	sidebarInner: PropTypes.bool,
-	innerScroll: PropTypes.bool
-};
-
-FusePageSimple.defaultProps = {};
 
 export default React.memo(FusePageSimple);
