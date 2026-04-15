@@ -1,7 +1,7 @@
 import { useDeepCompareEffect } from '@fuse/hooks';
 import FuseLayouts from '@fuse/layouts/FuseLayouts';
 import _ from '@lodash';
-import { makeStyles } from '@material-ui/core/styles';
+import { makeStyles } from 'tss-react/mui';
 import AppContext from 'app/AppContext';
 import * as Actions from 'app/store/actions';
 import { generateSettings } from 'app/store/reducers/fuse/settings.reducer';
@@ -12,11 +12,11 @@ import { useLocation } from 'react-router-dom';
 import Velocity from 'velocity-animate';
 import { defaults as Chartjs2Defaults } from 'react-chartjs-2';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles()((theme) => ({
 	'@global': {
 		'code:not([class*="language-"])': {
 			color: theme.palette.secondary.dark,
-			backgroundColor: theme.palette.type === 'light' ? 'rgba(255, 255, 255, .9)' : 'rgba(0, 0, 0, .9)',
+			backgroundColor: theme.palette.mode === 'light' ? 'rgba(255, 255, 255, .9)' : 'rgba(0, 0, 0, .9)',
 			padding: '2px 3px',
 			borderRadius: 2,
 			lineHeight: 1.7

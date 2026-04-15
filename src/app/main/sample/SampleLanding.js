@@ -1,7 +1,7 @@
 import React from 'react';
-import { makeStyles } from '@material-ui/core/styles';
-import Button from '@material-ui/core/Button';
-import Typography from '@material-ui/core/Typography';
+import { makeStyles } from 'tss-react/mui';
+import Button from '@mui/material/Button';
+import Typography from '@mui/material/Typography';
 import { useDispatch } from 'react-redux';
 import history from '@history';
 import * as userActions from 'app/auth/store/actions';
@@ -62,7 +62,7 @@ const useStyles = makeStyles(() => ({
 }));
 
 function SampleLanding() {
-	const classes = useStyles();
+	const { classes } = useStyles();
 	const dispatch = useDispatch();
 
 	function handleStart() {

@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { makeStyles } from '@material-ui/core/styles';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Switch from '@material-ui/core/Switch';
-import Tooltip from '@material-ui/core/Tooltip';
+import { makeStyles } from 'tss-react/mui';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import Switch from '@mui/material/Switch';
+import Tooltip from '@mui/material/Tooltip';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import camilleRiotAuthService from 'app/services/camilleRiotAuthService';
@@ -66,13 +66,13 @@ function formatDate(dateStr) {
 	return `${y}.${m}.${day}`;
 }
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles()((theme) => ({
 	container: {
 		padding: 28,
 		maxWidth: 1200,
 		margin: '0 auto',
 		width: '100%',
-		[theme.breakpoints.down('sm')]: {
+		[theme.breakpoints.down('md')]: {
 			padding: 16
 		}
 	},
@@ -119,7 +119,7 @@ const useStyles = makeStyles(theme => ({
 		display: 'grid',
 		gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
 		gap: 16,
-		[theme.breakpoints.down('xs')]: {
+		[theme.breakpoints.down('sm')]: {
 			gridTemplateColumns: '1fr'
 		}
 	},
@@ -264,7 +264,7 @@ const useStyles = makeStyles(theme => ({
 		alignItems: 'center',
 		gap: 16,
 		padding: '16px 24px',
-		[theme.breakpoints.down('sm')]: {
+		[theme.breakpoints.down('md')]: {
 			flexDirection: 'column',
 			alignItems: 'stretch',
 			gap: 0,
@@ -277,7 +277,7 @@ const useStyles = makeStyles(theme => ({
 		gap: 12,
 		flex: 1,
 		minWidth: 0,
-		[theme.breakpoints.down('sm')]: {
+		[theme.breakpoints.down('md')]: {
 			marginBottom: 12
 		}
 	},
@@ -286,7 +286,7 @@ const useStyles = makeStyles(theme => ({
 		alignItems: 'center',
 		gap: 16,
 		flexShrink: 0,
-		[theme.breakpoints.down('sm')]: {
+		[theme.breakpoints.down('md')]: {
 			flexWrap: 'wrap',
 			gap: 8,
 			paddingTop: 10,
@@ -302,7 +302,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 function AchievementContent() {
-	const classes = useStyles();
+	const { classes } = useStyles();
 	const dispatch = useDispatch();
 	const { puuid: paramPuuid } = useParams();
 

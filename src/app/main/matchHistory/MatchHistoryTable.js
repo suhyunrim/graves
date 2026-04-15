@@ -1,28 +1,29 @@
 import FuseScrollbars from '@fuse/core/FuseScrollbars';
-import Hidden from '@material-ui/core/Hidden';
-import Table from '@material-ui/core/Table';
-import TableBody from '@material-ui/core/TableBody';
-import TableCell from '@material-ui/core/TableCell';
-import TableHead from '@material-ui/core/TableHead';
-import TablePagination from '@material-ui/core/TablePagination';
-import TableRow from '@material-ui/core/TableRow';
-import Dialog from '@material-ui/core/Dialog';
-import DialogTitle from '@material-ui/core/DialogTitle';
-import DialogContent from '@material-ui/core/DialogContent';
-import DialogActions from '@material-ui/core/DialogActions';
-import Button from '@material-ui/core/Button';
-import IconButton from '@material-ui/core/IconButton';
-import TextField from '@material-ui/core/TextField';
-import Radio from '@material-ui/core/Radio';
-import RadioGroup from '@material-ui/core/RadioGroup';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import FormControl from '@material-ui/core/FormControl';
-import FormLabel from '@material-ui/core/FormLabel';
-import SettingsIcon from '@material-ui/icons/Settings';
-import Menu from '@material-ui/core/Menu';
-import MenuItem from '@material-ui/core/MenuItem';
-import CircularProgress from '@material-ui/core/CircularProgress';
-import { makeStyles, withStyles } from '@material-ui/core/styles';
+import Box from '@mui/material/Box';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableHead from '@mui/material/TableHead';
+import TablePagination from '@mui/material/TablePagination';
+import TableRow from '@mui/material/TableRow';
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import DialogActions from '@mui/material/DialogActions';
+import Button from '@mui/material/Button';
+import IconButton from '@mui/material/IconButton';
+import TextField from '@mui/material/TextField';
+import Radio from '@mui/material/Radio';
+import RadioGroup from '@mui/material/RadioGroup';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import FormControl from '@mui/material/FormControl';
+import FormLabel from '@mui/material/FormLabel';
+import SettingsIcon from '@mui/icons-material/Settings';
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
+import CircularProgress from '@mui/material/CircularProgress';
+import { makeStyles } from 'tss-react/mui';
+import { withStyles } from 'tss-react/mui';
 import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom';
@@ -57,7 +58,7 @@ const tierThresholds = {
 
 const tierSteps = ['IV', 'III', 'II', 'I'];
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles()((theme) => ({
 	container: {
 		padding: '28px',
 		maxWidth: 1600,
@@ -463,7 +464,7 @@ const useStyles = makeStyles(theme => ({
 		borderRadius: 16,
 		color: '#fff',
 		minWidth: 360,
-		[theme.breakpoints.down('xs')]: {
+		[theme.breakpoints.down('sm')]: {
 			minWidth: 'auto',
 			margin: 16
 		}
@@ -552,7 +553,7 @@ const StyledTableRow = withStyles(theme => ({
 }))(TableRow);
 
 function MatchHistoryTable() {
-	const classes = useStyles();
+	const { classes } = useStyles();
 	const dispatch = useDispatch();
 	const history = useHistory();
 
@@ -1001,13 +1002,13 @@ function MatchHistoryTable() {
 	);
 
 	return (
-		<div className={classes.container}>
-			{isAdmin && renderDuplicateDialog()}
-			<div className={classes.tableWrapper}>
+        <div className={classes.container}>
+            {isAdmin && renderDuplicateDialog()}
+            <div className={classes.tableWrapper}>
 				{matches && matches.length > 0 ? (
 					<>
 						{/* Desktop Table View */}
-						<Hidden smDown>
+						<Box sx={{ display: { xs: 'none', md: 'block' } }}>
 							<FuseScrollbars className="flex-grow overflow-x-auto">
 								<Table>
 									<TableHead>
@@ -1142,10 +1143,10 @@ function MatchHistoryTable() {
 									</TableBody>
 								</Table>
 							</FuseScrollbars>
-						</Hidden>
+						</Box>
 
 						{/* Mobile Card View */}
-						<Hidden mdUp>
+						<Box sx={{ display: { md: 'none' } }}>
 							<div className={classes.mobileCardList}>
 								{matches.map((match, index) => {
 									const isTeam1Win = match.winTeam === 1;
@@ -1247,7 +1248,7 @@ function MatchHistoryTable() {
 									);
 								})}
 							</div>
-						</Hidden>
+						</Box>
 
 						<TablePagination
 							className={classes.pagination}
@@ -1258,7 +1259,7 @@ function MatchHistoryTable() {
 							page={serverPage - 1}
 							backIconButtonProps={{ 'aria-label': 'Previous Page' }}
 							nextIconButtonProps={{ 'aria-label': 'Next Page' }}
-							onChangePage={handleChangePage}
+							onPageChange={handleChangePage}
 						/>
 					</>
 				) : (
@@ -1272,8 +1273,8 @@ function MatchHistoryTable() {
 					</div>
 				)}
 			</div>
-		</div>
-	);
+        </div>
+    );
 }
 
 export default MatchHistoryTable;

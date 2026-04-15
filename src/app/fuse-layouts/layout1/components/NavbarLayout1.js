@@ -1,8 +1,9 @@
 import FuseScrollbars from '@fuse/core/FuseScrollbars';
-import AppBar from '@material-ui/core/AppBar';
-import Hidden from '@material-ui/core/Hidden';
-import Icon from '@material-ui/core/Icon';
-import { makeStyles, useTheme } from '@material-ui/core/styles';
+import AppBar from '@mui/material/AppBar';
+import Box from '@mui/material/Box';
+import Icon from '@mui/material/Icon';
+import { useTheme } from '@mui/material/styles';
+import { makeStyles } from 'tss-react/mui';
 import Logo from 'app/fuse-layouts/shared-components/Logo';
 import NavbarFoldedToggleButton from 'app/fuse-layouts/shared-components/NavbarFoldedToggleButton';
 import NavbarMobileToggleButton from 'app/fuse-layouts/shared-components/NavbarMobileToggleButton';
@@ -50,12 +51,12 @@ const useStyles = makeStyles({
 });
 
 function NavbarLayout1(props) {
-	const classes = useStyles();
+	const { classes } = useStyles();
 	const theme = useTheme();
 
 	return (
-		<div className={clsx('flex flex-col overflow-hidden h-full', classes.root, props.className)}>
-			<AppBar
+        <div className={clsx('flex flex-col overflow-hidden h-full', classes.root, props.className)}>
+            <AppBar
 				position="static"
 				elevation={0}
 				className={clsx('flex flex-row items-center flex-shrink h-64 min-h-64 px-12', classes.appBar)}
@@ -64,24 +65,23 @@ function NavbarLayout1(props) {
 					<Logo />
 				</div>
 
-				<Hidden mdDown>
+				<Box sx={{ display: { xs: 'none', lg: 'block' } }}>
 					<NavbarFoldedToggleButton className={clsx('w-40 h-40 p-0', classes.toggleButton)} />
-				</Hidden>
+				</Box>
 
-				<Hidden lgUp>
+				<Box sx={{ display: { lg: 'none' } }}>
 					<NavbarMobileToggleButton className={clsx('w-40 h-40 p-0', classes.toggleButton)}>
 						<Icon>{theme.direction === 'ltr' ? 'arrow_back' : 'arrow_forward'}"</Icon>
 					</NavbarMobileToggleButton>
-				</Hidden>
+				</Box>
 			</AppBar>
-
-			<FuseScrollbars className={clsx(classes.content)} option={{ suppressScrollX: true }}>
+            <FuseScrollbars className={clsx(classes.content)} option={{ suppressScrollX: true }}>
 				<UserNavbarHeader />
 
 				<Navigation layout="vertical" />
 			</FuseScrollbars>
-		</div>
-	);
+        </div>
+    );
 }
 
 export default React.memo(NavbarLayout1);

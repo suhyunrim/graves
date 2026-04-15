@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { Typography, InputBase, Popover, IconButton } from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
-import SearchIcon from '@material-ui/icons/Search';
-import DateRangeIcon from '@material-ui/icons/DateRange';
-import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
-import ChevronRightIcon from '@material-ui/icons/ChevronRight';
+import { Typography, InputBase, Popover, IconButton } from '@mui/material';
+import { makeStyles } from 'tss-react/mui';
+import SearchIcon from '@mui/icons-material/Search';
+import DateRangeIcon from '@mui/icons-material/DateRange';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { useDispatch, useSelector } from 'react-redux';
 import * as Actions from './store/actions';
 
@@ -30,7 +30,7 @@ function formatDisplay(dateStr) {
 	return `${y}.${m}.${d}`;
 }
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles()((theme) => ({
 	root: {
 		display: 'flex',
 		flexDirection: 'column',
@@ -47,7 +47,7 @@ const useStyles = makeStyles(theme => ({
 		letterSpacing: '0.15em',
 		textShadow: '0 0 20px rgba(0, 212, 255, 0.5)',
 		margin: 0,
-		[theme.breakpoints.down('sm')]: {
+		[theme.breakpoints.down('md')]: {
 			fontSize: '2.75rem'
 		}
 	},
@@ -57,7 +57,7 @@ const useStyles = makeStyles(theme => ({
 		justifyContent: 'center',
 		position: 'relative',
 		marginTop: 10,
-		[theme.breakpoints.down('sm')]: {
+		[theme.breakpoints.down('md')]: {
 			flexDirection: 'column',
 			alignItems: 'flex-start',
 			gap: 12
@@ -70,7 +70,7 @@ const useStyles = makeStyles(theme => ({
 		fontSize: '1.6rem',
 		color: 'rgba(255, 255, 255, 0.6)',
 		letterSpacing: '0.05em',
-		[theme.breakpoints.down('sm')]: {
+		[theme.breakpoints.down('md')]: {
 			position: 'static',
 			fontSize: '1.35rem'
 		}
@@ -89,7 +89,7 @@ const useStyles = makeStyles(theme => ({
 			borderColor: 'rgba(0, 212, 255, 0.6)',
 			boxShadow: '0 0 20px rgba(0, 212, 255, 0.2)'
 		},
-		[theme.breakpoints.down('sm')]: {
+		[theme.breakpoints.down('md')]: {
 			width: '100%',
 			maxWidth: '100%'
 		}
@@ -113,7 +113,7 @@ const useStyles = makeStyles(theme => ({
 		alignItems: 'center',
 		gap: 8,
 		marginTop: 16,
-		[theme.breakpoints.down('sm')]: {
+		[theme.breakpoints.down('md')]: {
 			flexWrap: 'wrap'
 		}
 	},
@@ -312,7 +312,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 function CalendarPopover({ anchorEl, onClose, onConfirm }) {
-	const classes = useStyles();
+	const { classes } = useStyles();
 	const today = new Date();
 	const [viewYear, setViewYear] = useState(today.getFullYear());
 	const [viewMonth, setViewMonth] = useState(today.getMonth());
@@ -389,7 +389,7 @@ function CalendarPopover({ anchorEl, onClose, onConfirm }) {
 	const hintText = !startDate ? '시작일을 선택하세요' : !endDate ? '종료일을 선택하세요' : null;
 
 	return (
-		<Popover
+        <Popover
 			open={Boolean(anchorEl)}
 			anchorEl={anchorEl}
 			onClose={onClose}
@@ -397,7 +397,7 @@ function CalendarPopover({ anchorEl, onClose, onConfirm }) {
 			transformOrigin={{ vertical: 'top', horizontal: 'left' }}
 			PaperProps={{ className: classes.calendarPaper }}
 		>
-			<div className={classes.presetRow}>
+            <div className={classes.presetRow}>
 				<button type="button" className={classes.presetBtn} onClick={() => applyPreset(7)}>
 					최근 1주일
 				</button>
@@ -408,28 +408,25 @@ function CalendarPopover({ anchorEl, onClose, onConfirm }) {
 					최근 3달
 				</button>
 			</div>
-
-			<div className={classes.calendarHeader}>
-				<IconButton className={classes.calendarNavBtn} onClick={handlePrevMonth}>
+            <div className={classes.calendarHeader}>
+				<IconButton className={classes.calendarNavBtn} onClick={handlePrevMonth} size="large">
 					<ChevronLeftIcon />
 				</IconButton>
 				<span className={classes.calendarTitle}>
 					{viewYear}. {String(viewMonth + 1).padStart(2, '0')}
 				</span>
-				<IconButton className={classes.calendarNavBtn} onClick={handleNextMonth}>
+				<IconButton className={classes.calendarNavBtn} onClick={handleNextMonth} size="large">
 					<ChevronRightIcon />
 				</IconButton>
 			</div>
-
-			<div className={classes.calendarDaysHeader}>
+            <div className={classes.calendarDaysHeader}>
 				{DAYS.map(d => (
 					<span key={d} className={classes.calendarDayLabel}>
 						{d}
 					</span>
 				))}
 			</div>
-
-			<div className={classes.calendarGrid}>
+            <div className={classes.calendarGrid}>
 				{Array.from({ length: firstDay }).map((_, i) => (
 					<div key={`e-${i}`} className={`${classes.calendarDay} ${classes.calendarDayEmpty}`} />
 				))}
@@ -457,16 +454,13 @@ function CalendarPopover({ anchorEl, onClose, onConfirm }) {
 					);
 				})}
 			</div>
-
-			{hintText && <div className={classes.selectionHint}>{hintText}</div>}
-
-			{startDate && endDate && (
+            {hintText && <div className={classes.selectionHint}>{hintText}</div>}
+            {startDate && endDate && (
 				<div className={classes.selectionHint}>
 					{formatDisplay(formatDate(startDate))} ~ {formatDisplay(formatDate(endDate))}
 				</div>
 			)}
-
-			<div className={classes.calendarActions}>
+            <div className={classes.calendarActions}>
 				<button type="button" className={`${classes.calendarActionBtn} ${classes.calendarCancelBtn}`} onClick={onClose}>
 					취소
 				</button>
@@ -479,12 +473,12 @@ function CalendarPopover({ anchorEl, onClose, onConfirm }) {
 					적용
 				</button>
 			</div>
-		</Popover>
-	);
+        </Popover>
+    );
 }
 
 function RankingHeader() {
-	const classes = useStyles();
+	const { classes } = useStyles();
 	const dispatch = useDispatch();
 	const searchText = useSelector(({ Ranking }) => Ranking.ranking.searchText);
 	const period = useSelector(({ Ranking }) => Ranking.ranking.period);

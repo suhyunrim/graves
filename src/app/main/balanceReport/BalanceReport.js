@@ -1,17 +1,17 @@
 import FusePageSimple from '@fuse/core/FusePageSimple';
 import withReducer from 'app/store/withReducer';
-import { makeStyles } from '@material-ui/core/styles';
-import { Typography, CircularProgress, Tooltip, IconButton } from '@material-ui/core';
-import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
+import { makeStyles } from 'tss-react/mui';
+import { Typography, CircularProgress, Tooltip, IconButton } from '@mui/material';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import React, { useEffect, useState, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Line, Bar, Doughnut } from 'react-chartjs-2';
-import { KeyboardDatePicker } from '@material-ui/pickers';
+import { DatePicker } from '@mui/x-date-pickers';
 import moment from 'moment';
 import reducer from './store/reducers';
 import * as Actions from './store/actions';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles()((theme) => ({
 	layoutRoot: {
 		background: 'linear-gradient(180deg, #0f0f1a 0%, #1a1a2e 100%)',
 		minHeight: '100vh'
@@ -32,7 +32,7 @@ const useStyles = makeStyles(theme => ({
 		letterSpacing: '0.15em',
 		textShadow: '0 0 20px rgba(0, 212, 255, 0.5)',
 		margin: 0,
-		[theme.breakpoints.down('sm')]: {
+		[theme.breakpoints.down('md')]: {
 			fontSize: '2.75rem',
 			letterSpacing: '0.08em'
 		}
@@ -43,7 +43,7 @@ const useStyles = makeStyles(theme => ({
 		color: 'rgba(255, 255, 255, 0.6)',
 		letterSpacing: '0.05em',
 		marginTop: 10,
-		[theme.breakpoints.down('sm')]: {
+		[theme.breakpoints.down('md')]: {
 			fontSize: '1.35rem'
 		}
 	},
@@ -90,13 +90,13 @@ const useStyles = makeStyles(theme => ({
 		gridTemplateColumns: 'repeat(5, 1fr)',
 		gap: 16,
 		marginBottom: 24,
-		[theme.breakpoints.down('md')]: {
+		[theme.breakpoints.down('lg')]: {
 			gridTemplateColumns: 'repeat(3, 1fr)'
 		},
-		[theme.breakpoints.down('sm')]: {
+		[theme.breakpoints.down('md')]: {
 			gridTemplateColumns: 'repeat(2, 1fr)'
 		},
-		[theme.breakpoints.down('xs')]: {
+		[theme.breakpoints.down('sm')]: {
 			gridTemplateColumns: '1fr'
 		}
 	},
@@ -140,7 +140,7 @@ const useStyles = makeStyles(theme => ({
 		gridTemplateColumns: 'repeat(2, 1fr)',
 		gap: 20,
 		marginBottom: 20,
-		[theme.breakpoints.down('sm')]: {
+		[theme.breakpoints.down('md')]: {
 			gridTemplateColumns: '1fr'
 		}
 	},
@@ -149,7 +149,7 @@ const useStyles = makeStyles(theme => ({
 		gridTemplateColumns: 'repeat(3, 1fr)',
 		gap: 20,
 		marginBottom: 20,
-		[theme.breakpoints.down('sm')]: {
+		[theme.breakpoints.down('md')]: {
 			gridTemplateColumns: '1fr'
 		}
 	},
@@ -158,7 +158,7 @@ const useStyles = makeStyles(theme => ({
 		borderRadius: 20,
 		border: '1px solid rgba(0, 212, 255, 0.15)',
 		padding: 24,
-		[theme.breakpoints.down('xs')]: {
+		[theme.breakpoints.down('sm')]: {
 			padding: 16,
 			borderRadius: 16
 		}
@@ -169,7 +169,7 @@ const useStyles = makeStyles(theme => ({
 		border: '1px solid rgba(0, 212, 255, 0.15)',
 		padding: 24,
 		marginBottom: 20,
-		[theme.breakpoints.down('xs')]: {
+		[theme.breakpoints.down('sm')]: {
 			padding: 16,
 			borderRadius: 16
 		}
@@ -194,7 +194,7 @@ const useStyles = makeStyles(theme => ({
 	chartContainer: {
 		height: 280,
 		position: 'relative',
-		[theme.breakpoints.down('xs')]: {
+		[theme.breakpoints.down('sm')]: {
 			height: 220
 		}
 	},
@@ -370,7 +370,7 @@ function InfoTip({ title, classes }) {
 }
 
 function BalanceReport() {
-	const classes = useStyles();
+	const { classes } = useStyles();
 	const dispatch = useDispatch();
 	const report = useSelector(({ BalanceReport: br }) => br.balanceReport.report);
 	const loading = useSelector(({ BalanceReport: br }) => br.balanceReport.loading);
@@ -884,7 +884,7 @@ function BalanceReport() {
 			content={
 				<div className={classes.container}>
 					<div className={classes.dateRow}>
-						<KeyboardDatePicker
+						<DatePicker
 							value={startDate}
 							onChange={date => date && setStartDate(date)}
 							format="YYYY-MM-DD"
@@ -893,7 +893,7 @@ function BalanceReport() {
 							variant="inline"
 						/>
 						<span className={classes.dateSep}>~</span>
-						<KeyboardDatePicker
+						<DatePicker
 							value={endDate}
 							onChange={date => date && setEndDate(date)}
 							format="YYYY-MM-DD"

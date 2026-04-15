@@ -2,7 +2,7 @@ import FuseDialog from '@fuse/core/FuseDialog';
 import FuseMessage from '@fuse/core/FuseMessage';
 import FuseScrollbars from '@fuse/core/FuseScrollbars';
 import FuseSuspense from '@fuse/core/FuseSuspense';
-import { makeStyles } from '@material-ui/core/styles';
+import { makeStyles } from 'tss-react/mui';
 import AppContext from 'app/AppContext';
 import clsx from 'clsx';
 import React from 'react';
@@ -14,7 +14,7 @@ import NavbarWrapperLayout2 from './components/NavbarWrapperLayout2';
 import RightSideLayout2 from './components/RightSideLayout2';
 import ToolbarLayout2 from './components/ToolbarLayout2';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles()((theme) => ({
 	root: {
 		position: 'relative',
 		display: 'flex',

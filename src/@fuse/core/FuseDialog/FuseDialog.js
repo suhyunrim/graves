@@ -1,4 +1,4 @@
-import Dialog from '@material-ui/core/Dialog';
+import Dialog from '@mui/material/Dialog';
 import * as Actions from 'app/store/actions';
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';

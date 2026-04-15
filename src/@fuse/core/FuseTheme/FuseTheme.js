@@ -1,4 +1,4 @@
-import { ThemeProvider } from '@material-ui/core/styles';
+import { ThemeProvider, StyledEngineProvider } from '@mui/material/styles';
 import React, { useEffect, useLayoutEffect } from 'react';
 import { useSelector } from 'react-redux';
 
@@ -13,7 +13,11 @@ function FuseTheme(props) {
 	}, [direction]);
 
 	// console.warn('FuseTheme:: rendered',mainTheme);
-	return <ThemeProvider theme={mainTheme}>{props.children}</ThemeProvider>;
+	return (
+        <StyledEngineProvider injectFirst>
+            <ThemeProvider theme={mainTheme}>{props.children}</ThemeProvider>
+        </StyledEngineProvider>
+    );
 }
 
 export default React.memo(FuseTheme);

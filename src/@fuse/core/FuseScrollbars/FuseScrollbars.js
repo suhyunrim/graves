@@ -1,4 +1,4 @@
-import { makeStyles } from '@material-ui/core/styles';
+import { makeStyles } from 'tss-react/mui';
 import clsx from 'clsx';
 import MobileDetect from 'mobile-detect';
 import PerfectScrollbar from 'perfect-scrollbar';
@@ -24,7 +24,7 @@ const handlerNameByEvent = {
 };
 Object.freeze(handlerNameByEvent);
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles()((theme) => ({
 	root: {}
 }));
 
@@ -43,7 +43,7 @@ const FuseScrollbars = React.forwardRef(({
 	const ref = forwardedRef || createRef();
 	const ps = useRef(null);
 	const handlerByEvent = useRef(new Map());
-	const classes = useStyles();
+	const { classes } = useStyles();
 
 	const hookUpEvents = useCallback(() => {
 		Object.keys(handlerNameByEvent).forEach(key => {

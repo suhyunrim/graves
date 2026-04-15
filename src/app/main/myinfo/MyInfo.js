@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import FusePageSimple from '@fuse/core/FusePageSimple';
-import { makeStyles } from '@material-ui/core/styles';
+import { makeStyles } from 'tss-react/mui';
 import {
 	Button,
 	TextField,
@@ -13,7 +13,7 @@ import {
 	CircularProgress,
 	Tabs,
 	Tab
-} from '@material-ui/core';
+} from '@mui/material';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import withReducer from 'app/store/withReducer';
@@ -40,7 +40,7 @@ const tierColors = {
 	UNRANKED: { primary: '#888888', glow: 'rgba(136, 136, 136, 0.3)' }
 };
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles()((theme) => ({
 	layoutRoot: {
 		background: 'linear-gradient(180deg, #0f0f1a 0%, #1a1a2e 100%)',
 		minHeight: '100vh'
@@ -49,7 +49,7 @@ const useStyles = makeStyles(theme => ({
 		padding: '28px',
 		maxWidth: 1400,
 		margin: '0 auto',
-		[theme.breakpoints.down('xs')]: {
+		[theme.breakpoints.down('sm')]: {
 			padding: '16px'
 		}
 	},
@@ -66,7 +66,7 @@ const useStyles = makeStyles(theme => ({
 		borderRadius: 16,
 		border: '1px solid rgba(0, 212, 255, 0.2)',
 		animation: '$fadeIn 0.5s ease',
-		[theme.breakpoints.down('xs')]: {
+		[theme.breakpoints.down('sm')]: {
 			gap: 16,
 			padding: 16
 		}
@@ -86,7 +86,7 @@ const useStyles = makeStyles(theme => ({
 			transform: 'scale(1.05)',
 			boxShadow: '0 0 40px rgba(0, 212, 255, 0.5)'
 		},
-		[theme.breakpoints.down('xs')]: {
+		[theme.breakpoints.down('sm')]: {
 			width: 80,
 			height: 80,
 			borderRadius: 12
@@ -103,7 +103,7 @@ const useStyles = makeStyles(theme => ({
 		letterSpacing: '0.02em',
 		textShadow: '0 2px 20px rgba(0, 212, 255, 0.3)',
 		marginBottom: 6,
-		[theme.breakpoints.down('xs')]: {
+		[theme.breakpoints.down('sm')]: {
 			fontSize: '2.2rem'
 		}
 	},
@@ -150,7 +150,7 @@ const useStyles = makeStyles(theme => ({
 		gridTemplateColumns: 'repeat(auto-fit, minmax(380px, 1fr))',
 		gap: 24,
 		marginBottom: 32,
-		[theme.breakpoints.down('xs')]: {
+		[theme.breakpoints.down('sm')]: {
 			gridTemplateColumns: '1fr',
 			gap: 16
 		}
@@ -166,7 +166,7 @@ const useStyles = makeStyles(theme => ({
 		'&:hover': {
 			transform: 'translateY(-6px) scale(1.02)'
 		},
-		[theme.breakpoints.down('xs')]: {
+		[theme.breakpoints.down('sm')]: {
 			padding: 20,
 			borderRadius: 16
 		}
@@ -208,7 +208,7 @@ const useStyles = makeStyles(theme => ({
 		'&:hover': {
 			transform: 'scale(1.1) rotate(5deg)'
 		},
-		[theme.breakpoints.down('xs')]: {
+		[theme.breakpoints.down('sm')]: {
 			width: 72,
 			height: 72
 		}
@@ -228,7 +228,7 @@ const useStyles = makeStyles(theme => ({
 		fontWeight: 700,
 		letterSpacing: '0.03em',
 		textShadow: '0 2px 10px currentColor',
-		[theme.breakpoints.down('xs')]: {
+		[theme.breakpoints.down('sm')]: {
 			fontSize: '1.8rem'
 		}
 	},
@@ -294,7 +294,7 @@ const useStyles = makeStyles(theme => ({
 		gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
 		gap: 16,
 		marginBottom: 24,
-		[theme.breakpoints.down('xs')]: {
+		[theme.breakpoints.down('sm')]: {
 			gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
 			gap: 12
 		}
@@ -350,7 +350,7 @@ const useStyles = makeStyles(theme => ({
 		gridTemplateColumns: 'repeat(auto-fit, minmax(420px, 1fr))',
 		gap: 24,
 		marginBottom: 32,
-		[theme.breakpoints.down('xs')]: {
+		[theme.breakpoints.down('sm')]: {
 			gridTemplateColumns: '1fr',
 			gap: 16
 		}
@@ -364,7 +364,7 @@ const useStyles = makeStyles(theme => ({
 		opacity: 0,
 		'&:nth-child(1)': { animationDelay: '0.2s' },
 		'&:nth-child(2)': { animationDelay: '0.3s' },
-		[theme.breakpoints.down('xs')]: {
+		[theme.breakpoints.down('sm')]: {
 			padding: 16,
 			borderRadius: 16
 		}
@@ -398,7 +398,7 @@ const useStyles = makeStyles(theme => ({
 		'&:hover': {
 			background: 'rgba(0, 212, 255, 0.1)'
 		},
-		[theme.breakpoints.down('xs')]: {
+		[theme.breakpoints.down('sm')]: {
 			flexWrap: 'wrap',
 			gap: 4,
 			padding: '10px 12px'
@@ -441,7 +441,7 @@ const useStyles = makeStyles(theme => ({
 		gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
 		gap: 16,
 		marginBottom: 32,
-		[theme.breakpoints.down('xs')]: {
+		[theme.breakpoints.down('sm')]: {
 			gridTemplateColumns: '1fr',
 			gap: 12
 		}
@@ -532,7 +532,7 @@ const useStyles = makeStyles(theme => ({
 		display: 'flex',
 		alignItems: 'center',
 		gap: 12,
-		[theme.breakpoints.down('xs')]: {
+		[theme.breakpoints.down('sm')]: {
 			flexDirection: 'column',
 			alignItems: 'stretch'
 		}

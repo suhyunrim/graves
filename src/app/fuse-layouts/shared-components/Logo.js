@@ -1,9 +1,9 @@
-import { makeStyles } from '@material-ui/core/styles';
-import Typography from '@material-ui/core/Typography';
+import { makeStyles } from 'tss-react/mui';
+import Typography from '@mui/material/Typography';
 import clsx from 'clsx';
 import React from 'react';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles()((theme) => ({
 	root: {
 		'& .logo-icon': {
 			width: 28,
@@ -34,7 +34,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 function Logo() {
-	const classes = useStyles();
+	const { classes } = useStyles();
 
 	return (
 		<div className={clsx(classes.root, 'flex items-center')}>

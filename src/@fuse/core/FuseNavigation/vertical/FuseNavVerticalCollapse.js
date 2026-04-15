@@ -1,11 +1,11 @@
 import NavLinkAdapter from '@fuse/core/NavLinkAdapter';
 import FuseUtils from '@fuse/utils';
-import Collapse from '@material-ui/core/Collapse';
-import Icon from '@material-ui/core/Icon';
-import IconButton from '@material-ui/core/IconButton';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemText from '@material-ui/core/ListItemText';
-import { makeStyles } from '@material-ui/core/styles';
+import Collapse from '@mui/material/Collapse';
+import Icon from '@mui/material/Icon';
+import IconButton from '@mui/material/IconButton';
+import ListItem from '@mui/material/ListItem';
+import ListItemText from '@mui/material/ListItemText';
+import { makeStyles } from 'tss-react/mui';
 import clsx from 'clsx';
 
 import React, { useEffect, useState, useMemo } from 'react';
@@ -15,11 +15,11 @@ import { withRouter } from 'react-router-dom';
 import FuseNavBadge from '../FuseNavBadge';
 import FuseNavItem from '../FuseNavItem';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles()((theme) => ({
 	root: {
 		padding: 0,
 		'&.open': {
-			backgroundColor: theme.palette.type === 'dark' ? 'rgba(255,255,255,.015)' : 'rgba(0,0,0,.04)'
+			backgroundColor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,.015)' : 'rgba(0,0,0,.04)'
 		}
 	},
 	item: props => ({
@@ -91,8 +91,8 @@ function FuseNavVerticalCollapse(props) {
 	}
 
 	return (
-		<ul className={clsx(classes.root, open && 'open')}>
-			<ListItem
+        <ul className={clsx(classes.root, open && 'open')}>
+            <ListItem
 				button
 				className={clsx(classes.item, 'list-item')}
 				onClick={handleClick}
@@ -115,25 +115,24 @@ function FuseNavVerticalCollapse(props) {
 				{item.badge && <FuseNavBadge className="mx-4" badge={item.badge} />}
 
 				<IconButton
-					disableRipple
-					className="w-40 h-40 -mx-12 p-0 focus:bg-transparent hover:bg-transparent"
-					onClick={ev => ev.preventDefault()}
-				>
+                    disableRipple
+                    className="w-40 h-40 -mx-12 p-0 focus:bg-transparent hover:bg-transparent"
+                    onClick={ev => ev.preventDefault()}
+                    size="large">
 					<Icon className="text-16 arrow-icon" color="inherit">
 						{open ? 'expand_less' : 'expand_more'}
 					</Icon>
 				</IconButton>
 			</ListItem>
-
-			{item.children && (
+            {item.children && (
 				<Collapse in={open} className="collapse-children">
 					{item.children.map(_item => (
 						<FuseNavItem key={_item.id} type={`vertical-${_item.type}`} item={_item} nestedLevel={nestedLevel + 1} />
 					))}
 				</Collapse>
 			)}
-		</ul>
-	);
+        </ul>
+    );
 }
 
 const NavVerticalCollapse = withRouter(React.memo(FuseNavVerticalCollapse));

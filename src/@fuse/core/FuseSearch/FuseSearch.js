@@ -1,16 +1,16 @@
 import FuseUtils from '@fuse/utils';
-import ClickAwayListener from '@material-ui/core/ClickAwayListener';
-import Icon from '@material-ui/core/Icon';
-import IconButton from '@material-ui/core/IconButton';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
-import ListItemText from '@material-ui/core/ListItemText';
-import MenuItem from '@material-ui/core/MenuItem';
-import Paper from '@material-ui/core/Paper';
-import Popper from '@material-ui/core/Popper';
-import { makeStyles } from '@material-ui/core/styles';
-import TextField from '@material-ui/core/TextField';
-import Tooltip from '@material-ui/core/Tooltip';
-import Typography from '@material-ui/core/Typography';
+import ClickAwayListener from '@mui/material/ClickAwayListener';
+import Icon from '@mui/material/Icon';
+import IconButton from '@mui/material/IconButton';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import ListItemText from '@mui/material/ListItemText';
+import MenuItem from '@mui/material/MenuItem';
+import Paper from '@mui/material/Paper';
+import Popper from '@mui/material/Popper';
+import { makeStyles } from 'tss-react/mui';
+import TextField from '@mui/material/TextField';
+import Tooltip from '@mui/material/Tooltip';
+import Typography from '@mui/material/Typography';
 import match from 'autosuggest-highlight/match';
 import parse from 'autosuggest-highlight/parse';
 import clsx from 'clsx';
@@ -23,11 +23,11 @@ import { withRouter } from 'react-router-dom';
 function renderInputComponent(inputProps) {
 	const { variant, classes, inputRef = () => {}, ref, ...other } = inputProps;
 	return (
-		<div className="w-full relative">
-			{variant === 'basic' ? (
+        <div className="w-full relative">
+            {variant === 'basic' ? (
 				// Outlined
-				<>
-					<TextField
+				(<>
+                    <TextField
 						fullWidth
 						InputProps={{
 							inputRef: node => {
@@ -42,13 +42,13 @@ function renderInputComponent(inputProps) {
 						variant="outlined"
 						{...other}
 					/>
-					<Icon className="absolute top-0 ltr:right-0 rtl:left-0 h-48 w-48 p-12 pointer-events-none" color="action">
+                    <Icon className="absolute top-0 ltr:right-0 rtl:left-0 h-48 w-48 p-12 pointer-events-none" color="action">
 						search
 					</Icon>
-				</>
+                </>)
 			) : (
 				// Standard
-				<TextField
+				(<TextField
 					fullWidth
 					InputProps={{
 						disableUnderline: true,
@@ -62,10 +62,10 @@ function renderInputComponent(inputProps) {
 					}}
 					variant="standard"
 					{...other}
-				/>
+				/>)
 			)}
-		</div>
-	);
+        </div>
+    );
 }
 
 function renderSuggestion(suggestion, { query, isHighlighted }) {
@@ -120,7 +120,7 @@ function getSuggestionValue(suggestion) {
 	return suggestion.title;
 }
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles()((theme) => ({
 	root: {},
 	container: {
 		position: 'relative'
@@ -214,7 +214,7 @@ function reducer(state, action) {
 }
 
 const defaultTrigger = (
-	<IconButton className="w-64 h-64">
+	<IconButton className="w-64 h-64" size="large">
 		<Icon>search</Icon>
 	</IconButton>
 );
@@ -354,14 +354,13 @@ function FuseSearch(props) {
 		}
 		case 'full': {
 			return (
-				<div className={clsx(classes.root, 'flex', props.className)}>
-					<Tooltip title="Click to search" placement="bottom">
+                <div className={clsx(classes.root, 'flex', props.className)}>
+                    <Tooltip title="Click to search" placement="bottom">
 						<div onClick={showSearch} onKeyDown={showSearch} role="button" tabIndex={0}>
 							{trigger}
 						</div>
 					</Tooltip>
-
-					{state.opened && (
+                    {state.opened && (
 						<ClickAwayListener onClickAway={handleClickAway}>
 							<Paper className="absolute left-0 right-0 h-full z-9999" square>
 								<div className="flex items-center w-full" ref={popperNode}>
@@ -405,15 +404,15 @@ function FuseSearch(props) {
 											</Popper>
 										)}
 									/>
-									<IconButton onClick={hideSearch} className="mx-8">
+									<IconButton onClick={hideSearch} className="mx-8" size="large">
 										<Icon>close</Icon>
 									</IconButton>
 								</div>
 							</Paper>
 						</ClickAwayListener>
 					)}
-				</div>
-			);
+                </div>
+            );
 		}
 		default: {
 			return null;

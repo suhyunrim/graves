@@ -1,13 +1,14 @@
 import FuseScrollbars from '@fuse/core/FuseScrollbars';
 import FuseSettings from '@fuse/core/FuseSettings';
-import Button from '@material-ui/core/Button';
-import { red } from '@material-ui/core/colors';
-import Dialog from '@material-ui/core/Dialog';
-import Icon from '@material-ui/core/Icon';
-import IconButton from '@material-ui/core/IconButton';
-import Slide from '@material-ui/core/Slide';
-import { makeStyles, useTheme } from '@material-ui/core/styles';
-import Typography from '@material-ui/core/Typography';
+import Button from '@mui/material/Button';
+import { red } from '@mui/material/colors';
+import Dialog from '@mui/material/Dialog';
+import Icon from '@mui/material/Icon';
+import IconButton from '@mui/material/IconButton';
+import Slide from '@mui/material/Slide';
+import { useTheme } from '@mui/material/styles';
+import { makeStyles } from 'tss-react/mui';
+import Typography from '@mui/material/Typography';
 import React, { useState } from 'react';
 
 const Transition = React.forwardRef(function Transition(props, ref) {
@@ -15,7 +16,7 @@ const Transition = React.forwardRef(function Transition(props, ref) {
 	return <Slide direction={theme.direction === 'ltr' ? 'left' : 'right'} ref={ref} {...props} />;
 });
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles()((theme) => ({
 	button: {
 		position: 'absolute',
 		right: 0,
@@ -64,7 +65,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 function SettingsPanel() {
-	const classes = useStyles();
+	const { classes } = useStyles();
 	const [open, setOpen] = useState(false);
 
 	const handleOpen = () => {
@@ -76,12 +77,11 @@ function SettingsPanel() {
 	};
 
 	return (
-		<>
-			<Button id="fuse-settings" className={classes.button} variant="contained" onClick={handleOpen}>
+        <>
+            <Button id="fuse-settings" className={classes.button} variant="contained" onClick={handleOpen}>
 				<Icon className={classes.buttonIcon}>settings</Icon>
 			</Button>
-
-			<Dialog
+            <Dialog
 				TransitionComponent={Transition}
 				aria-labelledby="settings-panel"
 				aria-describedby="settings"
@@ -94,7 +94,10 @@ function SettingsPanel() {
 				}}
 			>
 				<FuseScrollbars className="p-24 sm:p-32">
-					<IconButton className="fixed top-0 ltr:right-0 rtl:left-0 z-10" onClick={handleClose}>
+					<IconButton
+                        className="fixed top-0 ltr:right-0 rtl:left-0 z-10"
+                        onClick={handleClose}
+                        size="large">
 						<Icon>close</Icon>
 					</IconButton>
 
@@ -105,8 +108,8 @@ function SettingsPanel() {
 					<FuseSettings />
 				</FuseScrollbars>
 			</Dialog>
-		</>
-	);
+        </>
+    );
 }
 
 export default React.memo(SettingsPanel);

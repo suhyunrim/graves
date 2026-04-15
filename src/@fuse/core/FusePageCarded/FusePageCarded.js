@@ -1,5 +1,5 @@
 import FuseScrollbars from '@fuse/core/FuseScrollbars';
-import { makeStyles } from '@material-ui/core/styles';
+import { makeStyles } from 'tss-react/mui';
 import clsx from 'clsx';
 import React, { useRef } from 'react';
 import FusePageCardedHeader from './FusePageCardedHeader';
@@ -10,7 +10,7 @@ const headerHeight = 200;
 const toolbarHeight = 64;
 const headerContentHeight = headerHeight - toolbarHeight;
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles()((theme) => ({
 	root: {
 		display: 'flex',
 		flexDirection: 'row',
@@ -43,7 +43,7 @@ const useStyles = makeStyles(theme => ({
 		maxWidth: '100%',
 		minWidth: 0,
 		minHeight: 0,
-		[theme.breakpoints.down('xs')]: {
+		[theme.breakpoints.down('sm')]: {
 			padding: '0 1.6rem'
 		}
 	},

@@ -1,8 +1,8 @@
 import React from 'react';
-import { Typography } from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
+import { Typography } from '@mui/material';
+import { makeStyles } from 'tss-react/mui';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles()((theme) => ({
 	root: {
 		display: 'flex',
 		flexDirection: 'column',
@@ -20,7 +20,7 @@ const useStyles = makeStyles(theme => ({
 		letterSpacing: '0.15em',
 		textShadow: '0 0 20px rgba(0, 212, 255, 0.5)',
 		margin: 0,
-		[theme.breakpoints.down('sm')]: {
+		[theme.breakpoints.down('md')]: {
 			fontSize: '2.75rem'
 		}
 	},
@@ -30,14 +30,14 @@ const useStyles = makeStyles(theme => ({
 		color: 'rgba(255, 255, 255, 0.6)',
 		marginTop: 8,
 		letterSpacing: '0.05em',
-		[theme.breakpoints.down('sm')]: {
+		[theme.breakpoints.down('md')]: {
 			fontSize: '1.35rem'
 		}
 	}
 }));
 
 function DashboardHeader() {
-	const classes = useStyles();
+	const { classes } = useStyles();
 
 	return (
 		<div className={classes.root}>

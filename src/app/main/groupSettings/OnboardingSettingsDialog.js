@@ -11,8 +11,8 @@ import {
 	Radio,
 	RadioGroup,
 	FormControlLabel
-} from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
+} from '@mui/material';
+import { makeStyles } from 'tss-react/mui';
 import { useDispatch, useSelector } from 'react-redux';
 import * as Actions from './store/actions';
 
@@ -54,7 +54,7 @@ function getTierIconUrl(tierKey) {
 	return `/assets/images/ranked-emblems/Emblem_${tierKey}.webp`;
 }
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles()((theme) => ({
 	paper: {
 		background: 'linear-gradient(135deg, #1a1a2e 0%, #0f0f1a 100%)',
 		color: '#fff',
@@ -62,7 +62,7 @@ const useStyles = makeStyles(theme => ({
 		border: '1px solid rgba(0, 212, 255, 0.3)',
 		minWidth: 520,
 		maxHeight: '80vh',
-		[theme.breakpoints.down('xs')]: {
+		[theme.breakpoints.down('sm')]: {
 			minWidth: 'auto',
 			margin: 16,
 			borderRadius: 16
@@ -98,7 +98,7 @@ const useStyles = makeStyles(theme => ({
 		alignItems: 'center',
 		gap: 12,
 		marginBottom: 12,
-		[theme.breakpoints.down('xs')]: {
+		[theme.breakpoints.down('sm')]: {
 			gap: 8
 		}
 	},
@@ -239,7 +239,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 function OnboardingSettingsDialog({ open, onClose, groupId }) {
-	const classes = useStyles();
+	const { classes } = useStyles();
 	const dispatch = useDispatch();
 	const { info, discordRoles } = useSelector(({ GroupSettings }) => GroupSettings.groupInfo);
 

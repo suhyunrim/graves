@@ -1,6 +1,6 @@
-import Divider from '@material-ui/core/Divider';
-import List from '@material-ui/core/List';
-import { makeStyles } from '@material-ui/core/styles';
+import Divider from '@mui/material/Divider';
+import List from '@mui/material/List';
+import { makeStyles } from 'tss-react/mui';
 import clsx from 'clsx';
 import React from 'react';
 import FuseNavHorizontalCollapse from './horizontal/FuseNavHorizontalCollapse';
@@ -27,14 +27,14 @@ registerComponent('horizontal-link', FuseNavHorizontalLink);
 registerComponent('vertical-divider', () => <Divider className="my-16" />);
 registerComponent('horizontal-divider', () => <Divider className="my-16" />);
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles()((theme) => ({
 	navigation: {
 		'& .list-item': {
 			'&:hover': {
-				backgroundColor: theme.palette.type === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0,0,0,.04)'
+				backgroundColor: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0,0,0,.04)'
 			},
 			'&:focus:not(.active)': {
-				backgroundColor: theme.palette.type === 'dark' ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0,0,0,.05)'
+				backgroundColor: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0,0,0,.05)'
 			}
 		}
 	},

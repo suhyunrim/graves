@@ -1,4 +1,4 @@
-import Typography from '@material-ui/core/Typography';
+import Typography from '@mui/material/Typography';
 import clsx from 'clsx';
 import moment from 'moment';
 import React, { useCallback, useEffect, useRef, useState } from 'react';

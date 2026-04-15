@@ -1,18 +1,18 @@
 import FuseAnimate from '@fuse/core/FuseAnimate';
 import FuseSplashScreen from '@fuse/core/FuseSplashScreen';
 import { useForm } from '@fuse/hooks';
-import Button from '@material-ui/core/Button';
-import Card from '@material-ui/core/Card';
-import CardContent from '@material-ui/core/CardContent';
-import { makeStyles } from '@material-ui/core/styles';
-import TextField from '@material-ui/core/TextField';
-import Typography from '@material-ui/core/Typography';
+import Button from '@mui/material/Button';
+import Card from '@mui/material/Card';
+import CardContent from '@mui/material/CardContent';
+import { makeStyles } from 'tss-react/mui';
+import TextField from '@mui/material/TextField';
+import Typography from '@mui/material/Typography';
 import clsx from 'clsx';
 import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import * as authActions from 'app/auth/store/actions';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles()((theme) => ({
 	'@keyframes pulseGlow': {
 		'0%, 100%': {
 			boxShadow: '0 0 30px rgba(0, 212, 255, 0.4), 0 0 60px rgba(0, 212, 255, 0.2)'
@@ -210,7 +210,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 function LoginPage() {
-	const classes = useStyles();
+	const { classes } = useStyles();
 	const dispatch = useDispatch();
 
 	const { form, handleChange, resetForm } = useForm({

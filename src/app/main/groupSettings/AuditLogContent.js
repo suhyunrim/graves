@@ -1,9 +1,10 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { Select, MenuItem, TextField, Chip, IconButton, useMediaQuery } from '@material-ui/core';
-import { makeStyles, useTheme } from '@material-ui/core/styles';
-import NavigateBeforeIcon from '@material-ui/icons/NavigateBefore';
-import NavigateNextIcon from '@material-ui/icons/NavigateNext';
-import LanguageIcon from '@material-ui/icons/Language';
+import { Select, MenuItem, TextField, Chip, IconButton, useMediaQuery } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
+import { makeStyles } from 'tss-react/mui';
+import NavigateBeforeIcon from '@mui/icons-material/NavigateBefore';
+import NavigateNextIcon from '@mui/icons-material/NavigateNext';
+import LanguageIcon from '@mui/icons-material/Language';
 import { useDispatch, useSelector } from 'react-redux';
 import { SettingsSkeleton } from '../components/SkeletonLoaders';
 import * as Actions from './store/actions';
@@ -119,10 +120,10 @@ function getDefaultDates() {
 	};
 }
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles()((theme) => ({
 	root: {
 		padding: '24px 28px',
-		[theme.breakpoints.down('sm')]: {
+		[theme.breakpoints.down('md')]: {
 			padding: '16px 12px'
 		}
 	},
@@ -141,7 +142,7 @@ const useStyles = makeStyles(theme => ({
 		gap: 12,
 		marginBottom: 20,
 		flexWrap: 'wrap',
-		[theme.breakpoints.down('sm')]: {
+		[theme.breakpoints.down('md')]: {
 			flexDirection: 'column',
 			alignItems: 'stretch'
 		}
@@ -174,7 +175,7 @@ const useStyles = makeStyles(theme => ({
 		fontFamily: '"Noto Sans KR", sans-serif',
 		fontSize: '1.2rem',
 		color: 'rgba(255, 255, 255, 0.4)',
-		[theme.breakpoints.down('sm')]: {
+		[theme.breakpoints.down('md')]: {
 			display: 'none'
 		}
 	},
@@ -189,7 +190,7 @@ const useStyles = makeStyles(theme => ({
 		minWidth: 120,
 		'&:before, &:after': { display: 'none' },
 		'& .MuiSelect-icon': { color: 'rgba(255, 255, 255, 0.5)' },
-		[theme.breakpoints.down('sm')]: {
+		[theme.breakpoints.down('md')]: {
 			width: '100%'
 		}
 	},
@@ -214,7 +215,7 @@ const useStyles = makeStyles(theme => ({
 		'&:hover': {
 			background: 'rgba(255, 255, 255, 0.05)'
 		},
-		[theme.breakpoints.down('sm')]: {
+		[theme.breakpoints.down('md')]: {
 			flexDirection: 'column',
 			alignItems: 'stretch',
 			gap: 6,
@@ -228,7 +229,7 @@ const useStyles = makeStyles(theme => ({
 		color: 'rgba(255, 255, 255, 0.4)',
 		minWidth: 100,
 		whiteSpace: 'nowrap',
-		[theme.breakpoints.down('sm')]: {
+		[theme.breakpoints.down('md')]: {
 			minWidth: 'auto',
 			fontSize: '1.1rem'
 		}
@@ -239,7 +240,7 @@ const useStyles = makeStyles(theme => ({
 		fontWeight: 700,
 		color: '#fff',
 		minWidth: 100,
-		[theme.breakpoints.down('sm')]: {
+		[theme.breakpoints.down('md')]: {
 			minWidth: 'auto',
 			fontSize: '1.15rem'
 		}
@@ -257,7 +258,7 @@ const useStyles = makeStyles(theme => ({
 		overflow: 'hidden',
 		textOverflow: 'ellipsis',
 		whiteSpace: 'nowrap',
-		[theme.breakpoints.down('sm')]: {
+		[theme.breakpoints.down('md')]: {
 			whiteSpace: 'normal',
 			width: '100%',
 			fontSize: '1rem'
@@ -321,10 +322,10 @@ const useStyles = makeStyles(theme => ({
 }));
 
 function AuditLogContent() {
-	const classes = useStyles();
+	const { classes } = useStyles();
 	const dispatch = useDispatch();
 	const theme = useTheme();
-	const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+	const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 	const user = useSelector(state => state.auth.user);
 	const { logs, total, page, limit, loading } = useSelector(({ GroupSettings }) => GroupSettings.auditLog);
 
@@ -434,8 +435,8 @@ function AuditLogContent() {
 	}
 
 	return (
-		<div className={classes.root}>
-			<div className={classes.filters}>
+        <div className={classes.root}>
+            <div className={classes.filters}>
 				<TextField
 					className={classes.dateField}
 					type="date"
@@ -474,27 +475,34 @@ function AuditLogContent() {
 					))}
 				</Select>
 			</div>
-
-			{logs.length === 0 ? (
+            {logs.length === 0 ? (
 				<div className={classes.emptyState}>로그가 없습니다.</div>
 			) : (
 				<>
 					<div className={classes.logList}>{logs.map(log => renderLogItem(log))}</div>
 					<div className={classes.pagination}>
-						<IconButton className={classes.pageBtn} disabled={page <= 1} onClick={() => fetchLogs(page - 1)}>
+						<IconButton
+                            className={classes.pageBtn}
+                            disabled={page <= 1}
+                            onClick={() => fetchLogs(page - 1)}
+                            size="large">
 							<NavigateBeforeIcon />
 						</IconButton>
 						<span className={classes.pageInfo}>
 							{page} / {totalPages}
 						</span>
-						<IconButton className={classes.pageBtn} disabled={page >= totalPages} onClick={() => fetchLogs(page + 1)}>
+						<IconButton
+                            className={classes.pageBtn}
+                            disabled={page >= totalPages}
+                            onClick={() => fetchLogs(page + 1)}
+                            size="large">
 							<NavigateNextIcon />
 						</IconButton>
 					</div>
 				</>
 			)}
-		</div>
-	);
+        </div>
+    );
 }
 
 export default AuditLogContent;
