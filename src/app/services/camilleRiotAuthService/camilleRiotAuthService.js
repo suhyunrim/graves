@@ -22,17 +22,16 @@ class CamilleRiotAuthService extends FuseUtils.EventEmitter {
 	};
 
 	signInWithRiotId = riotId => {
-		return new Promise((resolve, reject) => {
-			const createCamilleAxios = require('app/utility/camilleAxios').default;
-			createCamilleAxios()
+		// dynamic import로 순환 의존성 회피 (camilleAxios ↔ camilleRiotAuthService)
+		return import('app/utility/camilleAxios').then(({ default: createCamilleAxios }) => {
+			return createCamilleAxios()
 				.post('/api/user/login', { riotId })
 				.then(response => {
 					if (response.status === 200) {
 						this.setSession(response.data.puuid);
-						resolve(response.data);
-					} else {
-						reject(response.data);
+						return response.data;
 					}
+					return Promise.reject(response.data);
 				});
 		});
 	};
