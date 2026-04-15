@@ -1,12 +1,13 @@
 import FuseScrollbars from '@fuse/core/FuseScrollbars';
 import _ from '@lodash';
-import Hidden from '@material-ui/core/Hidden';
-import Table from '@material-ui/core/Table';
-import TableBody from '@material-ui/core/TableBody';
-import TableCell from '@material-ui/core/TableCell';
-import TablePagination from '@material-ui/core/TablePagination';
-import TableRow from '@material-ui/core/TableRow';
-import { makeStyles, withStyles } from '@material-ui/core/styles';
+import Box from '@mui/material/Box';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TablePagination from '@mui/material/TablePagination';
+import TableRow from '@mui/material/TableRow';
+import { makeStyles } from 'tss-react/mui';
+import { withStyles } from 'tss-react/mui';
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, withRouter } from 'react-router-dom';
@@ -27,7 +28,7 @@ const tierColors = {
 	CHALLENGER: '#F0E68C'
 };
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles()((theme) => ({
 	container: {
 		padding: '28px',
 		maxWidth: 1400,
@@ -435,7 +436,7 @@ const StyledTableRow = withStyles(theme => ({
 }))(TableRow);
 
 function RankingTable(props) {
-	const classes = useStyles();
+	const { classes } = useStyles();
 	const dispatch = useDispatch();
 	const ranking = useSelector(({ Ranking }) => Ranking.ranking.data);
 	const myRanking = useSelector(({ Ranking }) => Ranking.ranking.myRanking);
@@ -765,12 +766,12 @@ function RankingTable(props) {
 	}
 
 	return (
-		<div className={classes.container}>
-			<div className={classes.tableWrapper}>
+        <div className={classes.container}>
+            <div className={classes.tableWrapper}>
 				{data && data.length > 0 ? (
 					<>
 						{/* Desktop Table View */}
-						<Hidden smDown>
+						<Box sx={{ display: { xs: 'none', md: 'block' } }}>
 							<FuseScrollbars className="flex-grow overflow-x-auto">
 								<Table>
 									<RankingTableHead order={order} onRequestSort={handleRequestSort} rowCount={data.length} />
@@ -854,10 +855,10 @@ function RankingTable(props) {
 									</TableBody>
 								</Table>
 							</FuseScrollbars>
-						</Hidden>
+						</Box>
 
 						{/* Mobile Card View */}
-						<Hidden mdUp>
+						<Box sx={{ display: { md: 'none' } }}>
 							{/* Mobile Sort Bar */}
 							<div className={classes.mobileSortBar}>
 								<span className={classes.mobileSortLabel}>정렬:</span>
@@ -947,7 +948,7 @@ function RankingTable(props) {
 									);
 								})}
 							</div>
-						</Hidden>
+						</Box>
 
 						<TablePagination
 							className={classes.pagination}
@@ -958,7 +959,7 @@ function RankingTable(props) {
 							page={page}
 							backIconButtonProps={{ 'aria-label': 'Previous Page' }}
 							nextIconButtonProps={{ 'aria-label': 'Next Page' }}
-							onChangePage={handleChangePage}
+							onPageChange={handleChangePage}
 						/>
 					</>
 				) : (
@@ -972,8 +973,8 @@ function RankingTable(props) {
 					</div>
 				)}
 			</div>
-		</div>
-	);
+        </div>
+    );
 }
 
 export default withRouter(RankingTable);

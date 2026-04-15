@@ -1,6 +1,6 @@
 import FusePageSimple from '@fuse/core/FusePageSimple';
 import withReducer from 'app/store/withReducer';
-import { makeStyles } from '@material-ui/core/styles';
+import { makeStyles } from 'tss-react/mui';
 import React from 'react';
 import reducer from './store/reducers';
 import AchievementContent from './AchievementContent';
@@ -13,7 +13,7 @@ const useStyles = makeStyles({
 });
 
 function Achievement() {
-	const classes = useStyles();
+	const { classes } = useStyles();
 
 	return (
 		<FusePageSimple

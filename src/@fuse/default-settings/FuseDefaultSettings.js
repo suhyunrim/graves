@@ -1,7 +1,7 @@
 import { fuseDark } from '@fuse/colors';
 import _ from '@lodash';
-import { lightBlue, red } from '@material-ui/core/colors';
-import { createMuiTheme } from '@material-ui/core/styles';
+import { lightBlue, red } from '@mui/material/colors';
+import { createTheme, adaptV4Theme } from '@mui/material/styles';
 import qs from 'qs';
 
 /**
@@ -63,7 +63,7 @@ export const mustHaveThemeOptions = {
 export const defaultThemes = {
 	default: {
 		palette: {
-			type: 'light',
+			mode: 'light',
 			primary: fuseDark,
 			secondary: {
 				light: lightBlue[400],
@@ -78,7 +78,7 @@ export const defaultThemes = {
 	},
 	defaultDark: {
 		palette: {
-			type: 'dark',
+			mode: 'dark',
 			primary: fuseDark,
 			secondary: {
 				light: lightBlue[400],
@@ -94,7 +94,7 @@ export const defaultThemes = {
 };
 
 export function extendThemeWithMixins(obj) {
-	const theme = createMuiTheme(obj);
+	const theme = createTheme(adaptV4Theme(obj));
 	return {
 		border: (width = 1) => ({
 			borderWidth: width,
@@ -126,29 +126,29 @@ export function extendThemeWithMixins(obj) {
 
 export function mainThemeVariations(theme) {
 	return {
-		mainThemeDark: createMuiTheme(
-			_.merge({}, defaultThemeOptions, theme, {
+		mainThemeDark: createTheme(
+			adaptV4Theme(_.merge({}, defaultThemeOptions, theme, {
 				palette: {
-					type: 'dark',
+					mode: 'dark',
 					background: {
 						paper: '#1E2125',
 						default: '#121212'
 					}
 				},
 				...mustHaveThemeOptions
-			})
+			}))
 		),
-		mainThemeLight: createMuiTheme(
-			_.merge({}, defaultThemeOptions, theme, {
+		mainThemeLight: createTheme(
+			adaptV4Theme(_.merge({}, defaultThemeOptions, theme, {
 				palette: {
-					type: 'light',
+					mode: 'light',
 					background: {
 						paper: '#FFFFFF',
 						default: '#F7F7F7'
 					}
 				},
 				...mustHaveThemeOptions
-			})
+			}))
 		)
 	};
 }

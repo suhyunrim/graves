@@ -1,10 +1,8 @@
-import {
-	createGenerateClassName,
-	jssPreset,
-	StylesProvider,
-	ThemeProvider,
-	withStyles
-} from '@material-ui/core/styles';
+import { ThemeProvider, StyledEngineProvider } from '@mui/material/styles';
+import createGenerateClassName from '@mui/styles/createGenerateClassName';
+import jssPreset from '@mui/styles/jssPreset';
+import StylesProvider from '@mui/styles/StylesProvider';
+import { withStyles } from 'tss-react/mui';
 import { create } from 'jss';
 import jssExtend from 'jss-plugin-extend';
 import React from 'react';
@@ -70,28 +68,30 @@ class DemoFrame extends React.Component {
 		const { children, classes, theme } = this.props;
 
 		return (
-			<Frame
+            <Frame
 				head={this.renderHead()}
 				ref={this.handleRef}
 				className={classes.root}
 				contentDidMount={this.onContentDidMount}
 				contentDidUpdate={this.onContentDidUpdate}
 			>
-				{this.state.ready ? (
+                {this.state.ready ? (
 					<StylesProvider
 						jss={this.state.jss}
 						generateClassName={generateClassName}
 						sheetsManager={this.state.sheetsManager}
 					>
-						<ThemeProvider theme={theme}>
-							{React.cloneElement(children, {
-								container: this.state.container
-							})}
-						</ThemeProvider>
+						<StyledEngineProvider injectFirst>
+                            <ThemeProvider theme={theme}>
+                                {React.cloneElement(children, {
+                                    container: this.state.container
+                                })}
+                            </ThemeProvider>
+                        </StyledEngineProvider>
 					</StylesProvider>
 				) : null}
-			</Frame>
-		);
+            </Frame>
+        );
 	}
 }
 

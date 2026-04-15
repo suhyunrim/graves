@@ -1,6 +1,6 @@
 import React from 'react';
-import Skeleton from '@material-ui/lab/Skeleton';
-import { makeStyles } from '@material-ui/core/styles';
+import Skeleton from '@mui/material/Skeleton';
+import { makeStyles } from 'tss-react/mui';
 
 const useSkeletonStyles = makeStyles(() => ({
 	'@keyframes shimmer': {
@@ -126,21 +126,21 @@ const skeletonProps = {
 function DashboardSkeleton() {
 	const classes = useSkeletonStyles();
 	return (
-		<div className={classes.dashboardContainer}>
-			<div className={classes.dashboardMonthBadge}>
+        <div className={classes.dashboardContainer}>
+            <div className={classes.dashboardMonthBadge}>
 				<Skeleton
 					{...skeletonProps}
-					variant="rect"
+					variant="rectangular"
 					width={200}
 					height={36}
 					style={{ ...skeletonProps.style, borderRadius: 8 }}
 				/>
 			</div>
-			<div className={classes.dashboardGrid}>
+            <div className={classes.dashboardGrid}>
 				{Array.from({ length: 10 }).map((_, i) => (
 					<div key={i} className={classes.dashboardCard}>
 						<div className={classes.dashboardCardHeader}>
-							<Skeleton {...skeletonProps} variant="circle" width={48} height={48} />
+							<Skeleton {...skeletonProps} variant="circular" width={48} height={48} />
 							<div style={{ flex: 1 }}>
 								<Skeleton {...skeletonProps} variant="text" width="60%" height={16} />
 								<Skeleton
@@ -161,7 +161,7 @@ function DashboardSkeleton() {
 						/>
 						<Skeleton
 							{...skeletonProps}
-							variant="rect"
+							variant="rectangular"
 							width="70%"
 							height={20}
 							style={{ ...skeletonProps.style, borderRadius: 6 }}
@@ -169,15 +169,15 @@ function DashboardSkeleton() {
 					</div>
 				))}
 			</div>
-		</div>
-	);
+        </div>
+    );
 }
 
 function RankingTableSkeleton() {
 	const classes = useSkeletonStyles();
 	return (
-		<div className={classes.tableContainer}>
-			<div className={classes.tableWrapper}>
+        <div className={classes.tableContainer}>
+            <div className={classes.tableWrapper}>
 				<div className={classes.tableHeaderRow}>
 					<Skeleton {...skeletonProps} variant="text" width={40} height={18} />
 					<Skeleton {...skeletonProps} variant="text" width={100} height={18} />
@@ -192,7 +192,7 @@ function RankingTableSkeleton() {
 						<Skeleton {...skeletonProps} variant="text" width={40} height={24} />
 						<Skeleton {...skeletonProps} variant="text" width={100} height={20} />
 						<div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-							<Skeleton {...skeletonProps} variant="circle" width={40} height={40} />
+							<Skeleton {...skeletonProps} variant="circular" width={40} height={40} />
 							<div>
 								<Skeleton {...skeletonProps} variant="text" width={80} height={16} />
 								<Skeleton {...skeletonProps} variant="text" width={50} height={14} />
@@ -205,21 +205,21 @@ function RankingTableSkeleton() {
 					</div>
 				))}
 			</div>
-		</div>
-	);
+        </div>
+    );
 }
 
 function MatchHistorySkeleton() {
 	const classes = useSkeletonStyles();
 	return (
-		<div className={classes.tableContainer}>
-			<div className={classes.tableWrapper}>
+        <div className={classes.tableContainer}>
+            <div className={classes.tableWrapper}>
 				{Array.from({ length: 8 }).map((_, i) => (
 					<div key={i} className={classes.matchRow}>
 						<Skeleton {...skeletonProps} variant="text" width={30} height={22} />
 						<Skeleton
 							{...skeletonProps}
-							variant="rect"
+							variant="rectangular"
 							width={60}
 							height={28}
 							style={{ ...skeletonProps.style, borderRadius: 6 }}
@@ -239,18 +239,18 @@ function MatchHistorySkeleton() {
 					</div>
 				))}
 			</div>
-		</div>
-	);
+        </div>
+    );
 }
 
 function MyInfoSkeleton() {
 	const classes = useSkeletonStyles();
 	return (
-		<div className={classes.profileContainer}>
-			<div className={classes.profileTop}>
+        <div className={classes.profileContainer}>
+            <div className={classes.profileTop}>
 				<div className={classes.profileCard}>
 					<div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 20 }}>
-						<Skeleton {...skeletonProps} variant="circle" width={64} height={64} />
+						<Skeleton {...skeletonProps} variant="circular" width={64} height={64} />
 						<div>
 							<Skeleton {...skeletonProps} variant="text" width={120} height={24} />
 							<Skeleton
@@ -265,7 +265,7 @@ function MyInfoSkeleton() {
 					<div className={classes.profileStatRow}>
 						<Skeleton
 							{...skeletonProps}
-							variant="rect"
+							variant="rectangular"
 							width="100%"
 							height={60}
 							style={{ ...skeletonProps.style, borderRadius: 8 }}
@@ -281,7 +281,7 @@ function MyInfoSkeleton() {
 						style={{ ...skeletonProps.style, marginBottom: 16 }}
 					/>
 					<div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-						<Skeleton {...skeletonProps} variant="circle" width={56} height={56} />
+						<Skeleton {...skeletonProps} variant="circular" width={56} height={56} />
 						<div>
 							<Skeleton {...skeletonProps} variant="text" width={100} height={18} />
 							<Skeleton
@@ -296,14 +296,14 @@ function MyInfoSkeleton() {
 					<div className={classes.profileStatRow}>
 						<Skeleton
 							{...skeletonProps}
-							variant="rect"
+							variant="rectangular"
 							width="48%"
 							height={48}
 							style={{ ...skeletonProps.style, borderRadius: 8 }}
 						/>
 						<Skeleton
 							{...skeletonProps}
-							variant="rect"
+							variant="rectangular"
 							width="48%"
 							height={48}
 							style={{ ...skeletonProps.style, borderRadius: 8 }}
@@ -311,38 +311,38 @@ function MyInfoSkeleton() {
 					</div>
 				</div>
 			</div>
-			<Skeleton
+            <Skeleton
 				{...skeletonProps}
-				variant="rect"
+				variant="rectangular"
 				width="100%"
 				height={300}
 				style={{ ...skeletonProps.style, borderRadius: 16 }}
 			/>
-		</div>
-	);
+        </div>
+    );
 }
 
 function AchievementSkeleton() {
 	const classes = useSkeletonStyles();
 	return (
-		<div>
-			<div style={{ padding: '24px 24px 0', display: 'flex', gap: 8 }}>
+        <div>
+            <div style={{ padding: '24px 24px 0', display: 'flex', gap: 8 }}>
 				{Array.from({ length: 4 }).map((_, i) => (
 					<Skeleton
 						key={i}
 						{...skeletonProps}
-						variant="rect"
+						variant="rectangular"
 						width={80}
 						height={32}
 						style={{ ...skeletonProps.style, borderRadius: 16 }}
 					/>
 				))}
 			</div>
-			<div className={classes.achievementGrid}>
+            <div className={classes.achievementGrid}>
 				{Array.from({ length: 6 }).map((_, i) => (
 					<div key={i} className={classes.achievementCard}>
 						<div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
-							<Skeleton {...skeletonProps} variant="circle" width={40} height={40} />
+							<Skeleton {...skeletonProps} variant="circular" width={40} height={40} />
 							<div style={{ flex: 1 }}>
 								<Skeleton {...skeletonProps} variant="text" width="60%" height={18} />
 								<Skeleton
@@ -356,7 +356,7 @@ function AchievementSkeleton() {
 						</div>
 						<Skeleton
 							{...skeletonProps}
-							variant="rect"
+							variant="rectangular"
 							width="100%"
 							height={8}
 							style={{ ...skeletonProps.style, borderRadius: 4 }}
@@ -364,25 +364,25 @@ function AchievementSkeleton() {
 					</div>
 				))}
 			</div>
-		</div>
-	);
+        </div>
+    );
 }
 
 function ChampionTableSkeleton() {
 	const classes = useSkeletonStyles();
 	return (
-		<div className={classes.tableContainer}>
-			<Skeleton
+        <div className={classes.tableContainer}>
+            <Skeleton
 				{...skeletonProps}
 				variant="text"
 				width={200}
 				height={24}
 				style={{ ...skeletonProps.style, marginBottom: 16 }}
 			/>
-			<div className={classes.tableWrapper}>
+            <div className={classes.tableWrapper}>
 				{Array.from({ length: 8 }).map((_, i) => (
 					<div key={i} className={classes.tableRow}>
-						<Skeleton {...skeletonProps} variant="circle" width={36} height={36} />
+						<Skeleton {...skeletonProps} variant="circular" width={36} height={36} />
 						<Skeleton {...skeletonProps} variant="text" width={80} height={18} />
 						<Skeleton {...skeletonProps} variant="text" width={50} height={18} />
 						<Skeleton {...skeletonProps} variant="text" width={50} height={18} />
@@ -391,14 +391,14 @@ function ChampionTableSkeleton() {
 					</div>
 				))}
 			</div>
-		</div>
-	);
+        </div>
+    );
 }
 
 function SettingsSkeleton() {
 	return (
-		<div style={{ padding: '24px 28px' }}>
-			{Array.from({ length: 5 }).map((_, i) => (
+        <div style={{ padding: '24px 28px' }}>
+            {Array.from({ length: 5 }).map((_, i) => (
 				<div
 					key={i}
 					style={{
@@ -409,35 +409,35 @@ function SettingsSkeleton() {
 						borderBottom: '1px solid rgba(255, 255, 255, 0.05)'
 					}}
 				>
-					<Skeleton {...skeletonProps} variant="circle" width={32} height={32} />
+					<Skeleton {...skeletonProps} variant="circular" width={32} height={32} />
 					<Skeleton {...skeletonProps} variant="text" width="30%" height={18} />
 					<div style={{ flex: 1 }} />
 					<Skeleton
 						{...skeletonProps}
-						variant="rect"
+						variant="rectangular"
 						width={80}
 						height={28}
 						style={{ ...skeletonProps.style, borderRadius: 6 }}
 					/>
 				</div>
 			))}
-		</div>
-	);
+        </div>
+    );
 }
 
 function ChallengeListSkeleton() {
 	const classes = useSkeletonStyles();
 	return (
-		<div
+        <div
 			style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 16, padding: 24 }}
 		>
-			{Array.from({ length: 6 }).map((_, i) => (
+            {Array.from({ length: 6 }).map((_, i) => (
 				<div key={i} className={classes.achievementCard}>
 					<div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
 						<Skeleton {...skeletonProps} variant="text" width="50%" height={20} />
 						<Skeleton
 							{...skeletonProps}
-							variant="rect"
+							variant="rectangular"
 							width={60}
 							height={22}
 							style={{ ...skeletonProps.style, borderRadius: 12 }}
@@ -445,7 +445,7 @@ function ChallengeListSkeleton() {
 					</div>
 					<Skeleton
 						{...skeletonProps}
-						variant="rect"
+						variant="rectangular"
 						width={80}
 						height={22}
 						style={{ ...skeletonProps.style, borderRadius: 6, marginBottom: 8 }}
@@ -457,32 +457,32 @@ function ChallengeListSkeleton() {
 					</div>
 				</div>
 			))}
-		</div>
-	);
+        </div>
+    );
 }
 
 function ChallengeDetailSkeleton() {
 	const classes = useSkeletonStyles();
 	return (
-		<div style={{ padding: 24, maxWidth: 1200, margin: '0 auto' }}>
-			<Skeleton
+        <div style={{ padding: 24, maxWidth: 1200, margin: '0 auto' }}>
+            <Skeleton
 				{...skeletonProps}
 				variant="text"
 				width="40%"
 				height={28}
 				style={{ ...skeletonProps.style, marginBottom: 8 }}
 			/>
-			<div style={{ display: 'flex', gap: 12, marginBottom: 24 }}>
+            <div style={{ display: 'flex', gap: 12, marginBottom: 24 }}>
 				<Skeleton
 					{...skeletonProps}
-					variant="rect"
+					variant="rectangular"
 					width={80}
 					height={26}
 					style={{ ...skeletonProps.style, borderRadius: 12 }}
 				/>
 				<Skeleton {...skeletonProps} variant="text" width={150} height={18} />
 			</div>
-			<div className={classes.tableWrapper}>
+            <div className={classes.tableWrapper}>
 				{Array.from({ length: 8 }).map((_, i) => (
 					<div key={i} className={classes.tableRow}>
 						<Skeleton {...skeletonProps} variant="text" width={30} height={22} />
@@ -493,15 +493,15 @@ function ChallengeDetailSkeleton() {
 					</div>
 				))}
 			</div>
-		</div>
-	);
+        </div>
+    );
 }
 
 function ReleaseNotesSkeleton() {
 	const classes = useSkeletonStyles();
 	return (
-		<div className={classes.tableContainer} style={{ maxWidth: 900 }}>
-			{Array.from({ length: 4 }).map((_, i) => (
+        <div className={classes.tableContainer} style={{ maxWidth: 900 }}>
+            {Array.from({ length: 4 }).map((_, i) => (
 				<div
 					key={i}
 					style={{
@@ -515,7 +515,7 @@ function ReleaseNotesSkeleton() {
 					<div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16, flexWrap: 'wrap' }}>
 						<Skeleton
 							{...skeletonProps}
-							variant="rect"
+							variant="rectangular"
 							width={70}
 							height={30}
 							style={{ ...skeletonProps.style, borderRadius: 10 }}
@@ -536,8 +536,8 @@ function ReleaseNotesSkeleton() {
 					))}
 				</div>
 			))}
-		</div>
-	);
+        </div>
+    );
 }
 
 export {

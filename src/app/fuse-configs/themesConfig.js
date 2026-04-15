@@ -1,10 +1,10 @@
 import { fuseDark, skyBlue } from '@fuse/colors';
-import { lightBlue, red } from '@material-ui/core/colors';
+import { lightBlue, red } from '@mui/material/colors';
 
 const themesConfig = {
 	graves: {
 		palette: {
-			type: 'dark',
+			mode: 'dark',
 			primary: {
 				light: '#4de8ff',
 				main: '#00d4ff',
@@ -35,7 +35,7 @@ const themesConfig = {
 	},
 	default: {
 		palette: {
-			type: 'light',
+			mode: 'light',
 			primary: fuseDark,
 			secondary: {
 				light: skyBlue[100],
@@ -54,7 +54,7 @@ const themesConfig = {
 	},
 	legacy: {
 		palette: {
-			type: 'light',
+			mode: 'light',
 			primary: fuseDark,
 			secondary: {
 				light: lightBlue[400],
@@ -73,7 +73,7 @@ const themesConfig = {
 	},
 	sunset: {
 		palette: {
-			type: 'light',
+			mode: 'light',
 			primary: {
 				light: '#FF908B',
 				main: '#D0605E',
@@ -97,7 +97,7 @@ const themesConfig = {
 	},
 	greeny: {
 		palette: {
-			type: 'light',
+			mode: 'light',
 			primary: {
 				light: '#6CABD4',
 				main: '#387CA3',
@@ -121,7 +121,7 @@ const themesConfig = {
 	},
 	beach: {
 		palette: {
-			type: 'light',
+			mode: 'light',
 			primary: {
 				light: '#C4D8DD',
 				main: '#93A7AB',
@@ -142,7 +142,7 @@ const themesConfig = {
 	},
 	tech: {
 		palette: {
-			type: 'light',
+			mode: 'light',
 			primary: {
 				light: '#87EFFF',
 				main: '#4DBCE9',
@@ -162,7 +162,7 @@ const themesConfig = {
 	},
 	sweetHues: {
 		palette: {
-			type: 'light',
+			mode: 'light',
 			primary: {
 				light: '#D5C1EB',
 				main: '#A391B9',
@@ -182,7 +182,7 @@ const themesConfig = {
 	},
 	defaultDark: {
 		palette: {
-			type: 'dark',
+			mode: 'dark',
 			primary: fuseDark,
 			secondary: {
 				light: skyBlue[100],
@@ -201,7 +201,7 @@ const themesConfig = {
 	},
 	deepOcean: {
 		palette: {
-			type: 'dark',
+			mode: 'dark',
 			primary: {
 				light: '#8F53E7',
 				main: '#5A24B4',
@@ -221,7 +221,7 @@ const themesConfig = {
 	},
 	slate: {
 		palette: {
-			type: 'dark',
+			mode: 'dark',
 			primary: {
 				light: '#86FFF7',
 				main: '#4ECDC4',

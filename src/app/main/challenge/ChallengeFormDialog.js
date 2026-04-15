@@ -9,21 +9,22 @@ import {
 	MenuItem,
 	FormControlLabel,
 	Checkbox
-} from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
-import { MuiPickersUtilsProvider, KeyboardDatePicker } from '@material-ui/pickers';
-import DateFnsUtils from '@date-io/date-fns';
+} from '@mui/material';
+import { makeStyles } from 'tss-react/mui';
+import { DatePicker } from '@mui/x-date-pickers';
+import { LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import koLocale from 'date-fns/locale/ko';
 import * as Actions from './store/actions';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles()((theme) => ({
 	paper: {
 		background: 'linear-gradient(135deg, #1a1a2e 0%, #0f0f1a 100%)',
 		color: '#fff',
 		borderRadius: 20,
 		border: '1px solid rgba(0, 212, 255, 0.3)',
 		minWidth: 400,
-		[theme.breakpoints.down('xs')]: {
+		[theme.breakpoints.down('sm')]: {
 			minWidth: 'auto',
 			margin: 16,
 			borderRadius: 16
@@ -107,7 +108,7 @@ function toLocalDate(dateStr) {
 }
 
 function ChallengeFormDialog({ open, onClose, onSuccess, groupId, challenge }) {
-	const classes = useStyles();
+	const { classes } = useStyles();
 	const isEdit = Boolean(challenge);
 
 	const [form, setForm] = useState({
@@ -220,33 +221,25 @@ function ChallengeFormDialog({ open, onClose, onSuccess, groupId, challenge }) {
 					<MenuItem value="aram">칼바람</MenuItem>
 					<MenuItem value="arena">아레나</MenuItem>
 				</TextField>
-				<MuiPickersUtilsProvider utils={DateFnsUtils} locale={koLocale}>
-					<KeyboardDatePicker
+				<LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={koLocale}>
+					<DatePicker
 						className={classes.field}
 						label="시작일"
 						format="yyyy-MM-dd"
 						value={form.startAt}
 						onChange={handleStartDateChange}
-						inputVariant="outlined"
-						fullWidth
-						required
-						autoOk
-						KeyboardButtonProps={{ style: { color: 'rgba(255,255,255,0.7)' } }}
+						slotProps={{ textField: { variant: 'outlined', fullWidth: true, required: true } }}
 					/>
-					<KeyboardDatePicker
+					<DatePicker
 						className={classes.field}
 						label="종료일"
 						format="yyyy-MM-dd"
 						value={form.endAt}
 						onChange={handleEndDateChange}
-						inputVariant="outlined"
-						fullWidth
-						required
-						autoOk
 						minDate={form.startAt || undefined}
-						KeyboardButtonProps={{ style: { color: 'rgba(255,255,255,0.7)' } }}
+						slotProps={{ textField: { variant: 'outlined', fullWidth: true, required: true } }}
 					/>
-				</MuiPickersUtilsProvider>
+				</LocalizationProvider>
 				<TextField
 					className={classes.field}
 					label="점수 방식"

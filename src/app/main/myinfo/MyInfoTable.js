@@ -1,13 +1,14 @@
 import FuseScrollbars from '@fuse/core/FuseScrollbars';
 import _ from '@lodash';
 import getLatesetRiotDataVersion from 'app/utility/getLatesetRiotDataVersion';
-import Table from '@material-ui/core/Table';
-import TableBody from '@material-ui/core/TableBody';
-import TableCell from '@material-ui/core/TableCell';
-import TableHead from '@material-ui/core/TableHead';
-import TablePagination from '@material-ui/core/TablePagination';
-import TableRow from '@material-ui/core/TableRow';
-import { makeStyles, withStyles } from '@material-ui/core/styles';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableHead from '@mui/material/TableHead';
+import TablePagination from '@mui/material/TablePagination';
+import TableRow from '@mui/material/TableRow';
+import { makeStyles } from 'tss-react/mui';
+import { withStyles } from 'tss-react/mui';
 import React, { useEffect, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
@@ -15,7 +16,7 @@ import { getKDAColor, getWinRateColor } from 'app/utility/statisticsColor';
 import { ChampionTableSkeleton } from '../components/SkeletonLoaders';
 import * as Actions from './store/actions';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles()((theme) => ({
 	tableContainer: {
 		background: 'linear-gradient(135deg, #1a1a2e 0%, #0f0f1a 100%)',
 		borderRadius: 20,
@@ -149,7 +150,7 @@ const StyledTableRow = withStyles(theme => ({
 }))(TableRow);
 
 function MyInfoTable(props) {
-	const classes = useStyles();
+	const { classes } = useStyles();
 	const dispatch = useDispatch();
 
 	const championInfos = useSelector(({ MyInfo }) => MyInfo.championInfo);
@@ -189,9 +190,9 @@ function MyInfoTable(props) {
 	}
 
 	return (
-		<div className={classes.tableContainer}>
-			<div className={classes.tableTitle}>Champion Statistics</div>
-			{data.length > 0 ? (
+        <div className={classes.tableContainer}>
+            <div className={classes.tableTitle}>Champion Statistics</div>
+            {data.length > 0 ? (
 				<>
 					<FuseScrollbars className="flex-grow overflow-x-auto">
 						<Table>
@@ -265,8 +266,8 @@ function MyInfoTable(props) {
 						nextIconButtonProps={{
 							'aria-label': 'Next Page'
 						}}
-						onChangePage={handleChangePage}
-						onChangeRowsPerPage={handleChangeRowsPerPage}
+						onPageChange={handleChangePage}
+						onRowsPerPageChange={handleChangeRowsPerPage}
 					/>
 				</>
 			) : (
@@ -275,8 +276,8 @@ function MyInfoTable(props) {
 					<div className={classes.emptyText}>챔피언 통계 데이터가 없습니다</div>
 				</div>
 			)}
-		</div>
-	);
+        </div>
+    );
 }
 
 export default withRouter(MyInfoTable);

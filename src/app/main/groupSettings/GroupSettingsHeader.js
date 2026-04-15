@@ -1,11 +1,11 @@
 import React from 'react';
-import { Typography, InputBase } from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
-import SearchIcon from '@material-ui/icons/Search';
+import { Typography, InputBase } from '@mui/material';
+import { makeStyles } from 'tss-react/mui';
+import SearchIcon from '@mui/icons-material/Search';
 import { useDispatch, useSelector } from 'react-redux';
 import * as Actions from './store/actions';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles()((theme) => ({
 	root: {
 		display: 'flex',
 		flexDirection: 'column',
@@ -22,7 +22,7 @@ const useStyles = makeStyles(theme => ({
 		letterSpacing: '0.15em',
 		textShadow: '0 0 20px rgba(0, 212, 255, 0.5)',
 		margin: 0,
-		[theme.breakpoints.down('sm')]: {
+		[theme.breakpoints.down('md')]: {
 			fontSize: '2.75rem'
 		}
 	},
@@ -32,7 +32,7 @@ const useStyles = makeStyles(theme => ({
 		justifyContent: 'center',
 		position: 'relative',
 		marginTop: 10,
-		[theme.breakpoints.down('sm')]: {
+		[theme.breakpoints.down('md')]: {
 			flexDirection: 'column',
 			alignItems: 'flex-start',
 			gap: 12
@@ -45,7 +45,7 @@ const useStyles = makeStyles(theme => ({
 		fontSize: '1.6rem',
 		color: 'rgba(255, 255, 255, 0.6)',
 		letterSpacing: '0.05em',
-		[theme.breakpoints.down('sm')]: {
+		[theme.breakpoints.down('md')]: {
 			position: 'static',
 			fontSize: '1.35rem'
 		}
@@ -64,7 +64,7 @@ const useStyles = makeStyles(theme => ({
 			borderColor: 'rgba(0, 212, 255, 0.6)',
 			boxShadow: '0 0 20px rgba(0, 212, 255, 0.2)'
 		},
-		[theme.breakpoints.down('sm')]: {
+		[theme.breakpoints.down('md')]: {
 			width: '100%',
 			maxWidth: '100%'
 		}
@@ -86,7 +86,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 function GroupSettingsHeader({ subtitle, showSearch }) {
-	const classes = useStyles();
+	const { classes } = useStyles();
 	const dispatch = useDispatch();
 	const searchText = useSelector(({ GroupSettings }) => GroupSettings.groupSettings.searchText);
 

@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
-import { makeStyles } from '@material-ui/core/styles';
-import { Button } from '@material-ui/core';
+import { makeStyles } from 'tss-react/mui';
+import { Button } from '@mui/material';
 import history from '@history';
 import createCamilleAxios from 'app/utility/camilleAxios';
 
@@ -49,7 +49,7 @@ const useStyles = makeStyles(() => ({
 }));
 
 function Maintenance() {
-	const classes = useStyles();
+	const { classes } = useStyles();
 
 	useEffect(() => {
 		const interval = setInterval(() => {

@@ -1,13 +1,14 @@
 import NavLinkAdapter from '@fuse/core/NavLinkAdapter';
 import { useDebounce } from '@fuse/hooks';
 import FuseUtils from '@fuse/utils';
-import Grow from '@material-ui/core/Grow';
-import Icon from '@material-ui/core/Icon';
-import IconButton from '@material-ui/core/IconButton';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemText from '@material-ui/core/ListItemText';
-import Paper from '@material-ui/core/Paper';
-import { makeStyles, useTheme } from '@material-ui/core/styles';
+import Grow from '@mui/material/Grow';
+import Icon from '@mui/material/Icon';
+import IconButton from '@mui/material/IconButton';
+import ListItem from '@mui/material/ListItem';
+import ListItemText from '@mui/material/ListItemText';
+import Paper from '@mui/material/Paper';
+import { useTheme } from '@mui/material/styles';
+import { makeStyles } from 'tss-react/mui';
 import clsx from 'clsx';
 
 import React, { useState, useMemo } from 'react';
@@ -19,7 +20,7 @@ import { withRouter } from 'react-router-dom';
 import FuseNavBadge from '../FuseNavBadge';
 import FuseNavItem from '../FuseNavItem';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles()((theme) => ({
 	root: {
 		'& .list-item-text': {
 			padding: '0 0 0 16px'
@@ -90,8 +91,8 @@ function FuseNavHorizontalCollapse(props) {
 	}
 
 	return (
-		<ul className={clsx(classes.root, 'relative px-0')}>
-			<Manager>
+        <ul className={clsx(classes.root, 'relative px-0')}>
+            <Manager>
 				<Reference>
 					{({ ref }) => (
 						<div ref={ref}>
@@ -124,7 +125,11 @@ function FuseNavHorizontalCollapse(props) {
 								/>
 
 								{item.badge && <FuseNavBadge className="mx-4" badge={item.badge} />}
-								<IconButton disableRipple className="w-16 h-16 ltr:ml-4 rtl:mr-4 p-0" color="inherit">
+								<IconButton
+                                    disableRipple
+                                    className="w-16 h-16 ltr:ml-4 rtl:mr-4 p-0"
+                                    color="inherit"
+                                    size="large">
 									<Icon className="text-16 arrow-icon">
 										{theme.direction === 'ltr' ? 'keyboard_arrow_right' : 'keyboard_arrow_left'}
 									</Icon>
@@ -170,8 +175,8 @@ function FuseNavHorizontalCollapse(props) {
 					document.querySelector('#root')
 				)}
 			</Manager>
-		</ul>
-	);
+        </ul>
+    );
 }
 
 const NavHorizontalCollapse = withRouter(React.memo(FuseNavHorizontalCollapse));

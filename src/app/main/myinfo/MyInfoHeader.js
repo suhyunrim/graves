@@ -1,11 +1,11 @@
 import React from 'react';
-import { Typography } from '@material-ui/core';
-import IconButton from '@material-ui/core/IconButton';
-import ArrowBackIcon from '@material-ui/icons/ArrowBack';
-import { makeStyles } from '@material-ui/core/styles';
+import { Typography } from '@mui/material';
+import IconButton from '@mui/material/IconButton';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { makeStyles } from 'tss-react/mui';
 import { useHistory } from 'react-router-dom';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles()((theme) => ({
 	root: {
 		display: 'flex',
 		flexDirection: 'column',
@@ -37,7 +37,7 @@ const useStyles = makeStyles(theme => ({
 		letterSpacing: '0.15em',
 		textShadow: '0 0 20px rgba(0, 212, 255, 0.5)',
 		margin: 0,
-		[theme.breakpoints.down('sm')]: {
+		[theme.breakpoints.down('md')]: {
 			fontSize: '2.75rem'
 		}
 	},
@@ -47,21 +47,24 @@ const useStyles = makeStyles(theme => ({
 		color: 'rgba(255, 255, 255, 0.6)',
 		marginTop: 10,
 		letterSpacing: '0.05em',
-		[theme.breakpoints.down('sm')]: {
+		[theme.breakpoints.down('md')]: {
 			fontSize: '1.35rem'
 		}
 	}
 }));
 
 function MyInfoHeader({ title, subtitle, showBack }) {
-	const classes = useStyles();
+	const { classes } = useStyles();
 	const history = useHistory();
 
 	return (
-		<div className={classes.root}>
-			<div className={classes.titleRow}>
+        <div className={classes.root}>
+            <div className={classes.titleRow}>
 				{showBack && (
-					<IconButton className={classes.backButton} onClick={() => history.goBack()}>
+					<IconButton
+                        className={classes.backButton}
+                        onClick={() => history.goBack()}
+                        size="large">
 						<ArrowBackIcon />
 					</IconButton>
 				)}
@@ -69,11 +72,11 @@ function MyInfoHeader({ title, subtitle, showBack }) {
 					{title || 'My Info'}
 				</Typography>
 			</div>
-			<Typography className={classes.subtitle}>
+            <Typography className={classes.subtitle}>
 				{subtitle || '내 소환사 정보 및 내전 기록'}
 			</Typography>
-		</div>
-	);
+        </div>
+    );
 }
 
 export default MyInfoHeader;

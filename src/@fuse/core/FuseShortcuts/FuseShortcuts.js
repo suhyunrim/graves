@@ -1,17 +1,17 @@
 import FuseAnimateGroup from '@fuse/core/FuseAnimateGroup';
 import FuseUtils from '@fuse/utils';
-import { amber } from '@material-ui/core/colors';
-import Divider from '@material-ui/core/Divider';
-import Icon from '@material-ui/core/Icon';
-import IconButton from '@material-ui/core/IconButton';
-import Input from '@material-ui/core/Input';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
-import ListItemText from '@material-ui/core/ListItemText';
-import Menu from '@material-ui/core/Menu';
-import MenuItem from '@material-ui/core/MenuItem';
-import { makeStyles } from '@material-ui/core/styles';
-import Tooltip from '@material-ui/core/Tooltip';
-import Typography from '@material-ui/core/Typography';
+import { amber } from '@mui/material/colors';
+import Divider from '@mui/material/Divider';
+import Icon from '@mui/material/Icon';
+import IconButton from '@mui/material/IconButton';
+import Input from '@mui/material/Input';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import ListItemText from '@mui/material/ListItemText';
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
+import { makeStyles } from 'tss-react/mui';
+import Tooltip from '@mui/material/Tooltip';
+import Typography from '@mui/material/Typography';
 import * as UserActions from 'app/auth/store/actions';
 import clsx from 'clsx';
 import React, { useEffect, useRef, useState } from 'react';
@@ -84,8 +84,8 @@ function FuseShortcuts({ variant = 'horizontal', ...restProps }) {
 
 	function ShortcutMenuItem({ item, onToggle }) {
 		return (
-			<Link to={item.url} className={classes.item} role="button">
-				<MenuItem key={item.id}>
+            <Link to={item.url} className={classes.item} role="button">
+                <MenuItem key={item.id}>
 					<ListItemIcon className="min-w-40">
 						{item.icon ? (
 							<Icon>{item.icon}</Icon>
@@ -95,21 +95,21 @@ function FuseShortcuts({ variant = 'horizontal', ...restProps }) {
 					</ListItemIcon>
 					<ListItemText primary={item.title} />
 					<IconButton
-						onClick={ev => {
+                        onClick={ev => {
 							ev.preventDefault();
 							ev.stopPropagation();
 							onToggle(item.id);
 						}}
-					>
+                        size="large">
 						<Icon color="action">{shortcuts.includes(item.id) ? 'star' : 'star_border'}</Icon>
 					</IconButton>
 				</MenuItem>
-			</Link>
-		);
+            </Link>
+        );
 	}
 
 	return (
-		<div
+        <div
 			className={clsx(
 				classes.root,
 				props.variant,
@@ -118,7 +118,7 @@ function FuseShortcuts({ variant = 'horizontal', ...restProps }) {
 				props.className
 			)}
 		>
-			<FuseAnimateGroup
+            <FuseAnimateGroup
 				enter={{
 					animation: 'transition.expandIn'
 				}}
@@ -132,7 +132,7 @@ function FuseShortcuts({ variant = 'horizontal', ...restProps }) {
 									title={item.title}
 									placement={props.variant === 'horizontal' ? 'bottom' : 'left'}
 								>
-									<IconButton className="w-40 h-40 p-0">
+									<IconButton className="w-40 h-40 p-0" size="large">
 										{item.icon ? (
 											<Icon>{item.icon}</Icon>
 										) : (
@@ -149,31 +149,32 @@ function FuseShortcuts({ variant = 'horizontal', ...restProps }) {
 					placement={props.variant === 'horizontal' ? 'bottom' : 'left'}
 				>
 					<IconButton
-						className="w-40 h-40 p-0"
-						aria-owns={addMenu ? 'add-menu' : null}
-						aria-haspopup="true"
-						onClick={addMenuClick}
-					>
+                        className="w-40 h-40 p-0"
+                        aria-owns={addMenu ? 'add-menu' : null}
+                        aria-haspopup="true"
+                        onClick={addMenuClick}
+                        size="large">
 						<Icon className={classes.addIcon}>star</Icon>
 					</IconButton>
 				</Tooltip>
 			</FuseAnimateGroup>
-
-			<Menu
-				id="add-menu"
-				anchorEl={addMenu}
-				open={Boolean(addMenu)}
-				onClose={addMenuClose}
-				classes={{
+            <Menu
+                id="add-menu"
+                anchorEl={addMenu}
+                open={Boolean(addMenu)}
+                onClose={addMenuClose}
+                classes={{
 					paper: 'mt-48'
 				}}
-				onEntered={() => {
-					searchInputRef.current.focus();
-				}}
-				onExited={() => {
-					setSearchText('');
-				}}
-			>
+                TransitionProps={{
+                    onEntered: () => {
+                        searchInputRef.current.focus();
+                    },
+
+                    onExited: () => {
+                        setSearchText('');
+                    }
+                }}>
 				<div className="p-16 pt-8">
 					<Input
 						inputRef={searchInputRef}
@@ -214,8 +215,8 @@ function FuseShortcuts({ variant = 'horizontal', ...restProps }) {
 							)
 					)}
 			</Menu>
-		</div>
-	);
+        </div>
+    );
 }
 
 export default React.memo(FuseShortcuts);

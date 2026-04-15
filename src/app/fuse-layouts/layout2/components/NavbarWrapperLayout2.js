@@ -1,7 +1,8 @@
-import Drawer from '@material-ui/core/Drawer';
-import Hidden from '@material-ui/core/Hidden';
-import Paper from '@material-ui/core/Paper';
-import { makeStyles, ThemeProvider } from '@material-ui/core/styles';
+import Drawer from '@mui/material/Drawer';
+import Box from '@mui/material/Box';
+import Paper from '@mui/material/Paper';
+import { ThemeProvider, StyledEngineProvider } from '@mui/material/styles';
+import { makeStyles } from 'tss-react/mui';
 import NavbarMobileLayout2 from 'app/fuse-layouts/layout2/components/NavbarMobileLayout2';
 import NavbarMobileToggleFab from 'app/fuse-layouts/shared-components/NavbarMobileToggleFab';
 import * as Actions from 'app/store/actions';
@@ -11,7 +12,7 @@ import NavbarLayout2 from './NavbarLayout2';
 
 const navbarWidth = 280;
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles()((theme) => ({
 	navbar: {
 		display: 'flex',
 		overflow: 'hidden',
@@ -46,39 +47,40 @@ function NavbarWrapperLayout2(props) {
 	const classes = useStyles(props);
 
 	return (
-		<>
-			<ThemeProvider theme={navbarTheme}>
-				<Hidden mdDown>
-					<Paper className={classes.navbar} square>
-						<NavbarLayout2 />
-					</Paper>
-				</Hidden>
+        <>
+            <StyledEngineProvider injectFirst>
+                <ThemeProvider theme={navbarTheme}>
+                    <Box sx={{ display: { xs: 'none', lg: 'block' } }}>
+                        <Paper className={classes.navbar} square>
+                            <NavbarLayout2 />
+                        </Paper>
+                    </Box>
 
-				<Hidden lgUp>
-					<Drawer
-						anchor="left"
-						variant="temporary"
-						open={navbar.mobileOpen}
-						classes={{
-							paper: classes.navbarMobile
-						}}
-						onClose={ev => dispatch(Actions.navbarCloseMobile())}
-						ModalProps={{
-							keepMounted: true // Better open performance on mobile.
-						}}
-					>
-						<NavbarMobileLayout2 />
-					</Drawer>
-				</Hidden>
-			</ThemeProvider>
-
-			{config.navbar.display && !config.toolbar.display && (
-				<Hidden lgUp>
+                    <Box sx={{ display: { lg: 'none' } }}>
+                        <Drawer
+                            anchor="left"
+                            variant="temporary"
+                            open={navbar.mobileOpen}
+                            classes={{
+                                paper: classes.navbarMobile
+                            }}
+                            onClose={ev => dispatch(Actions.navbarCloseMobile())}
+                            ModalProps={{
+                                keepMounted: true // Better open performance on mobile.
+                            }}
+                        >
+                            <NavbarMobileLayout2 />
+                        </Drawer>
+                    </Box>
+                </ThemeProvider>
+            </StyledEngineProvider>
+            {config.navbar.display && !config.toolbar.display && (
+				<Box sx={{ display: { lg: 'none' } }}>
 					<NavbarMobileToggleFab />
-				</Hidden>
+				</Box>
 			)}
-		</>
-	);
+        </>
+    );
 }
 
 export default React.memo(NavbarWrapperLayout2);

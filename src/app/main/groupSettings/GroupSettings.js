@@ -1,8 +1,8 @@
 import FusePageSimple from '@fuse/core/FusePageSimple';
 import withReducer from 'app/store/withReducer';
-import { makeStyles } from '@material-ui/core/styles';
+import { makeStyles } from 'tss-react/mui';
 import React, { useState } from 'react';
-import { Tabs, Tab } from '@material-ui/core';
+import { Tabs, Tab } from '@mui/material';
 import reducer from './store/reducers';
 import GroupSettingsHeader from './GroupSettingsHeader';
 import GroupInfoContent from './GroupInfoContent';
@@ -49,7 +49,7 @@ const useStyles = makeStyles(() => ({
 }));
 
 function GroupSettings() {
-	const classes = useStyles();
+	const { classes } = useStyles();
 	const [tab, setTab] = useState(0);
 
 	const SUBTITLES = ['방 정보 및 설정', '그룹 멤버 관리', '임시 음성 채널 생성기 관리', '시스템 활동 로그'];

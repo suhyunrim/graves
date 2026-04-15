@@ -1,9 +1,9 @@
 import FusePageSimple from '@fuse/core/FusePageSimple';
 import withReducer from 'app/store/withReducer';
-import { makeStyles } from '@material-ui/core/styles';
-import { Typography, Button, Snackbar } from '@material-ui/core';
-import AddIcon from '@material-ui/icons/Add';
-import PeopleIcon from '@material-ui/icons/People';
+import { makeStyles } from 'tss-react/mui';
+import { Typography, Button, Snackbar } from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
+import PeopleIcon from '@mui/icons-material/People';
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
@@ -13,7 +13,7 @@ import * as Actions from './store/actions';
 import ChallengeFormDialog from './ChallengeFormDialog';
 import { gameTypeLabels, statusLabels, statusColors, formatDateRange, getDday } from './challengeUtils';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles()((theme) => ({
 	layoutRoot: {
 		background: 'linear-gradient(180deg, #0f0f1a 0%, #1a1a2e 100%)',
 		minHeight: '100vh'
@@ -34,7 +34,7 @@ const useStyles = makeStyles(theme => ({
 		letterSpacing: '0.15em',
 		textShadow: '0 0 20px rgba(0, 212, 255, 0.5)',
 		margin: 0,
-		[theme.breakpoints.down('sm')]: {
+		[theme.breakpoints.down('md')]: {
 			fontSize: '2.75rem',
 			letterSpacing: '0.08em'
 		}
@@ -50,7 +50,7 @@ const useStyles = makeStyles(theme => ({
 		fontSize: '1.6rem',
 		color: 'rgba(255, 255, 255, 0.6)',
 		letterSpacing: '0.05em',
-		[theme.breakpoints.down('sm')]: {
+		[theme.breakpoints.down('md')]: {
 			fontSize: '1.35rem'
 		}
 	},
@@ -66,7 +66,7 @@ const useStyles = makeStyles(theme => ({
 		'&:hover': {
 			background: 'linear-gradient(135deg, #00bce0 0%, #0088bb 100%)'
 		},
-		[theme.breakpoints.down('xs')]: {
+		[theme.breakpoints.down('sm')]: {
 			fontSize: '1rem',
 			padding: '6px 14px'
 		}
@@ -81,7 +81,7 @@ const useStyles = makeStyles(theme => ({
 		display: 'grid',
 		gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))',
 		gap: 20,
-		[theme.breakpoints.down('xs')]: {
+		[theme.breakpoints.down('sm')]: {
 			gridTemplateColumns: '1fr'
 		}
 	},
@@ -191,7 +191,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 function ChallengeList() {
-	const classes = useStyles();
+	const { classes } = useStyles();
 	const dispatch = useDispatch();
 	const list = useSelector(({ Challenge }) => Challenge.challenge.list);
 	const loadingList = useSelector(({ Challenge }) => Challenge.challenge.loadingList);

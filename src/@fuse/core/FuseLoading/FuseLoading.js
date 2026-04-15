@@ -1,6 +1,6 @@
 import { useTimeout } from '@fuse/hooks';
-import { LinearProgress, CircularProgress } from '@material-ui/core';
-import Typography from '@material-ui/core/Typography';
+import { LinearProgress, CircularProgress } from '@mui/material';
+import Typography from '@mui/material/Typography';
 import React, { useState } from 'react';
 
 function FuseLoading({ delay = false, isShowingText = true, isLinearProgress = true }) {

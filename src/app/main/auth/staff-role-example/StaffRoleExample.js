@@ -1,21 +1,21 @@
 import FuseHighlight from '@fuse/core/FuseHighlight';
 import FusePageSimple from '@fuse/core/FusePageSimple';
-import Button from '@material-ui/core/Button';
-import Icon from '@material-ui/core/Icon';
-import { makeStyles } from '@material-ui/core/styles';
-import Typography from '@material-ui/core/Typography';
+import Button from '@mui/material/Button';
+import Icon from '@mui/material/Icon';
+import { makeStyles } from 'tss-react/mui';
+import Typography from '@mui/material/Typography';
 import * as authActions from 'app/auth/store/actions';
 import React from 'react';
 import { useDispatch } from 'react-redux';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles()((theme) => ({
 	layoutRoot: {}
 }));
 
 function StaffRoleExample(props) {
 	const dispatch = useDispatch();
 
-	const classes = useStyles();
+	const { classes } = useStyles();
 
 	return (
 		<FusePageSimple

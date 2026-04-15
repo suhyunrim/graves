@@ -1,13 +1,9 @@
-import MomentUtils from '@date-io/moment';
 import FuseAuthorization from '@fuse/core/FuseAuthorization';
 import FuseLayout from '@fuse/core/FuseLayout';
 import FuseTheme from '@fuse/core/FuseTheme';
 import history from '@history';
-import { createGenerateClassName, jssPreset, StylesProvider } from '@material-ui/core/styles';
-import { MuiPickersUtilsProvider } from '@material-ui/pickers';
-import { create } from 'jss';
-import jssExtend from 'jss-plugin-extend';
-import rtl from 'jss-rtl';
+import { LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment';
 import React from 'react';
 import * as Sentry from '@sentry/react';
 import Provider from 'react-redux/es/components/Provider';
@@ -18,14 +14,6 @@ import routes from './fuse-configs/routesConfig';
 import store from './store';
 import './utility/getLatesetRiotDataVersion';
 import './main/releaseNotes/releaseNoteBadge';
-
-const jss = create({
-	...jssPreset(),
-	plugins: [...jssPreset().plugins, jssExtend(), rtl()],
-	insertionPoint: document.getElementById('jss-insertion-point')
-});
-
-const generateClassName = createGenerateClassName();
 
 const SentryFallback = () => (
 	<div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
@@ -41,21 +29,19 @@ const App = () => {
 					routes
 				}}
 			>
-				<StylesProvider jss={jss} generateClassName={generateClassName}>
-					<Provider store={store}>
-						<MuiPickersUtilsProvider utils={MomentUtils}>
-							<Auth>
-								<Router history={history}>
-									<FuseAuthorization>
-										<FuseTheme>
-											<FuseLayout />
-										</FuseTheme>
-									</FuseAuthorization>
-								</Router>
-							</Auth>
-						</MuiPickersUtilsProvider>
-					</Provider>
-				</StylesProvider>
+				<Provider store={store}>
+					<LocalizationProvider dateAdapter={AdapterMoment}>
+						<Auth>
+							<Router history={history}>
+								<FuseAuthorization>
+									<FuseTheme>
+										<FuseLayout />
+									</FuseTheme>
+								</FuseAuthorization>
+							</Router>
+						</Auth>
+					</LocalizationProvider>
+				</Provider>
 			</AppContext.Provider>
 		</Sentry.ErrorBoundary>
 	);

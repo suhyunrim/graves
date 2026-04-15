@@ -9,16 +9,17 @@ import {
 	DialogActions,
 	Chip,
 	useMediaQuery
-} from '@material-ui/core';
-import { makeStyles, useTheme } from '@material-ui/core/styles';
+} from '@mui/material';
+import { useTheme } from '@mui/material/styles';
+import { makeStyles } from 'tss-react/mui';
 import { useDispatch, useSelector } from 'react-redux';
 import { SettingsSkeleton } from '../components/SkeletonLoaders';
 import * as Actions from './store/actions';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles()((theme) => ({
 	root: {
 		padding: '24px 28px',
-		[theme.breakpoints.down('sm')]: {
+		[theme.breakpoints.down('md')]: {
 			padding: '16px 12px'
 		}
 	},
@@ -58,7 +59,7 @@ const useStyles = makeStyles(theme => ({
 		'&:hover': {
 			background: 'rgba(255, 255, 255, 0.05)'
 		},
-		[theme.breakpoints.down('sm')]: {
+		[theme.breakpoints.down('md')]: {
 			padding: '14px 14px'
 		}
 	},
@@ -71,7 +72,7 @@ const useStyles = makeStyles(theme => ({
 		alignItems: 'center',
 		justifyContent: 'space-between',
 		gap: 12,
-		[theme.breakpoints.down('sm')]: {
+		[theme.breakpoints.down('md')]: {
 			flexDirection: 'column',
 			alignItems: 'flex-start',
 			gap: 8
@@ -97,7 +98,7 @@ const useStyles = makeStyles(theme => ({
 	channelActions: {
 		display: 'flex',
 		gap: 8,
-		[theme.breakpoints.down('sm')]: {
+		[theme.breakpoints.down('md')]: {
 			width: '100%'
 		}
 	},
@@ -114,7 +115,7 @@ const useStyles = makeStyles(theme => ({
 		'&:hover': {
 			background: 'rgba(0, 212, 255, 0.3)'
 		},
-		[theme.breakpoints.down('sm')]: {
+		[theme.breakpoints.down('md')]: {
 			flex: 1
 		}
 	},
@@ -131,7 +132,7 @@ const useStyles = makeStyles(theme => ({
 		'&:hover': {
 			background: 'rgba(255, 107, 107, 0.3)'
 		},
-		[theme.breakpoints.down('sm')]: {
+		[theme.breakpoints.down('md')]: {
 			flex: 1
 		}
 	},
@@ -143,7 +144,7 @@ const useStyles = makeStyles(theme => ({
 		border: '1px solid rgba(0, 212, 255, 0.08)',
 		display: 'flex',
 		gap: 24,
-		[theme.breakpoints.down('sm')]: {
+		[theme.breakpoints.down('md')]: {
 			flexDirection: 'column',
 			gap: 8
 		}
@@ -165,7 +166,7 @@ const useStyles = makeStyles(theme => ({
 		borderRadius: 16,
 		color: '#fff',
 		minWidth: 400,
-		[theme.breakpoints.down('sm')]: {
+		[theme.breakpoints.down('md')]: {
 			minWidth: 'auto',
 			margin: 16
 		}
@@ -241,10 +242,10 @@ const useStyles = makeStyles(theme => ({
 }));
 
 function TempVoiceContent() {
-	const classes = useStyles();
+	const { classes } = useStyles();
 	const dispatch = useDispatch();
 	const theme = useTheme();
-	const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+	const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 	const user = useSelector(state => state.auth.user);
 	const { voiceChannels, generators, loading } = useSelector(({ GroupSettings }) => GroupSettings.tempVoice);
 

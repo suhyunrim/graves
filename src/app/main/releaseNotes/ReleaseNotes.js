@@ -1,7 +1,7 @@
 import FusePageSimple from '@fuse/core/FusePageSimple';
-import { makeStyles } from '@material-ui/core/styles';
-import { Typography } from '@material-ui/core';
-import NewReleasesIcon from '@material-ui/icons/NewReleases';
+import { makeStyles } from 'tss-react/mui';
+import { Typography } from '@mui/material';
+import NewReleasesIcon from '@mui/icons-material/NewReleases';
 import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import * as fuseActions from 'app/store/actions';
@@ -21,7 +21,7 @@ function compareVersions(a, b) {
 	return 0;
 }
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles()((theme) => ({
 	layoutRoot: {
 		background: 'linear-gradient(180deg, #0f0f1a 0%, #1a1a2e 100%)',
 		minHeight: '100vh'
@@ -42,7 +42,7 @@ const useStyles = makeStyles(theme => ({
 		letterSpacing: '0.15em',
 		textShadow: '0 0 20px rgba(0, 212, 255, 0.5)',
 		margin: 0,
-		[theme.breakpoints.down('sm')]: {
+		[theme.breakpoints.down('md')]: {
 			fontSize: '2.75rem'
 		}
 	},
@@ -52,7 +52,7 @@ const useStyles = makeStyles(theme => ({
 		color: 'rgba(255, 255, 255, 0.6)',
 		letterSpacing: '0.05em',
 		marginTop: 10,
-		[theme.breakpoints.down('sm')]: {
+		[theme.breakpoints.down('md')]: {
 			fontSize: '1.35rem'
 		}
 	},
@@ -100,7 +100,7 @@ const useStyles = makeStyles(theme => ({
 		color: '#fff',
 		flex: 1,
 		minWidth: 0,
-		[theme.breakpoints.down('sm')]: {
+		[theme.breakpoints.down('md')]: {
 			flex: 'none',
 			width: '100%',
 			order: 10
@@ -160,7 +160,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 function ReleaseNotes() {
-	const classes = useStyles();
+	const { classes } = useStyles();
 	const dispatch = useDispatch();
 	const [releases, setReleases] = useState([]);
 	const [loading, setLoading] = useState(true);

@@ -1,20 +1,20 @@
-import AppBar from '@material-ui/core/AppBar';
-import Avatar from '@material-ui/core/Avatar';
-import Button from '@material-ui/core/Button';
-import Icon from '@material-ui/core/Icon';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
-import ListItemText from '@material-ui/core/ListItemText';
-import MenuItem from '@material-ui/core/MenuItem';
-import Popover from '@material-ui/core/Popover';
-import Divider from '@material-ui/core/Divider';
-import { makeStyles } from '@material-ui/core/styles';
-import Typography from '@material-ui/core/Typography';
+import AppBar from '@mui/material/AppBar';
+import Avatar from '@mui/material/Avatar';
+import Button from '@mui/material/Button';
+import Icon from '@mui/material/Icon';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import ListItemText from '@mui/material/ListItemText';
+import MenuItem from '@mui/material/MenuItem';
+import Popover from '@mui/material/Popover';
+import Divider from '@mui/material/Divider';
+import { makeStyles } from 'tss-react/mui';
+import Typography from '@mui/material/Typography';
 import * as authActions from 'app/auth/store/actions';
 import clsx from 'clsx';
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles()((theme) => ({
 	root: {
 		background: 'linear-gradient(135deg, #16213e 0%, #1a1a2e 100%)',
 		borderBottom: '1px solid rgba(0, 212, 255, 0.15)',
@@ -128,7 +128,7 @@ function UserNavbarHeader(props) {
 	const dispatch = useDispatch();
 	const user = useSelector(({ auth }) => auth.user);
 
-	const classes = useStyles();
+	const { classes } = useStyles();
 
 	const [groupListMenu, setGroupListMenu] = useState(null);
 

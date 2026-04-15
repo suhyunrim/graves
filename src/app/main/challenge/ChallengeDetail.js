@@ -1,6 +1,6 @@
 import FusePageSimple from '@fuse/core/FusePageSimple';
 import withReducer from 'app/store/withReducer';
-import { makeStyles } from '@material-ui/core/styles';
+import { makeStyles } from 'tss-react/mui';
 import {
 	Typography,
 	Button,
@@ -16,10 +16,10 @@ import {
 	DialogContent,
 	DialogContentText,
 	DialogActions
-} from '@material-ui/core';
-import SyncIcon from '@material-ui/icons/Sync';
-import ArrowUpwardIcon from '@material-ui/icons/ArrowUpward';
-import ArrowDownwardIcon from '@material-ui/icons/ArrowDownward';
+} from '@mui/material';
+import SyncIcon from '@mui/icons-material/Sync';
+import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
+import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams, Link } from 'react-router-dom';
@@ -68,7 +68,7 @@ function getTierShortName(tier) {
 	return `${tierMap[parts[0]] || parts[0].charAt(0)}${rankMap[parts[1]] || ''}`;
 }
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles()((theme) => ({
 	layoutRoot: {
 		background: 'linear-gradient(180deg, #0f0f1a 0%, #1a1a2e 100%)',
 		minHeight: '100vh'
@@ -105,7 +105,7 @@ const useStyles = makeStyles(theme => ({
 		textShadow: '0 0 20px rgba(0, 212, 255, 0.5)',
 		margin: 0,
 		wordBreak: 'break-word',
-		[theme.breakpoints.down('sm')]: {
+		[theme.breakpoints.down('md')]: {
 			fontSize: '2.2rem'
 		}
 	},
@@ -444,14 +444,14 @@ const useStyles = makeStyles(theme => ({
 		color: '#fff'
 	},
 	desktopOnly: {
-		[theme.breakpoints.down('sm')]: {
+		[theme.breakpoints.down('md')]: {
 			display: 'none'
 		}
 	}
 }));
 
 function ChallengeDetail() {
-	const classes = useStyles();
+	const { classes } = useStyles();
 	const dispatch = useDispatch();
 	const { challengeId } = useParams();
 	const detail = useSelector(({ Challenge }) => Challenge.challenge.detail);

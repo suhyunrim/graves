@@ -1,11 +1,11 @@
 import history from '@history';
 import _ from '@lodash';
 import React from 'react';
-import Button from '@material-ui/core/Button';
-import DialogActions from '@material-ui/core/DialogActions';
-import DialogContent from '@material-ui/core/DialogContent';
-import DialogContentText from '@material-ui/core/DialogContentText';
-import DialogTitle from '@material-ui/core/DialogTitle';
+import Button from '@mui/material/Button';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
 import * as FuseActions from 'app/store/actions/fuse';
 import CamilleRiotAuthService from 'app/services/camilleRiotAuthService';
 import { enableSampleMode, disableSampleMode } from 'app/main/sample/sampleStorage';

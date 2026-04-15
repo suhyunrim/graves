@@ -1,20 +1,21 @@
 import React, { useEffect, useState } from 'react';
-import { TextField, Switch, Snackbar, IconButton, Button, useMediaQuery } from '@material-ui/core';
-import { makeStyles, useTheme } from '@material-ui/core/styles';
-import CheckIcon from '@material-ui/icons/Check';
-import CloseIcon from '@material-ui/icons/Close';
-import EditIcon from '@material-ui/icons/Edit';
-import SettingsIcon from '@material-ui/icons/Settings';
+import { TextField, Switch, Snackbar, IconButton, Button, useMediaQuery } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
+import { makeStyles } from 'tss-react/mui';
+import CheckIcon from '@mui/icons-material/Check';
+import CloseIcon from '@mui/icons-material/Close';
+import EditIcon from '@mui/icons-material/Edit';
+import SettingsIcon from '@mui/icons-material/Settings';
 import { useDispatch, useSelector } from 'react-redux';
 import { SettingsSkeleton } from '../components/SkeletonLoaders';
 import * as Actions from './store/actions';
 import OnboardingSettingsDialog from './OnboardingSettingsDialog';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles()((theme) => ({
 	root: {
 		padding: '24px 28px',
 		maxWidth: 720,
-		[theme.breakpoints.down('sm')]: {
+		[theme.breakpoints.down('md')]: {
 			padding: '16px 12px'
 		}
 	},
@@ -33,7 +34,7 @@ const useStyles = makeStyles(theme => ({
 		border: '1px solid rgba(255, 255, 255, 0.06)',
 		padding: '24px 28px',
 		marginBottom: 20,
-		[theme.breakpoints.down('sm')]: {
+		[theme.breakpoints.down('md')]: {
 			padding: '18px 16px'
 		}
 	},
@@ -52,7 +53,7 @@ const useStyles = makeStyles(theme => ({
 		alignItems: 'center',
 		gap: 16,
 		marginBottom: 24,
-		[theme.breakpoints.down('sm')]: {
+		[theme.breakpoints.down('md')]: {
 			gap: 12
 		}
 	},
@@ -61,7 +62,7 @@ const useStyles = makeStyles(theme => ({
 		height: 56,
 		borderRadius: '50%',
 		border: '2px solid rgba(0, 212, 255, 0.3)',
-		[theme.breakpoints.down('sm')]: {
+		[theme.breakpoints.down('md')]: {
 			width: 44,
 			height: 44
 		}
@@ -71,7 +72,7 @@ const useStyles = makeStyles(theme => ({
 		fontSize: '1.6rem',
 		fontWeight: 700,
 		color: '#fff',
-		[theme.breakpoints.down('sm')]: {
+		[theme.breakpoints.down('md')]: {
 			fontSize: '1.35rem'
 		}
 	},
@@ -142,7 +143,7 @@ const useStyles = makeStyles(theme => ({
 		gridTemplateColumns: 'repeat(4, 1fr)',
 		gap: 12,
 		marginBottom: 16,
-		[theme.breakpoints.down('sm')]: {
+		[theme.breakpoints.down('md')]: {
 			gridTemplateColumns: 'repeat(2, 1fr)',
 			gap: 8
 		}
@@ -237,10 +238,10 @@ const useStyles = makeStyles(theme => ({
 }));
 
 function GroupInfoContent() {
-	const classes = useStyles();
+	const { classes } = useStyles();
 	const dispatch = useDispatch();
 	const theme = useTheme();
-	const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+	const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 	const user = useSelector(state => state.auth.user);
 	const { info, loading } = useSelector(({ GroupSettings }) => GroupSettings.groupInfo);
 

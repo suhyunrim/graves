@@ -19,8 +19,9 @@ import {
 	Checkbox,
 	ListItemText,
 	useMediaQuery
-} from '@material-ui/core';
-import { makeStyles, useTheme } from '@material-ui/core/styles';
+} from '@mui/material';
+import { useTheme } from '@mui/material/styles';
+import { makeStyles } from 'tss-react/mui';
 import { useDispatch, useSelector } from 'react-redux';
 import { SettingsSkeleton } from '../components/SkeletonLoaders';
 import * as Actions from './store/actions';
@@ -111,10 +112,10 @@ const TIER_OPTIONS = [];
 	});
 });
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles()((theme) => ({
 	root: {
 		padding: '24px 28px',
-		[theme.breakpoints.down('sm')]: {
+		[theme.breakpoints.down('md')]: {
 			padding: '16px 12px'
 		}
 	},
@@ -326,7 +327,7 @@ const useStyles = makeStyles(theme => ({
 		display: 'grid',
 		gridTemplateColumns: '1fr 1fr',
 		gap: '10px 16px',
-		[theme.breakpoints.down('xs')]: {
+		[theme.breakpoints.down('sm')]: {
 			gridTemplateColumns: '1fr',
 			gap: 8
 		}
@@ -385,10 +386,10 @@ const useStyles = makeStyles(theme => ({
 }));
 
 function GroupSettingsContent() {
-	const classes = useStyles();
+	const { classes } = useStyles();
 	const dispatch = useDispatch();
 	const theme = useTheme();
-	const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+	const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 	const user = useSelector(state => state.auth.user);
 	const { members, loading, searchText } = useSelector(({ GroupSettings }) => GroupSettings.groupSettings);
 	const [confirmDialog, setConfirmDialog] = useState(null);

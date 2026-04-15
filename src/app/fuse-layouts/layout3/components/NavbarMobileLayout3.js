@@ -1,8 +1,9 @@
 import FuseScrollbars from '@fuse/core/FuseScrollbars';
-import AppBar from '@material-ui/core/AppBar';
-import Hidden from '@material-ui/core/Hidden';
-import Icon from '@material-ui/core/Icon';
-import { makeStyles, useTheme } from '@material-ui/core/styles';
+import AppBar from '@mui/material/AppBar';
+import Box from '@mui/material/Box';
+import Icon from '@mui/material/Icon';
+import { useTheme } from '@mui/material/styles';
+import { makeStyles } from 'tss-react/mui';
 import Logo from 'app/fuse-layouts/shared-components/Logo';
 import NavbarFoldedToggleButton from 'app/fuse-layouts/shared-components/NavbarFoldedToggleButton';
 import NavbarMobileToggleButton from 'app/fuse-layouts/shared-components/NavbarMobileToggleButton';
@@ -29,8 +30,8 @@ function NavbarMobileLayout3(props) {
 	const theme = useTheme();
 
 	return (
-		<div className="flex flex-col h-full overflow-hidden">
-			<AppBar
+        <div className="flex flex-col h-full overflow-hidden">
+            <AppBar
 				color="primary"
 				position="static"
 				elevation={0}
@@ -40,24 +41,23 @@ function NavbarMobileLayout3(props) {
 					<Logo />
 				</div>
 
-				<Hidden mdDown>
+				<Box sx={{ display: { xs: 'none', lg: 'block' } }}>
 					<NavbarFoldedToggleButton className="w-40 h-40 p-0" />
-				</Hidden>
+				</Box>
 
-				<Hidden lgUp>
+				<Box sx={{ display: { lg: 'none' } }}>
 					<NavbarMobileToggleButton className="w-40 h-40 p-0">
 						<Icon>{theme.direction === 'ltr' ? 'arrow_back' : 'arrow_forward'}"</Icon>
 					</NavbarMobileToggleButton>
-				</Hidden>
+				</Box>
 			</AppBar>
-
-			<FuseScrollbars className={clsx(classes.content)}>
+            <FuseScrollbars className={clsx(classes.content)}>
 				<UserNavbarHeader />
 
 				<Navigation layout="vertical" />
 			</FuseScrollbars>
-		</div>
-	);
+        </div>
+    );
 }
 
 export default React.memo(NavbarMobileLayout3);

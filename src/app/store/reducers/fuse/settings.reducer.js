@@ -8,7 +8,7 @@ import {
 	mustHaveThemeOptions
 } from '@fuse/default-settings';
 import _ from '@lodash';
-import { createMuiTheme } from '@material-ui/core/styles';
+import { createTheme, adaptV4Theme } from '@mui/material/styles';
 import FuseSettingsConfig from 'app/fuse-configs/settingsConfig';
 import FuseThemesConfig from 'app/fuse-configs/themesConfig';
 import FuseLayoutConfigs from 'app/fuse-layouts/FuseLayoutConfigs';
@@ -107,11 +107,11 @@ function getInitialThemes() {
 		...Object.entries(themesObjRaw).map(([key, value]) => {
 			const muiTheme = _.merge({}, defaultThemeOptions, value, mustHaveThemeOptions);
 			return {
-				[key]: createMuiTheme(
-					_.merge({}, muiTheme, {
+				[key]: createTheme(
+					adaptV4Theme(_.merge({}, muiTheme, {
 						mixins: extendThemeWithMixins(muiTheme),
 						direction
-					})
+					}))
 				)
 			};
 		})

@@ -1,5 +1,5 @@
-import Drawer from '@material-ui/core/Drawer';
-import Hidden from '@material-ui/core/Hidden';
+import Drawer from '@mui/material/Drawer';
+import Box from '@mui/material/Box';
 import clsx from 'clsx';
 import React, { useImperativeHandle, useState } from 'react';
 import FusePageCardedSidebarContent from './FusePageCardedSidebarContent';
@@ -17,8 +17,8 @@ function FusePageCardedSidebar(props, ref) {
 	};
 
 	return (
-		<>
-			<Hidden lgUp={props.variant === 'permanent'}>
+        <>
+            <Box sx={props.variant === 'permanent' ? { display: { lg: 'none' } } : {}}>
 				<Drawer
 					variant="temporary"
 					anchor={props.position}
@@ -45,9 +45,9 @@ function FusePageCardedSidebar(props, ref) {
 				>
 					<FusePageCardedSidebarContent {...props} />
 				</Drawer>
-			</Hidden>
-			{props.variant === 'permanent' && (
-				<Hidden mdDown>
+			</Box>
+            {props.variant === 'permanent' && (
+				<Box sx={{ display: { xs: 'none', lg: 'block' } }}>
 					<Drawer
 						variant="permanent"
 						className={clsx(classes.sidebarWrapper, props.variant)}
@@ -62,10 +62,10 @@ function FusePageCardedSidebar(props, ref) {
 					>
 						<FusePageCardedSidebarContent {...props} />
 					</Drawer>
-				</Hidden>
+				</Box>
 			)}
-		</>
-	);
+        </>
+    );
 }
 
 export default React.forwardRef(FusePageCardedSidebar);

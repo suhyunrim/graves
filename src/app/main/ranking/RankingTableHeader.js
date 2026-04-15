@@ -1,9 +1,10 @@
-import TableCell from '@material-ui/core/TableCell';
-import TableHead from '@material-ui/core/TableHead';
-import TableRow from '@material-ui/core/TableRow';
-import TableSortLabel from '@material-ui/core/TableSortLabel';
-import Tooltip from '@material-ui/core/Tooltip';
-import { makeStyles, withStyles } from '@material-ui/core/styles';
+import TableCell from '@mui/material/TableCell';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+import TableSortLabel from '@mui/material/TableSortLabel';
+import Tooltip from '@mui/material/Tooltip';
+import { makeStyles } from 'tss-react/mui';
+import { withStyles } from 'tss-react/mui';
 import React from 'react';
 
 const rows = [
@@ -58,7 +59,7 @@ const rows = [
 	}
 ];
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles()((theme) => ({
 	sortLabel: {
 		color: 'rgba(255, 255, 255, 0.7) !important',
 		'&:hover': {
@@ -94,7 +95,7 @@ const StyledTableRow = withStyles(theme => ({
 }))(TableRow);
 
 function RankingTableHead(props) {
-	const classes = useStyles();
+	const { classes } = useStyles();
 
 	const createSortHandler = property => event => {
 		props.onRequestSort(event, property);

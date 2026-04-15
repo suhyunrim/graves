@@ -1,6 +1,7 @@
-import Drawer from '@material-ui/core/Drawer';
-import Hidden from '@material-ui/core/Hidden';
-import { makeStyles, ThemeProvider } from '@material-ui/core/styles';
+import Drawer from '@mui/material/Drawer';
+import Box from '@mui/material/Box';
+import { ThemeProvider, StyledEngineProvider } from '@mui/material/styles';
+import { makeStyles } from 'tss-react/mui';
 import NavbarMobileToggleFab from 'app/fuse-layouts/shared-components/NavbarMobileToggleFab';
 import * as Actions from 'app/store/actions';
 import clsx from 'clsx';
@@ -10,7 +11,7 @@ import NavbarLayout1 from './NavbarLayout1';
 
 const navbarWidth = 280;
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles()((theme) => ({
 	wrapper: {
 		display: 'flex',
 		flexDirection: 'column',
@@ -123,59 +124,60 @@ function NavbarWrapperLayout1(props) {
 	const navbarTheme = useSelector(({ fuse }) => fuse.settings.navbarTheme);
 	const navbar = useSelector(({ fuse }) => fuse.navbar);
 
-	const classes = useStyles();
+	const { classes } = useStyles();
 
 	const { folded } = config.navbar;
 	const foldedAndClosed = folded && !navbar.foldedOpen;
 	const foldedAndOpened = folded && navbar.foldedOpen;
 
 	return (
-		<>
-			<ThemeProvider theme={navbarTheme}>
-				<div id="fuse-navbar" className={clsx(classes.wrapper, folded && classes.wrapperFolded)}>
-					<Hidden mdDown>
-						<div
-							className={clsx(
-								classes.navbar,
-								classes[config.navbar.position],
-								folded && classes.folded,
-								foldedAndOpened && classes.foldedAndOpened,
-								foldedAndClosed && classes.foldedAndClosed
-							)}
-							onMouseEnter={() => foldedAndClosed && dispatch(Actions.navbarOpenFolded())}
-							onMouseLeave={() => foldedAndOpened && dispatch(Actions.navbarCloseFolded())}
-							style={{ backgroundColor: navbarTheme.palette.background.default }}
-						>
-							<NavbarLayout1 className={classes.navbarContent} />
-						</div>
-					</Hidden>
+        <>
+            <StyledEngineProvider injectFirst>
+                <ThemeProvider theme={navbarTheme}>
+                    <div id="fuse-navbar" className={clsx(classes.wrapper, folded && classes.wrapperFolded)}>
+                        <Box sx={{ display: { xs: 'none', lg: 'block' } }}>
+                            <div
+                                className={clsx(
+                                    classes.navbar,
+                                    classes[config.navbar.position],
+                                    folded && classes.folded,
+                                    foldedAndOpened && classes.foldedAndOpened,
+                                    foldedAndClosed && classes.foldedAndClosed
+                                )}
+                                onMouseEnter={() => foldedAndClosed && dispatch(Actions.navbarOpenFolded())}
+                                onMouseLeave={() => foldedAndOpened && dispatch(Actions.navbarCloseFolded())}
+                                style={{ backgroundColor: navbarTheme.palette.background.default }}
+                            >
+                                <NavbarLayout1 className={classes.navbarContent} />
+                            </div>
+                        </Box>
 
-					<Hidden lgUp>
-						<Drawer
-							anchor={config.navbar.position}
-							variant="temporary"
-							open={navbar.mobileOpen}
-							classes={{
-								paper: classes.navbar
-							}}
-							onClose={() => dispatch(Actions.navbarCloseMobile())}
-							ModalProps={{
-								keepMounted: true // Better open performance on mobile.
-							}}
-						>
-							<NavbarLayout1 className={classes.navbarContent} />
-						</Drawer>
-					</Hidden>
-				</div>
-			</ThemeProvider>
-
-			{config.navbar.display && !config.toolbar.display && (
-				<Hidden lgUp>
+                        <Box sx={{ display: { lg: 'none' } }}>
+                            <Drawer
+                                anchor={config.navbar.position}
+                                variant="temporary"
+                                open={navbar.mobileOpen}
+                                classes={{
+                                    paper: classes.navbar
+                                }}
+                                onClose={() => dispatch(Actions.navbarCloseMobile())}
+                                ModalProps={{
+                                    keepMounted: true // Better open performance on mobile.
+                                }}
+                            >
+                                <NavbarLayout1 className={classes.navbarContent} />
+                            </Drawer>
+                        </Box>
+                    </div>
+                </ThemeProvider>
+            </StyledEngineProvider>
+            {config.navbar.display && !config.toolbar.display && (
+				<Box sx={{ display: { lg: 'none' } }}>
 					<NavbarMobileToggleFab />
-				</Hidden>
+				</Box>
 			)}
-		</>
-	);
+        </>
+    );
 }
 
 export default React.memo(NavbarWrapperLayout1);

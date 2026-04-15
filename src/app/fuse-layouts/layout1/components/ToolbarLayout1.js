@@ -1,9 +1,10 @@
 import FuseSearch from '@fuse/core/FuseSearch';
 import FuseShortcuts from '@fuse/core/FuseShortcuts';
-import AppBar from '@material-ui/core/AppBar';
-import Hidden from '@material-ui/core/Hidden';
-import { makeStyles, ThemeProvider } from '@material-ui/core/styles';
-import Toolbar from '@material-ui/core/Toolbar';
+import AppBar from '@mui/material/AppBar';
+import Box from '@mui/material/Box';
+import { ThemeProvider, StyledEngineProvider } from '@mui/material/styles';
+import { makeStyles } from 'tss-react/mui';
+import Toolbar from '@mui/material/Toolbar';
 import NavbarMobileToggleButton from 'app/fuse-layouts/shared-components/NavbarMobileToggleButton';
 import QuickPanelToggleButton from 'app/fuse-layouts/shared-components/quickPanel/QuickPanelToggleButton';
 import UserMenu from 'app/fuse-layouts/shared-components/UserMenu';
@@ -11,7 +12,7 @@ import React from 'react';
 import { useSelector } from 'react-redux';
 import LanguageSwitcher from '../../shared-components/LanguageSwitcher';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles()((theme) => ({
 	root: {
 		background: 'linear-gradient(90deg, #0f0f1a 0%, #1a1a2e 50%, #0f0f1a 100%)',
 		borderBottom: '1px solid rgba(0, 212, 255, 0.2)',
@@ -39,52 +40,54 @@ function ToolbarLayout1(props) {
 	const classes = useStyles(props);
 
 	return (
-		<ThemeProvider theme={toolbarTheme}>
-			<AppBar
-				id="fuse-toolbar"
-				className={classes.root}
-				position="relative"
-				elevation={0}
-			>
-				<Toolbar className="p-0">
-					{config.navbar.display && config.navbar.position === 'left' && (
-						<Hidden lgUp>
-							<NavbarMobileToggleButton className="w-64 h-64 p-0" />
-							<div className={classes.separator} />
-						</Hidden>
-					)}
+        <StyledEngineProvider injectFirst>
+            (<ThemeProvider theme={toolbarTheme}>
+                <AppBar
+                    id="fuse-toolbar"
+                    className={classes.root}
+                    position="relative"
+                    elevation={0}
+                >
+                    <Toolbar className="p-0">
+                        {config.navbar.display && config.navbar.position === 'left' && (
+                            <Box sx={{ display: { lg: 'none' } }}>
+                                <NavbarMobileToggleButton className="w-64 h-64 p-0" />
+                                <div className={classes.separator} />
+                            </Box>
+                        )}
 
-					<div className="flex flex-1">
-						<Hidden mdDown>
-							<FuseShortcuts className="px-16" />
-						</Hidden>
-					</div>
+                        <div className="flex flex-1">
+                            <Box sx={{ display: { xs: 'none', lg: 'block' } }}>
+                                <FuseShortcuts className="px-16" />
+                            </Box>
+                        </div>
 
-					<div className="flex items-center">
-						<UserMenu />
+                        <div className="flex items-center">
+                            <UserMenu />
 
-						<div className={classes.separator} />
+                            <div className={classes.separator} />
 
-						<FuseSearch />
+                            <FuseSearch />
 
-						<div className={classes.separator} />
+                            <div className={classes.separator} />
 
-						<LanguageSwitcher />
+                            <LanguageSwitcher />
 
-						<div className={classes.separator} />
+                            <div className={classes.separator} />
 
-						<QuickPanelToggleButton />
-					</div>
+                            <QuickPanelToggleButton />
+                        </div>
 
-					{config.navbar.display && config.navbar.position === 'right' && (
-						<Hidden lgUp>
-							<NavbarMobileToggleButton />
-						</Hidden>
-					)}
-				</Toolbar>
-			</AppBar>
-		</ThemeProvider>
-	);
+                        {config.navbar.display && config.navbar.position === 'right' && (
+                            <Box sx={{ display: { lg: 'none' } }}>
+                                <NavbarMobileToggleButton />
+                            </Box>
+                        )}
+                    </Toolbar>
+                </AppBar>
+            </ThemeProvider>)
+        </StyledEngineProvider>
+    );
 }
 
 export default React.memo(ToolbarLayout1);

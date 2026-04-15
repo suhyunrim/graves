@@ -1,7 +1,8 @@
 import NavLinkAdapter from '@fuse/core/NavLinkAdapter';
 import FuseUtils from '@fuse/utils';
-import ListSubheader from '@material-ui/core/ListSubheader';
-import { makeStyles, useTheme } from '@material-ui/core/styles';
+import ListSubheader from '@mui/material/ListSubheader';
+import { useTheme } from '@mui/material/styles';
+import { makeStyles } from 'tss-react/mui';
 import * as Actions from 'app/store/actions';
 import clsx from 'clsx';
 
@@ -9,10 +10,10 @@ import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { withRouter } from 'react-router-dom';
-import useMediaQuery from '@material-ui/core/useMediaQuery';
+import useMediaQuery from '@mui/material/useMediaQuery';
 import FuseNavItem from '../FuseNavItem';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles()((theme) => ({
 	item: props => ({
 		height: 40,
 		width: 'calc(100% - 16px)',
@@ -30,7 +31,7 @@ function FuseNavVerticalGroup(props) {
 	const dispatch = useDispatch();
 
 	const theme = useTheme();
-	const mdDown = useMediaQuery(theme.breakpoints.down('md'));
+	const mdDown = useMediaQuery(theme.breakpoints.down('lg'));
 	const { item, nestedLevel } = props;
 	const classes = useStyles({
 		itemPadding: nestedLevel > 0 ? 40 + nestedLevel * 16 : 24

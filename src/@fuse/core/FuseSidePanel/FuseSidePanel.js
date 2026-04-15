@@ -1,16 +1,16 @@
 import FuseScrollbars from '@fuse/core/FuseScrollbars';
-import Drawer from '@material-ui/core/Drawer';
-import Fab from '@material-ui/core/Fab';
-import Hidden from '@material-ui/core/Hidden';
-import Icon from '@material-ui/core/Icon';
-import IconButton from '@material-ui/core/IconButton';
-import Paper from '@material-ui/core/Paper';
-import { makeStyles } from '@material-ui/core/styles';
-import Tooltip from '@material-ui/core/Tooltip';
+import Drawer from '@mui/material/Drawer';
+import Fab from '@mui/material/Fab';
+import Box from '@mui/material/Box';
+import Icon from '@mui/material/Icon';
+import IconButton from '@mui/material/IconButton';
+import Paper from '@mui/material/Paper';
+import { makeStyles } from 'tss-react/mui';
+import Tooltip from '@mui/material/Tooltip';
 import clsx from 'clsx';
 import React, { useState } from 'react';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles()((theme) => ({
 	paper: {
 		display: 'flex',
 		width: 56
@@ -178,8 +178,8 @@ function FuseSidePanel({ position = 'left', opened: openedProp = true, ...restPr
 	}
 
 	return (
-		<>
-			<Hidden mdDown>
+        <>
+            <Box sx={{ display: { xs: 'none', lg: 'block' } }}>
 				<Paper
 					className={clsx(
 						classes.root,
@@ -195,14 +195,18 @@ function FuseSidePanel({ position = 'left', opened: openedProp = true, ...restPr
 
 					<div className={classes.buttonWrapper}>
 						<Tooltip title="Toggle side panel" placement={props.position === 'left' ? 'right' : 'right'}>
-							<IconButton className={classes.button} onClick={toggleOpened} disableRipple>
+							<IconButton
+                                className={classes.button}
+                                onClick={toggleOpened}
+                                disableRipple
+                                size="large">
 								<Icon className={classes.buttonIcon}>keyboard_arrow_left</Icon>
 							</IconButton>
 						</Tooltip>
 					</div>
 				</Paper>
-			</Hidden>
-			<Hidden lgUp>
+			</Box>
+            <Box sx={{ display: { lg: 'none' } }}>
 				<Drawer
 					classes={{
 						paper: clsx(classes.paper, props.className)
@@ -225,9 +229,9 @@ function FuseSidePanel({ position = 'left', opened: openedProp = true, ...restPr
 						</Icon>
 					</Fab>
 				</Tooltip>
-			</Hidden>
-		</>
-	);
+			</Box>
+        </>
+    );
 }
 
 export default React.memo(FuseSidePanel);

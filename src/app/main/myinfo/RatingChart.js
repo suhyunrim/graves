@@ -1,9 +1,9 @@
 import React from 'react';
 import { Line } from 'react-chartjs-2';
 import { useSelector } from 'react-redux';
-import { makeStyles } from '@material-ui/core/styles';
+import { makeStyles } from 'tss-react/mui';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles()((theme) => ({
 	chartCard: {
 		marginTop: 24,
 		background: 'linear-gradient(135deg, #1a1a2e 0%, #0f0f1a 100%)',
@@ -13,7 +13,7 @@ const useStyles = makeStyles(theme => ({
 		animation: '$fadeIn 0.6s ease',
 		animationDelay: '0.3s',
 		animationFillMode: 'backwards',
-		[theme.breakpoints.down('xs')]: {
+		[theme.breakpoints.down('sm')]: {
 			padding: 16,
 			borderRadius: 16
 		}
@@ -42,7 +42,7 @@ const useStyles = makeStyles(theme => ({
 	chartContainer: {
 		height: 420,
 		position: 'relative',
-		[theme.breakpoints.down('xs')]: {
+		[theme.breakpoints.down('sm')]: {
 			height: 280
 		}
 	},
@@ -82,7 +82,7 @@ const tierConfig = {
 const tierOrder = ['IRON', 'BRONZE', 'SILVER', 'GOLD', 'PLATINUM', 'EMERALD', 'DIAMOND', 'MASTER', 'GRANDMASTER', 'CHALLENGER'];
 
 function RatingChart() {
-	const classes = useStyles();
+	const { classes } = useStyles();
 	const ratingHistory = useSelector(({ MyInfo }) => MyInfo.myInfo.ratingHistory);
 
 	const getTierFromRating = rating => {

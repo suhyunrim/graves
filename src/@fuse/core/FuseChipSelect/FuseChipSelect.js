@@ -1,16 +1,16 @@
-import Chip from '@material-ui/core/Chip';
-import MenuItem from '@material-ui/core/MenuItem';
-import Paper from '@material-ui/core/Paper';
-import { makeStyles } from '@material-ui/core/styles';
-import { emphasize } from '@material-ui/core/styles/colorManipulator';
-import TextField from '@material-ui/core/TextField';
-import Typography from '@material-ui/core/Typography';
+import Chip from '@mui/material/Chip';
+import MenuItem from '@mui/material/MenuItem';
+import Paper from '@mui/material/Paper';
+import { emphasize } from '@mui/material/styles';
+import { makeStyles } from 'tss-react/mui';
+import TextField from '@mui/material/TextField';
+import Typography from '@mui/material/Typography';
 import clsx from 'clsx';
 import React from 'react';
 import Select from 'react-select';
 import Creatable from 'react-select/creatable';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles()((theme) => ({
 	root: {
 		'& .fuse-chip-select__input': {
 			color: theme.palette.text.primary
@@ -62,12 +62,12 @@ const useStyles = makeStyles(theme => ({
 	},
 	chipFocused: {
 		backgroundColor: emphasize(
-			theme.palette.type === 'light' ? theme.palette.grey[300] : theme.palette.grey[700],
+			theme.palette.mode === 'light' ? theme.palette.grey[300] : theme.palette.grey[700],
 			0.08
 		)
 	},
 	noOptionsMessage: {
-		padding: `${theme.spacing()}px ${theme.spacing(2)}px`
+		padding: `${theme.spacing()}px ${theme.spacing(2)}`
 	},
 	singleValue: {
 		fontSize: 16
@@ -91,7 +91,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 function NoOptionsMessage(props) {
-	const classes = useStyles();
+	const { classes } = useStyles();
 
 	return (
 		<Typography color="textSecondary" className={classes.noOptionsMessage} {...props.innerProps}>
@@ -105,7 +105,7 @@ function inputComponent({ inputRef, ...props }) {
 }
 
 function Control(props) {
-	const classes = useStyles();
+	const { classes } = useStyles();
 
 	return (
 		<TextField
@@ -144,7 +144,7 @@ function Option(props) {
 }
 
 function Placeholder(props) {
-	const classes = useStyles();
+	const { classes } = useStyles();
 
 	return (
 		<Typography color="textSecondary" className={classes.placeholder} {...props.innerProps}>
@@ -154,7 +154,7 @@ function Placeholder(props) {
 }
 
 function SingleValue(props) {
-	const classes = useStyles();
+	const { classes } = useStyles();
 
 	return (
 		<Typography className={classes.singleValue} {...props.innerProps}>
@@ -164,13 +164,13 @@ function SingleValue(props) {
 }
 
 function ValueContainer(props) {
-	const classes = useStyles();
+	const { classes } = useStyles();
 
 	return <div className={classes.valueContainer}>{props.children}</div>;
 }
 
 function MultiValue(props) {
-	const classes = useStyles();
+	const { classes } = useStyles();
 
 	return (
 		<Chip
@@ -192,7 +192,7 @@ function MultiValue(props) {
 }
 
 function Menu(props) {
-	const classes = useStyles();
+	const { classes } = useStyles();
 
 	return (
 		<Paper square className={classes.paper} {...props.innerProps}>

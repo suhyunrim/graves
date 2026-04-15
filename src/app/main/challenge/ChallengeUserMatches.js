@@ -1,9 +1,9 @@
 import FusePageSimple from '@fuse/core/FusePageSimple';
 import withReducer from 'app/store/withReducer';
-import { makeStyles } from '@material-ui/core/styles';
-import { Button } from '@material-ui/core';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import ExpandLessIcon from '@material-ui/icons/ExpandLess';
+import { makeStyles } from 'tss-react/mui';
+import { Button } from '@mui/material';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import React, { useEffect, useState, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams, Link } from 'react-router-dom';
@@ -57,7 +57,7 @@ function getTierShortName(tier) {
 	return `${tierMap[parts[0]] || parts[0].charAt(0)}${rankMap[parts[1]] || ''}`;
 }
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles()((theme) => ({
 	layoutRoot: {
 		background: 'linear-gradient(180deg, #0f0f1a 0%, #1a1a2e 100%)',
 		minHeight: '100vh'
@@ -84,7 +84,7 @@ const useStyles = makeStyles(theme => ({
 		alignItems: 'center',
 		gap: 20,
 		flexWrap: 'wrap',
-		[theme.breakpoints.down('xs')]: {
+		[theme.breakpoints.down('sm')]: {
 			flexDirection: 'column',
 			alignItems: 'flex-start'
 		}
@@ -94,7 +94,7 @@ const useStyles = makeStyles(theme => ({
 		height: 72,
 		borderRadius: 16,
 		border: '3px solid rgba(0, 212, 255, 0.4)',
-		[theme.breakpoints.down('xs')]: {
+		[theme.breakpoints.down('sm')]: {
 			width: 56,
 			height: 56
 		}
@@ -109,7 +109,7 @@ const useStyles = makeStyles(theme => ({
 		color: '#fff',
 		textShadow: '0 0 20px rgba(0, 212, 255, 0.5)',
 		lineHeight: 1.1,
-		[theme.breakpoints.down('sm')]: {
+		[theme.breakpoints.down('md')]: {
 			fontSize: '2.2rem'
 		}
 	},
@@ -177,7 +177,7 @@ const useStyles = makeStyles(theme => ({
 		alignItems: 'center',
 		padding: '14px 20px',
 		gap: 14,
-		[theme.breakpoints.down('xs')]: {
+		[theme.breakpoints.down('sm')]: {
 			flexWrap: 'wrap',
 			gap: 10,
 			padding: '12px 14px'
@@ -189,7 +189,7 @@ const useStyles = makeStyles(theme => ({
 		height: 60,
 		borderRadius: 2,
 		flexShrink: 0,
-		[theme.breakpoints.down('xs')]: {
+		[theme.breakpoints.down('sm')]: {
 			width: '100%',
 			height: 3
 		}
@@ -211,7 +211,7 @@ const useStyles = makeStyles(theme => ({
 		height: 52,
 		borderRadius: 12,
 		border: '2px solid rgba(255, 255, 255, 0.15)',
-		[theme.breakpoints.down('xs')]: {
+		[theme.breakpoints.down('sm')]: {
 			width: 44,
 			height: 44,
 			borderRadius: 10
@@ -258,7 +258,7 @@ const useStyles = makeStyles(theme => ({
 	kdaBlock: {
 		minWidth: 100,
 		textAlign: 'center',
-		[theme.breakpoints.down('xs')]: {
+		[theme.breakpoints.down('sm')]: {
 			minWidth: 'auto',
 			textAlign: 'left'
 		}
@@ -297,7 +297,7 @@ const useStyles = makeStyles(theme => ({
 		gap: 16,
 		flex: 1,
 		justifyContent: 'center',
-		[theme.breakpoints.down('xs')]: {
+		[theme.breakpoints.down('sm')]: {
 			gap: 10,
 			justifyContent: 'flex-start',
 			flexWrap: 'wrap'
@@ -319,7 +319,7 @@ const useStyles = makeStyles(theme => ({
 		fontSize: '1.2rem',
 		fontWeight: 600,
 		color: 'rgba(255, 255, 255, 0.8)',
-		[theme.breakpoints.down('xs')]: {
+		[theme.breakpoints.down('sm')]: {
 			fontSize: '1.1rem'
 		}
 	},
@@ -329,7 +329,7 @@ const useStyles = makeStyles(theme => ({
 		alignItems: 'center',
 		gap: 2,
 		flexShrink: 0,
-		[theme.breakpoints.down('xs')]: {
+		[theme.breakpoints.down('sm')]: {
 			display: 'none'
 		}
 	},
@@ -363,7 +363,7 @@ const useStyles = makeStyles(theme => ({
 		gap: 2,
 		flexShrink: 0,
 		minWidth: 80,
-		[theme.breakpoints.down('xs')]: {
+		[theme.breakpoints.down('sm')]: {
 			flexDirection: 'row',
 			gap: 8,
 			alignItems: 'center',
@@ -479,7 +479,7 @@ const useStyles = makeStyles(theme => ({
 		overflow: 'hidden',
 		textOverflow: 'ellipsis',
 		whiteSpace: 'nowrap',
-		[theme.breakpoints.down('xs')]: {
+		[theme.breakpoints.down('sm')]: {
 			minWidth: 70,
 			fontSize: '1rem'
 		}
@@ -502,14 +502,14 @@ const useStyles = makeStyles(theme => ({
 		color: 'rgba(255, 255, 255, 0.6)',
 		minWidth: 50,
 		textAlign: 'center',
-		[theme.breakpoints.down('xs')]: {
+		[theme.breakpoints.down('sm')]: {
 			display: 'none'
 		}
 	},
 	teamItems: {
 		display: 'flex',
 		gap: 2,
-		[theme.breakpoints.down('xs')]: {
+		[theme.breakpoints.down('sm')]: {
 			display: 'none'
 		}
 	},
@@ -581,7 +581,7 @@ function findMyParticipant(match, puuid) {
 }
 
 function ChallengeUserMatches() {
-	const classes = useStyles();
+	const { classes } = useStyles();
 	const dispatch = useDispatch();
 	const { challengeId, puuid } = useParams();
 	const userMatches = useSelector(({ Challenge }) => Challenge.challenge.userMatches);

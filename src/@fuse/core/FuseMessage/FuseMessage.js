@@ -1,16 +1,16 @@
-import { amber, blue, green } from '@material-ui/core/colors';
-import Icon from '@material-ui/core/Icon';
-import IconButton from '@material-ui/core/IconButton';
-import Snackbar from '@material-ui/core/Snackbar';
-import SnackbarContent from '@material-ui/core/SnackbarContent';
-import { makeStyles } from '@material-ui/core/styles';
-import Typography from '@material-ui/core/Typography';
+import { amber, blue, green } from '@mui/material/colors';
+import Icon from '@mui/material/Icon';
+import IconButton from '@mui/material/IconButton';
+import Snackbar from '@mui/material/Snackbar';
+import SnackbarContent from '@mui/material/SnackbarContent';
+import { makeStyles } from 'tss-react/mui';
+import Typography from '@mui/material/Typography';
 import * as Actions from 'app/store/actions';
 import clsx from 'clsx';
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles()((theme) => ({
 	root: {},
 	success: {
 		backgroundColor: green[600],
@@ -42,10 +42,10 @@ function FuseMessage(props) {
 	const state = useSelector(({ fuse }) => fuse.message.state);
 	const options = useSelector(({ fuse }) => fuse.message.options);
 
-	const classes = useStyles();
+	const { classes } = useStyles();
 
 	return (
-		<Snackbar
+        <Snackbar
 			{...options}
 			open={state}
 			onClose={() => dispatch(Actions.hideMessage())}
@@ -60,7 +60,7 @@ function FuseMessage(props) {
 				}
 			}}
 		>
-			<SnackbarContent
+            <SnackbarContent
 				className={clsx(classes[options.variant])}
 				message={
 					<div className="flex items-center">
@@ -70,17 +70,17 @@ function FuseMessage(props) {
 				}
 				action={[
 					<IconButton
-						key="close"
-						aria-label="Close"
-						color="inherit"
-						onClick={() => dispatch(Actions.hideMessage())}
-					>
+                        key="close"
+                        aria-label="Close"
+                        color="inherit"
+                        onClick={() => dispatch(Actions.hideMessage())}
+                        size="large">
 						<Icon>close</Icon>
 					</IconButton>
 				]}
 			/>
-		</Snackbar>
-	);
+        </Snackbar>
+    );
 }
 
 export default React.memo(FuseMessage);

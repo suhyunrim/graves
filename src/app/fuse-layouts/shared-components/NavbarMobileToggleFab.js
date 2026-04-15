@@ -1,13 +1,13 @@
-import Fab from '@material-ui/core/Fab';
-import Icon from '@material-ui/core/Icon';
-import { makeStyles } from '@material-ui/core/styles';
-import Tooltip from '@material-ui/core/Tooltip';
+import Fab from '@mui/material/Fab';
+import Icon from '@mui/material/Icon';
+import { makeStyles } from 'tss-react/mui';
+import Tooltip from '@mui/material/Tooltip';
 import * as Actions from 'app/store/actions';
 import clsx from 'clsx';
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles()((theme) => ({
 	buttonIcon: {
 		fontSize: 18,
 		transition: theme.transitions.create(['transform'], {

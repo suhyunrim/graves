@@ -1,13 +1,13 @@
 import React from 'react';
-import { Typography, InputBase, IconButton } from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
-import SearchIcon from '@material-ui/icons/Search';
-import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
-import ChevronRightIcon from '@material-ui/icons/ChevronRight';
+import { Typography, InputBase, IconButton } from '@mui/material';
+import { makeStyles } from 'tss-react/mui';
+import SearchIcon from '@mui/icons-material/Search';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { useDispatch, useSelector } from 'react-redux';
 import * as Actions from './store/actions';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles()((theme) => ({
 	root: {
 		display: 'flex',
 		flexDirection: 'column',
@@ -24,7 +24,7 @@ const useStyles = makeStyles(theme => ({
 		letterSpacing: '0.15em',
 		textShadow: '0 0 20px rgba(255, 193, 7, 0.5)',
 		margin: 0,
-		[theme.breakpoints.down('sm')]: {
+		[theme.breakpoints.down('md')]: {
 			fontSize: '2.75rem'
 		}
 	},
@@ -34,7 +34,7 @@ const useStyles = makeStyles(theme => ({
 		justifyContent: 'center',
 		position: 'relative',
 		marginTop: 10,
-		[theme.breakpoints.down('sm')]: {
+		[theme.breakpoints.down('md')]: {
 			flexDirection: 'column',
 			alignItems: 'flex-start',
 			gap: 12
@@ -47,7 +47,7 @@ const useStyles = makeStyles(theme => ({
 		fontSize: '1.6rem',
 		color: 'rgba(255, 255, 255, 0.6)',
 		letterSpacing: '0.05em',
-		[theme.breakpoints.down('sm')]: {
+		[theme.breakpoints.down('md')]: {
 			position: 'static',
 			fontSize: '1.35rem'
 		}
@@ -66,7 +66,7 @@ const useStyles = makeStyles(theme => ({
 			borderColor: 'rgba(255, 193, 7, 0.6)',
 			boxShadow: '0 0 20px rgba(255, 193, 7, 0.2)'
 		},
-		[theme.breakpoints.down('sm')]: {
+		[theme.breakpoints.down('md')]: {
 			width: '100%',
 			maxWidth: '100%'
 		}
@@ -90,7 +90,7 @@ const useStyles = makeStyles(theme => ({
 		alignItems: 'center',
 		gap: 8,
 		marginTop: 16,
-		[theme.breakpoints.down('sm')]: {
+		[theme.breakpoints.down('md')]: {
 			justifyContent: 'center'
 		}
 	},
@@ -137,7 +137,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 function HonorRankingHeader() {
-	const classes = useStyles();
+	const { classes } = useStyles();
 	const dispatch = useDispatch();
 	const searchText = useSelector(({ HonorRanking }) => HonorRanking.honorRanking.searchText);
 	const period = useSelector(({ HonorRanking }) => HonorRanking.honorRanking.period);
@@ -185,11 +185,11 @@ function HonorRankingHeader() {
 	}
 
 	return (
-		<div className={classes.root}>
-			<Typography className={classes.title} variant="h4">
+        <div className={classes.root}>
+            <Typography className={classes.title} variant="h4">
 				Honor
 			</Typography>
-			<div className={classes.subtitleRow}>
+            <div className={classes.subtitleRow}>
 				<Typography className={classes.subtitle}>MVP 투표 명예 랭킹</Typography>
 				<div className={classes.searchWrapper}>
 					<SearchIcon className={classes.searchIcon} />
@@ -202,7 +202,7 @@ function HonorRankingHeader() {
 					/>
 				</div>
 			</div>
-			<div className={classes.filterRow}>
+            <div className={classes.filterRow}>
 				<div
 					className={`${classes.filterChip} ${isAll ? classes.filterChipActive : ''}`}
 					onClick={handleAllClick}
@@ -214,7 +214,7 @@ function HonorRankingHeader() {
 				</div>
 				<div className={classes.monthNav}>
 					{isMonth && (
-						<IconButton className={classes.monthNavBtn} onClick={handlePrevMonth}>
+						<IconButton className={classes.monthNavBtn} onClick={handlePrevMonth} size="large">
 							<ChevronLeftIcon className={classes.monthNavIcon} />
 						</IconButton>
 					)}
@@ -229,14 +229,14 @@ function HonorRankingHeader() {
 						{getMonthLabel()}
 					</div>
 					{isMonth && (
-						<IconButton className={classes.monthNavBtn} onClick={handleNextMonth}>
+						<IconButton className={classes.monthNavBtn} onClick={handleNextMonth} size="large">
 							<ChevronRightIcon className={classes.monthNavIcon} />
 						</IconButton>
 					)}
 				</div>
 			</div>
-		</div>
-	);
+        </div>
+    );
 }
 
 export default HonorRankingHeader;

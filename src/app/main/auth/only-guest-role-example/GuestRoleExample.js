@@ -1,15 +1,15 @@
 import FuseHighlight from '@fuse/core/FuseHighlight';
 import FusePageSimple from '@fuse/core/FusePageSimple';
-import { makeStyles } from '@material-ui/core/styles';
-import Typography from '@material-ui/core/Typography';
+import { makeStyles } from 'tss-react/mui';
+import Typography from '@mui/material/Typography';
 import React from 'react';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles()((theme) => ({
 	layoutRoot: {}
 }));
 
 function GuestRoleExample() {
-	const classes = useStyles();
+	const { classes } = useStyles();
 
 	return (
 		<FusePageSimple
