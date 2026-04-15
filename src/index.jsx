@@ -1,5 +1,5 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import * as Sentry from '@sentry/react';
 import 'typeface-muli';
 import './i18n';
@@ -14,4 +14,4 @@ if (import.meta.env.VITE_SENTRY_DSN) {
 	});
 }
 
-ReactDOM.render(<App />, document.getElementById('root'));
+createRoot(document.getElementById('root')).render(<App />);

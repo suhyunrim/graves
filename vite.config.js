@@ -12,9 +12,7 @@ const jsxInJsPlugin = {
 			const code = readFileSync(id, 'utf-8');
 			const result = transformSync(code, {
 				loader: 'jsx',
-				jsx: 'transform',
-				jsxFactory: 'React.createElement',
-				jsxFragment: 'React.Fragment',
+				jsx: 'automatic',
 				sourcefile: id,
 				sourcemap: false
 			});
@@ -25,7 +23,7 @@ const jsxInJsPlugin = {
 };
 
 export default defineConfig({
-	plugins: [jsxInJsPlugin, react({ jsxRuntime: 'classic' })],
+	plugins: [jsxInJsPlugin, react()],
 	optimizeDeps: {
 		esbuildOptions: {
 			loader: {
