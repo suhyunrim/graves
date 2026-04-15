@@ -6,7 +6,7 @@ import { useDispatch } from 'react-redux';
 import history from '@history';
 import * as userActions from 'app/auth/store/actions';
 
-const useStyles = makeStyles(() => ({
+const useStyles = makeStyles()(() => ({
 	root: {
 		display: 'flex',
 		flexDirection: 'column',

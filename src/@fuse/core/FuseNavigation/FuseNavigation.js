@@ -96,7 +96,7 @@ const useStyles = makeStyles()((theme) => ({
 }));
 
 function FuseNavigation(props) {
-	const classes = useStyles(props);
+	const { classes } = useStyles(props);
 	const { navigation, layout = 'vertical', active, dense, className } = props;
 
 	const verticalNav = (

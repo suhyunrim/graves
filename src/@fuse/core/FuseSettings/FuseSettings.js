@@ -52,7 +52,7 @@ function FuseSettings(props) {
 	const themes = useSelector(({ fuse }) => fuse.settings.themes);
 	const settings = useSelector(({ fuse }) => fuse.settings.current);
 
-	const classes = useStyles(props);
+	const { classes } = useStyles(props);
 
 	function handleChange(event) {
 		const newSettings = _.set(

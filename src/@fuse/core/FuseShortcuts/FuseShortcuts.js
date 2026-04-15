@@ -18,7 +18,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 
-const useStyles = makeStyles({
+const useStyles = makeStyles()({
 	root: {
 		'&.horizontal': {},
 		'&.vertical': {
@@ -40,7 +40,7 @@ function FuseShortcuts({ variant = 'horizontal', ...restProps }) {
 	const shortcuts = useSelector(({ auth }) => auth.user.data.shortcuts);
 	const navigationData = useSelector(({ fuse }) => fuse.navigation);
 
-	const classes = useStyles(props);
+	const { classes } = useStyles(props);
 	const searchInputRef = useRef(null);
 	const [addMenu, setAddMenu] = useState(null);
 	const [searchText, setSearchText] = useState('');

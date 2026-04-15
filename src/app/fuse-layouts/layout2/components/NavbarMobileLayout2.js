@@ -12,7 +12,7 @@ import UserNavbarHeader from 'app/fuse-layouts/shared-components/UserNavbarHeade
 import clsx from 'clsx';
 import React from 'react';
 
-const useStyles = makeStyles({
+const useStyles = makeStyles()({
 	content: {
 		overflowX: 'hidden',
 		overflowY: 'auto',
@@ -26,7 +26,7 @@ const useStyles = makeStyles({
 });
 
 function NavbarMobileLayout2(props) {
-	const classes = useStyles(props);
+	const { classes } = useStyles(props);
 	const theme = useTheme();
 
 	return (

@@ -650,7 +650,7 @@ const useStyles = makeStyles()((theme) => ({
 }));
 
 function MyInfoPage(props) {
-	const classes = useStyles(props);
+	const { classes } = useStyles(props);
 	const dispatch = useDispatch();
 
 	const { puuid } = useParams();

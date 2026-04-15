@@ -66,7 +66,7 @@ function FuseNavVerticalCollapse(props) {
 	const userRole = useSelector(({ auth }) => auth.user.role);
 	const [open, setOpen] = useState(() => needsToBeOpened(props.location, props.item));
 	const { item, nestedLevel } = props;
-	const classes = useStyles({
+	const { classes } = useStyles({
 		itemPadding: nestedLevel > 0 ? 40 + nestedLevel * 16 : 24
 	});
 	const { t } = useTranslation('navigation');

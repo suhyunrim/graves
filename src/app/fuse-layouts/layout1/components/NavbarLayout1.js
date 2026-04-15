@@ -12,7 +12,7 @@ import UserNavbarHeader from 'app/fuse-layouts/shared-components/UserNavbarHeade
 import clsx from 'clsx';
 import React from 'react';
 
-const useStyles = makeStyles({
+const useStyles = makeStyles()({
 	root: {
 		background: 'linear-gradient(180deg, #0f0f1a 0%, #1a1a2e 100%)',
 		borderRight: '1px solid rgba(0, 212, 255, 0.15)'
@@ -71,7 +71,7 @@ function NavbarLayout1(props) {
 
 				<Box sx={{ display: { lg: 'none' } }}>
 					<NavbarMobileToggleButton className={clsx('w-40 h-40 p-0', classes.toggleButton)}>
-						<Icon>{theme.direction === 'ltr' ? 'arrow_back' : 'arrow_forward'}"</Icon>
+						<Icon>{theme.direction === 'ltr' ? 'arrow_back' : 'arrow_forward'}</Icon>
 					</NavbarMobileToggleButton>
 				</Box>
 			</AppBar>

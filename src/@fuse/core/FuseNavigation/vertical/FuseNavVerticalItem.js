@@ -72,7 +72,7 @@ function FuseNavVerticalItem(props) {
 	const theme = useTheme();
 	const mdDown = useMediaQuery(theme.breakpoints.down('lg'));
 	const { item, nestedLevel } = props;
-	const classes = useStyles({
+	const { classes } = useStyles({
 		itemPadding: nestedLevel > 0 ? 40 + nestedLevel * 16 : 24
 	});
 	const { t } = useTranslation('navigation');

@@ -4,7 +4,7 @@ import { Button } from '@mui/material';
 import history from '@history';
 import createCamilleAxios from 'app/utility/camilleAxios';
 
-const useStyles = makeStyles(() => ({
+const useStyles = makeStyles()(() => ({
 	root: {
 		display: 'flex',
 		flexDirection: 'column',

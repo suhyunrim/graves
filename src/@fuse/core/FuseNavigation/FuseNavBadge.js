@@ -18,7 +18,7 @@ const useStyles = makeStyles()((theme) => ({
 }));
 
 function FuseNavBadge(props) {
-	const classes = useStyles(props);
+	const { classes } = useStyles(props);
 	const { className, badge } = props;
 
 	return (

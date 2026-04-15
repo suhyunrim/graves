@@ -415,7 +415,7 @@ const useStyles = makeStyles()((theme) => ({
 	}
 }));
 
-const StyledTableCell = withStyles(theme => ({
+const StyledTableCell = withStyles(TableCell, (theme) => ({
 	body: {
 		backgroundColor: 'transparent',
 		color: '#fff',
@@ -424,16 +424,16 @@ const StyledTableCell = withStyles(theme => ({
 		borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
 		padding: '18px 24px'
 	}
-}))(TableCell);
+}));
 
-const StyledTableRow = withStyles(theme => ({
+const StyledTableRow = withStyles(TableRow, (theme) => ({
 	root: {
 		transition: 'background-color 0.2s ease',
 		'&:hover': {
 			backgroundColor: 'rgba(0, 212, 255, 0.05)'
 		}
 	}
-}))(TableRow);
+}));
 
 function RankingTable(props) {
 	const { classes } = useStyles();

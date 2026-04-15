@@ -2,7 +2,7 @@ import React from 'react';
 import Skeleton from '@mui/material/Skeleton';
 import { makeStyles } from 'tss-react/mui';
 
-const useSkeletonStyles = makeStyles(() => ({
+const useSkeletonStyles = makeStyles()(() => ({
 	'@keyframes shimmer': {
 		'0%': { opacity: 0.3 },
 		'50%': { opacity: 0.5 },

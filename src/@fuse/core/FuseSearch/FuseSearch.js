@@ -225,7 +225,7 @@ function FuseSearch(props) {
 	const navigation = useSelector(({ fuse }) => fuse.navigation);
 
 	const [state, dispatch] = useReducer(reducer, initialState);
-	const classes = useStyles(props);
+	const { classes } = useStyles(props);
 	const suggestionsNode = useRef(null);
 	const popperNode = useRef(null);
 

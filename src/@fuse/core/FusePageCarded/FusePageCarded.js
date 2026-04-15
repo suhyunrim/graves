@@ -137,7 +137,7 @@ const FusePageCarded = React.forwardRef((props, ref) => {
 	const leftSidebarRef = useRef(null);
 	const rightSidebarRef = useRef(null);
 	const rootRef = useRef(null);
-	const classes = useStyles(props);
+	const { classes } = useStyles(props);
 	const isRightSidebar = props.rightSidebarHeader || props.rightSidebarContent;
 	const isLeftSidebar = props.leftSidebarHeader || props.leftSidebarContent;
 

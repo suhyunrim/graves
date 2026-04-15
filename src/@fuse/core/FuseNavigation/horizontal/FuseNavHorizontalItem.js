@@ -38,7 +38,7 @@ const useStyles = makeStyles()((theme) => ({
 function FuseNavHorizontalItem(props) {
 	const userRole = useSelector(({ auth }) => auth.user.role);
 
-	const classes = useStyles(props);
+	const { classes } = useStyles(props);
 	const { item } = props;
 	const { t } = useTranslation('navigation');
 

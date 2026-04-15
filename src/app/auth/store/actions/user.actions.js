@@ -20,12 +20,10 @@ export const CHANGE_GROUP = '[USER] CHANGE GROUP';
 export const ENTER_SAMPLE_MODE = '[USER] ENTER SAMPLE MODE';
 
 export function retrieveGroupList() {
-	const createCamilleAxios = require('app/utility/camilleAxios').default;
-	const request = createCamilleAxios().get('/api/user/getGroupList');
-
 	return dispatch =>
-		request
-			.then(response => {
+		import('app/utility/camilleAxios').then(({ default: createCamilleAxios }) => {
+			return createCamilleAxios().get('/api/user/getGroupList');
+		}).then(response => {
 				const groupList = response.data.result;
 				const noGroup = groupList.length === 0;
 				if (noGroup) {
@@ -72,12 +70,10 @@ export function retrieveGroupList() {
 }
 
 export function retrieveDiscordUser() {
-	const createCamilleAxios = require('app/utility/camilleAxios').default;
-	const request = createCamilleAxios().get('/api/auth/me');
-
 	return dispatch =>
-		request
-			.then(response => {
+		import('app/utility/camilleAxios').then(({ default: createCamilleAxios }) => {
+			return createCamilleAxios().get('/api/auth/me');
+		}).then(response => {
 				const user = response.data.result;
 
 				if (user.puuid) {
