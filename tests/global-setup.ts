@@ -5,19 +5,10 @@ import { FullConfig } from '@playwright/test';
 const AUTH_PATH = path.resolve(__dirname, 'auth.json');
 
 export default function globalSetup(config: FullConfig) {
-	// smoke 프로젝트만 실행할 때는 auth.json 불필요
-	const projectNames = config.projects.map(p => p.name);
-	const runningProjects = process.argv.includes('--project')
-		? projectNames
-		: config.projects.map(p => p.name);
+	// e2e 프로젝트를 명시적으로 요청했는데 auth.json이 없으면 안내 후 종료
+	const explicitlyRequestedE2E = process.argv.some(arg => arg === 'e2e');
 
-	const needsAuth = runningProjects.some(name => name === 'e2e' || name === 'setup');
-
-	// smoke, content, visual 프로젝트는 자체 로그인하므로 auth.json 불필요
-	const skipAuthProjects = ['smoke', 'content', 'visual'];
-	if (process.argv.some(arg => skipAuthProjects.some(p => arg.includes(p)))) return;
-
-	if (needsAuth && !existsSync(AUTH_PATH)) {
+	if (explicitlyRequestedE2E && !existsSync(AUTH_PATH)) {
 		console.log('');
 		console.log('╔══════════════════════════════════════════════════════════╗');
 		console.log('║  auth.json이 없습니다!                                  ║');
@@ -30,9 +21,6 @@ export default function globalSetup(config: FullConfig) {
 		console.log('║                                                          ║');
 		console.log('║  브라우저에서 Discord 로그인 후 대시보드 진입 확인,      ║');
 		console.log('║  그 다음 브라우저를 닫으면 auth.json이 저장됩니다.       ║');
-		console.log('║                                                          ║');
-		console.log('║  인증 없이 스모크 테스트만 실행하려면:                   ║');
-		console.log('║  npx playwright test --project=smoke                     ║');
 		console.log('╚══════════════════════════════════════════════════════════╝');
 		console.log('');
 		process.exit(1);
