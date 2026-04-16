@@ -212,30 +212,43 @@ function RankingTableSkeleton() {
 function MatchHistorySkeleton() {
 	const { classes } = useSkeletonStyles();
 	return (
-        <div className={classes.tableContainer}>
+        <div className={classes.tableContainer} style={{ maxWidth: 1600 }}>
             <div className={classes.tableWrapper}>
-				{Array.from({ length: 8 }).map((_, i) => (
-					<div key={i} className={classes.matchRow}>
-						<Skeleton {...skeletonProps} variant="text" width={30} height={22} />
-						<Skeleton
-							{...skeletonProps}
-							variant="rectangular"
-							width={60}
-							height={28}
-							style={{ ...skeletonProps.style, borderRadius: 6 }}
-						/>
-						<div className={classes.matchTeams}>
+				{/* 헤더 */}
+				<div style={{ display: 'flex', gap: 16, padding: '20px 16px', borderBottom: '2px solid rgba(0, 212, 255, 0.15)', background: 'rgba(0, 212, 255, 0.04)' }}>
+					<Skeleton {...skeletonProps} variant="text" width={30} height={20} />
+					<Skeleton {...skeletonProps} variant="text" width={100} height={20} />
+					<Skeleton {...skeletonProps} variant="text" width={40} height={20} />
+					<div style={{ flex: 1 }}>
+						<Skeleton {...skeletonProps} variant="text" width={60} height={20} />
+					</div>
+					<Skeleton {...skeletonProps} variant="text" width={40} height={20} />
+					<div style={{ flex: 1 }}>
+						<Skeleton {...skeletonProps} variant="text" width={60} height={20} />
+					</div>
+				</div>
+				{/* 매치 행 */}
+				{Array.from({ length: 6 }).map((_, i) => (
+					<div key={i} style={{ display: 'flex', alignItems: 'stretch', borderBottom: '1px solid rgba(255, 255, 255, 0.05)' }}>
+						{/* # + 날짜 */}
+						<div style={{ padding: '16px', minWidth: 140, display: 'flex', flexDirection: 'column', gap: 4 }}>
+							<Skeleton {...skeletonProps} variant="text" width={40} height={24} />
+							<Skeleton {...skeletonProps} variant="text" width={110} height={14} />
+						</div>
+						{/* TEAM 1 (승리) */}
+						<div style={{ flex: 1, padding: '12px 16px', borderLeft: '4px solid rgba(0, 200, 83, 0.3)', background: 'rgba(0, 200, 83, 0.06)' }}>
+							<Skeleton {...skeletonProps} variant="rectangular" width={44} height={22} style={{ ...skeletonProps.style, borderRadius: 6, marginBottom: 8 }} />
 							{Array.from({ length: 5 }).map((__, j) => (
-								<Skeleton key={j} {...skeletonProps} variant="text" width={56} height={16} />
+								<Skeleton key={j} {...skeletonProps} variant="text" width={`${50 + Math.random() * 30}%`} height={16} style={{ ...skeletonProps.style, marginBottom: 2 }} />
 							))}
 						</div>
-						<Skeleton {...skeletonProps} variant="text" width={20} height={18} />
-						<div className={classes.matchTeams}>
+						{/* TEAM 2 (패배) */}
+						<div style={{ flex: 1, padding: '12px 16px', borderLeft: '4px solid rgba(255, 82, 82, 0.3)', background: 'rgba(255, 82, 82, 0.06)' }}>
+							<Skeleton {...skeletonProps} variant="rectangular" width={44} height={22} style={{ ...skeletonProps.style, borderRadius: 6, marginBottom: 8 }} />
 							{Array.from({ length: 5 }).map((__, j) => (
-								<Skeleton key={j} {...skeletonProps} variant="text" width={56} height={16} />
+								<Skeleton key={j} {...skeletonProps} variant="text" width={`${50 + Math.random() * 30}%`} height={16} style={{ ...skeletonProps.style, marginBottom: 2 }} />
 							))}
 						</div>
-						<Skeleton {...skeletonProps} variant="text" width={80} height={16} />
 					</div>
 				))}
 			</div>
@@ -428,35 +441,32 @@ function SettingsSkeleton() {
 function ChallengeListSkeleton() {
 	const { classes } = useSkeletonStyles();
 	return (
-        <div
-			style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 16, padding: 24 }}
-		>
-            {Array.from({ length: 6 }).map((_, i) => (
-				<div key={i} className={classes.achievementCard}>
-					<div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
-						<Skeleton {...skeletonProps} variant="text" width="50%" height={20} />
-						<Skeleton
-							{...skeletonProps}
-							variant="rectangular"
-							width={60}
-							height={22}
-							style={{ ...skeletonProps.style, borderRadius: 12 }}
-						/>
+        <div style={{ padding: '28px', maxWidth: 1400, margin: '0 auto' }}>
+			<div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: 20 }}>
+				{Array.from({ length: 4 }).map((_, i) => (
+					<div key={i} style={{
+						background: 'linear-gradient(135deg, #1a1a2e 0%, #0f0f1a 100%)',
+						borderRadius: 20,
+						border: '1px solid rgba(0, 212, 255, 0.2)',
+						padding: 24
+					}}>
+						{/* 제목 + 상태 배지 */}
+						<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
+							<Skeleton {...skeletonProps} variant="text" width="55%" height={24} />
+							<Skeleton {...skeletonProps} variant="rectangular" width={56} height={26} style={{ ...skeletonProps.style, borderRadius: 20 }} />
+						</div>
+						{/* 게임 타입 배지 */}
+						<Skeleton {...skeletonProps} variant="rectangular" width={70} height={24} style={{ ...skeletonProps.style, borderRadius: 8, marginBottom: 12 }} />
+						{/* 날짜 */}
+						<Skeleton {...skeletonProps} variant="text" width="60%" height={16} style={{ ...skeletonProps.style, marginBottom: 8 }} />
+						{/* 참가자 + D-day */}
+						<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 16, paddingTop: 12, borderTop: '1px solid rgba(255, 255, 255, 0.08)' }}>
+							<Skeleton {...skeletonProps} variant="text" width={60} height={18} />
+							<Skeleton {...skeletonProps} variant="text" width={40} height={20} />
+						</div>
 					</div>
-					<Skeleton
-						{...skeletonProps}
-						variant="rectangular"
-						width={80}
-						height={22}
-						style={{ ...skeletonProps.style, borderRadius: 6, marginBottom: 8 }}
-					/>
-					<Skeleton {...skeletonProps} variant="text" width="70%" height={14} />
-					<div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 12 }}>
-						<Skeleton {...skeletonProps} variant="text" width={60} height={16} />
-						<Skeleton {...skeletonProps} variant="text" width={40} height={16} />
-					</div>
-				</div>
-			))}
+				))}
+			</div>
         </div>
     );
 }
