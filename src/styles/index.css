@@ -14,6 +14,7 @@ body.no-animate *::after {
 html {
     font-size: 62.5%;
     font-family: Muli, Roboto, Helvetica Neue, Arial, sans-serif;
+    line-height: 1.15;
     background-color: #121212;
 }
 
