@@ -501,6 +501,19 @@ const useStyles = makeStyles()((theme) => ({
 	highlightWorst: {
 		color: '#ff6b6b'
 	},
+	moreButton: {
+		color: '#00d4ff',
+		fontSize: '1.2rem',
+		fontFamily: '"Noto Sans KR", sans-serif',
+		marginTop: 8,
+		padding: '4px 12px',
+		border: '1px solid rgba(0, 212, 255, 0.3)',
+		borderRadius: 8,
+		'&:hover': {
+			background: 'rgba(0, 212, 255, 0.1)',
+			borderColor: 'rgba(0, 212, 255, 0.5)'
+		}
+	},
 	noData: {
 		fontFamily: '"Noto Sans KR", sans-serif',
 		fontSize: '1.3rem',
@@ -665,14 +678,14 @@ function MyInfoPage(props) {
 	const summonerInfo = useSelector(({ MyInfo }) => MyInfo.myInfo.summonerInfo);
 	const topTeammates = useSelector(({ MyInfo }) => MyInfo.myInfo.topTeammates);
 	const topOpponents = useSelector(({ MyInfo }) => MyInfo.myInfo.topOpponents);
-	const bestTeammate = useSelector(({ MyInfo }) => MyInfo.myInfo.bestTeammate);
+	const bestTeammates = useSelector(({ MyInfo }) => MyInfo.myInfo.bestTeammates);
 	const recentGames = useSelector(({ MyInfo }) => MyInfo.myInfo.recentGames);
 	const recentWins = useSelector(({ MyInfo }) => MyInfo.myInfo.recentWins);
 	const recentWinRate = useSelector(({ MyInfo }) => MyInfo.myInfo.recentWinRate);
 	const maxWinStreak = useSelector(({ MyInfo }) => MyInfo.myInfo.maxWinStreak);
 	const maxLoseStreak = useSelector(({ MyInfo }) => MyInfo.myInfo.maxLoseStreak);
-	const bestOpponent = useSelector(({ MyInfo }) => MyInfo.myInfo.bestOpponent);
-	const worstOpponent = useSelector(({ MyInfo }) => MyInfo.myInfo.worstOpponent);
+	const bestOpponents = useSelector(({ MyInfo }) => MyInfo.myInfo.bestOpponents);
+	const worstOpponents = useSelector(({ MyInfo }) => MyInfo.myInfo.worstOpponents);
 	const honorStats = useSelector(({ MyInfo }) => MyInfo.myInfo.honorStats);
 	const subAccount = useSelector(({ MyInfo }) => MyInfo.myInfo.subAccount);
 
@@ -681,6 +694,7 @@ function MyInfoPage(props) {
 	const [subAccountLoading, setSubAccountLoading] = useState(false);
 	const [removeDialogOpen, setRemoveDialogOpen] = useState(false);
 	const [snack, setSnack] = useState({ open: false, message: '', type: 'success' });
+	const [listDialog, setListDialog] = useState({ open: false, title: '', data: [], type: '' });
 
 	const isMyPage = !puuid || puuid === myPuuid;
 	const isLoggedIn = Boolean(myPuuid);
@@ -955,7 +969,7 @@ function MyInfoPage(props) {
 
 							{/* 베스트/워스트 하이라이트 */}
 							<div className={classes.highlightSection}>
-								{bestTeammate && (
+								{bestTeammates.length > 0 && (
 									<div className={classes.highlightCard}>
 										<div className={classes.highlightIcon}>
 											<span role="img" aria-label="best teammate">
@@ -964,14 +978,23 @@ function MyInfoPage(props) {
 										</div>
 										<div className={classes.highlightContent}>
 											<div className={classes.highlightLabel}>함께하면 승률 최고</div>
-											<div className={classes.highlightName}>{bestTeammate.name}</div>
+											<div className={classes.highlightName}>{bestTeammates[0].name}</div>
 											<div className={`${classes.highlightStat} ${classes.highlightBest}`}>
-												{bestTeammate.games}판 ({bestTeammate.wins}승 {bestTeammate.losses}패) {bestTeammate.winRate}%
+												{bestTeammates[0].games}판 ({bestTeammates[0].wins}승 {bestTeammates[0].losses}패) {bestTeammates[0].winRate}%
 											</div>
 										</div>
+										{bestTeammates.length > 1 && (
+											<Button
+												size="small"
+												className={classes.moreButton}
+												onClick={() => setListDialog({ open: true, title: '함께하면 승률 최고', data: bestTeammates, type: 'teammate' })}
+											>
+												+{bestTeammates.length - 1}명 더보기
+											</Button>
+										)}
 									</div>
 								)}
-								{bestOpponent && (
+								{bestOpponents.length > 0 && (
 									<div className={classes.highlightCard}>
 										<div className={classes.highlightIcon}>
 											<span role="img" aria-label="best opponent">
@@ -980,15 +1003,24 @@ function MyInfoPage(props) {
 										</div>
 										<div className={classes.highlightContent}>
 											<div className={classes.highlightLabel}>상대 전적 최고</div>
-											<div className={classes.highlightName}>{bestOpponent.name}</div>
+											<div className={classes.highlightName}>{bestOpponents[0].name}</div>
 											<div className={`${classes.highlightStat} ${classes.highlightBest}`}>
-												{bestOpponent.games}판 ({bestOpponent.myWins}승 {bestOpponent.myLosses}패){' '}
-												{bestOpponent.winRate}%
+												{bestOpponents[0].games}판 ({bestOpponents[0].myWins}승 {bestOpponents[0].myLosses}패){' '}
+												{bestOpponents[0].winRate}%
 											</div>
 										</div>
+										{bestOpponents.length > 1 && (
+											<Button
+												size="small"
+												className={classes.moreButton}
+												onClick={() => setListDialog({ open: true, title: '상대 전적 최고', data: bestOpponents, type: 'opponent' })}
+											>
+												+{bestOpponents.length - 1}명 더보기
+											</Button>
+										)}
 									</div>
 								)}
-								{worstOpponent && (
+								{worstOpponents.length > 0 && (
 									<div className={classes.highlightCard}>
 										<div className={classes.highlightIcon}>
 											<span role="img" aria-label="worst opponent">
@@ -997,12 +1029,21 @@ function MyInfoPage(props) {
 										</div>
 										<div className={classes.highlightContent}>
 											<div className={classes.highlightLabel}>상대 전적 최악</div>
-											<div className={classes.highlightName}>{worstOpponent.name}</div>
+											<div className={classes.highlightName}>{worstOpponents[0].name}</div>
 											<div className={`${classes.highlightStat} ${classes.highlightWorst}`}>
-												{worstOpponent.games}판 ({worstOpponent.myWins}승 {worstOpponent.myLosses}패){' '}
-												{worstOpponent.winRate}%
+												{worstOpponents[0].games}판 ({worstOpponents[0].myWins}승 {worstOpponents[0].myLosses}패){' '}
+												{worstOpponents[0].winRate}%
 											</div>
 										</div>
+										{worstOpponents.length > 1 && (
+											<Button
+												size="small"
+												className={classes.moreButton}
+												onClick={() => setListDialog({ open: true, title: '상대 전적 최악', data: worstOpponents, type: 'opponent' })}
+											>
+												+{worstOpponents.length - 1}명 더보기
+											</Button>
+										)}
 									</div>
 								)}
 							</div>
@@ -1017,22 +1058,33 @@ function MyInfoPage(props) {
 										자주 함께한 팀원 Top 5
 									</div>
 									{topTeammates && topTeammates.length > 0 ? (
-										<div className={classes.relationList}>
-											{topTeammates.map((teammate, index) => (
-												<div key={teammate.puuid} className={classes.relationItem}>
-													<span className={classes.relationRank}>{index + 1}</span>
-													<span className={classes.relationName}>{teammate.name}</span>
-													<div className={classes.relationStats}>
-														<span className={classes.relationGames}>
-															{teammate.games}판 ({teammate.wins}승 {teammate.games - teammate.wins}패)
-														</span>
-														<span className={`${classes.relationWinRate} ${getWinRateClass(teammate.winRate)}`}>
-															{teammate.winRate}%
-														</span>
+										<>
+											<div className={classes.relationList}>
+												{topTeammates.slice(0, 5).map((teammate, index) => (
+													<div key={teammate.puuid} className={classes.relationItem}>
+														<span className={classes.relationRank}>{index + 1}</span>
+														<span className={classes.relationName}>{teammate.name}</span>
+														<div className={classes.relationStats}>
+															<span className={classes.relationGames}>
+																{teammate.games}판 ({teammate.wins}승 {teammate.games - teammate.wins}패)
+															</span>
+															<span className={`${classes.relationWinRate} ${getWinRateClass(teammate.winRate)}`}>
+																{teammate.winRate}%
+															</span>
+														</div>
 													</div>
-												</div>
-											))}
-										</div>
+												))}
+											</div>
+											{topTeammates.length > 5 && (
+												<Button
+													size="small"
+													className={classes.moreButton}
+													onClick={() => setListDialog({ open: true, title: '자주 함께한 팀원', data: topTeammates, type: 'teammate' })}
+												>
+													전체 {topTeammates.length}명 보기
+												</Button>
+											)}
+										</>
 									) : (
 										<div className={classes.noData}>데이터가 없습니다</div>
 									)}
@@ -1046,22 +1098,33 @@ function MyInfoPage(props) {
 										자주 맞선 상대 Top 5
 									</div>
 									{topOpponents && topOpponents.length > 0 ? (
-										<div className={classes.relationList}>
-											{topOpponents.map((opponent, index) => (
-												<div key={opponent.puuid} className={classes.relationItem}>
-													<span className={classes.relationRank}>{index + 1}</span>
-													<span className={classes.relationName}>{opponent.name}</span>
-													<div className={classes.relationStats}>
-														<span className={classes.relationGames}>
-															{opponent.games}판 ({opponent.myWins}승 {opponent.myLosses}패)
-														</span>
-														<span className={`${classes.relationWinRate} ${getWinRateClass(opponent.winRate)}`}>
-															{opponent.winRate}%
-														</span>
+										<>
+											<div className={classes.relationList}>
+												{topOpponents.slice(0, 5).map((opponent, index) => (
+													<div key={opponent.puuid} className={classes.relationItem}>
+														<span className={classes.relationRank}>{index + 1}</span>
+														<span className={classes.relationName}>{opponent.name}</span>
+														<div className={classes.relationStats}>
+															<span className={classes.relationGames}>
+																{opponent.games}판 ({opponent.myWins}승 {opponent.myLosses}패)
+															</span>
+															<span className={`${classes.relationWinRate} ${getWinRateClass(opponent.winRate)}`}>
+																{opponent.winRate}%
+															</span>
+														</div>
 													</div>
-												</div>
-											))}
-										</div>
+												))}
+											</div>
+											{topOpponents.length > 5 && (
+												<Button
+													size="small"
+													className={classes.moreButton}
+													onClick={() => setListDialog({ open: true, title: '자주 맞선 상대', data: topOpponents, type: 'opponent' })}
+												>
+													전체 {topOpponents.length}명 보기
+												</Button>
+											)}
+										</>
 									) : (
 										<div className={classes.noData}>데이터가 없습니다</div>
 									)}
@@ -1152,6 +1215,51 @@ function MyInfoPage(props) {
 								style={{ color: '#ff6b6b', fontFamily: '"Noto Sans KR", sans-serif', fontWeight: 700 }}
 							>
 								해제
+							</Button>
+						</DialogActions>
+					</Dialog>
+
+					{/* 더보기 Dialog */}
+					<Dialog
+						open={listDialog.open}
+						onClose={() => setListDialog(prev => ({ ...prev, open: false }))}
+						maxWidth="sm"
+						fullWidth
+						PaperProps={{
+							style: {
+								background: 'linear-gradient(135deg, #1a1a2e 0%, #0f0f1a 100%)',
+								border: '1px solid rgba(0, 212, 255, 0.2)',
+								borderRadius: 16,
+								color: '#fff'
+							}
+						}}
+					>
+						<DialogTitle style={{ fontFamily: '"Rajdhani", "Noto Sans KR", sans-serif', color: '#00d4ff' }}>
+							{listDialog.title}
+						</DialogTitle>
+						<DialogContent>
+							<div className={classes.relationList}>
+								{listDialog.data.map((item, index) => (
+									<div key={item.puuid} className={classes.relationItem}>
+										<span className={classes.relationRank}>{index + 1}</span>
+										<span className={classes.relationName}>{item.name}</span>
+										<div className={classes.relationStats}>
+											<span className={classes.relationGames}>
+												{listDialog.type === 'teammate'
+													? `${item.games}판 (${item.wins}승 ${item.games - item.wins}패)`
+													: `${item.games}판 (${item.myWins}승 ${item.myLosses}패)`}
+											</span>
+											<span className={`${classes.relationWinRate} ${getWinRateClass(item.winRate)}`}>
+												{item.winRate}%
+											</span>
+										</div>
+									</div>
+								))}
+							</div>
+						</DialogContent>
+						<DialogActions>
+							<Button onClick={() => setListDialog(prev => ({ ...prev, open: false }))} style={{ color: '#00d4ff' }}>
+								닫기
 							</Button>
 						</DialogActions>
 					</Dialog>
