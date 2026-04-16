@@ -49,6 +49,25 @@ export const mustHaveThemeOptions = {
 		body2: {
 			fontSize: '1.4rem'
 		}
+	},
+	components: {
+		MuiInputBase: {
+			styleOverrides: {
+				root: {
+					lineHeight: '1.1876em' // MUI 4 기본값 복원 (MUI 9: 1.4375em)
+				},
+				input: {
+					height: '1.1876em' // MUI 4 기본값 복원 (MUI 9: 1.4375em)
+				}
+			}
+		},
+		MuiFormLabel: {
+			styleOverrides: {
+				root: {
+					lineHeight: 1 // MUI 4 기본값 복원
+				}
+			}
+		}
 	}
 };
 
