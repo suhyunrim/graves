@@ -67,6 +67,14 @@ export const mustHaveThemeOptions = {
 					lineHeight: 1 // MUI 4 기본값 복원
 				}
 			}
+		},
+		MuiListItem: {
+			styleOverrides: {
+				root: {
+					paddingTop: 8, // MUI 4 기본값 복원
+					paddingBottom: 8
+				}
+			}
 		}
 	}
 };
