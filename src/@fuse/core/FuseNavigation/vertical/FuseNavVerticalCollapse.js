@@ -23,6 +23,8 @@ const useStyles = makeStyles()((theme, params) => ({
 		}
 	},
 	item: {
+		display: 'flex !important',
+		alignItems: 'center',
 		height: 40,
 		width: 'calc(100% - 16px)',
 		borderRadius: '0 20px 20px 0',

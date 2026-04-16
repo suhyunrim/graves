@@ -71,7 +71,9 @@ export const mustHaveThemeOptions = {
 		MuiListItem: {
 			styleOverrides: {
 				root: {
-					paddingTop: 8, // MUI 4 기본값 복원
+					display: 'flex', // MUI 4 기본값 복원 (MUI 9: list-item)
+					alignItems: 'center',
+					paddingTop: 8,
 					paddingBottom: 8
 				}
 			}
