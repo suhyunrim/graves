@@ -11,6 +11,7 @@ import clsx from 'clsx';
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
+import { useLocation } from 'react-router-dom';
 
 import useMediaQuery from '@mui/material/useMediaQuery';
 import FuseNavBadge from '../FuseNavBadge';
@@ -71,6 +72,7 @@ function FuseNavVerticalItem(props) {
 
 	const theme = useTheme();
 	const mdDown = useMediaQuery(theme.breakpoints.down('lg'));
+	const location = useLocation();
 	const { item, nestedLevel } = props;
 	const { classes } = useStyles({
 		itemPadding: nestedLevel > 0 ? 40 + nestedLevel * 16 : 24
@@ -88,7 +90,7 @@ function FuseNavVerticalItem(props) {
 			button
 			component={NavLinkAdapter}
 			to={item.url}
-			className={({ isActive }) => clsx(classes.item, 'list-item', isActive && 'active')}
+			className={clsx(classes.item, 'list-item', location.pathname === item.url && 'active')}
 			onClick={ev => mdDown && dispatch(Actions.navbarCloseMobile())}
 			end={item.exact}
 		>

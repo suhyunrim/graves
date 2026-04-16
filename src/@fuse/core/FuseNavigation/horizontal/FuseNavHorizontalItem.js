@@ -9,6 +9,7 @@ import clsx from 'clsx';
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
+import { useLocation } from 'react-router-dom';
 import FuseNavBadge from '../FuseNavBadge';
 
 const useStyles = makeStyles()((theme) => ({
@@ -38,6 +39,7 @@ function FuseNavHorizontalItem(props) {
 	const userRole = useSelector(({ auth }) => auth.user.role);
 
 	const { classes } = useStyles(props);
+	const location = useLocation();
 	const { item } = props;
 	const { t } = useTranslation('navigation');
 
@@ -52,7 +54,7 @@ function FuseNavHorizontalItem(props) {
 			button
 			component={NavLinkAdapter}
 			to={item.url}
-			className={({ isActive }) => clsx('list-item', classes.root, isActive && 'active')}
+			className={clsx('list-item', classes.root, location.pathname === item.url && 'active')}
 			end={item.exact}
 		>
 			{item.icon && (
