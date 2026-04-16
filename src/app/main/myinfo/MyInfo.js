@@ -505,7 +505,7 @@ const useStyles = makeStyles()((theme) => ({
 		color: '#00d4ff',
 		fontSize: '1.2rem',
 		fontFamily: '"Noto Sans KR", sans-serif',
-		marginTop: 8,
+		marginLeft: 'auto',
 		padding: '4px 12px',
 		border: '1px solid rgba(0, 212, 255, 0.3)',
 		borderRadius: 8,
@@ -1056,35 +1056,33 @@ function MyInfoPage(props) {
 											👥
 										</span>
 										자주 함께한 팀원 Top 5
+										{topTeammates && topTeammates.length > 5 && (
+											<Button
+												size="small"
+												className={classes.moreButton}
+												onClick={() => setListDialog({ open: true, title: '자주 함께한 팀원', data: topTeammates, type: 'teammate' })}
+											>
+												전체 {topTeammates.length}명 보기
+											</Button>
+										)}
 									</div>
 									{topTeammates && topTeammates.length > 0 ? (
-										<>
-											<div className={classes.relationList}>
-												{topTeammates.slice(0, 5).map((teammate, index) => (
-													<div key={teammate.puuid} className={classes.relationItem}>
-														<span className={classes.relationRank}>{index + 1}</span>
-														<span className={classes.relationName}>{teammate.name}</span>
-														<div className={classes.relationStats}>
-															<span className={classes.relationGames}>
-																{teammate.games}판 ({teammate.wins}승 {teammate.games - teammate.wins}패)
-															</span>
-															<span className={`${classes.relationWinRate} ${getWinRateClass(teammate.winRate)}`}>
-																{teammate.winRate}%
-															</span>
-														</div>
+										<div className={classes.relationList}>
+											{topTeammates.slice(0, 5).map((teammate, index) => (
+												<div key={teammate.puuid} className={classes.relationItem}>
+													<span className={classes.relationRank}>{index + 1}</span>
+													<span className={classes.relationName}>{teammate.name}</span>
+													<div className={classes.relationStats}>
+														<span className={classes.relationGames}>
+															{teammate.games}판 ({teammate.wins}승 {teammate.games - teammate.wins}패)
+														</span>
+														<span className={`${classes.relationWinRate} ${getWinRateClass(teammate.winRate)}`}>
+															{teammate.winRate}%
+														</span>
 													</div>
-												))}
-											</div>
-											{topTeammates.length > 5 && (
-												<Button
-													size="small"
-													className={classes.moreButton}
-													onClick={() => setListDialog({ open: true, title: '자주 함께한 팀원', data: topTeammates, type: 'teammate' })}
-												>
-													전체 {topTeammates.length}명 보기
-												</Button>
-											)}
-										</>
+												</div>
+											))}
+										</div>
 									) : (
 										<div className={classes.noData}>데이터가 없습니다</div>
 									)}
@@ -1096,35 +1094,33 @@ function MyInfoPage(props) {
 											⚔️
 										</span>
 										자주 맞선 상대 Top 5
+										{topOpponents && topOpponents.length > 5 && (
+											<Button
+												size="small"
+												className={classes.moreButton}
+												onClick={() => setListDialog({ open: true, title: '자주 맞선 상대', data: topOpponents, type: 'opponent' })}
+											>
+												전체 {topOpponents.length}명 보기
+											</Button>
+										)}
 									</div>
 									{topOpponents && topOpponents.length > 0 ? (
-										<>
-											<div className={classes.relationList}>
-												{topOpponents.slice(0, 5).map((opponent, index) => (
-													<div key={opponent.puuid} className={classes.relationItem}>
-														<span className={classes.relationRank}>{index + 1}</span>
-														<span className={classes.relationName}>{opponent.name}</span>
-														<div className={classes.relationStats}>
-															<span className={classes.relationGames}>
-																{opponent.games}판 ({opponent.myWins}승 {opponent.myLosses}패)
-															</span>
-															<span className={`${classes.relationWinRate} ${getWinRateClass(opponent.winRate)}`}>
-																{opponent.winRate}%
-															</span>
-														</div>
+										<div className={classes.relationList}>
+											{topOpponents.slice(0, 5).map((opponent, index) => (
+												<div key={opponent.puuid} className={classes.relationItem}>
+													<span className={classes.relationRank}>{index + 1}</span>
+													<span className={classes.relationName}>{opponent.name}</span>
+													<div className={classes.relationStats}>
+														<span className={classes.relationGames}>
+															{opponent.games}판 ({opponent.myWins}승 {opponent.myLosses}패)
+														</span>
+														<span className={`${classes.relationWinRate} ${getWinRateClass(opponent.winRate)}`}>
+															{opponent.winRate}%
+														</span>
 													</div>
-												))}
-											</div>
-											{topOpponents.length > 5 && (
-												<Button
-													size="small"
-													className={classes.moreButton}
-													onClick={() => setListDialog({ open: true, title: '자주 맞선 상대', data: topOpponents, type: 'opponent' })}
-												>
-													전체 {topOpponents.length}명 보기
-												</Button>
-											)}
-										</>
+												</div>
+											))}
+										</div>
 									) : (
 										<div className={classes.noData}>데이터가 없습니다</div>
 									)}
