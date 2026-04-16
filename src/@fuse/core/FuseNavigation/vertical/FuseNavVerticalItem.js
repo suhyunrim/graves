@@ -18,6 +18,8 @@ import FuseNavBadge from '../FuseNavBadge';
 
 const useStyles = makeStyles()((theme, params) => ({
 	item: {
+		display: 'flex !important',
+		alignItems: 'center',
 		height: 48,
 		width: 'calc(100% - 16px)',
 		borderRadius: '0 24px 24px 0',
