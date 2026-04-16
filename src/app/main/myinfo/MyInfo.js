@@ -1294,11 +1294,15 @@ function MyInfoPage(props) {
 						onClose={() => setListDialog(prev => ({ ...prev, open: false }))}
 						maxWidth="sm"
 						fullWidth
-						PaperProps={{
-							className: classes.dialogPaper,
-							sx: {
-								background: 'linear-gradient(135deg, #1a1a2e 0%, #0f0f1a 100%) !important',
-								backgroundImage: 'linear-gradient(135deg, #1a1a2e 0%, #0f0f1a 100%) !important'
+						slotProps={{
+							paper: {
+								className: classes.dialogPaper,
+								sx: {
+									backgroundImage: 'linear-gradient(135deg, #1a1a2e 0%, #0f0f1a 100%) !important',
+									border: '1px solid rgba(0, 212, 255, 0.25) !important',
+									borderRadius: '20px !important',
+									boxShadow: '0 8px 32px rgba(0, 0, 0, 0.5), 0 0 60px rgba(0, 212, 255, 0.08) !important'
+								}
 							}
 						}}
 					>
