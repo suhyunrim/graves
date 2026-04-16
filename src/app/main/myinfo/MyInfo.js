@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import FusePageSimple from '@fuse/core/FusePageSimple';
 import { makeStyles } from 'tss-react/mui';
+import { keyframes } from '@emotion/react';
 import {
 	Button,
 	TextField,
@@ -40,6 +41,17 @@ const tierColors = {
 	UNRANKED: { primary: '#888888', glow: 'rgba(136, 136, 136, 0.3)' }
 };
 
+// keyframes 헬퍼로 애니메이션 정의 (tss-react는 JSS $ruleName 참조 미지원)
+const fadeIn = keyframes`
+	0% { opacity: 0; transform: translateY(20px); }
+	100% { opacity: 1; transform: translateY(0); }
+`;
+
+const fadeInUp = keyframes`
+	0% { opacity: 0; transform: translateY(30px); }
+	100% { opacity: 1; transform: translateY(0); }
+`;
+
 const useStyles = makeStyles()((theme) => ({
 	layoutRoot: {
 		background: 'linear-gradient(180deg, #0f0f1a 0%, #1a1a2e 100%)',
@@ -65,15 +77,11 @@ const useStyles = makeStyles()((theme) => ({
 		background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
 		borderRadius: 16,
 		border: '1px solid rgba(0, 212, 255, 0.2)',
-		animation: '$fadeIn 0.5s ease',
+		animation: `${fadeIn} 0.5s ease`,
 		[theme.breakpoints.down('sm')]: {
 			gap: 16,
 			padding: 16
 		}
-	},
-	'@keyframes fadeIn': {
-		'0%': { opacity: 0, transform: 'translateY(20px)' },
-		'100%': { opacity: 1, transform: 'translateY(0)' }
 	},
 	profileIcon: {
 		width: 120,
@@ -161,7 +169,7 @@ const useStyles = makeStyles()((theme) => ({
 		padding: 28,
 		overflow: 'hidden',
 		transition: 'transform 0.3s ease, box-shadow 0.3s ease',
-		animation: '$fadeInUp 0.6s ease forwards',
+		animation: `${fadeInUp} 0.6s ease forwards`,
 		opacity: 0,
 		'&:hover': {
 			transform: 'translateY(-6px) scale(1.02)'
@@ -170,10 +178,6 @@ const useStyles = makeStyles()((theme) => ({
 			padding: 20,
 			borderRadius: 16
 		}
-	},
-	'@keyframes fadeInUp': {
-		'0%': { opacity: 0, transform: 'translateY(30px)' },
-		'100%': { opacity: 1, transform: 'translateY(0)' }
 	},
 	soloRankCard: {
 		background: 'linear-gradient(135deg, #1f2937 0%, #111827 100%)',
@@ -304,7 +308,7 @@ const useStyles = makeStyles()((theme) => ({
 		borderRadius: 16,
 		padding: '20px 24px',
 		border: '1px solid rgba(0, 212, 255, 0.15)',
-		animation: '$fadeInUp 0.5s ease forwards',
+		animation: `${fadeInUp} 0.5s ease forwards`,
 		opacity: 0,
 		'&:nth-child(1)': { animationDelay: '0.1s' },
 		'&:nth-child(2)': { animationDelay: '0.15s' },
@@ -360,7 +364,7 @@ const useStyles = makeStyles()((theme) => ({
 		borderRadius: 20,
 		padding: 24,
 		border: '1px solid rgba(0, 212, 255, 0.15)',
-		animation: '$fadeInUp 0.6s ease forwards',
+		animation: `${fadeInUp} 0.6s ease forwards`,
 		opacity: 0,
 		'&:nth-child(1)': { animationDelay: '0.2s' },
 		'&:nth-child(2)': { animationDelay: '0.3s' },
@@ -451,7 +455,7 @@ const useStyles = makeStyles()((theme) => ({
 		borderRadius: 16,
 		padding: '20px 24px',
 		border: '1px solid rgba(0, 212, 255, 0.15)',
-		animation: '$fadeInUp 0.5s ease forwards',
+		animation: `${fadeInUp} 0.5s ease forwards`,
 		opacity: 0,
 		display: 'flex',
 		alignItems: 'center',
@@ -511,7 +515,7 @@ const useStyles = makeStyles()((theme) => ({
 		border: '1px solid rgba(0, 212, 255, 0.2)',
 		padding: '24px 28px',
 		marginTop: 20,
-		animation: '$fadeInUp 0.6s ease forwards',
+		animation: `${fadeInUp} 0.6s ease forwards`,
 		opacity: 0,
 		animationDelay: '0.4s'
 	},
@@ -629,7 +633,7 @@ const useStyles = makeStyles()((theme) => ({
 	},
 	tabs: {
 		marginBottom: 32,
-		animation: '$fadeInUp 0.5s ease forwards',
+		animation: `${fadeInUp} 0.5s ease forwards`,
 		opacity: 0,
 		animationDelay: '0.15s',
 		'& .MuiTabs-indicator': {

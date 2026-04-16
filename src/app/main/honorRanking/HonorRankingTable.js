@@ -8,10 +8,17 @@ import TableHead from '@mui/material/TableHead';
 import TablePagination from '@mui/material/TablePagination';
 import TableRow from '@mui/material/TableRow';
 import { makeStyles } from 'tss-react/mui';
+import { keyframes } from '@emotion/react';
 import { withStyles } from 'tss-react/mui';
 import React, { useEffect, useState, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import * as Actions from './store/actions';
+
+// keyframes 헬퍼로 애니메이션 정의 (tss-react는 JSS $ruleName 참조 미지원)
+const fadeIn = keyframes`
+	0% { opacity: 0; transform: translateY(20px); }
+	100% { opacity: 1; transform: translateY(0); }
+`;
 
 const useStyles = makeStyles()((theme) => ({
 	container: {
@@ -25,11 +32,7 @@ const useStyles = makeStyles()((theme) => ({
 		borderRadius: 20,
 		border: '1px solid rgba(255, 193, 7, 0.2)',
 		overflow: 'hidden',
-		animation: '$fadeIn 0.6s ease'
-	},
-	'@keyframes fadeIn': {
-		'0%': { opacity: 0, transform: 'translateY(20px)' },
-		'100%': { opacity: 1, transform: 'translateY(0)' }
+		animation: `${fadeIn} 0.6s ease`
 	},
 	rankingNumber: {
 		fontFamily: '"Rajdhani", sans-serif',
