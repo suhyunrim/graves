@@ -66,7 +66,7 @@ const useStyles = makeStyles()((theme) => ({
 		flex: '1 1 auto'
 	},
 	foldedAndClosed: {
-		'& $navbarContent': {
+		'& .navbar-content': {
 			'& .logo-icon': {
 				width: 32,
 				height: 32
@@ -151,7 +151,7 @@ function NavbarWrapperLayout1(props) {
                                 onMouseLeave={() => foldedAndOpened && dispatch(Actions.navbarCloseFolded())}
                                 style={{ backgroundColor: navbarTheme.palette.background.default }}
                             >
-                                <NavbarLayout1 className={classes.navbarContent} />
+                                <NavbarLayout1 className={clsx('navbar-content', classes.navbarContent)} />
                             </div>
                         </Box>
 
@@ -168,7 +168,7 @@ function NavbarWrapperLayout1(props) {
                                     keepMounted: true // Better open performance on mobile.
                                 }}
                             >
-                                <NavbarLayout1 className={classes.navbarContent} />
+                                <NavbarLayout1 className={clsx('navbar-content', classes.navbarContent)} />
                             </Drawer>
                         </Box>
                     </div>
