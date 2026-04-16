@@ -13,6 +13,7 @@ import { withStyles } from 'tss-react/mui';
 import React, { useEffect, useState, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import * as Actions from './store/actions';
+import { RankingTableSkeleton } from '../components/SkeletonLoaders';
 
 // keyframes 헬퍼로 애니메이션 정의 (tss-react는 JSS $ruleName 참조 미지원)
 const fadeIn = keyframes`
@@ -297,6 +298,7 @@ function HonorRankingTable() {
 	}, [dispatch, groupId, period]);
 
 	const filteredData = useMemo(() => {
+		if (!honorData) return null;
 		if (searchText.length === 0) return honorData;
 		return _.filter(honorData, item => item.name.toLowerCase().includes(searchText.toLowerCase()));
 	}, [honorData, searchText]);
@@ -305,7 +307,7 @@ function HonorRankingTable() {
 		setPage(0);
 	}, [searchText, period]);
 
-	const paginatedData = filteredData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
+	const paginatedData = filteredData ? filteredData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage) : [];
 
 	function getRankClass(rank) {
 		if (rank === 1) return classes.rankTop1;
@@ -343,10 +345,14 @@ function HonorRankingTable() {
 		);
 	}
 
+	if (filteredData === null) {
+		return <RankingTableSkeleton />;
+	}
+
 	return (
         <div className={classes.container}>
             <div className={classes.tableWrapper}>
-				{filteredData && filteredData.length > 0 ? (
+				{filteredData.length > 0 ? (
 					<>
 						{/* Desktop Table View */}
 						<Box sx={{ display: { xs: 'none', md: 'block' } }}>

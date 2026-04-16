@@ -1,7 +1,8 @@
 import FusePageSimple from '@fuse/core/FusePageSimple';
 import withReducer from 'app/store/withReducer';
 import { makeStyles } from 'tss-react/mui';
-import { Typography, CircularProgress, Tooltip, IconButton } from '@mui/material';
+import { Typography, Tooltip, IconButton } from '@mui/material';
+import { BalanceReportSkeleton } from '../components/SkeletonLoaders';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import React, { useEffect, useState, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -923,11 +924,7 @@ function BalanceReport() {
 						/>
 					</div>
 
-					{loading && (
-						<div className={classes.loadingWrapper}>
-							<CircularProgress style={{ color: '#00d4ff' }} />
-						</div>
-					)}
+					{loading && <BalanceReportSkeleton />}
 
 					{!loading && !report && (
 						<div className={classes.emptyState}>

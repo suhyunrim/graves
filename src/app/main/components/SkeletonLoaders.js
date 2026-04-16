@@ -540,6 +540,32 @@ function ReleaseNotesSkeleton() {
     );
 }
 
+function BalanceReportSkeleton() {
+	const { classes } = useSkeletonStyles();
+	return (
+		<div className={classes.tableContainer}>
+			{/* 요약 카드 */}
+			<div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16, marginBottom: 24 }}>
+				{Array.from({ length: 4 }).map((_, i) => (
+					<div key={i} className={classes.dashboardCard} style={{ padding: 20 }}>
+						<Skeleton {...skeletonProps} variant="text" width="50%" height={16} />
+						<Skeleton {...skeletonProps} variant="text" width="70%" height={28} style={{ ...skeletonProps.style, marginTop: 8 }} />
+					</div>
+				))}
+			</div>
+			{/* 차트 영역 */}
+			<div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: 16 }}>
+				{Array.from({ length: 2 }).map((_, i) => (
+					<div key={i} className={classes.dashboardCard} style={{ padding: 24 }}>
+						<Skeleton {...skeletonProps} variant="text" width="40%" height={20} style={{ ...skeletonProps.style, marginBottom: 16 }} />
+						<Skeleton {...skeletonProps} variant="rectangular" width="100%" height={200} style={{ ...skeletonProps.style, borderRadius: 8 }} />
+					</div>
+				))}
+			</div>
+		</div>
+	);
+}
+
 export {
 	DashboardSkeleton,
 	RankingTableSkeleton,
@@ -550,5 +576,6 @@ export {
 	SettingsSkeleton,
 	ChallengeListSkeleton,
 	ChallengeDetailSkeleton,
-	ReleaseNotesSkeleton
+	ReleaseNotesSkeleton,
+	BalanceReportSkeleton
 };
