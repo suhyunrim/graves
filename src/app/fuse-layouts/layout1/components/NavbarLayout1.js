@@ -75,7 +75,7 @@ function NavbarLayout1(props) {
 					</NavbarMobileToggleButton>
 				</Box>
 			</AppBar>
-            <FuseScrollbars className={clsx(classes.content)} option={{ suppressScrollX: true }}>
+            <FuseScrollbars className={clsx('flex-1', classes.content)} option={{ suppressScrollX: true }}>
 				<UserNavbarHeader />
 
 				<Navigation layout="vertical" />
