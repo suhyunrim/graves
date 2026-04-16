@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import FusePageSimple from '@fuse/core/FusePageSimple';
 import { makeStyles } from 'tss-react/mui';
+import { keyframes } from '@emotion/react';
 import IconButton from '@mui/material/IconButton';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
@@ -10,6 +11,16 @@ import { DashboardSkeleton } from '../components/SkeletonLoaders';
 import DashboardHeader from './DashboardHeader';
 import reducer from './store/reducers';
 import * as Actions from './store/actions';
+
+const fadeInUp = keyframes({
+	'0%': { opacity: 0, transform: 'translateY(30px)' },
+	'100%': { opacity: 1, transform: 'translateY(0)' }
+});
+
+const pulse = keyframes({
+	'0%, 100%': { transform: 'scale(1)' },
+	'50%': { transform: 'scale(1.05)' }
+});
 
 const useStyles = makeStyles()((theme) => ({
 	layoutRoot: {
@@ -64,21 +75,11 @@ const useStyles = makeStyles()((theme) => ({
 		padding: 28,
 		overflow: 'hidden',
 		transition: 'transform 0.3s ease, box-shadow 0.3s ease',
-		animation: '$fadeInUp 0.6s ease forwards',
+		animation: `${fadeInUp} 0.6s ease forwards`,
 		opacity: 0,
 		'&:hover': {
 			transform: 'translateY(-4px) scale(1.02)',
 			boxShadow: '0 20px 40px rgba(0, 0, 0, 0.4)'
-		}
-	},
-	'@keyframes fadeInUp': {
-		'0%': {
-			opacity: 0,
-			transform: 'translateY(30px)'
-		},
-		'100%': {
-			opacity: 1,
-			transform: 'translateY(0)'
 		}
 	},
 	cardMostGames: {
@@ -219,20 +220,12 @@ const useStyles = makeStyles()((theme) => ({
 	heart: {
 		color: '#ff69b4',
 		fontSize: '1.8rem',
-		animation: '$pulse 1.5s ease infinite'
+		animation: `${pulse} 1.5s ease infinite`
 	},
 	versus: {
 		color: '#8a2be2',
 		fontSize: '1.6rem',
 		fontWeight: 600
-	},
-	'@keyframes pulse': {
-		'0%, 100%': {
-			transform: 'scale(1)'
-		},
-		'50%': {
-			transform: 'scale(1.2)'
-		}
 	},
 	stats: {
 		fontFamily: '"Noto Sans KR", sans-serif',

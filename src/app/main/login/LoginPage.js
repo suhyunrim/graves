@@ -5,6 +5,7 @@ import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import { makeStyles } from 'tss-react/mui';
+import { keyframes } from '@emotion/react';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import clsx from 'clsx';
@@ -12,15 +13,13 @@ import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import * as authActions from 'app/auth/store/actions';
 
+// keyframes 헬퍼로 애니메이션 정의 (tss-react는 JSS $ruleName 참조 미지원)
+const pulseGlow = keyframes`
+	0%, 100% { box-shadow: 0 0 30px rgba(0, 212, 255, 0.4), 0 0 60px rgba(0, 212, 255, 0.2); }
+	50% { box-shadow: 0 0 50px rgba(0, 212, 255, 0.6), 0 0 100px rgba(0, 212, 255, 0.4); }
+`;
+
 const useStyles = makeStyles()((theme) => ({
-	'@keyframes pulseGlow': {
-		'0%, 100%': {
-			boxShadow: '0 0 30px rgba(0, 212, 255, 0.4), 0 0 60px rgba(0, 212, 255, 0.2)'
-		},
-		'50%': {
-			boxShadow: '0 0 50px rgba(0, 212, 255, 0.6), 0 0 100px rgba(0, 212, 255, 0.4)'
-		}
-	},
 	root: {
 		background: 'linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 50%, #16213e 100%)',
 		position: 'relative',
@@ -63,7 +62,7 @@ const useStyles = makeStyles()((theme) => ({
 		objectFit: 'cover',
 		border: '3px solid rgba(0, 212, 255, 0.5)',
 		boxShadow: '0 0 30px rgba(0, 212, 255, 0.4), 0 0 60px rgba(0, 212, 255, 0.2)',
-		animation: '$pulseGlow 3s ease-in-out infinite',
+		animation: `${pulseGlow} 3s ease-in-out infinite`,
 		[theme.breakpoints.up('md')]: {
 			width: 200,
 			height: 200,
