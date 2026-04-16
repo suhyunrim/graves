@@ -18,7 +18,10 @@ const useStyles = makeStyles()((theme) => ({
 		zIndex: 4,
 		[theme.breakpoints.up('lg')]: {
 			width: navbarWidth,
-			minWidth: navbarWidth
+			minWidth: navbarWidth,
+			height: '100%',
+			position: 'sticky',
+			top: 0
 		}
 	},
 	wrapperFolded: {
@@ -135,7 +138,7 @@ function NavbarWrapperLayout1(props) {
             <StyledEngineProvider injectFirst>
                 <ThemeProvider theme={navbarTheme}>
                     <div id="fuse-navbar" className={clsx(classes.wrapper, folded && classes.wrapperFolded)}>
-                        <Box sx={{ display: { xs: 'none', lg: 'block' } }}>
+                        <Box sx={{ display: { xs: 'none', lg: 'block' }, height: '100%' }}>
                             <div
                                 className={clsx(
                                     classes.navbar,
