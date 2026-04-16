@@ -521,6 +521,79 @@ const useStyles = makeStyles()((theme) => ({
 		textAlign: 'center',
 		padding: '20px 0'
 	},
+	// 더보기 Dialog
+	dialogPaper: {
+		background: 'linear-gradient(135deg, #1a1a2e 0%, #0f0f1a 100%)',
+		border: '1px solid rgba(0, 212, 255, 0.25)',
+		borderRadius: '20px !important',
+		color: '#fff',
+		boxShadow: '0 8px 32px rgba(0, 0, 0, 0.5), 0 0 60px rgba(0, 212, 255, 0.08)',
+		overflow: 'hidden',
+		'&::before': {
+			content: '""',
+			position: 'absolute',
+			top: 0,
+			left: 0,
+			right: 0,
+			height: 1,
+			background: 'linear-gradient(90deg, transparent, rgba(0, 212, 255, 0.5), transparent)'
+		}
+	},
+	dialogTitle: {
+		fontFamily: '"Rajdhani", "Noto Sans KR", sans-serif',
+		fontSize: '2rem',
+		fontWeight: 700,
+		color: '#00d4ff',
+		letterSpacing: '0.05em',
+		textTransform: 'uppercase',
+		padding: '24px 28px 8px',
+		textShadow: '0 0 20px rgba(0, 212, 255, 0.3)'
+	},
+	dialogSubtitle: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.2rem',
+		color: 'rgba(255, 255, 255, 0.4)',
+		padding: '0 28px 16px'
+	},
+	dialogContent: {
+		padding: '8px 28px 24px !important'
+	},
+	dialogListItem: {
+		display: 'flex',
+		alignItems: 'center',
+		justifyContent: 'space-between',
+		padding: '12px 16px',
+		background: 'rgba(0, 0, 0, 0.2)',
+		borderRadius: 12,
+		transition: 'all 0.2s ease',
+		'&:hover': {
+			background: 'rgba(0, 212, 255, 0.08)',
+			borderColor: 'rgba(0, 212, 255, 0.2)'
+		},
+		[theme.breakpoints.down('sm')]: {
+			flexWrap: 'wrap',
+			gap: 4,
+			padding: '10px 12px'
+		}
+	},
+	dialogRankTop3: {
+		color: '#00d4ff',
+		textShadow: '0 0 8px rgba(0, 212, 255, 0.4)'
+	},
+	dialogCloseButton: {
+		color: 'rgba(255, 255, 255, 0.5)',
+		border: '1px solid rgba(255, 255, 255, 0.15)',
+		borderRadius: 10,
+		padding: '8px 24px',
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.3rem',
+		transition: 'all 0.2s ease',
+		'&:hover': {
+			color: '#00d4ff',
+			borderColor: 'rgba(0, 212, 255, 0.4)',
+			background: 'rgba(0, 212, 255, 0.08)'
+		}
+	},
 	// 부캐 설정
 	subAccountSection: {
 		background: 'linear-gradient(135deg, #1a1a2e 0%, #0f0f1a 100%)',
@@ -1221,23 +1294,19 @@ function MyInfoPage(props) {
 						onClose={() => setListDialog(prev => ({ ...prev, open: false }))}
 						maxWidth="sm"
 						fullWidth
-						PaperProps={{
-							style: {
-								background: 'linear-gradient(135deg, #1a1a2e 0%, #0f0f1a 100%)',
-								border: '1px solid rgba(0, 212, 255, 0.2)',
-								borderRadius: 16,
-								color: '#fff'
-							}
-						}}
+						PaperProps={{ className: classes.dialogPaper }}
 					>
-						<DialogTitle style={{ fontFamily: '"Rajdhani", "Noto Sans KR", sans-serif', color: '#00d4ff' }}>
-							{listDialog.title}
-						</DialogTitle>
-						<DialogContent>
+						<div className={classes.dialogTitle}>{listDialog.title}</div>
+						<div className={classes.dialogSubtitle}>
+							{listDialog.data.length}명의 소환사
+						</div>
+						<DialogContent className={classes.dialogContent}>
 							<div className={classes.relationList}>
 								{listDialog.data.map((item, index) => (
-									<div key={item.puuid} className={classes.relationItem}>
-										<span className={classes.relationRank}>{index + 1}</span>
+									<div key={item.puuid} className={classes.dialogListItem}>
+										<span className={`${classes.relationRank} ${index < 3 ? classes.dialogRankTop3 : ''}`}>
+											{index + 1}
+										</span>
 										<span className={classes.relationName}>{item.name}</span>
 										<div className={classes.relationStats}>
 											<span className={classes.relationGames}>
@@ -1253,8 +1322,11 @@ function MyInfoPage(props) {
 								))}
 							</div>
 						</DialogContent>
-						<DialogActions>
-							<Button onClick={() => setListDialog(prev => ({ ...prev, open: false }))} style={{ color: '#00d4ff' }}>
+						<DialogActions style={{ padding: '12px 28px 24px' }}>
+							<Button
+								className={classes.dialogCloseButton}
+								onClick={() => setListDialog(prev => ({ ...prev, open: false }))}
+							>
 								닫기
 							</Button>
 						</DialogActions>
