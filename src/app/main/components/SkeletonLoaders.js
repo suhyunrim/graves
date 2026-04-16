@@ -120,11 +120,11 @@ const useSkeletonStyles = makeStyles()(() => ({
 
 const skeletonProps = {
 	animation: 'wave',
-	style: { backgroundColor: 'rgba(255, 255, 255, 0.08)' }
+	style: { backgroundColor: 'rgba(255, 255, 255, 0.12)' }
 };
 
 function DashboardSkeleton() {
-	const classes = useSkeletonStyles();
+	const { classes } = useSkeletonStyles();
 	return (
         <div className={classes.dashboardContainer}>
             <div className={classes.dashboardMonthBadge}>
@@ -174,7 +174,7 @@ function DashboardSkeleton() {
 }
 
 function RankingTableSkeleton() {
-	const classes = useSkeletonStyles();
+	const { classes } = useSkeletonStyles();
 	return (
         <div className={classes.tableContainer}>
             <div className={classes.tableWrapper}>
@@ -210,7 +210,7 @@ function RankingTableSkeleton() {
 }
 
 function MatchHistorySkeleton() {
-	const classes = useSkeletonStyles();
+	const { classes } = useSkeletonStyles();
 	return (
         <div className={classes.tableContainer}>
             <div className={classes.tableWrapper}>
@@ -244,7 +244,7 @@ function MatchHistorySkeleton() {
 }
 
 function MyInfoSkeleton() {
-	const classes = useSkeletonStyles();
+	const { classes } = useSkeletonStyles();
 	return (
         <div className={classes.profileContainer}>
             <div className={classes.profileTop}>
@@ -323,7 +323,7 @@ function MyInfoSkeleton() {
 }
 
 function AchievementSkeleton() {
-	const classes = useSkeletonStyles();
+	const { classes } = useSkeletonStyles();
 	return (
         <div>
             <div style={{ padding: '24px 24px 0', display: 'flex', gap: 8 }}>
@@ -369,7 +369,7 @@ function AchievementSkeleton() {
 }
 
 function ChampionTableSkeleton() {
-	const classes = useSkeletonStyles();
+	const { classes } = useSkeletonStyles();
 	return (
         <div className={classes.tableContainer}>
             <Skeleton
@@ -426,7 +426,7 @@ function SettingsSkeleton() {
 }
 
 function ChallengeListSkeleton() {
-	const classes = useSkeletonStyles();
+	const { classes } = useSkeletonStyles();
 	return (
         <div
 			style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 16, padding: 24 }}
@@ -462,7 +462,7 @@ function ChallengeListSkeleton() {
 }
 
 function ChallengeDetailSkeleton() {
-	const classes = useSkeletonStyles();
+	const { classes } = useSkeletonStyles();
 	return (
         <div style={{ padding: 24, maxWidth: 1200, margin: '0 auto' }}>
             <Skeleton
@@ -498,7 +498,7 @@ function ChallengeDetailSkeleton() {
 }
 
 function ReleaseNotesSkeleton() {
-	const classes = useSkeletonStyles();
+	const { classes } = useSkeletonStyles();
 	return (
         <div className={classes.tableContainer} style={{ maxWidth: 900 }}>
             {Array.from({ length: 4 }).map((_, i) => (
