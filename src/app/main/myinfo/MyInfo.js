@@ -1294,7 +1294,13 @@ function MyInfoPage(props) {
 						onClose={() => setListDialog(prev => ({ ...prev, open: false }))}
 						maxWidth="sm"
 						fullWidth
-						PaperProps={{ className: classes.dialogPaper }}
+						PaperProps={{
+							className: classes.dialogPaper,
+							sx: {
+								background: 'linear-gradient(135deg, #1a1a2e 0%, #0f0f1a 100%) !important',
+								backgroundImage: 'linear-gradient(135deg, #1a1a2e 0%, #0f0f1a 100%) !important'
+							}
+						}}
 					>
 						<div className={classes.dialogTitle}>{listDialog.title}</div>
 						<div className={classes.dialogSubtitle}>
