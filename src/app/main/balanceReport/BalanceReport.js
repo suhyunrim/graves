@@ -6,7 +6,7 @@ import { BalanceReportSkeleton } from '../components/SkeletonLoaders';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import React, { useEffect, useState, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Line, Bar, Doughnut } from 'react-chartjs-2';
+import ChartCanvas from '../components/ChartCanvas';
 import {
 	Chart as ChartJS,
 	CategoryScale,
@@ -15,6 +15,9 @@ import {
 	LineElement,
 	BarElement,
 	ArcElement,
+	LineController,
+	BarController,
+	DoughnutController,
 	Title,
 	Tooltip as ChartTooltip,
 	Filler,
@@ -22,7 +25,21 @@ import {
 } from 'chart.js';
 import { DatePicker } from '@mui/x-date-pickers';
 
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, ArcElement, Title, ChartTooltip, Filler, Legend);
+ChartJS.register(
+	CategoryScale,
+	LinearScale,
+	PointElement,
+	LineElement,
+	BarElement,
+	ArcElement,
+	LineController,
+	BarController,
+	DoughnutController,
+	Title,
+	ChartTooltip,
+	Filler,
+	Legend
+);
 import { subMonths, format as formatDate } from 'date-fns';
 import reducer from './store/reducers';
 import * as Actions from './store/actions';
@@ -521,6 +538,7 @@ function BalanceReport() {
 		const options = {
 			responsive: true,
 			maintainAspectRatio: false,
+			animation: false,
 			plugins: {
 				legend: {
 					labels: {
@@ -564,7 +582,7 @@ function BalanceReport() {
 					/>
 				</div>
 				<div className={classes.chartContainer}>
-					<Bar data={data} options={options} plugins={[baselinePlugin]} />
+					<ChartCanvas type="bar" data={data} options={options} plugins={[baselinePlugin]} />
 				</div>
 			</div>
 		);
@@ -598,6 +616,7 @@ function BalanceReport() {
 		const options = {
 			responsive: true,
 			maintainAspectRatio: false,
+			animation: false,
 			plugins: {
 				legend: { display: false },
 				tooltip: {
@@ -631,7 +650,7 @@ function BalanceReport() {
 					/>
 				</div>
 				<div className={classes.chartContainer}>
-					<Bar data={data} options={options} plugins={[baselinePlugin]} />
+					<ChartCanvas type="bar" data={data} options={options} plugins={[baselinePlugin]} />
 				</div>
 			</div>
 		);
@@ -679,6 +698,7 @@ function BalanceReport() {
 		const options = {
 			responsive: true,
 			maintainAspectRatio: false,
+			animation: false,
 			plugins: {
 				legend: {
 					labels: {
@@ -724,7 +744,7 @@ function BalanceReport() {
 			<div className={classes.cardFull}>
 				<div className={classes.cardTitle}>월별 추이</div>
 				<div className={classes.chartContainer} style={{ height: 320 }}>
-					<Line data={data} options={options} />
+					<ChartCanvas type="line" data={data} options={options} />
 				</div>
 			</div>
 		);
@@ -748,6 +768,7 @@ function BalanceReport() {
 		const options = {
 			responsive: true,
 			maintainAspectRatio: false,
+			animation: false,
 			plugins: {
 				legend: {
 					position: 'bottom',
@@ -773,7 +794,7 @@ function BalanceReport() {
 			<div className={classes.card}>
 				<div className={classes.cardTitle}>포지션 겹침 빈도</div>
 				<div style={{ height: 260 }}>
-					<Doughnut data={data} options={options} />
+					<ChartCanvas type="doughnut" data={data} options={options} />
 				</div>
 			</div>
 		);
@@ -797,6 +818,7 @@ function BalanceReport() {
 		const options = {
 			responsive: true,
 			maintainAspectRatio: false,
+			animation: false,
 			plugins: {
 				legend: {
 					position: 'bottom',
@@ -832,7 +854,7 @@ function BalanceReport() {
 					<InfoTip title="경기: 같은 10명이 24시간 이내에 연속으로 한 3판 2선 묶음" classes={classes} />
 				</div>
 				<div style={{ height: 260 }}>
-					<Doughnut data={data} options={options} />
+					<ChartCanvas type="doughnut" data={data} options={options} />
 				</div>
 			</div>
 		);

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { useMemo } from 'react';
 import {
 	Chart as ChartJS,
 	CategoryScale,
@@ -14,6 +14,7 @@ import {
 import { useSelector } from 'react-redux';
 import { makeStyles } from 'tss-react/mui';
 import { keyframes } from '@emotion/react';
+import ChartCanvas from '../components/ChartCanvas';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, LineController, Title, Tooltip, Filler, Legend);
 
@@ -247,34 +248,6 @@ function RatingChart() {
 		};
 	}, [dailyHistory]);
 
-	const canvasRef = useRef(null);
-	const chartInstanceRef = useRef(null);
-	const hasData = Boolean(ratingHistory && ratingHistory.length > 0);
-
-	useEffect(() => {
-		if (!canvasRef.current || !hasData) return undefined;
-
-		chartInstanceRef.current = new ChartJS(canvasRef.current, {
-			type: 'line',
-			data: chartData,
-			options: chartOptions
-		});
-
-		return () => {
-			if (chartInstanceRef.current) {
-				chartInstanceRef.current.destroy();
-				chartInstanceRef.current = null;
-			}
-		};
-	}, [hasData]);
-
-	useEffect(() => {
-		if (!chartInstanceRef.current) return;
-		chartInstanceRef.current.data = chartData;
-		chartInstanceRef.current.options = chartOptions;
-		chartInstanceRef.current.update();
-	}, [chartData, chartOptions]);
-
 	if (!ratingHistory || ratingHistory.length === 0) {
 		return (
 			<div className={classes.chartCard}>
@@ -291,7 +264,7 @@ function RatingChart() {
 		<div className={classes.chartCard}>
 			<div className={classes.chartTitle}>Rating History</div>
 			<div className={classes.chartContainer}>
-				<canvas ref={canvasRef} />
+				<ChartCanvas type="line" data={chartData} options={chartOptions} />
 			</div>
 		</div>
 	);
