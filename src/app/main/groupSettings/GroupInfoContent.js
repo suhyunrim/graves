@@ -1,5 +1,14 @@
-import React, { useEffect, useState } from 'react';
-import { TextField, Switch, Snackbar, IconButton, Button, useMediaQuery } from '@mui/material';
+import React, { useEffect, useState, useTransition, useOptimistic } from 'react';
+import {
+	TextField,
+	Switch,
+	Snackbar,
+	IconButton,
+	Button,
+	ToggleButton,
+	ToggleButtonGroup,
+	useMediaQuery
+} from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { makeStyles } from 'tss-react/mui';
 import CheckIcon from '@mui/icons-material/Check';
@@ -10,6 +19,18 @@ import { useDispatch, useSelector } from 'react-redux';
 import { SettingsSkeleton } from '../components/SkeletonLoaders';
 import * as Actions from './store/actions';
 import OnboardingSettingsDialog from './OnboardingSettingsDialog';
+
+const VOTE_MODE_LABELS = {
+	off: '사용 안 함',
+	normal: '일반 투표',
+	blind: '블라인드 투표'
+};
+
+const VOTE_MODE_DESCRIPTIONS = {
+	off: '매칭 생성 시 플랜을 바로 선택합니다.',
+	normal: '참가자 투표로 플랜을 결정합니다. 투표 현황이 실시간 공개됩니다.',
+	blind: '참가자 투표로 플랜을 결정합니다. 투표 현황은 확정 후 공개됩니다.'
+};
 
 const useStyles = makeStyles()((theme) => ({
 	root: {
@@ -227,6 +248,49 @@ const useStyles = makeStyles()((theme) => ({
 			backgroundColor: '#00d4ff'
 		}
 	},
+	voteModeRow: {
+		display: 'flex',
+		flexDirection: 'column',
+		gap: 12,
+		padding: '14px 0',
+		borderBottom: '1px solid rgba(255, 255, 255, 0.04)'
+	},
+	voteModeGroup: {
+		alignSelf: 'flex-start',
+		background: 'rgba(255, 255, 255, 0.03)',
+		borderRadius: 10,
+		'& .MuiToggleButtonGroup-grouped': {
+			border: '1px solid rgba(255, 255, 255, 0.1)',
+			color: 'rgba(255, 255, 255, 0.6)',
+			fontFamily: '"Noto Sans KR", sans-serif',
+			fontSize: '1.1rem',
+			fontWeight: 600,
+			padding: '6px 14px',
+			textTransform: 'none',
+			'&.Mui-selected': {
+				color: '#00d4ff',
+				background: 'rgba(0, 212, 255, 0.12)',
+				borderColor: 'rgba(0, 212, 255, 0.4)',
+				'&:hover': {
+					background: 'rgba(0, 212, 255, 0.18)'
+				}
+			},
+			'&:hover': {
+				background: 'rgba(255, 255, 255, 0.05)'
+			},
+			'&.Mui-disabled': {
+				color: 'rgba(255, 255, 255, 0.2)'
+			}
+		},
+		[theme.breakpoints.down('md')]: {
+			alignSelf: 'stretch',
+			'& .MuiToggleButtonGroup-grouped': {
+				flex: 1,
+				fontSize: '1rem',
+				padding: '6px 8px'
+			}
+		}
+	},
 	snackbar: {
 		'& .MuiSnackbarContent-root': {
 			fontFamily: '"Noto Sans KR", sans-serif',
@@ -249,6 +313,12 @@ function GroupInfoContent() {
 	const [nameValue, setNameValue] = useState('');
 	const [snackMsg, setSnackMsg] = useState('');
 	const [onboardingDialogOpen, setOnboardingDialogOpen] = useState(false);
+	const [isSaving, startSaveTransition] = useTransition();
+	const [isToggling, startToggleTransition] = useTransition();
+	const [optimisticSettings, applyOptimisticSettings] = useOptimistic(
+		info?.settings,
+		(current, patch) => ({ ...current, ...patch })
+	);
 
 	const groupId = user?.reprGroup?.groupId;
 	const isAdmin = user?.reprGroup?.isAdmin;
@@ -281,12 +351,15 @@ function GroupInfoContent() {
 			setEditingName(false);
 			return;
 		}
-		dispatch(Actions.updateGroupName(groupId, nameValue.trim()))
-			.then(() => {
+		startSaveTransition(async () => {
+			try {
+				await dispatch(Actions.updateGroupName(groupId, nameValue.trim()));
 				setSnackMsg('방 이름이 변경되었습니다.');
 				setEditingName(false);
-			})
-			.catch(() => setSnackMsg('변경에 실패했습니다.'));
+			} catch {
+				setSnackMsg('변경에 실패했습니다.');
+			}
+		});
 	}
 
 	function handleNameKeyDown(e) {
@@ -295,10 +368,16 @@ function GroupInfoContent() {
 	}
 
 	function handleToggleOnboarding() {
-		const next = !info.settings.onboardingEnabled;
-		dispatch(Actions.updateGroupSettings(groupId, { onboardingEnabled: next }))
-			.then(() => setSnackMsg(next ? '온보딩이 활성화되었습니다.' : '온보딩이 비활성화되었습니다.'))
-			.catch(() => setSnackMsg('설정 변경에 실패했습니다.'));
+		const next = !optimisticSettings.onboardingEnabled;
+		startToggleTransition(async () => {
+			applyOptimisticSettings({ onboardingEnabled: next });
+			try {
+				await dispatch(Actions.updateGroupSettings(groupId, { onboardingEnabled: next }));
+				setSnackMsg(next ? '온보딩이 활성화되었습니다.' : '온보딩이 비활성화되었습니다.');
+			} catch {
+				setSnackMsg('설정 변경에 실패했습니다.');
+			}
+		});
 	}
 
 	function handleOnboardingDialogClose(msg) {
@@ -306,11 +385,17 @@ function GroupInfoContent() {
 		if (msg) setSnackMsg(msg);
 	}
 
-	function handleToggleVoteMode() {
-		const next = !info.settings.matchVoteMode;
-		dispatch(Actions.updateGroupSettings(groupId, { matchVoteMode: next }))
-			.then(() => setSnackMsg(next ? '매칭 투표가 활성화되었습니다.' : '매칭 투표가 비활성화되었습니다.'))
-			.catch(() => setSnackMsg('설정 변경에 실패했습니다.'));
+	function handleChangeVoteMode(_event, nextMode) {
+		if (!nextMode || nextMode === optimisticSettings.matchVoteMode) return;
+		startToggleTransition(async () => {
+			applyOptimisticSettings({ matchVoteMode: nextMode });
+			try {
+				await dispatch(Actions.updateGroupSettings(groupId, { matchVoteMode: nextMode }));
+				setSnackMsg(`매칭 투표 모드가 '${VOTE_MODE_LABELS[nextMode]}'(으)로 변경되었습니다.`);
+			} catch {
+				setSnackMsg('설정 변경에 실패했습니다.');
+			}
+		});
 	}
 
 	function formatDate(dateStr) {
@@ -343,7 +428,7 @@ function GroupInfoContent() {
 								autoFocus
 								style={{ width: isMobile ? 160 : 220 }}
 							/>
-							<IconButton className={classes.confirmBtn} onClick={saveName} size="small">
+							<IconButton className={classes.confirmBtn} onClick={saveName} size="small" disabled={isSaving}>
 								<CheckIcon fontSize="small" />
 							</IconButton>
 							<IconButton className={classes.cancelBtn} onClick={cancelEditName} size="small">
@@ -403,18 +488,25 @@ function GroupInfoContent() {
 			{/* 방 설정 */}
 			<div className={classes.section}>
 				<div className={classes.sectionTitle}>방 설정</div>
-				<div className={classes.settingRow}>
+				<div className={classes.voteModeRow}>
 					<div className={classes.settingInfo}>
-						<div className={classes.settingLabel}>매칭 투표</div>
+						<div className={classes.settingLabel}>매칭 투표 모드</div>
 						<div className={classes.settingDesc}>
-							매칭 생성 시 플랜을 바로 선택하는 대신, 참가자 10명이 투표로 결정합니다.
+							{VOTE_MODE_DESCRIPTIONS[optimisticSettings?.matchVoteMode] || VOTE_MODE_DESCRIPTIONS.off}
 						</div>
 					</div>
-					<Switch
-						className={classes.switch}
-						checked={Boolean(info.settings?.matchVoteMode)}
-						onChange={handleToggleVoteMode}
-					/>
+					<ToggleButtonGroup
+						className={classes.voteModeGroup}
+						value={optimisticSettings?.matchVoteMode || 'off'}
+						exclusive
+						onChange={handleChangeVoteMode}
+						disabled={isToggling}
+						size="small"
+					>
+						<ToggleButton value="off">{VOTE_MODE_LABELS.off}</ToggleButton>
+						<ToggleButton value="normal">{VOTE_MODE_LABELS.normal}</ToggleButton>
+						<ToggleButton value="blind">{VOTE_MODE_LABELS.blind}</ToggleButton>
+					</ToggleButtonGroup>
 				</div>
 				<div className={classes.settingRow}>
 					<div className={classes.settingInfo}>
@@ -429,7 +521,7 @@ function GroupInfoContent() {
 							className={classes.settingBtn}
 							variant="outlined"
 							size="small"
-							disabled={!info.settings?.onboardingEnabled}
+							disabled={!optimisticSettings?.onboardingEnabled}
 							onClick={() => setOnboardingDialogOpen(true)}
 							startIcon={<SettingsIcon style={{ fontSize: 16 }} />}
 						>
@@ -437,8 +529,9 @@ function GroupInfoContent() {
 						</Button>
 						<Switch
 							className={classes.switch}
-							checked={Boolean(info.settings?.onboardingEnabled)}
+							checked={Boolean(optimisticSettings?.onboardingEnabled)}
 							onChange={handleToggleOnboarding}
+							disabled={isToggling}
 						/>
 					</div>
 				</div>
