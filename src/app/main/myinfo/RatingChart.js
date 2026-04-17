@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Line } from 'react-chartjs-2';
 import {
 	Chart as ChartJS,
@@ -155,6 +155,97 @@ function RatingChart() {
 		return `${tier} ${divisions[subIndex]}`;
 	};
 
+	const dailyHistory = useMemo(
+		() =>
+			(ratingHistory || []).map(h => ({
+				...h,
+				dateLabel: h.date.slice(5)
+			})),
+		[ratingHistory]
+	);
+
+	const chartData = useMemo(() => {
+		const tierValues = dailyHistory.map(h => ratingToTierValue(h.rating));
+		return {
+			labels: dailyHistory.map(h => h.dateLabel),
+			datasets: [
+				{
+					label: 'Tier',
+					data: tierValues,
+					fill: true,
+					borderColor: '#00d4ff',
+					backgroundColor: 'rgba(0, 212, 255, 0.1)',
+					tension: 0.4,
+					pointRadius: 6,
+					pointHoverRadius: 10,
+					pointBackgroundColor: '#00d4ff',
+					pointBorderColor: '#fff',
+					pointBorderWidth: 2,
+					pointHoverBackgroundColor: '#fff',
+					pointHoverBorderColor: '#00d4ff',
+					pointHoverBorderWidth: 3
+				}
+			]
+		};
+	}, [dailyHistory]);
+
+	const chartOptions = useMemo(() => {
+		const tierValues = dailyHistory.map(h => ratingToTierValue(h.rating));
+		const minTierValue = tierValues.length ? Math.floor(Math.min(...tierValues)) - 1 : 0;
+		const maxTierValue = tierValues.length ? Math.ceil(Math.max(...tierValues)) + 1 : 1;
+		return {
+			responsive: true,
+			maintainAspectRatio: false,
+			interaction: { mode: 'nearest', intersect: false, axis: 'x' },
+			plugins: {
+				legend: { display: false },
+				tooltip: {
+					backgroundColor: 'rgba(15, 15, 26, 0.95)',
+					titleColor: '#fff',
+					titleFont: { size: 16, family: '"Noto Sans KR", sans-serif' },
+					bodyColor: '#00d4ff',
+					bodyFont: { size: 18, family: '"Rajdhani", sans-serif' },
+					borderColor: 'rgba(0, 212, 255, 0.3)',
+					borderWidth: 1,
+					cornerRadius: 8,
+					displayColors: false,
+					padding: 14,
+					callbacks: {
+						label: tooltipItem => {
+							const index = tooltipItem.dataIndex;
+							const rating = dailyHistory[index].rating;
+							const tierInfo = getTierFromRating(rating);
+							const tierLabel = tierInfo.division
+								? `${tierInfo.tier} ${tierInfo.division} ${tierInfo.lp}LP`
+								: `${tierInfo.tier} ${tierInfo.lp}LP`;
+							return `${tierLabel} (${rating}p)`;
+						}
+					}
+				}
+			},
+			scales: {
+				x: {
+					grid: { color: 'rgba(255, 255, 255, 0.05)' },
+					ticks: {
+						color: 'rgba(255, 255, 255, 0.6)',
+						font: { size: 15, family: '"Noto Sans KR", sans-serif' }
+					}
+				},
+				y: {
+					min: Math.max(0, minTierValue),
+					max: maxTierValue,
+					grid: { color: 'rgba(255, 255, 255, 0.05)' },
+					ticks: {
+						stepSize: 1,
+						callback: value => tierValueToLabel(value),
+						color: 'rgba(255, 255, 255, 0.6)',
+						font: { size: 14, family: '"Rajdhani", sans-serif' }
+					}
+				}
+			}
+		};
+	}, [dailyHistory]);
+
 	if (!ratingHistory || ratingHistory.length === 0) {
 		return (
 			<div className={classes.chartCard}>
@@ -166,94 +257,6 @@ function RatingChart() {
 			</div>
 		);
 	}
-
-	const dailyHistory = ratingHistory.map(h => ({
-		...h,
-		dateLabel: h.date.slice(5)
-	}));
-
-	const tierValues = dailyHistory.map(h => ratingToTierValue(h.rating));
-	const minTierValue = Math.floor(Math.min(...tierValues)) - 1;
-	const maxTierValue = Math.ceil(Math.max(...tierValues)) + 1;
-
-	const chartData = {
-		labels: dailyHistory.map(h => h.dateLabel),
-		datasets: [
-			{
-				label: 'Tier',
-				data: tierValues,
-				fill: true,
-				borderColor: '#00d4ff',
-				backgroundColor: 'rgba(0, 212, 255, 0.1)',
-				tension: 0.4,
-				pointRadius: 6,
-				pointHoverRadius: 10,
-				pointBackgroundColor: '#00d4ff',
-				pointBorderColor: '#fff',
-				pointBorderWidth: 2,
-				pointHoverBackgroundColor: '#fff',
-				pointHoverBorderColor: '#00d4ff',
-				pointHoverBorderWidth: 3
-			}
-		]
-	};
-
-	const chartOptions = {
-		responsive: true,
-		maintainAspectRatio: false,
-		plugins: {
-			legend: {
-				display: false
-			},
-			tooltip: {
-				backgroundColor: 'rgba(15, 15, 26, 0.95)',
-				titleColor: '#fff',
-				titleFont: { size: 16, family: '"Noto Sans KR", sans-serif' },
-				bodyColor: '#00d4ff',
-				bodyFont: { size: 18, family: '"Rajdhani", sans-serif' },
-				borderColor: 'rgba(0, 212, 255, 0.3)',
-				borderWidth: 1,
-				cornerRadius: 8,
-				displayColors: false,
-				padding: 14,
-				callbacks: {
-					label: (tooltipItem) => {
-						const index = tooltipItem.dataIndex;
-						const rating = dailyHistory[index].rating;
-						const tierInfo = getTierFromRating(rating);
-						const tierLabel = tierInfo.division
-							? `${tierInfo.tier} ${tierInfo.division} ${tierInfo.lp}LP`
-							: `${tierInfo.tier} ${tierInfo.lp}LP`;
-						return `${tierLabel} (${rating}p)`;
-					}
-				}
-			}
-		},
-		scales: {
-			x: {
-				grid: {
-					color: 'rgba(255, 255, 255, 0.05)'
-				},
-				ticks: {
-					color: 'rgba(255, 255, 255, 0.6)',
-					font: { size: 15, family: '"Noto Sans KR", sans-serif' }
-				}
-			},
-			y: {
-				min: Math.max(0, minTierValue),
-				max: maxTierValue,
-				grid: {
-					color: 'rgba(255, 255, 255, 0.05)'
-				},
-				ticks: {
-					stepSize: 1,
-					callback: value => tierValueToLabel(value),
-					color: 'rgba(255, 255, 255, 0.6)',
-					font: { size: 14, family: '"Rajdhani", sans-serif' }
-				}
-			}
-		}
-	};
 
 	return (
 		<div className={classes.chartCard}>
