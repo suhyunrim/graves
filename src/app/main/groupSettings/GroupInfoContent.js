@@ -7,10 +7,17 @@ import {
 	Button,
 	ToggleButton,
 	ToggleButtonGroup,
+	Dialog,
+	DialogTitle,
+	DialogContent,
+	DialogContentText,
+	DialogActions,
 	useMediaQuery
 } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { makeStyles } from 'tss-react/mui';
+import { DatePicker } from '@mui/x-date-pickers';
+import { format as dfFormat, parse as dfParse, startOfMonth } from 'date-fns';
 import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
 import EditIcon from '@mui/icons-material/Edit';
@@ -291,6 +298,75 @@ const useStyles = makeStyles()((theme) => ({
 			}
 		}
 	},
+	seasonControls: {
+		display: 'flex',
+		alignItems: 'center',
+		gap: 10,
+		flexWrap: 'wrap',
+		'& .MuiInputBase-root': {
+			color: '#fff',
+			fontFamily: '"Rajdhani", sans-serif',
+			fontSize: '1.2rem',
+			background: 'rgba(255, 255, 255, 0.04)',
+			borderRadius: 8
+		},
+		'& .MuiOutlinedInput-notchedOutline': {
+			borderColor: 'rgba(0, 212, 255, 0.3)'
+		},
+		'& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline': {
+			borderColor: 'rgba(0, 212, 255, 0.5)'
+		},
+		'& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline': {
+			borderColor: '#00d4ff'
+		},
+		'& .MuiIconButton-root': {
+			color: 'rgba(255, 255, 255, 0.5)'
+		}
+	},
+	seasonBtn: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.05rem',
+		fontWeight: 600,
+		textTransform: 'none',
+		minWidth: 'auto',
+		padding: '4px 12px',
+		borderRadius: 8
+	},
+	seasonClearBtn: {
+		color: 'rgba(255, 255, 255, 0.5)',
+		borderColor: 'rgba(255, 255, 255, 0.2)',
+		'&:hover': {
+			color: '#fff',
+			borderColor: 'rgba(255, 255, 255, 0.4)',
+			background: 'rgba(255, 255, 255, 0.05)'
+		}
+	},
+	seasonResetBtn: {
+		color: '#ff6b6b',
+		borderColor: 'rgba(255, 107, 107, 0.4)',
+		'&:hover': {
+			borderColor: '#ff6b6b',
+			background: 'rgba(255, 107, 107, 0.08)'
+		}
+	},
+	confirmDialogPaper: {
+		background: 'linear-gradient(135deg, #1a1a2e 0%, #0f0f1a 100%)',
+		color: '#fff',
+		borderRadius: 16,
+		border: '1px solid rgba(255, 107, 107, 0.3)',
+		minWidth: 360
+	},
+	confirmDialogTitle: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontWeight: 700,
+		color: '#ff6b6b'
+	},
+	confirmDialogText: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.2rem',
+		color: 'rgba(255, 255, 255, 0.75)',
+		lineHeight: 1.6
+	},
 	snackbar: {
 		'& .MuiSnackbarContent-root': {
 			fontFamily: '"Noto Sans KR", sans-serif',
@@ -313,8 +389,10 @@ function GroupInfoContent() {
 	const [nameValue, setNameValue] = useState('');
 	const [snackMsg, setSnackMsg] = useState('');
 	const [onboardingDialogOpen, setOnboardingDialogOpen] = useState(false);
+	const [resetConfirmOpen, setResetConfirmOpen] = useState(false);
 	const [isSaving, startSaveTransition] = useTransition();
 	const [isToggling, startToggleTransition] = useTransition();
+	const [isResetting, startResetTransition] = useTransition();
 	const [optimisticSettings, applyOptimisticSettings] = useOptimistic(
 		info?.settings,
 		(current, patch) => ({ ...current, ...patch })
@@ -394,6 +472,46 @@ function GroupInfoContent() {
 				setSnackMsg(`매칭 투표 모드가 '${VOTE_MODE_LABELS[nextMode]}'(으)로 변경되었습니다.`);
 			} catch {
 				setSnackMsg('설정 변경에 실패했습니다.');
+			}
+		});
+	}
+
+	function handleChangeSeasonEndMonth(date) {
+		if (!date || Number.isNaN(date.getTime())) return;
+		const next = dfFormat(date, 'yyyy-MM');
+		if (next === optimisticSettings.seasonEndMonth) return;
+		startToggleTransition(async () => {
+			applyOptimisticSettings({ seasonEndMonth: next });
+			try {
+				await dispatch(Actions.updateGroupSettings(groupId, { seasonEndMonth: next }));
+				setSnackMsg(`시즌 자동 종료가 ${next}로 설정되었습니다.`);
+			} catch {
+				setSnackMsg('설정 변경에 실패했습니다.');
+			}
+		});
+	}
+
+	function handleClearSeasonEndMonth() {
+		if (!optimisticSettings.seasonEndMonth) return;
+		startToggleTransition(async () => {
+			applyOptimisticSettings({ seasonEndMonth: null });
+			try {
+				await dispatch(Actions.updateGroupSettings(groupId, { seasonEndMonth: null }));
+				setSnackMsg('시즌 자동 종료가 해제되었습니다.');
+			} catch {
+				setSnackMsg('설정 변경에 실패했습니다.');
+			}
+		});
+	}
+
+	function handleConfirmReset() {
+		startResetTransition(async () => {
+			try {
+				await dispatch(Actions.resetSeason(groupId));
+				setSnackMsg('시즌이 리셋되었습니다.');
+				setResetConfirmOpen(false);
+			} catch {
+				setSnackMsg('시즌 리셋에 실패했습니다.');
 			}
 		});
 	}
@@ -508,6 +626,53 @@ function GroupInfoContent() {
 						<ToggleButton value="blind">{VOTE_MODE_LABELS.blind}</ToggleButton>
 					</ToggleButtonGroup>
 				</div>
+				<div className={classes.voteModeRow}>
+					<div className={classes.settingInfo}>
+						<div className={classes.settingLabel}>시즌 자동 종료</div>
+						<div className={classes.settingDesc}>
+							지정한 월의 다음 달 1일 새벽(00:05 KST)에 자동으로 시즌이 리셋됩니다. 리셋 시 모든 유저의
+							additionalRating이 50%로 감소합니다. 리셋 후에는 자동 종료가 해제되며, 다음 시즌 종료월을 다시
+							지정해야 합니다.
+						</div>
+					</div>
+					<div className={classes.seasonControls}>
+						<DatePicker
+							views={['year', 'month']}
+							format="yyyy-MM"
+							minDate={startOfMonth(new Date())}
+							value={
+								optimisticSettings?.seasonEndMonth
+									? dfParse(optimisticSettings.seasonEndMonth, 'yyyy-MM', new Date())
+									: null
+							}
+							onChange={handleChangeSeasonEndMonth}
+							disabled={isToggling}
+							slotProps={{
+								textField: { size: 'small', placeholder: 'YYYY-MM', variant: 'outlined' }
+							}}
+						/>
+						{optimisticSettings?.seasonEndMonth && (
+							<Button
+								className={`${classes.seasonBtn} ${classes.seasonClearBtn}`}
+								variant="outlined"
+								size="small"
+								onClick={handleClearSeasonEndMonth}
+								disabled={isToggling}
+							>
+								해제
+							</Button>
+						)}
+						<Button
+							className={`${classes.seasonBtn} ${classes.seasonResetBtn}`}
+							variant="outlined"
+							size="small"
+							onClick={() => setResetConfirmOpen(true)}
+							disabled={isResetting}
+						>
+							지금 리셋
+						</Button>
+					</div>
+				</div>
 				<div className={classes.settingRow}>
 					<div className={classes.settingInfo}>
 						<div className={classes.settingLabel}>온보딩</div>
@@ -538,6 +703,31 @@ function GroupInfoContent() {
 			</div>
 
 			<OnboardingSettingsDialog open={onboardingDialogOpen} onClose={handleOnboardingDialogClose} groupId={groupId} />
+
+			<Dialog
+				open={resetConfirmOpen}
+				onClose={() => !isResetting && setResetConfirmOpen(false)}
+				slotProps={{ paper: { className: classes.confirmDialogPaper } }}
+			>
+				<DialogTitle className={classes.confirmDialogTitle}>시즌을 지금 리셋할까요?</DialogTitle>
+				<DialogContent>
+					<DialogContentText className={classes.confirmDialogText}>
+						모든 유저의 additionalRating이 50%로 감소합니다. 이 작업은 되돌릴 수 없습니다.
+					</DialogContentText>
+				</DialogContent>
+				<DialogActions>
+					<Button onClick={() => setResetConfirmOpen(false)} disabled={isResetting} style={{ color: 'rgba(255,255,255,0.6)' }}>
+						취소
+					</Button>
+					<Button
+						onClick={handleConfirmReset}
+						disabled={isResetting}
+						style={{ color: '#ff6b6b', fontWeight: 700 }}
+					>
+						{isResetting ? '리셋 중...' : '리셋'}
+					</Button>
+				</DialogActions>
+			</Dialog>
 
 			<Snackbar
 				className={classes.snackbar}

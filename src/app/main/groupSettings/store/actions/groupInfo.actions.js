@@ -47,6 +47,14 @@ export function updateGroupSettings(groupId, settings) {
 	};
 }
 
+export function resetSeason(groupId) {
+	return dispatch => {
+		const request = createCamilleAxios().post(`/api/group/${groupId}/season/reset`);
+
+		return request.then(() => dispatch(getGroupInfo(groupId)));
+	};
+}
+
 export function getDiscordRoles(groupId) {
 	return dispatch => {
 		const request = createCamilleAxios().get(`/api/group/${groupId}/discord-roles`);
