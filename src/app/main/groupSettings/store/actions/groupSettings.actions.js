@@ -2,6 +2,7 @@ import createCamilleAxios from 'app/utility/camilleAxios';
 
 export const GET_MEMBERS = '[GROUP_SETTINGS] GET MEMBERS';
 export const GET_MEMBERS_LOADING = '[GROUP_SETTINGS] GET MEMBERS LOADING';
+export const SET_MEMBER_RATING = '[GROUP_SETTINGS] SET MEMBER RATING';
 export const SET_SEARCH_TEXT = '[GROUP_SETTINGS] SET SEARCH TEXT';
 
 export function getMembers(groupId) {
@@ -35,11 +36,16 @@ export function removeBlacklist(groupId, puuid) {
 	};
 }
 
-export function changeDefaultTier(groupId, puuid, tier) {
+export function changeDefaultTier(groupId, puuid, tier, rating) {
 	return dispatch => {
+		dispatch({ type: SET_MEMBER_RATING, payload: { puuid, defaultRating: rating } });
+
 		const request = createCamilleAxios().patch(`/api/group/${groupId}/members/${puuid}/rating`, { tier });
 
-		return request.then(() => dispatch(getMembers(groupId)));
+		return request.catch(err => {
+			dispatch(getMembers(groupId));
+			throw err;
+		});
 	};
 }
 
