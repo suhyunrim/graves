@@ -5,7 +5,7 @@ import Icon from '@mui/material/Icon';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import MenuItem from '@mui/material/MenuItem';
-import Popover from '@mui/material/Popover';
+import Menu from '@mui/material/Menu';
 import Divider from '@mui/material/Divider';
 import { makeStyles } from 'tss-react/mui';
 import Typography from '@mui/material/Typography';
@@ -179,7 +179,7 @@ function UserNavbarHeader(props) {
 					</Icon>
 				</Button>
 
-				<Popover
+				<Menu
 					open={Boolean(groupListMenu)}
 					anchorEl={groupListMenu}
 					onClose={onGroupListClose}
@@ -191,8 +191,8 @@ function UserNavbarHeader(props) {
 						vertical: 'top',
 						horizontal: 'center'
 					}}
-					classes={{
-						paper: clsx('py-8', classes.popover)
+					slotProps={{
+						paper: { className: clsx('py-8', classes.popover) }
 					}}
 				>
 					{user.groupList.map(elem => (
@@ -233,7 +233,7 @@ function UserNavbarHeader(props) {
 						</ListItemIcon>
 						<ListItemText primary="Logout" />
 					</MenuItem>
-				</Popover>
+				</Menu>
 
 				<Avatar
 					className={clsx(classes.avatar, 'avatar')}

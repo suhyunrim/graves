@@ -2,7 +2,7 @@ import Button from '@mui/material/Button';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import MenuItem from '@mui/material/MenuItem';
-import Popover from '@mui/material/Popover';
+import Menu from '@mui/material/Menu';
 import { useTheme } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import * as Actions from 'app/store/actions';
@@ -76,7 +76,7 @@ function LanguageSwitcher(props) {
 				<Typography className="mx-4 font-600">{currentLng.id}</Typography>
 			</Button>
 
-			<Popover
+			<Menu
 				open={Boolean(menu)}
 				anchorEl={menu}
 				onClose={userMenuClose}
@@ -88,8 +88,8 @@ function LanguageSwitcher(props) {
 					vertical: 'top',
 					horizontal: 'center'
 				}}
-				classes={{
-					paper: 'py-8'
+				slotProps={{
+					paper: { className: 'py-8' }
 				}}
 			>
 				{languages.map(lng => (
@@ -109,7 +109,7 @@ function LanguageSwitcher(props) {
 				>
 					<ListItemText primary="Learn More" />
 				</MenuItem>
-			</Popover>
+			</Menu>
 		</>
 	);
 }

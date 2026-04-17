@@ -4,7 +4,7 @@ import Icon from '@mui/material/Icon';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import MenuItem from '@mui/material/MenuItem';
-import Popover from '@mui/material/Popover';
+import Menu from '@mui/material/Menu';
 import Typography from '@mui/material/Typography';
 import { makeStyles } from 'tss-react/mui';
 import * as authActions from 'app/auth/store/actions';
@@ -97,7 +97,7 @@ function UserMenu(props) {
 				</Icon>
 			</Button>
 
-			<Popover
+			<Menu
 				open={Boolean(userMenu)}
 				anchorEl={userMenu}
 				onClose={userMenuClose}
@@ -109,8 +109,8 @@ function UserMenu(props) {
 					vertical: 'top',
 					horizontal: 'center'
 				}}
-				classes={{
-					paper: clsx('py-8', classes.popover)
+				slotProps={{
+					paper: { className: clsx('py-8', classes.popover) }
 				}}
 			>
 				{!user.role || user.role.length === 0 ? (
@@ -156,7 +156,7 @@ function UserMenu(props) {
 						</MenuItem>
 					</>
 				)}
-			</Popover>
+			</Menu>
 		</>
 	);
 }
