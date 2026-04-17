@@ -1,11 +1,11 @@
-import React, { useMemo } from 'react';
-import { Line } from 'react-chartjs-2';
+import React, { useEffect, useMemo, useRef } from 'react';
 import {
 	Chart as ChartJS,
 	CategoryScale,
 	LinearScale,
 	PointElement,
 	LineElement,
+	LineController,
 	Title,
 	Tooltip,
 	Filler,
@@ -15,7 +15,7 @@ import { useSelector } from 'react-redux';
 import { makeStyles } from 'tss-react/mui';
 import { keyframes } from '@emotion/react';
 
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Filler, Legend);
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, LineController, Title, Tooltip, Filler, Legend);
 
 // keyframes 헬퍼로 애니메이션 정의 (tss-react는 JSS $ruleName 참조 미지원)
 const fadeIn = keyframes`
@@ -246,6 +246,27 @@ function RatingChart() {
 		};
 	}, [dailyHistory]);
 
+	const canvasRef = useRef(null);
+	const chartInstanceRef = useRef(null);
+
+	useEffect(() => {
+		if (!canvasRef.current) return undefined;
+		if (!ratingHistory || ratingHistory.length === 0) return undefined;
+
+		chartInstanceRef.current = new ChartJS(canvasRef.current, {
+			type: 'line',
+			data: chartData,
+			options: chartOptions
+		});
+
+		return () => {
+			if (chartInstanceRef.current) {
+				chartInstanceRef.current.destroy();
+				chartInstanceRef.current = null;
+			}
+		};
+	}, [chartData, chartOptions, ratingHistory]);
+
 	if (!ratingHistory || ratingHistory.length === 0) {
 		return (
 			<div className={classes.chartCard}>
@@ -262,7 +283,7 @@ function RatingChart() {
 		<div className={classes.chartCard}>
 			<div className={classes.chartTitle}>Rating History</div>
 			<div className={classes.chartContainer}>
-				<Line data={chartData} options={chartOptions} />
+				<canvas ref={canvasRef} />
 			</div>
 		</div>
 	);
