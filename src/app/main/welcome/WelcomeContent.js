@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { makeStyles } from 'tss-react/mui';
+import { keyframes } from '@emotion/react';
 import { Button } from '@mui/material';
 
 const FEATURES = [
@@ -28,9 +29,9 @@ const FEATURES = [
 		description:
 			'레이팅 변화 추이, 베스트 듀오, 최근 전적, 승률까지. 솔로랭크 티어와 내전 티어를 나란히 비교하며 내 내전 커리어를 한눈에 확인하세요.',
 		accent: '#50C878',
-		mode: 'video',
-		video: '/assets/images/about/myinfo.webm',
-		poster: '/assets/images/about/myinfo.png'
+		mode: 'image',
+		image: '/assets/images/about/myinfo.png',
+		kenBurns: 'drift-up'
 	},
 	{
 		eyebrow: '04 · 월간 대시보드',
@@ -38,9 +39,9 @@ const FEATURES = [
 		description:
 			'명예왕·연승왕·베스트듀오·신인왕 등 10개 부문 월간 어워드로 서버 전체의 하이라이트를 한 페이지에 담습니다. 매달 새로운 이야깃거리가 쌓입니다.',
 		accent: '#FFD700',
-		mode: 'video',
-		video: '/assets/images/about/dashboard.webm',
-		poster: '/assets/images/about/dashboard.png'
+		mode: 'image',
+		image: '/assets/images/about/dashboard.png',
+		kenBurns: 'drift-diagonal'
 	}
 ];
 
@@ -82,6 +83,16 @@ function FadeIn({ children, delay = 0 }) {
 		</div>
 	);
 }
+
+const driftUp = keyframes`
+	0%   { transform: scale(1); }
+	100% { transform: scale(1.04); }
+`;
+
+const driftDiagonal = keyframes`
+	0%   { transform: scale(1) translate3d(0, 0, 0); }
+	100% { transform: scale(1.05) translate3d(-1%, -1%, 0); }
+`;
 
 const useStyles = makeStyles()((theme) => ({
 	root: {
@@ -311,6 +322,38 @@ const useStyles = makeStyles()((theme) => ({
 		display: 'block',
 		width: '100%',
 		height: 'auto'
+	},
+	imageFrame: {
+		position: 'relative',
+		borderRadius: 16,
+		border: '1px solid rgba(255, 255, 255, 0.08)',
+		boxShadow: '0 20px 60px rgba(0, 0, 0, 0.5)',
+		overflow: 'hidden',
+		background: '#0a0a12',
+		'&::after': {
+			content: '""',
+			position: 'absolute',
+			inset: 0,
+			background: 'linear-gradient(180deg, transparent 75%, rgba(10, 10, 18, 0.3) 100%)',
+			pointerEvents: 'none'
+		}
+	},
+	imageInner: {
+		display: 'block',
+		width: '100%',
+		height: 'auto',
+		transformOrigin: 'center center',
+		willChange: 'transform',
+		animationDuration: '14s',
+		animationTimingFunction: 'ease-in-out',
+		animationIterationCount: 'infinite',
+		animationDirection: 'alternate'
+	},
+	imageAnimUp: {
+		animationName: driftUp
+	},
+	imageAnimDiagonal: {
+		animationName: driftDiagonal
 	},
 	discordMock: {
 		background: '#2b2d31',
@@ -572,9 +615,18 @@ function DiscordMock({ classes }) {
 	);
 }
 
-function FeatureMedia({ feature, classes }) {
+function FeatureMedia({ feature, classes, cx }) {
 	if (feature.mode === 'discord') {
 		return <DiscordMock classes={classes} />;
+	}
+	if (feature.mode === 'image') {
+		const animClass =
+			feature.kenBurns === 'drift-diagonal' ? classes.imageAnimDiagonal : classes.imageAnimUp;
+		return (
+			<div className={classes.imageFrame}>
+				<img className={cx(classes.imageInner, animClass)} src={feature.image} alt={feature.title} />
+			</div>
+		);
 	}
 	return (
 		<div className={classes.featureMedia}>
@@ -659,7 +711,7 @@ function WelcomeContent() {
 							</div>
 						</FadeIn>
 						<FadeIn delay={0.1}>
-							<FeatureMedia feature={feature} classes={classes} />
+							<FeatureMedia feature={feature} classes={classes} cx={cx} />
 						</FadeIn>
 					</div>
 				</section>
