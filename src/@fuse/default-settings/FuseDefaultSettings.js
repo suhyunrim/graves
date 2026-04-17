@@ -77,6 +77,13 @@ export const mustHaveThemeOptions = {
 					paddingBottom: 8
 				}
 			}
+		},
+		MuiTooltip: {
+			defaultProps: {
+				// 모바일에서 long-press(700ms) 없이 탭 즉시 반응하도록
+				enterTouchDelay: 0,
+				leaveTouchDelay: 4000
+			}
 		}
 	}
 };
