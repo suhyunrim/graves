@@ -630,9 +630,9 @@ function GroupInfoContent() {
 					<div className={classes.settingInfo}>
 						<div className={classes.settingLabel}>시즌 자동 종료</div>
 						<div className={classes.settingDesc}>
-							지정한 월의 다음 달 1일 새벽(00:05 KST)에 자동으로 시즌이 리셋됩니다. 리셋 시 모든 유저의
-							additionalRating이 50%로 감소합니다. 리셋 후에는 자동 종료가 해제되며, 다음 시즌 종료월을 다시
-							지정해야 합니다.
+							지정한 월의 다음 달 1일 새벽(00:05 KST)에 자동으로 시즌이 리셋됩니다. 리셋 시 모든 유저가
+							시즌 동안 쌓은 레이팅이 절반으로 줄어듭니다 (기본 티어 점수는 유지). 리셋 후에는 자동 종료가
+							해제되며, 다음 시즌 종료월을 다시 지정해야 합니다.
 						</div>
 					</div>
 					<div className={classes.seasonControls}>
@@ -712,7 +712,8 @@ function GroupInfoContent() {
 				<DialogTitle className={classes.confirmDialogTitle}>시즌을 지금 리셋할까요?</DialogTitle>
 				<DialogContent>
 					<DialogContentText className={classes.confirmDialogText}>
-						모든 유저의 additionalRating이 50%로 감소합니다. 이 작업은 되돌릴 수 없습니다.
+						모든 유저가 시즌 동안 쌓은 레이팅이 절반으로 줄어듭니다. 기본 티어 점수는 유지되지만 이 작업은
+						되돌릴 수 없습니다.
 					</DialogContentText>
 				</DialogContent>
 				<DialogActions>
