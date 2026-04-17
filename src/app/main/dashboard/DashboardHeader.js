@@ -1,6 +1,7 @@
 import React from 'react';
 import { Typography } from '@mui/material';
 import { makeStyles } from 'tss-react/mui';
+import SeasonCountdownBadge from '../components/SeasonCountdownBadge';
 
 const useStyles = makeStyles()((theme) => ({
 	root: {
@@ -24,11 +25,18 @@ const useStyles = makeStyles()((theme) => ({
 			fontSize: '2.75rem'
 		}
 	},
+	subtitleRow: {
+		display: 'flex',
+		alignItems: 'center',
+		justifyContent: 'space-between',
+		gap: 12,
+		marginTop: 8,
+		flexWrap: 'wrap'
+	},
 	subtitle: {
 		fontFamily: '"Noto Sans KR", sans-serif',
 		fontSize: '1.4rem',
 		color: 'rgba(255, 255, 255, 0.6)',
-		marginTop: 8,
 		letterSpacing: '0.05em',
 		[theme.breakpoints.down('md')]: {
 			fontSize: '1.35rem'
@@ -44,9 +52,10 @@ function DashboardHeader() {
 			<Typography className={classes.title} variant="h4">
 				Dashboard
 			</Typography>
-			<Typography className={classes.subtitle}>
-				이번 달 내전 하이라이트
-			</Typography>
+			<div className={classes.subtitleRow}>
+				<Typography className={classes.subtitle}>이번 달 내전 하이라이트</Typography>
+				<SeasonCountdownBadge />
+			</div>
 		</div>
 	);
 }

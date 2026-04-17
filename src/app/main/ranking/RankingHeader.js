@@ -6,6 +6,7 @@ import DateRangeIcon from '@mui/icons-material/DateRange';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { useDispatch, useSelector } from 'react-redux';
+import SeasonCountdownBadge from '../components/SeasonCountdownBadge';
 import * as Actions from './store/actions';
 
 const DAYS = ['일', '월', '화', '수', '목', '금', '토'];
@@ -115,6 +116,12 @@ const useStyles = makeStyles()((theme) => ({
 		marginTop: 16,
 		[theme.breakpoints.down('md')]: {
 			flexWrap: 'wrap'
+		}
+	},
+	seasonBadgeWrap: {
+		marginLeft: 'auto',
+		[theme.breakpoints.down('md')]: {
+			marginLeft: 0
 		}
 	},
 	filterChip: {
@@ -547,6 +554,9 @@ function RankingHeader() {
 					) : (
 						'기간 선택'
 					)}
+				</div>
+				<div className={classes.seasonBadgeWrap}>
+					<SeasonCountdownBadge />
 				</div>
 			</div>
 			<CalendarPopover anchorEl={calendarAnchor} onClose={handleCalendarClose} onConfirm={handleCalendarConfirm} />
