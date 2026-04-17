@@ -15,10 +15,12 @@ import BalanceReportConfig from 'app/main/balanceReport/BalanceReportConfig';
 import LoginPageConfig from 'app/main/login/LoginPageConfig';
 import MaintenanceConfig from 'app/main/maintenance/MaintenanceConfig';
 import SampleConfig from 'app/main/sample/SampleConfig';
+import WelcomeConfig from 'app/main/welcome/WelcomeConfig';
 
 const routeConfigs = [
 	...authRoleExamplesConfigs,
 	LoginPageConfig,
+	WelcomeConfig,
 	SampleConfig,
 	DashboardConfig,
 	MyInfoConfig,

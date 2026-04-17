@@ -11,6 +11,7 @@ import Typography from '@mui/material/Typography';
 import clsx from 'clsx';
 import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
+import { Link } from 'react-router-dom';
 import * as authActions from 'app/auth/store/actions';
 
 // keyframes 헬퍼로 애니메이션 정의 (tss-react는 JSS $ruleName 참조 미지원)
@@ -205,6 +206,21 @@ const useStyles = makeStyles()((theme) => ({
 			height: 32,
 			marginRight: 12
 		}
+	},
+	aboutLink: {
+		marginTop: 24,
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '0.95rem',
+		color: 'rgba(255, 255, 255, 0.5)',
+		textDecoration: 'none',
+		transition: 'color 0.2s ease',
+		'&:hover': {
+			color: '#00d4ff'
+		},
+		[theme.breakpoints.up('md')]: {
+			fontSize: '1.4rem',
+			marginTop: 32
+		}
 	}
 }));
 
@@ -285,6 +301,10 @@ function LoginPage() {
 								</svg>
 								Discord로 로그인
 							</Button>
+
+							<Link to="/welcome" className={classes.aboutLink}>
+								Graves가 뭔가요? →
+							</Link>
 						</CardContent>
 					</Card>
 				</FuseAnimate>
