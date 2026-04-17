@@ -4,6 +4,7 @@ import FuseScrollbars from '@fuse/core/FuseScrollbars';
 import FuseSuspense from '@fuse/core/FuseSuspense';
 import { makeStyles } from 'tss-react/mui';
 import AppContext from 'app/AppContext';
+import RouteErrorBoundary from 'app/main/components/RouteErrorBoundary';
 import clsx from 'clsx';
 import React from 'react';
 import { useSelector } from 'react-redux';
@@ -89,7 +90,15 @@ function Layout3(props) {
 								<FuseSuspense>
 									<Routes>
 										{routes.map((route, i) => (
-											<Route key={i} path={route.path || '*'} element={<route.component />} />
+											<Route
+												key={i}
+												path={route.path || '*'}
+												element={
+													<RouteErrorBoundary>
+														<route.component />
+													</RouteErrorBoundary>
+												}
+											/>
 										))}
 									</Routes>
 								</FuseSuspense>

@@ -14,6 +14,8 @@ import {
 } from '@mui/material';
 import { makeStyles } from 'tss-react/mui';
 import { useDispatch, useSelector } from 'react-redux';
+import SaveButton from '../components/SaveButton';
+import useSaveAction from '../components/useSaveAction';
 import * as Actions from './store/actions';
 
 const POSITIONS = [
@@ -251,7 +253,15 @@ function OnboardingSettingsDialog({ open, onClose, groupId }) {
 	const [verifyMethod, setVerifyMethod] = useState('nickname');
 	const [rolesLoading, setRolesLoading] = useState(true);
 	const [rolesError, setRolesError] = useState('');
-	const [saving, setSaving] = useState(false);
+	const [saveState, runSave, isPending] = useSaveAction(async (settings) => {
+		await dispatch(Actions.updateGroupSettings(groupId, settings));
+	});
+
+	useEffect(() => {
+		if (saveState.success) {
+			onClose('온보딩 설정이 저장되었습니다.');
+		}
+	}, [saveState.nonce, saveState.success, onClose]);
 
 	useEffect(() => {
 		if (open && groupId) {
@@ -289,21 +299,12 @@ function OnboardingSettingsDialog({ open, onClose, groupId }) {
 	}, [open, info]);
 
 	function handleSave() {
-		setSaving(true);
-		const settings = {
+		runSave({
 			onboardingRoleId: roleId,
 			onboardingPositionRoles: positionRoles,
 			onboardingTierRoles: tierRoles,
 			onboardingVerifyMethod: verifyMethod
-		};
-		dispatch(Actions.updateGroupSettings(groupId, settings))
-			.then(() => {
-				setSaving(false);
-				onClose('온보딩 설정이 저장되었습니다.');
-			})
-			.catch(() => {
-				setSaving(false);
-			});
+		});
 	}
 
 	function renderRoleDropdown(value, onChange) {
@@ -418,17 +419,21 @@ function OnboardingSettingsDialog({ open, onClose, groupId }) {
 					</>
 				)}
 			</DialogContent>
+			{saveState.error && (
+				<div style={{ padding: '0 24px 8px', color: '#ff6b6b', fontFamily: '"Noto Sans KR", sans-serif', fontSize: '1.05rem', textAlign: 'right' }}>
+					{saveState.error}
+				</div>
+			)}
 			<DialogActions>
 				<Button className={classes.cancelBtn} onClick={() => onClose()}>
 					취소
 				</Button>
-				<Button
+				<SaveButton
 					className={classes.submitBtn}
 					onClick={handleSave}
-					disabled={saving || rolesLoading || Boolean(rolesError)}
-				>
-					{saving ? '저장 중...' : '저장'}
-				</Button>
+					isPending={isPending}
+					disabled={rolesLoading || Boolean(rolesError)}
+				/>
 			</DialogActions>
 		</Dialog>
 	);
