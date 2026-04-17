@@ -196,6 +196,7 @@ function RatingChart() {
 		return {
 			responsive: true,
 			maintainAspectRatio: false,
+			animation: false,
 			interaction: { mode: 'nearest', intersect: false, axis: 'x' },
 			plugins: {
 				legend: { display: false },
@@ -248,10 +249,10 @@ function RatingChart() {
 
 	const canvasRef = useRef(null);
 	const chartInstanceRef = useRef(null);
+	const hasData = Boolean(ratingHistory && ratingHistory.length > 0);
 
 	useEffect(() => {
-		if (!canvasRef.current) return undefined;
-		if (!ratingHistory || ratingHistory.length === 0) return undefined;
+		if (!canvasRef.current || !hasData) return undefined;
 
 		chartInstanceRef.current = new ChartJS(canvasRef.current, {
 			type: 'line',
@@ -265,7 +266,14 @@ function RatingChart() {
 				chartInstanceRef.current = null;
 			}
 		};
-	}, [chartData, chartOptions, ratingHistory]);
+	}, [hasData]);
+
+	useEffect(() => {
+		if (!chartInstanceRef.current) return;
+		chartInstanceRef.current.data = chartData;
+		chartInstanceRef.current.options = chartOptions;
+		chartInstanceRef.current.update();
+	}, [chartData, chartOptions]);
 
 	if (!ratingHistory || ratingHistory.length === 0) {
 		return (
