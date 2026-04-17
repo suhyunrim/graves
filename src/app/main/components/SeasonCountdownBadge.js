@@ -91,7 +91,14 @@ function SeasonCountdownBadge() {
 		: '현재 시즌 자동 종료는 설정되어 있지 않습니다.';
 
 	return (
-		<Tooltip title={tooltipText} classes={{ tooltip: classes.tooltip }} arrow placement="bottom">
+		<Tooltip
+			title={tooltipText}
+			classes={{ tooltip: classes.tooltip }}
+			arrow
+			placement="bottom"
+			enterTouchDelay={0}
+			leaveTouchDelay={4000}
+		>
 			<span className={`${classes.badge} ${urgent ? classes.urgent : ''}`}>
 				{currentSeason && <span className={classes.season}>시즌 {currentSeason}</span>}
 				{currentSeason && label && <span className={classes.divider} />}
