@@ -489,7 +489,7 @@ function GroupSettingsContent() {
 	function handleTierChange(puuid, rating) {
 		const opt = TIER_OPTIONS.find(o => o.rating === rating);
 		if (opt) {
-			dispatch(Actions.changeDefaultTier(groupId, puuid, opt.apiValue));
+			dispatch(Actions.changeDefaultTier(groupId, puuid, opt.apiValue, opt.rating));
 		}
 	}
 
