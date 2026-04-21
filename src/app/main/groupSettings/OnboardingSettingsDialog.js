@@ -41,6 +41,59 @@ const TIERS = [
 
 const NONE_VALUE = '__none__';
 
+const ONBOARDING_MESSAGE_KEYS = [
+	{
+		key: 'welcome',
+		label: '1. 환영 화면 (첫 진입 · 포지션 선택)',
+		title: '🎮 {서버명}에 오신 것을 환영합니다!',
+		description: '내전 참가를 위해 간단한 등록을 진행합니다.\n먼저 **주 포지션**을 선택해주세요.'
+	},
+	{
+		key: 'tierCategory',
+		label: '2. 티어 카테고리 선택',
+		title: '🎮 티어를 선택해주세요',
+		description: '포지션: {포지션이모지} **{포지션}**\n\n자신의 티어를 선택해주세요.'
+	},
+	{
+		key: 'tierStep',
+		label: '3. 티어 세부 단계 선택',
+		title: '{티어이모지} {티어} · 단계를 선택해주세요',
+		description: '포지션: {포지션이모지} **{포지션}**\n티어: {티어이모지} **{티어}**'
+	},
+	{
+		key: 'nameInput',
+		label: '4. 닉네임 입력 직전',
+		title: '🎮 거의 다 됐어요!',
+		description: '포지션: {포지션이모지} **{포지션}**\n티어: {티어이모지} **{티어}**\n\n아래 버튼을 눌러 롤 닉네임을 입력해주세요.'
+	},
+	{
+		key: 'complete',
+		label: '5. 등록 완료',
+		title: '✅ 등록 완료!',
+		description: '{등록결과메시지}\n\n포지션: {포지션이모지} **{포지션}**\n티어: {티어이모지} **{티어}**\n\n내전에서 만나요! 🎮'
+	}
+];
+
+function resolvePreview(text, serverName) {
+	return text
+		.replace(/\{서버명\}/g, serverName || '우리 서버')
+		.replace(/\{포지션이모지\}/g, '🛡️')
+		.replace(/\{포지션\}/g, 'TOP')
+		.replace(/\{티어이모지\}/g, '🥇')
+		.replace(/\{티어\}/g, 'GOLD II')
+		.replace(/\{등록결과메시지\}/g, '새 계정이 등록되었습니다.');
+}
+
+function renderInlineMarkdown(text) {
+	const parts = text.split(/(\*\*[^*]+\*\*)/g);
+	return parts.map((part, idx) => {
+		if (part.startsWith('**') && part.endsWith('**')) {
+			return <strong key={idx}>{part.slice(2, -2)}</strong>;
+		}
+		return <React.Fragment key={idx}>{part}</React.Fragment>;
+	});
+}
+
 function getPositionIconUrl(positionKey) {
 	const nameMap = {
 		TOP: 'top',
@@ -237,6 +290,64 @@ const useStyles = makeStyles()((theme) => ({
 		fontFamily: '"Noto Sans KR", sans-serif',
 		display: 'flex',
 		alignItems: 'center'
+	},
+	messageBlock: {
+		marginBottom: 22
+	},
+	messageLabel: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1rem',
+		fontWeight: 600,
+		color: 'rgba(0, 212, 255, 0.85)',
+		marginBottom: 6
+	},
+	previewBox: {
+		background: 'rgba(47, 49, 54, 0.55)',
+		borderLeft: '4px solid rgba(0, 212, 255, 0.45)',
+		borderRadius: 4,
+		padding: '10px 14px'
+	},
+	previewTitle: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '0.9rem',
+		fontWeight: 600,
+		color: 'rgba(255, 255, 255, 0.5)',
+		marginBottom: 6
+	},
+	previewDesc: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '0.95rem',
+		color: 'rgba(255, 255, 255, 0.72)',
+		whiteSpace: 'pre-line',
+		lineHeight: 1.55
+	},
+	previewHint: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '0.82rem',
+		color: 'rgba(0, 212, 255, 0.6)',
+		textAlign: 'center',
+		margin: '4px 0'
+	},
+	messageField: {
+		'& .MuiInputBase-root': {
+			color: '#fff',
+			fontFamily: '"Noto Sans KR", sans-serif',
+			fontSize: '1rem',
+			lineHeight: 1.5
+		},
+		'& .MuiInputLabel-root': {
+			color: 'rgba(255, 255, 255, 0.6)',
+			fontFamily: '"Noto Sans KR", sans-serif'
+		},
+		'& .MuiOutlinedInput-notchedOutline': {
+			borderColor: 'rgba(255, 255, 255, 0.2)'
+		},
+		'& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline': {
+			borderColor: 'rgba(0, 212, 255, 0.5)'
+		},
+		'& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline': {
+			borderColor: '#00d4ff'
+		}
 	}
 }));
 
@@ -251,6 +362,13 @@ function OnboardingSettingsDialog({ open, onClose, groupId }) {
 	const [selectedTier, setSelectedTier] = useState('IRON');
 	const [tierRoles, setTierRoles] = useState({});
 	const [verifyMethod, setVerifyMethod] = useState('nickname');
+	const [messages, setMessages] = useState({
+		welcome: '',
+		tierCategory: '',
+		tierStep: '',
+		nameInput: '',
+		complete: ''
+	});
 	const [rolesLoading, setRolesLoading] = useState(true);
 	const [rolesError, setRolesError] = useState('');
 	const [saveState, runSave, isPending] = useSaveAction(async (settings) => {
@@ -295,15 +413,28 @@ function OnboardingSettingsDialog({ open, onClose, groupId }) {
 			setTierRoles(tr);
 			setSelectedPosition('TOP');
 			setSelectedTier('IRON');
+			const savedMessages = info.settings.onboardingMessages || {};
+			setMessages({
+				welcome: savedMessages.welcome || '',
+				tierCategory: savedMessages.tierCategory || '',
+				tierStep: savedMessages.tierStep || '',
+				nameInput: savedMessages.nameInput || '',
+				complete: savedMessages.complete || ''
+			});
 		}
 	}, [open, info]);
 
 	function handleSave() {
+		const trimmedMessages = {};
+		ONBOARDING_MESSAGE_KEYS.forEach(({ key }) => {
+			trimmedMessages[key] = (messages[key] || '').trim();
+		});
 		runSave({
 			onboardingRoleId: roleId,
 			onboardingPositionRoles: positionRoles,
 			onboardingTierRoles: tierRoles,
-			onboardingVerifyMethod: verifyMethod
+			onboardingVerifyMethod: verifyMethod,
+			onboardingMessages: trimmedMessages
 		});
 	}
 
@@ -416,6 +547,37 @@ function OnboardingSettingsDialog({ open, onClose, groupId }) {
 							</TextField>
 							{renderRoleDropdown(tierRoles[selectedTier], v => setTierRoles(prev => ({ ...prev, [selectedTier]: v })))}
 						</div>
+
+						{/* 추가 안내 문구 */}
+						<div className={classes.sectionTitle}>추가 안내 문구</div>
+						<div className={classes.sectionDesc}>
+							각 온보딩 DM 화면의 기본 안내 아래에 덧붙일 문구를 입력하세요. 비워두면 기본 문구만 표시됩니다.
+						</div>
+						{ONBOARDING_MESSAGE_KEYS.map(spec => (
+							<div key={spec.key} className={classes.messageBlock}>
+								<div className={classes.messageLabel}>{spec.label}</div>
+								<div className={classes.previewBox}>
+									<div className={classes.previewTitle}>
+										{resolvePreview(spec.title, info?.name)}
+									</div>
+									<div className={classes.previewDesc}>
+										{renderInlineMarkdown(resolvePreview(spec.description, info?.name))}
+									</div>
+								</div>
+								<div className={classes.previewHint}>↓ 이 아래에 추가됩니다</div>
+								<TextField
+									className={classes.messageField}
+									value={messages[spec.key]}
+									onChange={e => setMessages(prev => ({ ...prev, [spec.key]: e.target.value }))}
+									variant="outlined"
+									fullWidth
+									multiline
+									rows={2}
+									size="small"
+									placeholder="(선택) 이 문구 아래에 덧붙일 안내 메시지"
+								/>
+							</div>
+						))}
 					</>
 				)}
 			</DialogContent>
