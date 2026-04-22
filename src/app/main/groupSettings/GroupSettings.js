@@ -13,7 +13,8 @@ import AuditLogContent from './AuditLogContent';
 const useStyles = makeStyles()(() => ({
 	layoutRoot: {
 		background: 'linear-gradient(180deg, #0f0f1a 0%, #1a1a2e 100%)',
-		minHeight: '100vh'
+		minHeight: '100vh',
+		overflowX: 'hidden'
 	},
 	tabsWrapper: {
 		padding: '0 28px',

@@ -24,6 +24,10 @@ const useStyles = makeStyles()((theme) => ({
 		margin: 0,
 		[theme.breakpoints.down('md')]: {
 			fontSize: '2.75rem'
+		},
+		[theme.breakpoints.down('sm')]: {
+			fontSize: '2.1rem',
+			letterSpacing: '0.06em'
 		}
 	},
 	subtitleRow: {
