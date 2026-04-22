@@ -16,6 +16,9 @@ const useStyles = makeStyles()(() => ({
 		minHeight: '100vh',
 		overflowX: 'hidden'
 	},
+	contentWrapperOverride: {
+		overflowX: 'hidden !important'
+	},
 	tabsWrapper: {
 		padding: '0 28px',
 		background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
@@ -58,7 +61,8 @@ function GroupSettings() {
 	return (
 		<FusePageSimple
 			classes={{
-				root: classes.layoutRoot
+				root: classes.layoutRoot,
+				contentWrapper: classes.contentWrapperOverride
 			}}
 			header={<GroupSettingsHeader subtitle={SUBTITLES[tab]} showSearch={tab === 1} />}
 			content={
