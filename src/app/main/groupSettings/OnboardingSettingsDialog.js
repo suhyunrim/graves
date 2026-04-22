@@ -144,30 +144,32 @@ const useStyles = makeStyles()((theme) => ({
 	paper: {
 		background: 'linear-gradient(135deg, #1a1a2e 0%, #0f0f1a 100%)',
 		color: '#fff',
-		borderRadius: 20,
+		borderRadius: 16,
 		border: '1px solid rgba(0, 212, 255, 0.3)',
 		minWidth: 520,
 		maxHeight: '80vh',
 		[theme.breakpoints.down('sm')]: {
 			minWidth: 'auto',
-			margin: 16,
-			borderRadius: 16
+			margin: 16
 		}
 	},
 	title: {
-		fontFamily: '"Noto Sans KR", sans-serif',
+		fontFamily: '"Rajdhani", "Noto Sans KR", sans-serif',
 		fontWeight: 700,
 		fontSize: '1.8rem',
-		borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+		letterSpacing: '0.05em',
 		color: '#fff'
 	},
 	sectionTitle: {
-		fontFamily: '"Noto Sans KR", sans-serif',
+		fontFamily: '"Rajdhani", "Noto Sans KR", sans-serif',
 		fontWeight: 700,
-		fontSize: '1.3rem',
+		fontSize: '1.5rem',
 		color: 'rgba(0, 212, 255, 0.9)',
+		letterSpacing: '0.05em',
 		marginTop: 20,
 		marginBottom: 12,
+		paddingBottom: 10,
+		borderBottom: '1px solid rgba(0, 212, 255, 0.15)',
 		'&:first-child': {
 			marginTop: 8
 		}
