@@ -10,8 +10,14 @@ const useStyles = makeStyles()((theme) => ({
 		display: 'flex',
 		flexDirection: 'column',
 		width: '100%',
+		maxWidth: '100%',
+		boxSizing: 'border-box',
 		padding: '24px 28px 20px',
-		background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)'
+		background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
+		overflow: 'hidden',
+		[theme.breakpoints.down('sm')]: {
+			padding: '20px 16px 16px'
+		}
 	},
 	title: {
 		fontFamily: '"Rajdhani", "Noto Sans KR", sans-serif',
@@ -22,12 +28,15 @@ const useStyles = makeStyles()((theme) => ({
 		letterSpacing: '0.15em',
 		textShadow: '0 0 20px rgba(0, 212, 255, 0.5)',
 		margin: 0,
+		whiteSpace: 'nowrap',
+		overflow: 'hidden',
+		textOverflow: 'ellipsis',
 		[theme.breakpoints.down('md')]: {
 			fontSize: '2.75rem'
 		},
 		[theme.breakpoints.down('sm')]: {
-			fontSize: '2.1rem',
-			letterSpacing: '0.06em'
+			fontSize: '1.8rem',
+			letterSpacing: '0.04em'
 		}
 	},
 	subtitleRow: {

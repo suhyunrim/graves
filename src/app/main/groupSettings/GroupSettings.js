@@ -10,19 +10,28 @@ import GroupSettingsContent from './GroupSettingsContent';
 import TempVoiceContent from './TempVoiceContent';
 import AuditLogContent from './AuditLogContent';
 
-const useStyles = makeStyles()(() => ({
+const useStyles = makeStyles()((theme) => ({
 	layoutRoot: {
 		background: 'linear-gradient(180deg, #0f0f1a 0%, #1a1a2e 100%)',
 		minHeight: '100vh',
+		width: '100%',
+		maxWidth: '100%',
 		overflowX: 'hidden'
 	},
 	contentWrapperOverride: {
-		overflowX: 'hidden !important'
+		overflowX: 'hidden !important',
+		maxWidth: '100%'
 	},
 	tabsWrapper: {
 		padding: '0 28px',
+		maxWidth: '100%',
+		boxSizing: 'border-box',
+		overflow: 'hidden',
 		background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
-		borderBottom: '1px solid rgba(255, 255, 255, 0.06)'
+		borderBottom: '1px solid rgba(255, 255, 255, 0.06)',
+		[theme.breakpoints.down('sm')]: {
+			padding: '0 8px'
+		}
 	},
 	tabs: {
 		minHeight: 44,
