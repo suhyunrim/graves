@@ -34,27 +34,57 @@ const TIER_RANK = {
 };
 
 const CATEGORY_LABELS = {
-	match: '매치',
-	games: '판수',
-	streak_win: '연승',
-	streak_lose: '연패',
-	tier: '티어 달성',
-	voice: '보이스',
-	challenge: '챌린지',
-	underdog: '언더독',
-	late_night: '야식'
+	match: { label: '첫걸음', icon: '🏆' },
+	games: { label: '판수', icon: '📊' },
+	weekend_games: { label: '솔로신가요?', icon: '🍺' },
+	weekday_games: { label: '평일 근로자', icon: '💼' },
+	games_per_day: { label: '하루 N판', icon: '🎯' },
+	welcomer: { label: '환영위원회', icon: '🤝' },
+	streak: { label: '연승·연패', icon: '🔥' },
+	reverse_win: { label: '역전승', icon: '🔄' },
+	reverse_lose: { label: '역전패', icon: '🔃' },
+	sweep_win: { label: '완승 스윕', icon: '🧹' },
+	sweep_lose: { label: '시련', icon: '💧' },
+	underdog: { label: '언더독', icon: '💪' },
+	tier: { label: '티어 달성', icon: '👑' },
+	consecutive_days: { label: '출석', icon: '📅' },
+	anniversary: { label: '기념일', icon: '🎂' },
+	honor_received: { label: '명예왕', icon: '🎖️' },
+	honor_voted_count: { label: '투표러', icon: '🗳️' },
+	match_mvp: { label: '매치 MVP', icon: '⭐' },
+	match_mvp_streak: { label: '팬 서비스', icon: '🌟' },
+	voice: { label: '보이스 체류', icon: '🎙️' },
+	night_owl: { label: '밤새기', icon: '🦉' },
+	channel_creator: { label: '채널 개척자', icon: '🔊' },
+	late_night: { label: '야식', icon: '🌙' },
+	challenge: { label: '챌린지 메달', icon: '🏅' }
 };
 
 const CATEGORY_ORDER = [
 	'match',
 	'games',
-	'streak_win',
-	'streak_lose',
-	'tier',
-	'voice',
-	'challenge',
+	'weekend_games',
+	'weekday_games',
+	'games_per_day',
+	'welcomer',
+	'streak',
+	'reverse_win',
+	'reverse_lose',
+	'sweep_win',
+	'sweep_lose',
 	'underdog',
-	'late_night'
+	'tier',
+	'consecutive_days',
+	'anniversary',
+	'honor_received',
+	'honor_voted_count',
+	'match_mvp',
+	'match_mvp_streak',
+	'voice',
+	'night_owl',
+	'channel_creator',
+	'late_night',
+	'challenge'
 ];
 
 function formatDate(dateStr) {
@@ -107,6 +137,9 @@ const useStyles = makeStyles()((theme) => ({
 		marginBottom: 20
 	},
 	categoryTitle: {
+		display: 'flex',
+		alignItems: 'center',
+		gap: 8,
 		fontFamily: '"Rajdhani", "Noto Sans KR", sans-serif',
 		fontSize: '1.6rem',
 		fontWeight: 700,
@@ -114,6 +147,10 @@ const useStyles = makeStyles()((theme) => ({
 		marginBottom: 16,
 		paddingBottom: 8,
 		borderBottom: '1px solid rgba(255, 255, 255, 0.08)'
+	},
+	categoryIcon: {
+		fontSize: '1.4rem',
+		lineHeight: 1
 	},
 	grid: {
 		display: 'grid',
@@ -344,15 +381,7 @@ function AchievementContent() {
 	const total = achievements.length;
 
 	const grouped = {};
-	const streakItems = achievements.filter(a => a.category === 'streak');
-	if (streakItems.length > 0) {
-		const wins = streakItems.filter(a => a.id.includes('WIN'));
-		const losses = streakItems.filter(a => !a.id.includes('WIN'));
-		if (wins.length > 0) grouped.streak_win = wins;
-		if (losses.length > 0) grouped.streak_lose = losses;
-	}
 	CATEGORY_ORDER.forEach(cat => {
-		if (cat === 'streak_win' || cat === 'streak_lose') return;
 		const items = achievements.filter(a => a.category === cat);
 		if (items.length > 0) {
 			grouped[cat] = items;
@@ -433,7 +462,16 @@ function AchievementContent() {
 				}
 				return (
 					<div key={cat} className={highestOnly ? classes.categorySectionCompact : classes.categorySection}>
-						{!highestOnly && <div className={classes.categoryTitle}>{CATEGORY_LABELS[cat] || cat}</div>}
+						{!highestOnly && (
+						<div className={classes.categoryTitle}>
+							{CATEGORY_LABELS[cat]?.icon && (
+								<span role="img" aria-label={CATEGORY_LABELS[cat].label} className={classes.categoryIcon}>
+									{CATEGORY_LABELS[cat].icon}
+								</span>
+							)}
+							<span>{CATEGORY_LABELS[cat]?.label || cat}</span>
+						</div>
+					)}
 						<div className={highestOnly ? undefined : classes.grid}>
 							{displayItems.map(achievement => {
 								const tierColor = TIER_COLORS[achievement.tier] || '#fff';
