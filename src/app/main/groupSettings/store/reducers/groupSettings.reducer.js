@@ -21,6 +21,13 @@ const groupSettingsReducer = (state = initialState, action) => {
 				members: state.members.map(m => (m.puuid === puuid ? { ...m, defaultRating } : m))
 			};
 		}
+		case Actions.SET_MEMBER_ROLE: {
+			const { puuid, role } = action.payload;
+			return {
+				...state,
+				members: state.members.map(m => (m.puuid === puuid ? { ...m, role } : m))
+			};
+		}
 		case Actions.SET_SEARCH_TEXT: {
 			return { ...state, searchText: action.searchText };
 		}

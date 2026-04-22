@@ -64,14 +64,9 @@ export function cancelMatch(groupId, matchId) {
 		return () => Promise.resolve({ success: true });
 	}
 
-	const request = createCamilleAxios().post(`/api/match/${groupId}/cancel`, { matchId });
+	return dispatch => {
+		dispatch({ type: CANCEL_MATCH, payload: { matchId } });
 
-	return dispatch =>
-		request.then(response => {
-			dispatch({
-				type: CANCEL_MATCH,
-				payload: response.data
-			});
-			return response.data;
-		});
+		return createCamilleAxios().post(`/api/match/${groupId}/cancel`, { matchId });
+	};
 }

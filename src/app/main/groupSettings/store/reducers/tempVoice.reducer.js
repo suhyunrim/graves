@@ -17,6 +17,14 @@ const tempVoiceReducer = (state = initialState, action) => {
 		case Actions.GET_GENERATORS: {
 			return { ...state, generators: action.payload };
 		}
+		case Actions.UPSERT_GENERATOR: {
+			const { channelId } = action.payload;
+			const others = state.generators.filter(g => g.channelId !== channelId);
+			return { ...state, generators: [...others, action.payload] };
+		}
+		case Actions.REMOVE_GENERATOR: {
+			return { ...state, generators: state.generators.filter(g => g.channelId !== action.payload) };
+		}
 		default: {
 			return state;
 		}

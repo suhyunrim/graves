@@ -579,7 +579,6 @@ function MatchHistoryTable() {
 	const [dupWinTeam, setDupWinTeam] = useState('1');
 	const [dupLoading, setDupLoading] = useState(false);
 	const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
-	const [cancelLoading, setCancelLoading] = useState(false);
 
 	const handleMenuOpen = (event, match) => {
 		event.stopPropagation();
@@ -641,16 +640,13 @@ function MatchHistoryTable() {
 
 	const handleCancelSubmit = () => {
 		if (!menuMatch) return;
-		setCancelLoading(true);
-		dispatch(Actions.cancelMatch(user.reprGroup.groupId, menuMatch.gameId))
-			.then(() => {
-				setCancelDialogOpen(false);
-				setMenuMatch(null);
-				dispatch(Actions.getMatchHistory(user.reprGroup.groupId, serverPage, rowsPerPage, searchText));
-			})
-			.finally(() => {
-				setCancelLoading(false);
-			});
+		const groupId = user.reprGroup.groupId;
+		const matchId = menuMatch.gameId;
+		setCancelDialogOpen(false);
+		setMenuMatch(null);
+		dispatch(Actions.cancelMatch(groupId, matchId)).catch(() => {
+			dispatch(Actions.getMatchHistory(groupId, serverPage, rowsPerPage, searchText));
+		});
 	};
 
 	useEffect(() => {
@@ -988,7 +984,6 @@ function MatchHistoryTable() {
 					</Button>
 					<Button
 						onClick={handleCancelSubmit}
-						disabled={cancelLoading}
 						style={{
 							background: 'linear-gradient(135deg, #ff5252 0%, #ff1744 100%)',
 							color: '#fff',
@@ -997,7 +992,7 @@ function MatchHistoryTable() {
 							padding: '6px 20px'
 						}}
 					>
-						{cancelLoading ? <CircularProgress size={20} color="inherit" /> : '취소하기'}
+						취소하기
 					</Button>
 				</DialogActions>
 			</Dialog>
