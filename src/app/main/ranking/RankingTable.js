@@ -574,8 +574,9 @@ function RankingTable(props) {
 	}
 
 	function formatRatingChange(val) {
-		if (val > 0) return `+${val}`;
-		return String(val);
+		const lp = val * 4;
+		if (lp > 0) return `+${lp} LP`;
+		return `${lp} LP`;
 	}
 
 	function getWinRateClass(winRate) {
@@ -609,7 +610,7 @@ function RankingTable(props) {
 		const tierColor = tierColors[tierName] || '#fff';
 		const isRanked = myRanking.ranking != null;
 		const rank = isRanked ? myRanking.ranking : '-';
-		const games = myRanking.win + myRanking.lose;
+		const games = myRanking.games ?? myRanking.win + myRanking.lose;
 
 		return (
 			<StyledTableRow
@@ -626,7 +627,9 @@ function RankingTable(props) {
 						{myRanking.name}
 					</Link>
 					{!isRanked && myRanking.reason && (
-						<div className={classes.myRankingReason}>{myRanking.reason}(으)로 랭킹에 미표시</div>
+						<div className={classes.myRankingReason}>
+							{isPeriod ? myRanking.reason : `${myRanking.reason}(으)로 랭킹에 미표시`}
+						</div>
 					)}
 				</StyledTableCell>
 				<StyledTableCell>
@@ -642,7 +645,18 @@ function RankingTable(props) {
 								<span className={classes.tierName} style={{ color: tierColor }}>
 									{getRatingTierName(myRanking.rating)}
 								</span>
-								<span className={classes.tierLP}>{getTierPoint(myRanking.rating)} LP</span>
+								<span className={classes.tierLP}>
+									{getTierPoint(myRanking.rating)} LP
+									{isPeriod && myRanking.ratingChange != null && (
+										<span
+											className={`${classes.ratingChangeInline} ${getRatingChangeClass(
+												myRanking.ratingChange
+											)}`}
+										>
+											{` (${formatRatingChange(myRanking.ratingChange)})`}
+										</span>
+									)}
+								</span>
 							</div>
 						</div>
 					) : (
@@ -678,6 +692,7 @@ function RankingTable(props) {
 		const tierColor = tierColors[tierName] || '#fff';
 		const isRanked = myRanking.ranking != null;
 		const rank = isRanked ? myRanking.ranking : '-';
+		const games = myRanking.games ?? myRanking.win + myRanking.lose;
 
 		const mobileInner = (
 			<>
@@ -704,18 +719,27 @@ function RankingTable(props) {
 								<span className={classes.mobileTierText} style={{ color: tierColor }}>
 									{getRatingTierName(myRanking.rating)}
 								</span>
-								<span className={classes.mobileLPText}>{getTierPoint(myRanking.rating)} LP</span>
+								<span className={classes.mobileLPText}>
+									{getTierPoint(myRanking.rating)} LP
+									{isPeriod && myRanking.ratingChange != null && (
+										<span className={getRatingChangeClass(myRanking.ratingChange)}>
+											{` (${formatRatingChange(myRanking.ratingChange)})`}
+										</span>
+									)}
+								</span>
 							</div>
 						)}
 						{!isRanked && myRanking.reason && (
-							<div className={classes.myRankingReason}>{myRanking.reason}(으)로 랭킹에 미표시</div>
+							<div className={classes.myRankingReason}>
+								{isPeriod ? myRanking.reason : `${myRanking.reason}(으)로 랭킹에 미표시`}
+							</div>
 						)}
 					</div>
 				</div>
 				<div className={classes.mobileStats}>
 					<div className={classes.mobileStatItem}>
 						<span className={classes.mobileStatLabel}>판수</span>
-						<span className={classes.mobileStatValue}>{myRanking.win + myRanking.lose}</span>
+						<span className={classes.mobileStatValue}>{games}</span>
 					</div>
 					<div className={classes.mobileStatItem}>
 						<span className={classes.mobileStatLabel}>승</span>

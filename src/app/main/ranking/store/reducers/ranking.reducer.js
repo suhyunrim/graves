@@ -21,7 +21,7 @@ const rankingReducer = (state = initialState, action) => {
 			return {
 				...state,
 				data: action.payload,
-				myRanking: action.myRanking != null ? action.myRanking : state.myRanking,
+				myRanking: action.myRanking !== undefined ? action.myRanking : state.myRanking,
 				loading: false
 			};
 		}
