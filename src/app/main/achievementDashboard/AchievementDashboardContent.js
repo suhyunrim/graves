@@ -34,6 +34,8 @@ const useStyles = makeStyles()((theme) => ({
 		maxWidth: 1400,
 		margin: '0 auto',
 		width: '100%',
+		boxSizing: 'border-box',
+		overflowX: 'hidden',
 		[theme.breakpoints.down('md')]: {
 			padding: 16
 		}
@@ -329,7 +331,7 @@ const useStyles = makeStyles()((theme) => ({
 		}
 	},
 	categoryIcon: {
-		fontSize: '1.8rem',
+		fontSize: '1.4rem',
 		lineHeight: 1,
 		flexShrink: 0
 	},
@@ -661,8 +663,8 @@ const useStyles = makeStyles()((theme) => ({
 	},
 	categoryLabelLine: {
 		display: 'flex',
-		alignItems: 'baseline',
-		columnGap: 10,
+		alignItems: 'center',
+		columnGap: 8,
 		rowGap: 2,
 		flexWrap: 'wrap',
 		minWidth: 0
@@ -1129,11 +1131,15 @@ function AchievementDashboardContent() {
 								tabIndex={0}
 								aria-expanded={open}
 							>
-								<span role="img" aria-label={CATEGORY_LABELS[cat]?.label || cat} className={classes.categoryIcon}>
-									{CATEGORY_LABELS[cat]?.icon || '🏷️'}
-								</span>
 								<div className={classes.categoryInfo}>
 									<div className={classes.categoryLabelLine}>
+										<span
+											role="img"
+											aria-label={CATEGORY_LABELS[cat]?.label || cat}
+											className={classes.categoryIcon}
+										>
+											{CATEGORY_LABELS[cat]?.icon || '🏷️'}
+										</span>
 										<span className={classes.categoryLabel}>{CATEGORY_LABELS[cat]?.label || cat}</span>
 										{CATEGORY_LABELS[cat]?.description && (
 											<span className={classes.categoryDescInline}>
