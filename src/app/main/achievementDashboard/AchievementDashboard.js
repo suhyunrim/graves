@@ -8,7 +8,11 @@ import AchievementDashboardContent from './AchievementDashboardContent';
 const useStyles = makeStyles()({
 	layoutRoot: {
 		background: 'linear-gradient(180deg, #0f0f1a 0%, #1a1a2e 100%)',
-		minHeight: '100vh'
+		minHeight: '100vh',
+		overflowX: 'hidden'
+	},
+	contentWrapperOverride: {
+		overflowX: 'hidden !important'
 	}
 });
 
@@ -18,7 +22,8 @@ function AchievementDashboard() {
 	return (
 		<FusePageSimple
 			classes={{
-				root: classes.layoutRoot
+				root: classes.layoutRoot,
+				contentWrapper: classes.contentWrapperOverride
 			}}
 			content={<AchievementDashboardContent />}
 		/>
