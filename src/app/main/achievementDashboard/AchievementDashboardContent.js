@@ -630,108 +630,45 @@ const useStyles = makeStyles()((theme) => ({
 		borderColor: '#CD7F32',
 		boxShadow: '0 0 6px rgba(205, 127, 50, 0.55)'
 	},
-	topAchieverBanner: {
+	categoryMetaLine: {
 		display: 'flex',
 		alignItems: 'center',
-		gap: 14,
-		padding: '10px 18px',
-		borderTop: '1px solid rgba(255, 215, 0, 0.2)',
-		borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
-		background: 'linear-gradient(135deg, rgba(255, 215, 0, 0.06) 0%, rgba(255, 170, 51, 0.02) 100%)',
-		[theme.breakpoints.down('sm')]: {
-			flexDirection: 'column',
-			alignItems: 'flex-start',
-			gap: 10,
-			padding: '10px 14px'
-		}
-	},
-	topAchieverHead: {
-		display: 'flex',
-		alignItems: 'center',
-		gap: 10,
+		gap: 12,
+		marginTop: 2,
 		minWidth: 0,
-		flexShrink: 0,
-		textDecoration: 'none',
-		color: 'inherit',
-		transition: 'opacity 0.2s ease',
-		'&:hover': {
-			opacity: 0.85
-		}
+		flexWrap: 'wrap'
 	},
-	topAchieverEmoji: {
-		fontSize: '1.8rem',
+	categoryTopInline: {
+		display: 'flex',
+		alignItems: 'center',
+		gap: 8,
+		padding: '3px 10px',
+		borderRadius: 8,
+		background: 'rgba(255, 215, 0, 0.07)',
+		border: '1px solid rgba(255, 215, 0, 0.22)',
+		minWidth: 0
+	},
+	categoryTopEmoji: {
+		fontSize: '1.15rem',
 		lineHeight: 1,
 		flexShrink: 0
 	},
-	topAchieverEmblem: {
-		width: 30,
-		height: 30,
+	categoryTopEmblem: {
+		width: 20,
+		height: 20,
 		flexShrink: 0
 	},
-	topAchieverInfo: {
-		display: 'flex',
-		flexDirection: 'column',
-		minWidth: 0
-	},
-	topAchieverTitle: {
-		fontFamily: '"Noto Sans KR", sans-serif',
-		fontSize: '1.15rem',
-		fontWeight: 700,
-		color: '#fff',
-		whiteSpace: 'nowrap',
-		overflow: 'hidden',
-		textOverflow: 'ellipsis'
-	},
-	topAchieverLabel: {
-		fontFamily: '"Rajdhani", "Noto Sans KR", sans-serif',
-		fontSize: '0.88rem',
-		fontWeight: 700,
-		color: 'rgba(255, 215, 0, 0.75)',
-		letterSpacing: '0.05em',
-		textTransform: 'uppercase'
-	},
-	topAchieverMedals: {
-		display: 'flex',
-		gap: 8,
-		flex: 1,
-		flexWrap: 'wrap',
-		justifyContent: 'flex-end',
-		[theme.breakpoints.down('sm')]: {
-			justifyContent: 'flex-start',
-			width: '100%'
-		}
-	},
-	topAchieverMedal: {
-		display: 'inline-flex',
-		alignItems: 'center',
-		gap: 6,
-		padding: '4px 10px',
-		borderRadius: 8,
-		background: 'rgba(255, 255, 255, 0.04)',
-		border: '1px solid rgba(255, 255, 255, 0.08)',
+	categoryTopName: {
 		fontFamily: '"Noto Sans KR", sans-serif',
 		fontSize: '1rem',
-		color: '#fff',
-		textDecoration: 'none',
-		transition: 'background 0.2s ease, border-color 0.2s ease',
-		'&:hover': {
-			background: 'rgba(0, 212, 255, 0.1)',
-			borderColor: 'rgba(0, 212, 255, 0.3)'
-		}
-	},
-	topAchieverMedalIcon: {
-		fontSize: '1.1rem',
-		lineHeight: 1
-	},
-	topAchieverMedalName: {
-		maxWidth: 110,
+		fontWeight: 700,
+		whiteSpace: 'nowrap',
 		overflow: 'hidden',
 		textOverflow: 'ellipsis',
-		whiteSpace: 'nowrap'
-	},
-	topAchieverMedalTime: {
-		fontSize: '0.85rem',
-		color: 'rgba(255, 255, 255, 0.4)'
+		maxWidth: 160,
+		[theme.breakpoints.down('md')]: {
+			maxWidth: 100
+		}
 	},
 	recentTextWrap: {
 		minWidth: 0,
@@ -821,17 +758,6 @@ function getRankMedal(rank) {
 	if (rank === 2) return '🥈';
 	if (rank === 3) return '🥉';
 	return `${rank}위`;
-}
-
-function getRankMedalText(rank) {
-	return getRankMedal(rank);
-}
-
-function getRankAriaLabel(rank) {
-	if (rank === 1) return 'first place';
-	if (rank === 2) return 'second place';
-	if (rank === 3) return 'third place';
-	return `rank ${rank}`;
 }
 
 function formatRelative(iso) {
@@ -1126,7 +1052,18 @@ function AchievementDashboardContent() {
 					const sortId = sortBy[cat] || 'rate_desc';
 					const sortedItems = catItems ? sortAchievements(catItems, sortId) : null;
 
-					const meta = `${stat.unlockedAchievements}/${stat.totalAchievements} 업적 · 총 ${stat.totalUnlocks}회 달성 · 평균 ${stat.avgUnlockRate?.toFixed(1)}%`;
+					const meta = `${stat.unlockedAchievements}/${stat.totalAchievements} 업적 · 총 ${stat.totalUnlocks}회`;
+
+					const topTier = catItems
+						? [...catItems]
+								.filter(a => (a.topUnlockers || []).length > 0)
+								.sort((a, b) => {
+									const tierDiff = (TIER_RANK[b.tier] || 0) - (TIER_RANK[a.tier] || 0);
+									if (tierDiff !== 0) return tierDiff;
+									return (b.goal || 0) - (a.goal || 0);
+								})[0]
+						: null;
+					const topUnlockers = topTier ? (topTier.topUnlockers || []).slice(0, 3) : [];
 
 					return (
 						<div
@@ -1147,7 +1084,75 @@ function AchievementDashboardContent() {
 								</span>
 								<div className={classes.categoryInfo}>
 									<div className={classes.categoryLabel}>{CATEGORY_LABELS[cat]?.label || cat}</div>
-									<div className={classes.categoryMeta}>{meta}</div>
+									<div className={classes.categoryMetaLine}>
+										<span className={classes.categoryMeta}>{meta}</span>
+										{topUnlockers.length > 0 && topTier && (
+											<div className={classes.categoryTopInline}>
+												{topTier.category === 'tier' ? (
+													<img
+														className={classes.categoryTopEmblem}
+														src={`/assets/images/ranked-emblems/Emblem_${String(topTier.id).replace('TIER_', '')}.webp`}
+														alt={topTier.name}
+													/>
+												) : (
+													<span
+														role="img"
+														aria-label={topTier.name}
+														className={classes.categoryTopEmoji}
+													>
+														{topTier.emoji || '🏆'}
+													</span>
+												)}
+												<span
+													className={classes.categoryTopName}
+													style={{ color: `${TIER_COLORS[topTier.tier] || '#fff'}cc` }}
+												>
+													{topTier.name}
+												</span>
+												<div className={classes.avatarStack}>
+													{topUnlockers.map(u => {
+														const rankClass =
+															u.rank === 1
+																? classes.avatarRank1
+																: u.rank === 2
+																? classes.avatarRank2
+																: u.rank === 3
+																? classes.avatarRank3
+																: undefined;
+														const profileUrl = getProfileIconUrl(u.profileIconId);
+														return (
+															<Tooltip
+																key={u.puuid}
+																title={`${getRankMedal(u.rank)} ${u.name} · ${topTier.tier} ${topTier.name} · ${formatRelative(u.unlockedAt)}`}
+																arrow
+																placement="top"
+																enterTouchDelay={0}
+																leaveTouchDelay={2000}
+															>
+																{profileUrl ? (
+																	<img
+																		src={profileUrl}
+																		alt={u.name}
+																		className={cx(classes.avatar, rankClass)}
+																		style={{ objectFit: 'cover', background: '#0f0f1a' }}
+																	/>
+																) : (
+																	<div
+																		className={cx(classes.avatar, rankClass)}
+																		style={{
+																			background: `linear-gradient(135deg, ${hashColor(u.puuid)}, ${hashColor(`${u.puuid}x`)})`
+																		}}
+																	>
+																		{getInitial(u.name)}
+																	</div>
+																)}
+															</Tooltip>
+														);
+													})}
+												</div>
+											</div>
+										)}
+									</div>
 								</div>
 								<div className={classes.categoryProgress}>
 									<div className={classes.categoryProgressBar}>
@@ -1160,8 +1165,6 @@ function AchievementDashboardContent() {
 								</div>
 								<span className={cx(classes.categoryChevron, open && classes.categoryChevronOpen)}>▼</span>
 							</div>
-
-							{catItems && <TopTierBanner items={catItems} classes={classes} />}
 
 							{open && (
 								<div className={classes.categoryBody}>
@@ -1279,7 +1282,7 @@ function AchievementDashboardContent() {
 																				return (
 																					<Tooltip
 																						key={u.puuid}
-																						title={`${getRankMedalText(u.rank)} ${u.name} · ${formatRelative(u.unlockedAt)}`}
+																						title={`${getRankMedal(u.rank)} ${u.name} · ${formatRelative(u.unlockedAt)}`}
 																						arrow
 																						placement="top"
 																						enterTouchDelay={0}
@@ -1344,74 +1347,6 @@ function AchievementDashboardContent() {
 						</div>
 					);
 				})}
-			</div>
-		</div>
-	);
-}
-
-function TopTierBanner({ items, classes }) {
-	const candidates = (items || []).filter(a => (a.topUnlockers || []).length > 0);
-	if (candidates.length === 0) return null;
-	const sorted = [...candidates].sort((a, b) => {
-		const tierDiff = (TIER_RANK[b.tier] || 0) - (TIER_RANK[a.tier] || 0);
-		if (tierDiff !== 0) return tierDiff;
-		return (b.goal || 0) - (a.goal || 0);
-	});
-	const highest = sorted[0];
-	const top = (highest.topUnlockers || []).slice(0, 3);
-	if (top.length === 0) return null;
-
-	const tierColor = TIER_COLORS[highest.tier] || '#fff';
-	const isTierCat = highest.category === 'tier';
-	const iconNode = isTierCat ? (
-		<img
-			className={classes.topAchieverEmblem}
-			src={`/assets/images/ranked-emblems/Emblem_${String(highest.id).replace('TIER_', '')}.webp`}
-			alt={highest.name}
-		/>
-	) : (
-		<span role="img" aria-label={highest.name} className={classes.topAchieverEmoji}>
-			{highest.emoji || '🏆'}
-		</span>
-	);
-
-	return (
-		<div className={classes.topAchieverBanner}>
-			<Link to={`/achievement-dashboard/ranking/${highest.id}`} className={classes.topAchieverHead}>
-				{iconNode}
-				<div className={classes.topAchieverInfo}>
-					<span className={classes.topAchieverLabel} style={{ color: `${tierColor}cc` }}>
-						{highest.tier} · 최고 달성
-					</span>
-					<span className={classes.topAchieverTitle}>{highest.name}</span>
-				</div>
-			</Link>
-			<div className={classes.topAchieverMedals}>
-				{top.map(u => (
-					<Link
-						key={u.puuid}
-						to={`/userinfo/${u.puuid}`}
-						className={classes.topAchieverMedal}
-					>
-						<span
-							role="img"
-							aria-label={getRankAriaLabel(u.rank)}
-							className={classes.topAchieverMedalIcon}
-						>
-							{getRankMedal(u.rank)}
-						</span>
-						<span className={classes.topAchieverMedalName}>{u.name}</span>
-						<Tooltip
-							title={new Date(u.unlockedAt).toLocaleString('ko-KR')}
-							arrow
-							placement="top"
-							enterTouchDelay={0}
-							leaveTouchDelay={2000}
-						>
-							<span className={classes.topAchieverMedalTime}>{formatRelative(u.unlockedAt)}</span>
-						</Tooltip>
-					</Link>
-				))}
 			</div>
 		</div>
 	);
