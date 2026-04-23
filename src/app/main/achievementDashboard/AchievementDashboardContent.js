@@ -659,21 +659,20 @@ const useStyles = makeStyles()((theme) => ({
 			maxWidth: 100
 		}
 	},
-	categoryTopDesc: {
+	categoryLabelLine: {
+		display: 'flex',
+		alignItems: 'baseline',
+		columnGap: 10,
+		rowGap: 2,
+		flexWrap: 'wrap',
+		minWidth: 0
+	},
+	categoryDescInline: {
 		fontFamily: '"Noto Sans KR", sans-serif',
-		fontSize: '0.95rem',
+		fontSize: '1rem',
+		fontWeight: 400,
 		color: 'rgba(255, 255, 255, 0.55)',
-		maxWidth: 280,
-		whiteSpace: 'nowrap',
-		overflow: 'hidden',
-		textOverflow: 'ellipsis',
-		[theme.breakpoints.down('lg')]: {
-			maxWidth: 200
-		},
-		[theme.breakpoints.down('sm')]: {
-			maxWidth: '100%',
-			flexBasis: '100%'
-		}
+		lineHeight: 1.4
 	},
 	categoryTopMembers: {
 		display: 'flex',
@@ -1134,7 +1133,14 @@ function AchievementDashboardContent() {
 									{CATEGORY_LABELS[cat]?.icon || '🏷️'}
 								</span>
 								<div className={classes.categoryInfo}>
-									<div className={classes.categoryLabel}>{CATEGORY_LABELS[cat]?.label || cat}</div>
+									<div className={classes.categoryLabelLine}>
+										<span className={classes.categoryLabel}>{CATEGORY_LABELS[cat]?.label || cat}</span>
+										{CATEGORY_LABELS[cat]?.description && (
+											<span className={classes.categoryDescInline}>
+												{CATEGORY_LABELS[cat].description}
+											</span>
+										)}
+									</div>
 									<div className={classes.categoryMetaLine}>
 										<span className={classes.categoryMeta}>{meta}</span>
 										{topUnlockers.length > 0 && topTier && (
@@ -1160,17 +1166,6 @@ function AchievementDashboardContent() {
 												>
 													{topTier.name}
 												</span>
-												{topTier.description && (
-													<Tooltip
-														title={topTier.description}
-														arrow
-														placement="top"
-														enterTouchDelay={0}
-														leaveTouchDelay={2000}
-													>
-														<span className={classes.categoryTopDesc}>{topTier.description}</span>
-													</Tooltip>
-												)}
 												<div className={classes.categoryTopMembers}>
 													{topUnlockers.map(u => {
 														const rankClass =
