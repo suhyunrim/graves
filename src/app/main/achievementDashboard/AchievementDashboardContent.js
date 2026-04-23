@@ -771,7 +771,7 @@ function AchievementDashboardContent() {
 		);
 	}
 
-	if (!dashboard || !dashboard.summary) {
+	if (!dashboard) {
 		return (
 			<div className={classes.container}>
 				<div className={classes.errorState}>
@@ -784,9 +784,8 @@ function AchievementDashboardContent() {
 		);
 	}
 
-	const summary = dashboard.summary || {};
-	const topUsers = dashboard.topUsers || [];
-	const untouched = Math.max(0, (summary.totalAchievements || 0) - (summary.unlockedAchievements || 0));
+	const { summary, topUsers } = dashboard;
+	const untouched = Math.max(0, (summary?.totalAchievements || 0) - (summary?.unlockedAchievements || 0));
 
 	return (
 		<div className={classes.container}>
@@ -802,22 +801,22 @@ function AchievementDashboardContent() {
 					<div className={classes.heroStat}>
 						<div className={classes.heroStatLabel}>해금</div>
 						<div className={cx(classes.heroStatValue, classes.valuePrimary)}>
-							{summary.unlockedAchievements ?? 0} <span style={{ fontSize: '1.4rem', color: 'rgba(255,255,255,0.35)' }}>/ {summary.totalAchievements ?? 0}</span>
+							{summary.unlockedAchievements} <span style={{ fontSize: '1.4rem', color: 'rgba(255,255,255,0.35)' }}>/ {summary.totalAchievements}</span>
 						</div>
-						<div className={classes.heroStatSub}>{(summary.unlockRate ?? 0).toFixed(1)}% 달성</div>
+						<div className={classes.heroStatSub}>{summary.unlockRate?.toFixed(1)}% 달성</div>
 					</div>
 					<div className={classes.heroStat}>
 						<div className={classes.heroStatLabel}>
 							<span role="img" aria-label="new">✨</span>
 							<span>이번 주 신규</span>
 						</div>
-						<div className={cx(classes.heroStatValue, classes.valueSuccess)}>+{summary.newUnlocksThisWeek ?? 0}</div>
+						<div className={cx(classes.heroStatValue, classes.valueSuccess)}>+{summary.newUnlocksThisWeek}</div>
 						<div className={classes.heroStatSub}>최근 7일 해금</div>
 					</div>
 					<div className={classes.heroStat}>
 						<div className={classes.heroStatLabel}>총 해금</div>
-						<div className={classes.heroStatValue}>{summary.totalUnlocks ?? 0}</div>
-						<div className={classes.heroStatSub}>활성 유저 {summary.totalActiveUsers ?? 0}명</div>
+						<div className={classes.heroStatValue}>{summary.totalUnlocks}</div>
+						<div className={classes.heroStatSub}>활성 유저 {summary.totalActiveUsers}명</div>
 					</div>
 					<div className={classes.heroStat}>
 						<div className={classes.heroStatLabel}>

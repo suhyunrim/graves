@@ -14,20 +14,12 @@ export const GET_RANKING_ERROR = '[ACHIEVEMENT_DASHBOARD] GET RANKING ERROR';
 
 export const INVALIDATE_CACHE = '[ACHIEVEMENT_DASHBOARD] INVALIDATE CACHE';
 
-function unwrap(response) {
-	const body = response?.data;
-	if (body && typeof body === 'object' && body.result !== undefined) {
-		return body.result;
-	}
-	return body;
-}
-
 export function getDashboard(groupId) {
 	return dispatch => {
 		dispatch({ type: GET_DASHBOARD_LOADING });
 		return createCamilleAxios()
 			.get(`/api/achievement/${groupId}/dashboard`)
-			.then(response => dispatch({ type: GET_DASHBOARD, payload: unwrap(response) }))
+			.then(response => dispatch({ type: GET_DASHBOARD, payload: response.data.result }))
 			.catch(err => dispatch({ type: GET_DASHBOARD_ERROR, payload: err?.message || 'error' }));
 	};
 }
@@ -41,7 +33,7 @@ export function getCategory(groupId, category) {
 		dispatch({ type: GET_CATEGORY_LOADING, payload: { category } });
 		return createCamilleAxios()
 			.get(`/api/achievement/${groupId}/category/${category}`)
-			.then(response => dispatch({ type: GET_CATEGORY, payload: { category, data: unwrap(response) } }))
+			.then(response => dispatch({ type: GET_CATEGORY, payload: { category, data: response.data.result } }))
 			.catch(err => dispatch({ type: GET_CATEGORY_ERROR, payload: { category, error: err?.message || 'error' } }));
 	};
 }
@@ -51,7 +43,7 @@ export function getAchievementRanking(groupId, achievementId) {
 		dispatch({ type: GET_RANKING_LOADING });
 		return createCamilleAxios()
 			.get(`/api/achievement/${groupId}/ranking/${achievementId}`)
-			.then(response => dispatch({ type: GET_RANKING, payload: unwrap(response) }))
+			.then(response => dispatch({ type: GET_RANKING, payload: response.data.result }))
 			.catch(err => dispatch({ type: GET_RANKING_ERROR, payload: err?.message || 'error' }));
 	};
 }
