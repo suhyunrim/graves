@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import Tooltip from '@mui/material/Tooltip';
 import CircularProgress from '@mui/material/CircularProgress';
-import camilleRiotAuthService from 'app/services/camilleRiotAuthService';
+import SearchIcon from '@mui/icons-material/Search';
 import * as Actions from './store/actions';
 import { CATEGORY_LABELS, CATEGORY_ORDER, TIER_COLORS, TIER_RANK } from './constants';
 
@@ -425,6 +425,12 @@ const useStyles = makeStyles()((theme) => ({
 			transform: 'translateY(-3px)',
 			borderColor: 'rgba(0, 212, 255, 0.35)',
 			boxShadow: '0 8px 24px rgba(0, 0, 0, 0.3)'
+		},
+		'&:hover .achievement-card-search': {
+			background: 'rgba(0, 212, 255, 0.28)',
+			borderColor: 'rgba(0, 212, 255, 0.6)',
+			transform: 'scale(1.1)',
+			boxShadow: '0 0 12px rgba(0, 212, 255, 0.35)'
 		}
 	},
 	cardFullUnlocked: {
@@ -594,23 +600,21 @@ const useStyles = makeStyles()((theme) => ({
 		fontSize: '1.05rem',
 		color: 'rgba(255, 255, 255, 0.4)'
 	},
-	// summary emblems
-	summaryEmblemRow: {
-		marginTop: 12,
-		display: 'flex',
-		gap: 6,
-		flexWrap: 'wrap',
-		alignItems: 'center'
-	},
-	summaryEmblem: {
-		width: 26,
-		height: 26
-	},
-	summaryEmblemLabel: {
-		fontFamily: '"Noto Sans KR", sans-serif',
-		fontSize: '1rem',
-		color: 'rgba(255, 255, 255, 0.45)',
-		marginRight: 4
+	searchBtn: {
+		display: 'inline-flex',
+		alignItems: 'center',
+		justifyContent: 'center',
+		width: 28,
+		height: 28,
+		borderRadius: 8,
+		background: 'rgba(0, 212, 255, 0.1)',
+		color: '#00d4ff',
+		border: '1px solid rgba(0, 212, 255, 0.25)',
+		transition: 'transform 0.2s ease, background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease',
+		flexShrink: 0,
+		'& svg': {
+			fontSize: 16
+		}
 	},
 	errorState: {
 		padding: '48px 20px',
@@ -683,7 +687,6 @@ function AchievementDashboardContent() {
 
 	const user = useSelector(state => state.auth.user);
 	const groupId = user?.reprGroup?.groupId;
-	const myPuuid = camilleRiotAuthService.getPuuid();
 
 	const dashboard = useSelector(({ AchievementDashboard }) => AchievementDashboard.achievementDashboard.dashboard);
 	const dashboardLoading = useSelector(
@@ -1076,11 +1079,27 @@ function AchievementDashboardContent() {
 																		<div className={classes.recentTextWrap}>
 																			최근 {formatRelative(recent[0].unlockedAt)}
 																		</div>
+																		<Tooltip title="랭킹 보기" arrow placement="top">
+																			<span
+																				className={cx(classes.searchBtn, 'achievement-card-search')}
+																				aria-label="상세 보기"
+																			>
+																				<SearchIcon />
+																			</span>
+																		</Tooltip>
 																	</div>
 																) : (
 																	<div className={classes.cardFooter}>
 																		<span role="img" aria-label="locked">🔒</span>
-																		<span>아직 아무도 달성 못함</span>
+																		<span style={{ flex: 1 }}>아직 아무도 달성 못함</span>
+																		<Tooltip title="랭킹 보기" arrow placement="top">
+																			<span
+																				className={cx(classes.searchBtn, 'achievement-card-search')}
+																				aria-label="상세 보기"
+																			>
+																				<SearchIcon />
+																			</span>
+																		</Tooltip>
 																	</div>
 																)}
 															</Link>
@@ -1095,61 +1114,7 @@ function AchievementDashboardContent() {
 						</div>
 					);
 				})}
-
-				{/* TOP achievers summary emblems */}
-				{dashboard.categoryStats && (
-					<div className={classes.section} style={{ marginTop: 24 }}>
-						<div className={classes.sectionTitle}>
-							<span role="img" aria-label="sparkle">💠</span>
-							<span>나의 최고 달성 요약</span>
-						</div>
-						<div className={classes.heatmapCard}>
-							<MyHighestEmblems myPuuid={myPuuid} categories={categories} />
-						</div>
-					</div>
-				)}
 			</div>
-		</div>
-	);
-}
-
-function MyHighestEmblems({ myPuuid, categories }) {
-	const { classes } = useStyles();
-	if (!myPuuid) {
-		return <div className={classes.emptyHint}>로그인 후 이용 가능합니다</div>;
-	}
-	const loadedCats = Object.keys(categories).filter(k => categories[k]?.data);
-	if (loadedCats.length === 0) {
-		return <div className={classes.emptyHint}>카테고리를 펼쳐보면 최고 달성 요약이 여기에 표시됩니다</div>;
-	}
-	const myHighests = [];
-	loadedCats.forEach(cat => {
-		const items = categories[cat]?.data?.achievements || [];
-		const mine = items.filter(a => (a.recentUnlockers || []).some(u => u.puuid === myPuuid));
-		if (mine.length === 0) return;
-		mine.sort((a, b) => (TIER_RANK[b.tier] || 0) - (TIER_RANK[a.tier] || 0));
-		myHighests.push(mine[0]);
-	});
-	if (myHighests.length === 0) {
-		return <div className={classes.emptyHint}>아직 달성한 업적이 없어요</div>;
-	}
-	myHighests.sort((a, b) => (TIER_RANK[b.tier] || 0) - (TIER_RANK[a.tier] || 0));
-	return (
-		<div className={classes.summaryEmblemRow}>
-			<span className={classes.summaryEmblemLabel}>내 최고 달성:</span>
-			{myHighests.map(a => {
-				const tierColor = TIER_COLORS[a.tier] || '#fff';
-				return (
-					<Tooltip key={a.id} title={`${a.name} (${a.tier})`} arrow placement="top" enterTouchDelay={0} leaveTouchDelay={2000}>
-						<img
-							className={classes.summaryEmblem}
-							src={`/assets/images/ranked-emblems/Emblem_${a.tier}.webp`}
-							alt={a.tier}
-							style={{ filter: `drop-shadow(0 0 6px ${tierColor}50)` }}
-						/>
-					</Tooltip>
-				);
-			})}
 		</div>
 	);
 }
