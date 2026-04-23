@@ -654,8 +654,25 @@ const useStyles = makeStyles()((theme) => ({
 		overflow: 'hidden',
 		textOverflow: 'ellipsis',
 		maxWidth: 160,
+		flexShrink: 0,
 		[theme.breakpoints.down('md')]: {
 			maxWidth: 100
+		}
+	},
+	categoryTopDesc: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '0.95rem',
+		color: 'rgba(255, 255, 255, 0.55)',
+		maxWidth: 280,
+		whiteSpace: 'nowrap',
+		overflow: 'hidden',
+		textOverflow: 'ellipsis',
+		[theme.breakpoints.down('lg')]: {
+			maxWidth: 200
+		},
+		[theme.breakpoints.down('sm')]: {
+			maxWidth: '100%',
+			flexBasis: '100%'
 		}
 	},
 	categoryTopMembers: {
@@ -1143,6 +1160,17 @@ function AchievementDashboardContent() {
 												>
 													{topTier.name}
 												</span>
+												{topTier.description && (
+													<Tooltip
+														title={topTier.description}
+														arrow
+														placement="top"
+														enterTouchDelay={0}
+														leaveTouchDelay={2000}
+													>
+														<span className={classes.categoryTopDesc}>{topTier.description}</span>
+													</Tooltip>
+												)}
 												<div className={classes.categoryTopMembers}>
 													{topUnlockers.map(u => {
 														const rankClass =
