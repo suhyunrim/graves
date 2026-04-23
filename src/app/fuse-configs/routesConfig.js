@@ -11,6 +11,7 @@ import GroupSettingsConfig from 'app/main/groupSettings/GroupSettingsConfig';
 import ChallengeConfig from 'app/main/challenge/ChallengeConfig';
 import ReleaseNotesConfig from 'app/main/releaseNotes/ReleaseNotesConfig';
 import AchievementConfig from 'app/main/achievement/AchievementConfig';
+import AchievementDashboardConfig from 'app/main/achievementDashboard/AchievementDashboardConfig';
 import BalanceReportConfig from 'app/main/balanceReport/BalanceReportConfig';
 import LoginPageConfig from 'app/main/login/LoginPageConfig';
 import MaintenanceConfig from 'app/main/maintenance/MaintenanceConfig';
@@ -29,6 +30,7 @@ const routeConfigs = [
 	ChallengeConfig,
 	ReleaseNotesConfig,
 	AchievementConfig,
+	AchievementDashboardConfig,
 	BalanceReportConfig,
 	MaintenanceConfig
 ];

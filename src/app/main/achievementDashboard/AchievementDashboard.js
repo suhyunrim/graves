@@ -1,0 +1,28 @@
+import FusePageSimple from '@fuse/core/FusePageSimple';
+import withReducer from 'app/store/withReducer';
+import { makeStyles } from 'tss-react/mui';
+import React from 'react';
+import reducer from './store/reducers';
+import AchievementDashboardContent from './AchievementDashboardContent';
+
+const useStyles = makeStyles()({
+	layoutRoot: {
+		background: 'linear-gradient(180deg, #0f0f1a 0%, #1a1a2e 100%)',
+		minHeight: '100vh'
+	}
+});
+
+function AchievementDashboard() {
+	const { classes } = useStyles();
+
+	return (
+		<FusePageSimple
+			classes={{
+				root: classes.layoutRoot
+			}}
+			content={<AchievementDashboardContent />}
+		/>
+	);
+}
+
+export default withReducer('AchievementDashboard', reducer)(AchievementDashboard);

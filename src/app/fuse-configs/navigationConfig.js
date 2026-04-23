@@ -41,6 +41,13 @@ const navigationConfig = [
 				url: '/honor-ranking'
 			},
 			{
+				id: 'achievement-dashboard-component',
+				title: 'Achievements',
+				type: 'item',
+				icon: 'military_tech',
+				url: '/achievement-dashboard'
+			},
+			{
 				id: 'challenge-component',
 				title: 'Challenge',
 				type: 'item',

@@ -17,6 +17,7 @@ const routeImports = [
 	() => import('app/main/balanceReport/BalanceReport'),
 	() => import('app/main/challenge/ChallengeUserMatches'),
 	() => import('app/main/achievement/Achievement'),
+	() => import('app/main/achievementDashboard/AchievementDashboard'),
 	// 4순위: 드물게
 	() => import('app/main/groupSettings/GroupSettings'),
 	() => import('app/main/releaseNotes/ReleaseNotes')
