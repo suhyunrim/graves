@@ -898,9 +898,10 @@ function AchievementDashboardContent() {
 
 	function findScrollContainer(el) {
 		let node = el.parentElement;
-		while (node && node !== document.body) {
-			const { overflowY } = getComputedStyle(node);
-			if ((overflowY === 'auto' || overflowY === 'scroll') && node.scrollHeight > node.clientHeight) {
+		while (node && node !== document.documentElement) {
+			const style = getComputedStyle(node);
+			const overflowY = style.overflowY;
+			if (overflowY !== 'visible' && node.scrollHeight > node.clientHeight + 1) {
 				return node;
 			}
 			node = node.parentElement;
@@ -916,17 +917,21 @@ function AchievementDashboardContent() {
 		setTimeout(() => {
 			const el = sectionRefs.current[cat];
 			if (!el) return;
+
+			try {
+				el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+			} catch (e) {
+				// noop
+			}
+
 			const container = findScrollContainer(el);
 			if (container) {
 				const elRect = el.getBoundingClientRect();
 				const containerRect = container.getBoundingClientRect();
 				const top = elRect.top - containerRect.top + container.scrollTop - 12;
 				container.scrollTo({ top, behavior: 'smooth' });
-			} else {
-				const y = el.getBoundingClientRect().top + window.scrollY - 80;
-				window.scrollTo({ top: y, behavior: 'smooth' });
 			}
-		}, 60);
+		}, 80);
 	}
 
 	function setCatSort(cat, id) {
