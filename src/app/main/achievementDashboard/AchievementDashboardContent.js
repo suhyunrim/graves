@@ -482,45 +482,33 @@ const useStyles = makeStyles()((theme) => ({
 		opacity: 0.55,
 		filter: 'grayscale(0.7)'
 	},
-	cardHeader: {
+	cardName: {
 		display: 'flex',
 		alignItems: 'center',
-		gap: 10,
-		marginBottom: 10
+		gap: 7,
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.25rem',
+		fontWeight: 700,
+		color: '#fff',
+		paddingRight: 66,
+		marginBottom: 6,
+		minWidth: 0
 	},
 	cardEmoji: {
-		fontSize: '2rem',
+		fontSize: '1.35rem',
 		lineHeight: 1,
 		flexShrink: 0
 	},
 	cardEmblem: {
-		width: 36,
-		height: 36,
+		width: 22,
+		height: 22,
 		flexShrink: 0
 	},
-	cardTextCol: {
-		flex: 1,
-		minWidth: 0
-	},
-	cardName: {
-		fontFamily: '"Noto Sans KR", sans-serif',
-		fontSize: '1.2rem',
-		fontWeight: 700,
-		color: '#fff',
-		whiteSpace: 'nowrap',
+	cardNameText: {
 		overflow: 'hidden',
-		textOverflow: 'ellipsis'
-	},
-	cardDesc: {
-		fontFamily: '"Noto Sans KR", sans-serif',
-		fontSize: '0.95rem',
-		color: 'rgba(255, 255, 255, 0.5)',
-		marginTop: 2,
-		lineHeight: 1.3,
-		display: '-webkit-box',
-		WebkitLineClamp: 2,
-		WebkitBoxOrient: 'vertical',
-		overflow: 'hidden'
+		textOverflow: 'ellipsis',
+		whiteSpace: 'nowrap',
+		minWidth: 0
 	},
 	cardProgressWrap: {
 		marginTop: 'auto',
@@ -1291,12 +1279,9 @@ function AchievementDashboardContent() {
 																	</span>
 																)}
 
-																<div className={classes.cardHeader}>
+																<div className={classes.cardName}>
 																	{iconNode}
-																	<div className={classes.cardTextCol}>
-																		<div className={classes.cardName}>{a.name}</div>
-																		<div className={classes.cardDesc}>{a.description}</div>
-																	</div>
+																	<span className={classes.cardNameText}>{a.name}</span>
 																</div>
 
 																<div className={classes.cardProgressWrap}>
