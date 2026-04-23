@@ -911,6 +911,20 @@ function AchievementDashboardContent() {
 		return null;
 	}
 
+	function smoothScrollContainer(container, targetTop, duration = 380) {
+		const start = container.scrollTop;
+		const change = targetTop - start;
+		if (Math.abs(change) < 1) return;
+		const startTime = performance.now();
+		function step(now) {
+			const t = Math.min((now - startTime) / duration, 1);
+			const ease = 0.5 - Math.cos(t * Math.PI) / 2;
+			container.scrollTop = start + change * ease;
+			if (t < 1) requestAnimationFrame(step);
+		}
+		requestAnimationFrame(step);
+	}
+
 	function openAndScroll(cat) {
 		setOpenCats(prev => ({ ...prev, [cat]: true }));
 		if (groupId && !categories?.[cat]?.data) {
@@ -920,18 +934,18 @@ function AchievementDashboardContent() {
 			const el = sectionRefs.current[cat];
 			if (!el) return;
 
-			try {
-				el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-			} catch (e) {
-				// noop
-			}
-
 			const container = findScrollContainer(el);
 			if (container) {
 				const elRect = el.getBoundingClientRect();
 				const containerRect = container.getBoundingClientRect();
 				const top = elRect.top - containerRect.top + container.scrollTop - 12;
-				container.scrollTo({ top, behavior: 'smooth' });
+				smoothScrollContainer(container, top);
+			} else {
+				try {
+					el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+				} catch (e) {
+					// noop
+				}
 			}
 		}, 80);
 	}
