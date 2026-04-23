@@ -44,7 +44,7 @@ const navigationConfig = [
 				id: 'achievement-dashboard-component',
 				title: 'Achievements',
 				type: 'item',
-				icon: 'military_tech',
+				icon: 'workspace_premium',
 				url: '/achievement-dashboard'
 			},
 			{

@@ -8,6 +8,7 @@ import InputAdornment from '@mui/material/InputAdornment';
 import SearchIcon from '@mui/icons-material/Search';
 import CircularProgress from '@mui/material/CircularProgress';
 import camilleRiotAuthService from 'app/services/camilleRiotAuthService';
+import getLatesetRiotDataVersion from 'app/utility/getLatesetRiotDataVersion';
 import * as Actions from './store/actions';
 
 const fadeInUp = keyframes`
@@ -436,6 +437,13 @@ function hashColor(key) {
 	return palette[h % palette.length];
 }
 
+function getProfileIconUrl(profileIconId) {
+	if (profileIconId == null) return null;
+	const version = getLatesetRiotDataVersion();
+	if (!version) return null;
+	return `https://ddragon.leagueoflegends.com/cdn/${version}/img/profileicon/${profileIconId}.png`;
+}
+
 function AchievementUserRankingContent() {
 	const { classes, cx } = useStyles();
 	const dispatch = useDispatch();
@@ -593,14 +601,29 @@ function AchievementUserRankingContent() {
 				<span role="img" aria-label={medalLabel} className={classes.podiumMedal}>
 					{medal}
 				</span>
-				<div
-					className={cx(classes.podiumAvatar, classes[`podiumAvatar${rank}`])}
-					style={{
-						background: `linear-gradient(135deg, ${hashColor(entry.puuid)}, ${hashColor(`${entry.puuid}x`)})`
-					}}
-				>
-					{getInitial(entry.name)}
-				</div>
+				{(() => {
+					const profileUrl = getProfileIconUrl(entry.profileIconId);
+					if (profileUrl) {
+						return (
+							<img
+								src={profileUrl}
+								alt={entry.name}
+								className={cx(classes.podiumAvatar, classes[`podiumAvatar${rank}`])}
+								style={{ objectFit: 'cover', background: '#0f0f1a' }}
+							/>
+						);
+					}
+					return (
+						<div
+							className={cx(classes.podiumAvatar, classes[`podiumAvatar${rank}`])}
+							style={{
+								background: `linear-gradient(135deg, ${hashColor(entry.puuid)}, ${hashColor(`${entry.puuid}x`)})`
+							}}
+						>
+							{getInitial(entry.name)}
+						</div>
+					);
+				})()}
 				<div className={classes.podiumName}>
 					{entry.name}
 					{isMe && <span className={classes.meBadge}>ME</span>}
@@ -679,14 +702,29 @@ function AchievementUserRankingContent() {
 							>
 								<div className={classes.rowRank}>{r.rank}</div>
 								<div className={classes.rowNameWrap}>
-									<div
-										className={classes.rowAvatar}
-										style={{
-											background: `linear-gradient(135deg, ${hashColor(r.puuid)}, ${hashColor(`${r.puuid}x`)})`
-										}}
-									>
-										{getInitial(r.name)}
-									</div>
+									{(() => {
+										const profileUrl = getProfileIconUrl(r.profileIconId);
+										if (profileUrl) {
+											return (
+												<img
+													src={profileUrl}
+													alt={r.name}
+													className={classes.rowAvatar}
+													style={{ objectFit: 'cover', background: '#0f0f1a' }}
+												/>
+											);
+										}
+										return (
+											<div
+												className={classes.rowAvatar}
+												style={{
+													background: `linear-gradient(135deg, ${hashColor(r.puuid)}, ${hashColor(`${r.puuid}x`)})`
+												}}
+											>
+												{getInitial(r.name)}
+											</div>
+										);
+									})()}
 									<span className={classes.rowName}>{r.name}</span>
 									{isMe && <span className={classes.meBadge}>ME</span>}
 								</div>

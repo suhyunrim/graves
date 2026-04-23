@@ -8,6 +8,7 @@ import CircularProgress from '@mui/material/CircularProgress';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import SearchIcon from '@mui/icons-material/Search';
+import getLatesetRiotDataVersion from 'app/utility/getLatesetRiotDataVersion';
 import * as Actions from './store/actions';
 import { CATEGORY_LABELS, CATEGORY_ORDER, TIER_COLORS, TIER_RANK } from './constants';
 import AchievementUserRankingContent from './AchievementUserRankingContent';
@@ -633,15 +634,15 @@ const useStyles = makeStyles()((theme) => ({
 		display: 'flex',
 		alignItems: 'center',
 		gap: 14,
-		padding: '10px 14px',
-		marginBottom: 14,
-		borderRadius: 12,
-		background: 'linear-gradient(135deg, rgba(255, 215, 0, 0.08) 0%, rgba(255, 170, 51, 0.03) 100%)',
-		border: '1px solid rgba(255, 215, 0, 0.25)',
+		padding: '10px 18px',
+		borderTop: '1px solid rgba(255, 215, 0, 0.2)',
+		borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
+		background: 'linear-gradient(135deg, rgba(255, 215, 0, 0.06) 0%, rgba(255, 170, 51, 0.02) 100%)',
 		[theme.breakpoints.down('sm')]: {
 			flexDirection: 'column',
 			alignItems: 'flex-start',
-			gap: 10
+			gap: 10,
+			padding: '10px 14px'
 		}
 	},
 	topAchieverHead: {
@@ -808,6 +809,13 @@ function hashColor(key) {
 	return palette[h % palette.length];
 }
 
+function getProfileIconUrl(profileIconId) {
+	if (profileIconId == null) return null;
+	const version = getLatesetRiotDataVersion();
+	if (!version) return null;
+	return `https://ddragon.leagueoflegends.com/cdn/${version}/img/profileicon/${profileIconId}.png`;
+}
+
 function getRankMedal(rank) {
 	if (rank === 1) return '🥇';
 	if (rank === 2) return '🥈';
@@ -879,6 +887,13 @@ function AchievementDashboardContent() {
 			dispatch(Actions.getDashboard(groupId));
 		}
 	}, [dispatch, groupId]);
+
+	useEffect(() => {
+		if (!dashboard?.categoryStats || !groupId) return;
+		dashboard.categoryStats.forEach(c => {
+			dispatch(Actions.getCategory(groupId, c.category));
+		});
+	}, [dispatch, dashboard, groupId]);
 
 	const categoryStatsByKey = useMemo(() => {
 		const map = {};
@@ -1146,6 +1161,8 @@ function AchievementDashboardContent() {
 								<span className={cx(classes.categoryChevron, open && classes.categoryChevronOpen)}>▼</span>
 							</div>
 
+							{catItems && <TopTierBanner items={catItems} classes={classes} />}
+
 							{open && (
 								<div className={classes.categoryBody}>
 									{catLoading && !catItems && (
@@ -1155,7 +1172,6 @@ function AchievementDashboardContent() {
 									)}
 									{catItems && (
 										<>
-											<TopTierBanner items={catItems} classes={classes} />
 											<div className={classes.sortBar}>
 												{SORT_OPTIONS.map(opt => (
 													<button
@@ -1250,30 +1266,45 @@ function AchievementDashboardContent() {
 																{top.length > 0 ? (
 																	<div className={classes.cardFooter}>
 																		<div className={classes.avatarStack}>
-																			{top.map(u => (
-																				<Tooltip
-																					key={u.puuid}
-																					title={`${getRankMedalText(u.rank)} ${u.name} · ${formatRelative(u.unlockedAt)}`}
-																					arrow
-																					placement="top"
-																					enterTouchDelay={0}
-																					leaveTouchDelay={2000}
-																				>
-																					<div
-																						className={cx(
-																							classes.avatar,
-																							u.rank === 1 && classes.avatarRank1,
-																							u.rank === 2 && classes.avatarRank2,
-																							u.rank === 3 && classes.avatarRank3
-																						)}
-																						style={{
-																							background: `linear-gradient(135deg, ${hashColor(u.puuid)}, ${hashColor(`${u.puuid}x`)})`
-																						}}
+																			{top.map(u => {
+																				const rankClass =
+																					u.rank === 1
+																						? classes.avatarRank1
+																						: u.rank === 2
+																						? classes.avatarRank2
+																						: u.rank === 3
+																						? classes.avatarRank3
+																						: undefined;
+																				const profileUrl = getProfileIconUrl(u.profileIconId);
+																				return (
+																					<Tooltip
+																						key={u.puuid}
+																						title={`${getRankMedalText(u.rank)} ${u.name} · ${formatRelative(u.unlockedAt)}`}
+																						arrow
+																						placement="top"
+																						enterTouchDelay={0}
+																						leaveTouchDelay={2000}
 																					>
-																						{getInitial(u.name)}
-																					</div>
-																				</Tooltip>
-																			))}
+																						{profileUrl ? (
+																							<img
+																								src={profileUrl}
+																								alt={u.name}
+																								className={cx(classes.avatar, rankClass)}
+																								style={{ objectFit: 'cover', background: '#0f0f1a' }}
+																							/>
+																						) : (
+																							<div
+																								className={cx(classes.avatar, rankClass)}
+																								style={{
+																									background: `linear-gradient(135deg, ${hashColor(u.puuid)}, ${hashColor(`${u.puuid}x`)})`
+																								}}
+																							>
+																								{getInitial(u.name)}
+																							</div>
+																						)}
+																					</Tooltip>
+																				);
+																			})}
 																		</div>
 																		<div className={classes.recentTextWrap}>
 																			<span role="img" aria-label="first place">🥇</span> {top[0].name}
