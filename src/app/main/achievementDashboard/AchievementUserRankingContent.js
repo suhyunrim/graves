@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { makeStyles } from 'tss-react/mui';
 import { keyframes } from '@emotion/react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import TextField from '@mui/material/TextField';
 import InputAdornment from '@mui/material/InputAdornment';
 import SearchIcon from '@mui/icons-material/Search';
@@ -22,47 +22,7 @@ const shimmer = keyframes`
 
 const useStyles = makeStyles()((theme) => ({
 	container: {
-		padding: 28,
-		maxWidth: 1100,
-		margin: '0 auto',
-		width: '100%',
-		[theme.breakpoints.down('md')]: {
-			padding: 16
-		}
-	},
-	backLink: {
-		display: 'inline-flex',
-		alignItems: 'center',
-		gap: 6,
-		fontFamily: '"Noto Sans KR", sans-serif',
-		fontSize: '1.05rem',
-		color: 'rgba(255, 255, 255, 0.5)',
-		textDecoration: 'none',
-		marginBottom: 12,
-		cursor: 'pointer',
-		background: 'none',
-		border: 'none',
-		padding: 0,
-		transition: 'color 0.2s ease',
-		'&:hover': {
-			color: '#00d4ff'
-		}
-	},
-	title: {
-		fontFamily: '"Rajdhani", "Noto Sans KR", sans-serif',
-		fontSize: '2.6rem',
-		fontWeight: 700,
-		color: '#fff',
-		marginBottom: 6,
-		display: 'flex',
-		alignItems: 'center',
-		gap: 10
-	},
-	subtitle: {
-		fontFamily: '"Noto Sans KR", sans-serif',
-		fontSize: '1.25rem',
-		color: 'rgba(255, 255, 255, 0.5)',
-		marginBottom: 24
+		width: '100%'
 	},
 	// My rank card
 	myRankCard: {
@@ -479,7 +439,6 @@ function hashColor(key) {
 function AchievementUserRankingContent() {
 	const { classes, cx } = useStyles();
 	const dispatch = useDispatch();
-	const navigate = useNavigate();
 
 	const user = useSelector(state => state.auth.user);
 	const groupId = user?.reprGroup?.groupId;
@@ -525,9 +484,6 @@ function AchievementUserRankingContent() {
 	if (!userRanking || !userRanking.rankings) {
 		return (
 			<div className={classes.container}>
-				<button type="button" className={classes.backLink} onClick={() => navigate('/achievement-dashboard')}>
-					<span>←</span> 업적 대시보드로
-				</button>
 				<div className={classes.emptyState}>
 					<div className={classes.emptyIcon}>
 						<span role="img" aria-label="error">⚠️</span>
@@ -543,13 +499,6 @@ function AchievementUserRankingContent() {
 	if (totalActiveUsers === 0) {
 		return (
 			<div className={classes.container}>
-				<button type="button" className={classes.backLink} onClick={() => navigate('/achievement-dashboard')}>
-					<span>←</span> 업적 대시보드로
-				</button>
-				<div className={classes.title}>
-					<span role="img" aria-label="trophy">🏅</span>
-					<span>업적 랭킹</span>
-				</div>
 				<div className={classes.emptyState}>
 					<div className={classes.emptyIcon}>
 						<span role="img" aria-label="empty">👻</span>
@@ -666,17 +615,6 @@ function AchievementUserRankingContent() {
 
 	return (
 		<div className={classes.container}>
-			<button type="button" className={classes.backLink} onClick={() => navigate('/achievement-dashboard')}>
-				<span>←</span> 업적 대시보드로
-			</button>
-			<div className={classes.title}>
-				<span role="img" aria-label="trophy">🏅</span>
-				<span>업적 랭킹</span>
-			</div>
-			<div className={classes.subtitle}>
-				해금한 업적 개수로 줄 세운 그룹 전체 리더보드
-			</div>
-
 			{renderMyRankCard()}
 
 			{/* Podium */}

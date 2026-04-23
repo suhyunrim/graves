@@ -2,12 +2,15 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { makeStyles } from 'tss-react/mui';
 import { keyframes } from '@emotion/react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import Tooltip from '@mui/material/Tooltip';
 import CircularProgress from '@mui/material/CircularProgress';
+import Tabs from '@mui/material/Tabs';
+import Tab from '@mui/material/Tab';
 import SearchIcon from '@mui/icons-material/Search';
 import * as Actions from './store/actions';
 import { CATEGORY_LABELS, CATEGORY_ORDER, TIER_COLORS, TIER_RANK } from './constants';
+import AchievementUserRankingContent from './AchievementUserRankingContent';
 
 const fadeInUp = keyframes`
 	0% { opacity: 0; transform: translateY(12px); }
@@ -49,7 +52,34 @@ const useStyles = makeStyles()((theme) => ({
 		fontFamily: '"Noto Sans KR", sans-serif',
 		fontSize: '1.3rem',
 		color: 'rgba(255, 255, 255, 0.5)',
-		marginBottom: 28
+		marginBottom: 16
+	},
+	tabs: {
+		marginBottom: 24,
+		minHeight: 48,
+		borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+		'& .MuiTabs-indicator': {
+			backgroundColor: '#00d4ff',
+			height: 3,
+			borderRadius: '3px 3px 0 0'
+		}
+	},
+	tab: {
+		fontFamily: '"Rajdhani", "Noto Sans KR", sans-serif',
+		fontSize: '1.35rem',
+		fontWeight: 700,
+		color: 'rgba(255, 255, 255, 0.5)',
+		textTransform: 'none',
+		minHeight: 48,
+		letterSpacing: '0.03em',
+		padding: '8px 20px',
+		transition: 'color 0.2s ease',
+		'&:hover': {
+			color: 'rgba(255, 255, 255, 0.85)'
+		},
+		'&.Mui-selected': {
+			color: '#00d4ff'
+		}
 	},
 	// Hero
 	hero: {
@@ -716,40 +746,6 @@ const useStyles = makeStyles()((theme) => ({
 		fontSize: '1.05rem',
 		color: 'rgba(255, 255, 255, 0.4)'
 	},
-	heroRankingLink: {
-		position: 'absolute',
-		top: 16,
-		right: 18,
-		display: 'inline-flex',
-		alignItems: 'center',
-		gap: 6,
-		zIndex: 2,
-		fontFamily: '"Rajdhani", "Noto Sans KR", sans-serif',
-		fontSize: '0.98rem',
-		fontWeight: 700,
-		color: '#00d4ff',
-		textDecoration: 'none',
-		padding: '6px 14px',
-		borderRadius: 10,
-		background: 'rgba(0, 212, 255, 0.1)',
-		border: '1px solid rgba(0, 212, 255, 0.4)',
-		letterSpacing: '0.04em',
-		transition: 'all 0.2s ease',
-		'&:hover': {
-			background: 'rgba(0, 212, 255, 0.22)',
-			borderColor: 'rgba(0, 212, 255, 0.7)',
-			boxShadow: '0 0 14px rgba(0, 212, 255, 0.3)'
-		},
-		[theme.breakpoints.down('sm')]: {
-			position: 'static',
-			marginBottom: 14,
-			alignSelf: 'flex-start'
-		}
-	},
-	heroRankingLinkIcon: {
-		fontSize: '1.1rem',
-		lineHeight: 1
-	},
 	searchBtn: {
 		display: 'inline-flex',
 		alignItems: 'center',
@@ -852,6 +848,18 @@ function formatRelative(iso) {
 function AchievementDashboardContent() {
 	const { classes, cx } = useStyles();
 	const dispatch = useDispatch();
+	const [searchParams, setSearchParams] = useSearchParams();
+	const tab = searchParams.get('tab') === 'ranking' ? 'ranking' : 'dashboard';
+
+	function handleTabChange(_, value) {
+		const next = new URLSearchParams(searchParams);
+		if (value === 'dashboard') {
+			next.delete('tab');
+		} else {
+			next.set('tab', value);
+		}
+		setSearchParams(next);
+	}
 
 	const user = useSelector(state => state.auth.user);
 	const groupId = user?.reprGroup?.groupId;
@@ -928,23 +936,43 @@ function AchievementDashboardContent() {
 		return arr;
 	}
 
+	const header = (
+		<>
+			<div className={classes.title}>
+				<span role="img" aria-label="trophy">🏆</span>
+				<span>업적 대시보드</span>
+			</div>
+			<div className={classes.subtitle}>그룹 전체의 도전 현황을 한눈에</div>
+			<Tabs value={tab} onChange={handleTabChange} className={classes.tabs}>
+				<Tab label="대시보드" value="dashboard" className={classes.tab} />
+				<Tab label="랭킹" value="ranking" className={classes.tab} />
+			</Tabs>
+		</>
+	);
+
+	if (tab === 'ranking') {
+		return (
+			<div className={classes.container}>
+				{header}
+				<AchievementUserRankingContent />
+			</div>
+		);
+	}
+
 	if (dashboardLoading && !dashboard) {
 		return (
 			<div className={classes.container}>
-				<div className={classes.title}>
-					<span role="img" aria-label="trophy">🏆</span>
-					<span>업적 대시보드</span>
-				</div>
-				<div className={classes.subtitle}>그룹 전체의 도전 현황을 한눈에</div>
+				{header}
 				<div className={classes.skeletonHero} />
 				<div className={classes.skeletonHeatmap} />
 			</div>
 		);
 	}
 
-	if (!dashboard) {
+	if (!dashboard || !dashboard.summary) {
 		return (
 			<div className={classes.container}>
+				{header}
 				<div className={classes.errorState}>
 					<div>
 						<span role="img" aria-label="error">⚠️</span>
@@ -955,23 +983,16 @@ function AchievementDashboardContent() {
 		);
 	}
 
-	const { summary, topUsers } = dashboard;
-	const untouched = Math.max(0, (summary?.totalAchievements || 0) - (summary?.unlockedAchievements || 0));
+	const summary = dashboard.summary || {};
+	const topUsers = dashboard.topUsers || [];
+	const untouched = Math.max(0, (summary.totalAchievements || 0) - (summary.unlockedAchievements || 0));
 
 	return (
 		<div className={classes.container}>
-			<div className={classes.title}>
-				<span role="img" aria-label="trophy">🏆</span>
-				<span>업적 대시보드</span>
-			</div>
-			<div className={classes.subtitle}>그룹 전체의 도전 현황을 한눈에</div>
+			{header}
 
 			{/* Hero */}
 			<div className={classes.hero}>
-				<Link to="/achievement-dashboard/user-ranking" className={classes.heroRankingLink}>
-					<span role="img" aria-label="leaderboard" className={classes.heroRankingLinkIcon}>🏅</span>
-					<span>전체 랭킹 보기 →</span>
-				</Link>
 				<div className={classes.heroStatsGrid}>
 					<div className={classes.heroStat}>
 						<div className={classes.heroStatLabel}>해금</div>

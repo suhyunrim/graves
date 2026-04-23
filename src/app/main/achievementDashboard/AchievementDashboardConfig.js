@@ -12,11 +12,6 @@ const AchievementDashboardConfig = {
 			component: React.lazy(() => import('./AchievementDashboard'))
 		},
 		{
-			path: '/achievement-dashboard/user-ranking',
-			auth: authRoles.user,
-			component: React.lazy(() => import('./AchievementUserRanking'))
-		},
-		{
 			path: '/achievement-dashboard/ranking/:achievementId',
 			auth: authRoles.user,
 			component: React.lazy(() => import('./AchievementRanking'))
