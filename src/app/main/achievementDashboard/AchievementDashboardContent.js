@@ -897,11 +897,13 @@ function AchievementDashboardContent() {
 	}
 
 	function findScrollContainer(el) {
+		const psActive = document.querySelector('.ps--active-y');
+		if (psActive && psActive.contains(el)) return psActive;
+
 		let node = el.parentElement;
 		while (node && node !== document.documentElement) {
 			const style = getComputedStyle(node);
-			const overflowY = style.overflowY;
-			if (overflowY !== 'visible' && node.scrollHeight > node.clientHeight + 1) {
+			if (style.overflowY !== 'visible' && node.scrollHeight > node.clientHeight + 1) {
 				return node;
 			}
 			node = node.parentElement;
