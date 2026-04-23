@@ -896,6 +896,18 @@ function AchievementDashboardContent() {
 		}
 	}
 
+	function findScrollContainer(el) {
+		let node = el.parentElement;
+		while (node && node !== document.body) {
+			const { overflowY } = getComputedStyle(node);
+			if ((overflowY === 'auto' || overflowY === 'scroll') && node.scrollHeight > node.clientHeight) {
+				return node;
+			}
+			node = node.parentElement;
+		}
+		return null;
+	}
+
 	function openAndScroll(cat) {
 		setOpenCats(prev => ({ ...prev, [cat]: true }));
 		if (groupId && !categories?.[cat]?.data) {
@@ -903,8 +915,16 @@ function AchievementDashboardContent() {
 		}
 		setTimeout(() => {
 			const el = sectionRefs.current[cat];
-			if (el) {
-				el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+			if (!el) return;
+			const container = findScrollContainer(el);
+			if (container) {
+				const elRect = el.getBoundingClientRect();
+				const containerRect = container.getBoundingClientRect();
+				const top = elRect.top - containerRect.top + container.scrollTop - 12;
+				container.scrollTo({ top, behavior: 'smooth' });
+			} else {
+				const y = el.getBoundingClientRect().top + window.scrollY - 80;
+				window.scrollTo({ top: y, behavior: 'smooth' });
 			}
 		}, 60);
 	}
