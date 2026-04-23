@@ -5,7 +5,9 @@ const initialState = {
 	dashboardLoading: false,
 	categories: {},
 	ranking: null,
-	rankingLoading: false
+	rankingLoading: false,
+	userRanking: null,
+	userRankingLoading: false
 };
 
 const achievementDashboardReducer = (state = initialState, action) => {
@@ -64,6 +66,15 @@ const achievementDashboardReducer = (state = initialState, action) => {
 		}
 		case Actions.GET_RANKING_ERROR: {
 			return { ...state, rankingLoading: false };
+		}
+		case Actions.GET_USER_RANKING_LOADING: {
+			return { ...state, userRankingLoading: true };
+		}
+		case Actions.GET_USER_RANKING: {
+			return { ...state, userRanking: action.payload, userRankingLoading: false };
+		}
+		case Actions.GET_USER_RANKING_ERROR: {
+			return { ...state, userRankingLoading: false };
 		}
 		case Actions.INVALIDATE_CACHE: {
 			return initialState;

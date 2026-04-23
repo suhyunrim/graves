@@ -716,6 +716,40 @@ const useStyles = makeStyles()((theme) => ({
 		fontSize: '1.05rem',
 		color: 'rgba(255, 255, 255, 0.4)'
 	},
+	heroRankingLink: {
+		position: 'absolute',
+		top: 16,
+		right: 18,
+		display: 'inline-flex',
+		alignItems: 'center',
+		gap: 6,
+		zIndex: 2,
+		fontFamily: '"Rajdhani", "Noto Sans KR", sans-serif',
+		fontSize: '0.98rem',
+		fontWeight: 700,
+		color: '#00d4ff',
+		textDecoration: 'none',
+		padding: '6px 14px',
+		borderRadius: 10,
+		background: 'rgba(0, 212, 255, 0.1)',
+		border: '1px solid rgba(0, 212, 255, 0.4)',
+		letterSpacing: '0.04em',
+		transition: 'all 0.2s ease',
+		'&:hover': {
+			background: 'rgba(0, 212, 255, 0.22)',
+			borderColor: 'rgba(0, 212, 255, 0.7)',
+			boxShadow: '0 0 14px rgba(0, 212, 255, 0.3)'
+		},
+		[theme.breakpoints.down('sm')]: {
+			position: 'static',
+			marginBottom: 14,
+			alignSelf: 'flex-start'
+		}
+	},
+	heroRankingLinkIcon: {
+		fontSize: '1.1rem',
+		lineHeight: 1
+	},
 	searchBtn: {
 		display: 'inline-flex',
 		alignItems: 'center',
@@ -934,6 +968,10 @@ function AchievementDashboardContent() {
 
 			{/* Hero */}
 			<div className={classes.hero}>
+				<Link to="/achievement-dashboard/user-ranking" className={classes.heroRankingLink}>
+					<span role="img" aria-label="leaderboard" className={classes.heroRankingLinkIcon}>🏅</span>
+					<span>전체 랭킹 보기 →</span>
+				</Link>
 				<div className={classes.heroStatsGrid}>
 					<div className={classes.heroStat}>
 						<div className={classes.heroStatLabel}>해금</div>
