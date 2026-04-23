@@ -670,6 +670,52 @@ const useStyles = makeStyles()((theme) => ({
 			maxWidth: 100
 		}
 	},
+	categoryTopMembers: {
+		display: 'flex',
+		alignItems: 'center',
+		gap: 6,
+		flexWrap: 'wrap'
+	},
+	categoryTopMember: {
+		display: 'inline-flex',
+		alignItems: 'center',
+		gap: 5,
+		padding: '2px 8px 2px 2px',
+		borderRadius: 12,
+		background: 'rgba(255, 255, 255, 0.04)',
+		border: '1px solid rgba(255, 255, 255, 0.08)',
+		textDecoration: 'none',
+		color: 'rgba(255, 255, 255, 0.85)',
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '0.95rem',
+		whiteSpace: 'nowrap',
+		transition: 'background 0.2s ease, border-color 0.2s ease, color 0.2s ease',
+		'&:hover': {
+			background: 'rgba(0, 212, 255, 0.12)',
+			borderColor: 'rgba(0, 212, 255, 0.35)',
+			color: '#fff'
+		}
+	},
+	categoryTopMemberAvatar: {
+		width: 20,
+		height: 20,
+		borderRadius: '50%',
+		border: '2px solid rgba(0, 0, 0, 0.25)',
+		fontSize: '0.7rem',
+		display: 'flex',
+		alignItems: 'center',
+		justifyContent: 'center',
+		objectFit: 'cover',
+		background: '#0f0f1a',
+		fontWeight: 700,
+		color: '#fff',
+		flexShrink: 0
+	},
+	categoryTopMemberName: {
+		maxWidth: 90,
+		overflow: 'hidden',
+		textOverflow: 'ellipsis'
+	},
 	recentTextWrap: {
 		minWidth: 0,
 		overflow: 'hidden',
@@ -1109,7 +1155,7 @@ function AchievementDashboardContent() {
 												>
 													{topTier.name}
 												</span>
-												<div className={classes.avatarStack}>
+												<div className={classes.categoryTopMembers}>
 													{topUnlockers.map(u => {
 														const rankClass =
 															u.rank === 1
@@ -1129,23 +1175,29 @@ function AchievementDashboardContent() {
 																enterTouchDelay={0}
 																leaveTouchDelay={2000}
 															>
-																{profileUrl ? (
-																	<img
-																		src={profileUrl}
-																		alt={u.name}
-																		className={cx(classes.avatar, rankClass)}
-																		style={{ objectFit: 'cover', background: '#0f0f1a' }}
-																	/>
-																) : (
-																	<div
-																		className={cx(classes.avatar, rankClass)}
-																		style={{
-																			background: `linear-gradient(135deg, ${hashColor(u.puuid)}, ${hashColor(`${u.puuid}x`)})`
-																		}}
-																	>
-																		{getInitial(u.name)}
-																	</div>
-																)}
+																<Link
+																	to={`/userinfo/${u.puuid}`}
+																	className={classes.categoryTopMember}
+																	onClick={e => e.stopPropagation()}
+																>
+																	{profileUrl ? (
+																		<img
+																			src={profileUrl}
+																			alt={u.name}
+																			className={cx(classes.categoryTopMemberAvatar, rankClass)}
+																		/>
+																	) : (
+																		<div
+																			className={cx(classes.categoryTopMemberAvatar, rankClass)}
+																			style={{
+																				background: `linear-gradient(135deg, ${hashColor(u.puuid)}, ${hashColor(`${u.puuid}x`)})`
+																			}}
+																		>
+																			{getInitial(u.name)}
+																		</div>
+																	)}
+																	<span className={classes.categoryTopMemberName}>{u.name}</span>
+																</Link>
 															</Tooltip>
 														);
 													})}

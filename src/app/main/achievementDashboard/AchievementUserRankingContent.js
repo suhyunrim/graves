@@ -67,14 +67,52 @@ const useStyles = makeStyles()((theme) => ({
 			gap: 14
 		}
 	},
-	myRankIcon: {
-		fontSize: '2.8rem',
-		lineHeight: 1,
+	myRankAvatarWrap: {
+		position: 'relative',
 		flexShrink: 0
+	},
+	myRankAvatar: {
+		width: 60,
+		height: 60,
+		borderRadius: '50%',
+		display: 'flex',
+		alignItems: 'center',
+		justifyContent: 'center',
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.6rem',
+		fontWeight: 700,
+		color: '#fff',
+		border: '2px solid rgba(0, 212, 255, 0.5)',
+		objectFit: 'cover',
+		background: '#0f0f1a',
+		boxShadow: '0 0 14px rgba(0, 212, 255, 0.35)'
+	},
+	myRankAvatarPodium: {
+		borderColor: '#FFD700',
+		boxShadow: '0 0 16px rgba(255, 215, 0, 0.55)'
+	},
+	myRankMedalOverlay: {
+		position: 'absolute',
+		bottom: -4,
+		right: -4,
+		fontSize: '1.8rem',
+		lineHeight: 1,
+		filter: 'drop-shadow(0 0 4px rgba(0, 0, 0, 0.6))'
 	},
 	myRankMain: {
 		flex: 1,
 		minWidth: 0
+	},
+	myRankName: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.4rem',
+		fontWeight: 700,
+		color: '#fff',
+		marginTop: 2,
+		marginBottom: 2,
+		whiteSpace: 'nowrap',
+		overflow: 'hidden',
+		textOverflow: 'ellipsis'
 	},
 	myRankLabel: {
 		fontFamily: '"Rajdhani", "Noto Sans KR", sans-serif',
@@ -529,21 +567,46 @@ function AchievementUserRankingContent() {
 
 		const isPodium = myEntry.rank <= 3 && myEntry.unlockCount > 0;
 		const isZero = (myEntry.unlockCount || 0) === 0;
-		const medal = myEntry.rank === 1 ? '🥇' : myEntry.rank === 2 ? '🥈' : myEntry.rank === 3 ? '🥉' : '🎯';
+		const medal = myEntry.rank === 1 ? '🥇' : myEntry.rank === 2 ? '🥈' : myEntry.rank === 3 ? '🥉' : null;
 		const medalLabel =
-			myEntry.rank === 1 ? 'first place' : myEntry.rank === 2 ? 'second place' : myEntry.rank === 3 ? 'third place' : 'target';
+			myEntry.rank === 1 ? 'first place' : myEntry.rank === 2 ? 'second place' : myEntry.rank === 3 ? 'third place' : null;
+		const profileUrl = getProfileIconUrl(myEntry.profileIconId);
+
+		const avatarNode = (
+			<div className={classes.myRankAvatarWrap}>
+				{profileUrl ? (
+					<img
+						src={profileUrl}
+						alt={myEntry.name}
+						className={cx(classes.myRankAvatar, isPodium && classes.myRankAvatarPodium)}
+					/>
+				) : (
+					<div
+						className={cx(classes.myRankAvatar, isPodium && classes.myRankAvatarPodium)}
+						style={{
+							background: `linear-gradient(135deg, ${hashColor(myEntry.puuid)}, ${hashColor(`${myEntry.puuid}x`)})`
+						}}
+					>
+						{getInitial(myEntry.name)}
+					</div>
+				)}
+				{medal && (
+					<span role="img" aria-label={medalLabel} className={classes.myRankMedalOverlay}>
+						{medal}
+					</span>
+				)}
+			</div>
+		);
 
 		if (isZero) {
 			return (
 				<div className={cx(classes.myRankCard, classes.myRankEmpty)}>
 					<div className={classes.myRankRow}>
-						<span role="img" aria-label="spark" className={classes.myRankIcon}>⚡</span>
+						{avatarNode}
 						<div className={classes.myRankMain}>
 							<div className={classes.myRankLabel}>내 순위</div>
-							<div className={classes.myRankValue}>
-								아직 업적이 없어요
-							</div>
-							<div className={classes.myRankSub}>첫 내전을 시작해보세요!</div>
+							<div className={classes.myRankName}>{myEntry.name}</div>
+							<div className={classes.myRankSub}>아직 업적이 없어요 · 첫 내전을 시작해보세요!</div>
 						</div>
 					</div>
 				</div>
@@ -553,11 +616,12 @@ function AchievementUserRankingContent() {
 		return (
 			<div className={cx(classes.myRankCard, isPodium && classes.myRankPodium)}>
 				<div className={classes.myRankRow}>
-					<span role="img" aria-label={medalLabel} className={classes.myRankIcon}>{medal}</span>
+					{avatarNode}
 					<div className={classes.myRankMain}>
 						<div className={classes.myRankLabel}>
 							{isPodium ? `${myEntry.rank}위를 달성했어요!` : '내 순위'}
 						</div>
+						<div className={classes.myRankName}>{myEntry.name}</div>
 						<div className={classes.myRankValue}>
 							{myEntry.rank}
 							<span className={classes.myRankUnit}>/ {totalActiveUsers}</span>
