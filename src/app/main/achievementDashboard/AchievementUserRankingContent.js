@@ -6,9 +6,9 @@ import { Link } from 'react-router-dom';
 import TextField from '@mui/material/TextField';
 import InputAdornment from '@mui/material/InputAdornment';
 import SearchIcon from '@mui/icons-material/Search';
-import CircularProgress from '@mui/material/CircularProgress';
 import camilleRiotAuthService from 'app/services/camilleRiotAuthService';
 import getLatesetRiotDataVersion from 'app/utility/getLatesetRiotDataVersion';
+import { AchievementUserRankingSkeleton } from '../components/SkeletonLoaders';
 import * as Actions from './store/actions';
 
 const fadeInUp = keyframes`
@@ -438,12 +438,6 @@ const useStyles = makeStyles()((theme) => ({
 		fontWeight: 400,
 		marginLeft: 2
 	},
-	// Loading / empty
-	loadingWrap: {
-		display: 'flex',
-		justifyContent: 'center',
-		padding: '80px 0'
-	},
 	emptyState: {
 		padding: '80px 20px',
 		textAlign: 'center'
@@ -520,9 +514,7 @@ function AchievementUserRankingContent() {
 	if (loading && !userRanking) {
 		return (
 			<div className={classes.container}>
-				<div className={classes.loadingWrap}>
-					<CircularProgress size={36} sx={{ color: '#00d4ff' }} />
-				</div>
+				<AchievementUserRankingSkeleton />
 			</div>
 		);
 	}

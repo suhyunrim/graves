@@ -576,12 +576,292 @@ function BalanceReportSkeleton() {
 	);
 }
 
+function AchievementDashboardSkeleton() {
+	return (
+		<div>
+			{/* Hero */}
+			<div
+				style={{
+					background: 'linear-gradient(135deg, #181830 0%, #0f0f1a 100%)',
+					border: '1px solid rgba(0, 212, 255, 0.18)',
+					borderRadius: 20,
+					padding: '28px 32px',
+					marginBottom: 24
+				}}
+			>
+				<div
+					style={{
+						display: 'grid',
+						gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+						gap: 16,
+						marginBottom: 24
+					}}
+				>
+					{Array.from({ length: 4 }).map((_, i) => (
+						<div
+							key={i}
+							style={{
+								padding: '16px 20px',
+								borderRadius: 14,
+								background: 'rgba(255, 255, 255, 0.03)',
+								border: '1px solid rgba(255, 255, 255, 0.06)'
+							}}
+						>
+							<Skeleton {...skeletonProps} variant="text" width="40%" height={14} />
+							<Skeleton
+								{...skeletonProps}
+								variant="text"
+								width="70%"
+								height={36}
+								style={{ ...skeletonProps.style, marginTop: 6 }}
+							/>
+							<Skeleton
+								{...skeletonProps}
+								variant="text"
+								width="50%"
+								height={12}
+								style={{ ...skeletonProps.style, marginTop: 4 }}
+							/>
+						</div>
+					))}
+				</div>
+				<Skeleton
+					{...skeletonProps}
+					variant="text"
+					width={100}
+					height={14}
+					style={{ ...skeletonProps.style, marginBottom: 10 }}
+				/>
+				<div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+					{Array.from({ length: 3 }).map((_, i) => (
+						<Skeleton
+							key={i}
+							{...skeletonProps}
+							variant="rectangular"
+							width={200}
+							height={48}
+							style={{ ...skeletonProps.style, borderRadius: 12 }}
+						/>
+					))}
+				</div>
+			</div>
+
+			{/* Heatmap */}
+			<Skeleton
+				{...skeletonProps}
+				variant="text"
+				width={180}
+				height={26}
+				style={{ ...skeletonProps.style, marginBottom: 14 }}
+			/>
+			<div
+				style={{
+					background: 'linear-gradient(135deg, #1a1a2e 0%, #0f0f1a 100%)',
+					border: '1px solid rgba(0, 212, 255, 0.18)',
+					borderRadius: 20,
+					padding: '20px 24px',
+					marginBottom: 24
+				}}
+			>
+				{Array.from({ length: 8 }).map((_, i) => (
+					<div
+						key={i}
+						style={{
+							display: 'grid',
+							gridTemplateColumns: '140px 1fr 64px',
+							alignItems: 'center',
+							gap: 14,
+							padding: '8px 0'
+						}}
+					>
+						<Skeleton {...skeletonProps} variant="text" width="80%" height={18} />
+						<Skeleton
+							{...skeletonProps}
+							variant="rectangular"
+							width={`${40 + Math.random() * 55}%`}
+							height={16}
+							style={{ ...skeletonProps.style, borderRadius: 8 }}
+						/>
+						<Skeleton {...skeletonProps} variant="text" width={36} height={18} style={{ marginLeft: 'auto' }} />
+					</div>
+				))}
+			</div>
+
+			{/* Categories */}
+			<Skeleton
+				{...skeletonProps}
+				variant="text"
+				width={180}
+				height={26}
+				style={{ ...skeletonProps.style, marginBottom: 14 }}
+			/>
+			{Array.from({ length: 6 }).map((_, i) => (
+				<div
+					key={i}
+					style={{
+						marginBottom: 14,
+						border: '1px solid rgba(255, 255, 255, 0.06)',
+						borderRadius: 16,
+						background: 'rgba(255, 255, 255, 0.02)',
+						padding: '16px 20px',
+						display: 'flex',
+						alignItems: 'center',
+						gap: 14
+					}}
+				>
+					<div style={{ flex: 1, minWidth: 0 }}>
+						<Skeleton {...skeletonProps} variant="text" width="30%" height={22} />
+						<Skeleton
+							{...skeletonProps}
+							variant="text"
+							width="60%"
+							height={16}
+							style={{ ...skeletonProps.style, marginTop: 4 }}
+						/>
+					</div>
+					<Skeleton
+						{...skeletonProps}
+						variant="rectangular"
+						width={120}
+						height={8}
+						style={{ ...skeletonProps.style, borderRadius: 4 }}
+					/>
+					<Skeleton {...skeletonProps} variant="text" width={36} height={18} />
+				</div>
+			))}
+		</div>
+	);
+}
+
+function AchievementUserRankingSkeleton() {
+	return (
+		<div>
+			{/* My rank card */}
+			<div
+				style={{
+					background: 'linear-gradient(135deg, rgba(0, 212, 255, 0.12) 0%, rgba(0, 102, 255, 0.06) 100%)',
+					border: '1px solid rgba(0, 212, 255, 0.4)',
+					borderRadius: 20,
+					padding: '22px 28px',
+					marginBottom: 24,
+					display: 'flex',
+					alignItems: 'center',
+					gap: 18
+				}}
+			>
+				<Skeleton {...skeletonProps} variant="circular" width={60} height={60} />
+				<div style={{ flex: 1 }}>
+					<Skeleton {...skeletonProps} variant="text" width={80} height={14} />
+					<Skeleton
+						{...skeletonProps}
+						variant="text"
+						width={160}
+						height={22}
+						style={{ ...skeletonProps.style, marginTop: 4 }}
+					/>
+					<Skeleton
+						{...skeletonProps}
+						variant="text"
+						width={100}
+						height={32}
+						style={{ ...skeletonProps.style, marginTop: 4 }}
+					/>
+				</div>
+				<Skeleton {...skeletonProps} variant="text" width={80} height={28} />
+			</div>
+
+			{/* Podium */}
+			<div
+				style={{
+					display: 'grid',
+					gridTemplateColumns: '1fr 1.15fr 1fr',
+					gap: 14,
+					alignItems: 'end',
+					marginBottom: 24
+				}}
+			>
+				{[200, 230, 180].map((h, i) => (
+					<div
+						key={i}
+						style={{
+							borderRadius: 18,
+							padding: '20px 16px',
+							background: 'linear-gradient(135deg, #1a1a2e 0%, #0f0f1a 100%)',
+							border: '1px solid rgba(255, 255, 255, 0.08)',
+							minHeight: h,
+							display: 'flex',
+							flexDirection: 'column',
+							alignItems: 'center',
+							gap: 10
+						}}
+					>
+						<Skeleton {...skeletonProps} variant="text" width={40} height={40} />
+						<Skeleton {...skeletonProps} variant="circular" width={56} height={56} />
+						<Skeleton {...skeletonProps} variant="text" width="70%" height={22} />
+						<Skeleton {...skeletonProps} variant="text" width={60} height={28} />
+					</div>
+				))}
+			</div>
+
+			{/* Search bar */}
+			<div style={{ display: 'flex', gap: 12, marginBottom: 14 }}>
+				<Skeleton
+					{...skeletonProps}
+					variant="rectangular"
+					width={260}
+					height={40}
+					style={{ ...skeletonProps.style, borderRadius: 8 }}
+				/>
+				<Skeleton {...skeletonProps} variant="text" width={200} height={20} />
+			</div>
+
+			{/* List */}
+			<div
+				style={{
+					background: 'linear-gradient(135deg, #1a1a2e 0%, #0f0f1a 100%)',
+					border: '1px solid rgba(0, 212, 255, 0.18)',
+					borderRadius: 18
+				}}
+			>
+				{Array.from({ length: 10 }).map((_, i) => (
+					<div
+						key={i}
+						style={{
+							display: 'grid',
+							gridTemplateColumns: '60px 1fr 100px',
+							alignItems: 'center',
+							padding: '12px 20px',
+							borderBottom: '1px solid rgba(255, 255, 255, 0.04)',
+							gap: 12
+						}}
+					>
+						<Skeleton {...skeletonProps} variant="text" width={24} height={24} style={{ margin: '0 auto' }} />
+						<div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+							<Skeleton {...skeletonProps} variant="circular" width={32} height={32} />
+							<Skeleton {...skeletonProps} variant="text" width={`${100 + Math.random() * 120}px`} height={20} />
+						</div>
+						<Skeleton
+							{...skeletonProps}
+							variant="text"
+							width={40}
+							height={22}
+							style={{ marginLeft: 'auto' }}
+						/>
+					</div>
+				))}
+			</div>
+		</div>
+	);
+}
+
 export {
 	DashboardSkeleton,
 	RankingTableSkeleton,
 	MatchHistorySkeleton,
 	MyInfoSkeleton,
 	AchievementSkeleton,
+	AchievementDashboardSkeleton,
+	AchievementUserRankingSkeleton,
 	ChampionTableSkeleton,
 	SettingsSkeleton,
 	ChallengeListSkeleton,

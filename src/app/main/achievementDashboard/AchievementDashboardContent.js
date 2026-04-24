@@ -9,6 +9,7 @@ import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import SearchIcon from '@mui/icons-material/Search';
 import getLatesetRiotDataVersion from 'app/utility/getLatesetRiotDataVersion';
+import { AchievementDashboardSkeleton } from '../components/SkeletonLoaders';
 import * as Actions from './store/actions';
 import { CATEGORY_LABELS, CATEGORY_ORDER, TIER_COLORS, TIER_RANK } from './constants';
 import AchievementUserRankingContent from './AchievementUserRankingContent';
@@ -759,22 +760,6 @@ const useStyles = makeStyles()((theme) => ({
 		fontSize: '1.3rem',
 		color: 'rgba(255, 255, 255, 0.5)'
 	},
-	skeletonHero: {
-		background: 'linear-gradient(135deg, #181830 0%, #0f0f1a 100%)',
-		border: '1px solid rgba(0, 212, 255, 0.18)',
-		borderRadius: 20,
-		padding: 28,
-		marginBottom: 24,
-		height: 260
-	},
-	skeletonHeatmap: {
-		background: 'linear-gradient(135deg, #1a1a2e 0%, #0f0f1a 100%)',
-		border: '1px solid rgba(0, 212, 255, 0.18)',
-		borderRadius: 20,
-		padding: 28,
-		height: 360,
-		marginBottom: 24
-	}
 }));
 
 const SORT_OPTIONS = [
@@ -997,8 +982,7 @@ function AchievementDashboardContent() {
 		return (
 			<div className={classes.container}>
 				{header}
-				<div className={classes.skeletonHero} />
-				<div className={classes.skeletonHeatmap} />
+				<AchievementDashboardSkeleton />
 			</div>
 		);
 	}
