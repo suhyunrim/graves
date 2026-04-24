@@ -46,6 +46,32 @@ export default defineConfig({
 	},
 	build: {
 		outDir: 'build',
-		sourcemap: false
+		sourcemap: false,
+		chunkSizeWarningLimit: 700,
+		rollupOptions: {
+			output: {
+				manualChunks: {
+					'react-vendor': [
+						'react',
+						'react-dom',
+						'react-router-dom',
+						'react-redux',
+						'redux',
+						'redux-thunk'
+					],
+					'mui-vendor': [
+						'@mui/material',
+						'@mui/icons-material',
+						'@mui/lab',
+						'@emotion/react',
+						'@emotion/styled',
+						'tss-react'
+					],
+					'chart-vendor': ['chart.js', 'react-chartjs-2'],
+					'date-vendor': ['@mui/x-date-pickers', 'date-fns'],
+					'util-vendor': ['lodash', 'axios', 'clsx', 'mobile-detect', 'perfect-scrollbar']
+				}
+			}
+		}
 	}
 });
