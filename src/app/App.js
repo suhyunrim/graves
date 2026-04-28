@@ -7,6 +7,7 @@ import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import React from 'react';
 import * as Sentry from '@sentry/react';
 import { Analytics } from '@vercel/analytics/react';
+import { SpeedInsights } from '@vercel/speed-insights/react';
 import { Provider } from 'react-redux';
 import { BrowserRouter, useNavigate } from 'react-router-dom';
 import AppContext from './AppContext';
@@ -50,6 +51,7 @@ const App = () => {
 									</FuseTheme>
 								</FuseAuthorization>
 								<Analytics />
+								<SpeedInsights />
 							</BrowserRouter>
 						</Auth>
 					</LocalizationProvider>
