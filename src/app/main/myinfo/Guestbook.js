@@ -18,6 +18,8 @@ import FavoriteIcon from '@mui/icons-material/Favorite';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutlineOutlined';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
+import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutlineOutlined';
+import SubdirectoryArrowRightIcon from '@mui/icons-material/SubdirectoryArrowRight';
 import { makeStyles } from 'tss-react/mui';
 import { keyframes } from '@emotion/react';
 import { formatDistanceToNow } from 'date-fns';
@@ -154,6 +156,17 @@ const useStyles = makeStyles()(theme => ({
 			color: 'rgba(255, 255, 255, 0.3)'
 		}
 	},
+	cancelBtn: {
+		color: 'rgba(255, 255, 255, 0.55)',
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.15rem',
+		textTransform: 'none',
+		marginRight: 4,
+		'&:hover': {
+			color: '#fff',
+			background: 'rgba(255, 255, 255, 0.04)'
+		}
+	},
 	loginPrompt: {
 		display: 'flex',
 		alignItems: 'center',
@@ -201,6 +214,11 @@ const useStyles = makeStyles()(theme => ({
 		justifyContent: 'center',
 		padding: '40px 0'
 	},
+	threadGroup: {
+		display: 'flex',
+		flexDirection: 'column',
+		gap: 8
+	},
 	comment: {
 		padding: '14px 18px',
 		background: 'rgba(0, 0, 0, 0.22)',
@@ -214,6 +232,31 @@ const useStyles = makeStyles()(theme => ({
 	commentSecret: {
 		borderColor: 'rgba(255, 215, 0, 0.18)',
 		background: 'rgba(255, 215, 0, 0.04)'
+	},
+	commentDeleted: {
+		borderColor: 'rgba(255, 255, 255, 0.04)',
+		background: 'rgba(255, 255, 255, 0.025)'
+	},
+	replyWrapper: {
+		display: 'flex',
+		gap: 10,
+		marginLeft: 28,
+		[theme.breakpoints.down('sm')]: {
+			marginLeft: 14,
+			gap: 6
+		}
+	},
+	replyConnector: {
+		flexShrink: 0,
+		paddingTop: 14,
+		color: 'rgba(0, 212, 255, 0.45)',
+		'& svg': {
+			fontSize: '1.6rem'
+		}
+	},
+	replyComment: {
+		flex: 1,
+		background: 'rgba(0, 0, 0, 0.32)'
 	},
 	commentTop: {
 		display: 'flex',
@@ -233,6 +276,11 @@ const useStyles = makeStyles()(theme => ({
 		fontSize: '1.35rem',
 		fontWeight: 700,
 		color: '#fff'
+	},
+	authorNameDeleted: {
+		color: 'rgba(255, 255, 255, 0.4)',
+		fontStyle: 'italic',
+		fontWeight: 500
 	},
 	secretBadge: {
 		display: 'inline-flex',
@@ -271,11 +319,16 @@ const useStyles = makeStyles()(theme => ({
 		whiteSpace: 'pre-wrap',
 		wordBreak: 'break-word'
 	},
+	contentDeleted: {
+		color: 'rgba(255, 255, 255, 0.35)',
+		fontStyle: 'italic'
+	},
 	commentBottom: {
 		marginTop: 10,
 		display: 'flex',
 		alignItems: 'center',
-		gap: 4
+		gap: 4,
+		flexWrap: 'wrap'
 	},
 	likeBtn: {
 		display: 'inline-flex',
@@ -320,6 +373,42 @@ const useStyles = makeStyles()(theme => ({
 			color: '#00d4ff'
 		}
 	},
+	replyBtn: {
+		padding: '4px 10px',
+		borderRadius: 999,
+		color: 'rgba(255, 255, 255, 0.5)',
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.15rem',
+		textTransform: 'none',
+		minWidth: 0,
+		gap: 5,
+		'&:hover': {
+			color: '#00d4ff',
+			background: 'rgba(0, 212, 255, 0.08)'
+		},
+		'& svg': {
+			fontSize: '1.3rem'
+		}
+	},
+	replyBtnActive: {
+		color: '#00d4ff',
+		background: 'rgba(0, 212, 255, 0.08)'
+	},
+	replyFormWrapper: {
+		marginLeft: 28,
+		marginTop: 4,
+		marginBottom: 4,
+		[theme.breakpoints.down('sm')]: {
+			marginLeft: 14
+		}
+	},
+	replyForm: {
+		padding: 12,
+		background: 'rgba(0, 0, 0, 0.32)',
+		borderRadius: 12,
+		border: '1px solid rgba(0, 212, 255, 0.15)',
+		animation: `${fadeIn} 0.2s ease`
+	},
 	snackSuccess: {
 		'& .MuiSnackbarContent-root': {
 			background: '#51cf66',
@@ -347,6 +436,197 @@ function formatTimeAgo(iso) {
 	}
 }
 
+function CommentItem({
+	comment,
+	classes,
+	cx,
+	isReply,
+	canDelete,
+	canReply,
+	canLike,
+	isLikePending,
+	isReplyOpen,
+	onToggleLike,
+	onAskDelete,
+	onToggleReply,
+	onOpenLikers
+}) {
+	const isDeleted = comment.isDeleted;
+	const showLike = !isDeleted;
+	const showDelete = !isDeleted && canDelete;
+	const showReplyButton = !isDeleted && canReply;
+
+	return (
+		<div
+			className={cx(
+				classes.comment,
+				comment.isSecret && classes.commentSecret,
+				isDeleted && classes.commentDeleted,
+				isReply && classes.replyComment
+			)}
+		>
+			<div className={classes.commentTop}>
+				<div className={classes.commentMeta}>
+					<span
+						className={cx(classes.authorName, isDeleted && classes.authorNameDeleted)}
+					>
+						{isDeleted ? '[삭제된 댓글]' : comment.authorName}
+					</span>
+					{!isDeleted && comment.isSecret && (
+						<span className={classes.secretBadge}>
+							<LockOutlinedIcon /> 비밀글
+						</span>
+					)}
+					<span className={classes.timeAgo}>{formatTimeAgo(comment.createdAt)}</span>
+				</div>
+				{showDelete && (
+					<IconButton
+						size="small"
+						className={classes.deleteBtn}
+						onClick={() => onAskDelete(comment)}
+						aria-label="댓글 삭제"
+					>
+						<DeleteOutlineIcon fontSize="small" />
+					</IconButton>
+				)}
+			</div>
+
+			{!isDeleted && (
+				<div className={classes.content}>{comment.content}</div>
+			)}
+			{isDeleted && (
+				<div className={cx(classes.content, classes.contentDeleted)}>
+					삭제된 메시지입니다.
+				</div>
+			)}
+
+			{(showLike || showReplyButton) && (
+				<div className={classes.commentBottom}>
+					{showLike && (
+						<>
+							<Button
+								className={cx(
+									classes.likeBtn,
+									comment.likedByMe && classes.likeBtnActive,
+									!canLike && classes.likeBtnDisabled
+								)}
+								onClick={() => onToggleLike(comment)}
+								disabled={!canLike || isLikePending}
+								aria-label={comment.likedByMe ? '좋아요 취소' : '좋아요'}
+							>
+								{comment.likedByMe ? <FavoriteIcon /> : <FavoriteBorderIcon />}
+							</Button>
+							<Button
+								className={classes.likeCountBtn}
+								onClick={() => comment.likeCount > 0 && onOpenLikers(comment)}
+								disabled={comment.likeCount === 0}
+							>
+								{comment.likeCount}
+							</Button>
+						</>
+					)}
+					{showReplyButton && (
+						<Button
+							className={cx(classes.replyBtn, isReplyOpen && classes.replyBtnActive)}
+							onClick={() => onToggleReply(comment)}
+							aria-label="답글 작성"
+						>
+							<ChatBubbleOutlineIcon /> 답글
+						</Button>
+					)}
+				</div>
+			)}
+		</div>
+	);
+}
+
+function ReplyForm({ classes, cx, submitting, onSubmit, onCancel }) {
+	const [content, setContent] = useState('');
+	const [isSecret, setIsSecret] = useState(false);
+
+	const trimmedLen = content.trim().length;
+	const overLimit = trimmedLen > MAX_LEN;
+	const submitDisabled = submitting || trimmedLen === 0 || overLimit;
+
+	function handleSubmit() {
+		if (submitDisabled) return;
+		onSubmit({ content: content.trim(), isSecret }, () => {
+			setContent('');
+			setIsSecret(false);
+		});
+	}
+
+	return (
+		<div className={classes.replyForm}>
+			<TextField
+				className={classes.textField}
+				placeholder="답글을 입력하세요..."
+				multiline
+				minRows={2}
+				maxRows={6}
+				fullWidth
+				variant="outlined"
+				value={content}
+				onChange={e => setContent(e.target.value)}
+				disabled={submitting}
+				autoFocus
+			/>
+			<div className={classes.formFooter}>
+				<div className={classes.leftFooter}>
+					<FormControlLabel
+						className={classes.secretLabel}
+						control={
+							<Checkbox
+								size="small"
+								checked={isSecret}
+								onChange={e => setIsSecret(e.target.checked)}
+								disabled={submitting}
+							/>
+						}
+						label="비밀글"
+					/>
+					<span className={cx(classes.charCount, overLimit && classes.charCountOver)}>
+						{trimmedLen} / {MAX_LEN}
+					</span>
+				</div>
+				<div>
+					<Button className={classes.cancelBtn} onClick={onCancel} disabled={submitting}>
+						취소
+					</Button>
+					<Button className={classes.submitBtn} onClick={handleSubmit} disabled={submitDisabled}>
+						{submitting ? <CircularProgress size={16} style={{ color: '#000' }} /> : '답글 작성'}
+					</Button>
+				</div>
+			</div>
+		</div>
+	);
+}
+
+function findCommentById(comments, id) {
+	for (const c of comments) {
+		if (c.id === id) return { comment: c, parentId: null };
+		if (c.replies) {
+			for (const r of c.replies) {
+				if (r.id === id) return { comment: r, parentId: c.id };
+			}
+		}
+	}
+	return null;
+}
+
+function updateCommentById(comments, id, updater) {
+	return comments.map(c => {
+		if (c.id === id) return updater(c);
+		if (c.replies && c.replies.some(r => r.id === id)) {
+			return {
+				...c,
+				replies: c.replies.map(r => (r.id === id ? updater(r) : r))
+			};
+		}
+		return c;
+	});
+}
+
 function Guestbook({ groupId, puuid }) {
 	const { classes, cx } = useStyles();
 	const user = useSelector(state => state.auth.user);
@@ -359,6 +639,8 @@ function Guestbook({ groupId, puuid }) {
 	const [content, setContent] = useState('');
 	const [isSecret, setIsSecret] = useState(false);
 	const [submitting, setSubmitting] = useState(false);
+	const [replySubmittingId, setReplySubmittingId] = useState(null);
+	const [openReplyId, setOpenReplyId] = useState(null);
 	const [pendingLikeIds, setPendingLikeIds] = useState({});
 	const [likersDialog, setLikersDialog] = useState({ open: false, commentId: null });
 	const [confirmDelete, setConfirmDelete] = useState({ open: false, commentId: null });
@@ -372,15 +654,16 @@ function Guestbook({ groupId, puuid }) {
 		if (!groupId || !puuid) return;
 		setComments(null);
 		setLoadError(false);
+		setOpenReplyId(null);
 		fetchProfileComments(groupId, puuid)
-			.then(result => setComments(result || []))
+			.then(result => setComments(Array.isArray(result) ? result : []))
 			.catch(() => {
 				setComments([]);
 				setLoadError(true);
 			});
 	}, [groupId, puuid]);
 
-	function handleSubmit() {
+	function handleSubmitTopLevel() {
 		const trimmed = content.trim();
 		if (!trimmed || submitting) return;
 		if (trimmed.length > MAX_LEN) {
@@ -388,9 +671,9 @@ function Guestbook({ groupId, puuid }) {
 			return;
 		}
 		setSubmitting(true);
-		createProfileComment(groupId, puuid, trimmed, isSecret)
+		createProfileComment(groupId, puuid, trimmed, isSecret, null)
 			.then(newComment => {
-				setComments(prev => [newComment, ...(prev || [])]);
+				setComments(prev => [{ ...newComment, replies: newComment.replies || [] }, ...(prev || [])]);
 				setContent('');
 				setIsSecret(false);
 				showSnack('방명록이 등록되었습니다.');
@@ -404,14 +687,84 @@ function Guestbook({ groupId, puuid }) {
 			.finally(() => setSubmitting(false));
 	}
 
-	function handleDelete(commentId) {
+	function handleSubmitReply(target, payload, resetForm) {
+		if (replySubmittingId) return;
+		setReplySubmittingId(target.id);
+		createProfileComment(groupId, puuid, payload.content, payload.isSecret, target.id)
+			.then(newReply => {
+				const rootId = newReply.parentId || target.parentId || target.id;
+				setComments(prev =>
+					(prev || []).map(c => {
+						if (c.id !== rootId) return c;
+						const existingReplies = Array.isArray(c.replies) ? c.replies : [];
+						return { ...c, replies: [...existingReplies, newReply] };
+					})
+				);
+				setOpenReplyId(null);
+				resetForm();
+				showSnack('답글이 등록되었습니다.');
+			})
+			.catch(err => {
+				const msg =
+					(err && err.response && err.response.data && err.response.data.result) ||
+					'답글 등록에 실패했습니다.';
+				showSnack(msg, 'error');
+			})
+			.finally(() => setReplySubmittingId(null));
+	}
+
+	function handleAskDelete(comment) {
+		setConfirmDelete({ open: true, commentId: comment.id });
+	}
+
+	function handleConfirmDelete() {
+		const commentId = confirmDelete.commentId;
 		setConfirmDelete({ open: false, commentId: null });
-		const prev = comments;
-		setComments(curr => (curr || []).filter(c => c.id !== commentId));
+		if (!commentId) return;
+
+		const snapshot = comments;
+		const found = findCommentById(comments || [], commentId);
+
+		if (found) {
+			if (found.parentId !== null) {
+				setComments(prev =>
+					(prev || []).map(c => {
+						if (c.id !== found.parentId) return c;
+						return {
+							...c,
+							replies: (c.replies || []).filter(r => r.id !== commentId)
+						};
+					})
+				);
+			} else {
+				const top = found.comment;
+				const hasReplies = Array.isArray(top.replies) && top.replies.length > 0;
+				if (hasReplies) {
+					setComments(prev =>
+						(prev || []).map(c =>
+							c.id === commentId
+								? {
+										...c,
+										isDeleted: true,
+										content: null,
+										authorName: null,
+										authorDiscordId: null,
+										likeCount: 0,
+										likedByMe: false
+								  }
+								: c
+						)
+					);
+				} else {
+					setComments(prev => (prev || []).filter(c => c.id !== commentId));
+				}
+			}
+		}
+
 		deleteProfileComment(commentId)
 			.then(() => showSnack('삭제되었습니다.'))
 			.catch(err => {
-				setComments(prev);
+				setComments(snapshot);
 				const msg =
 					(err && err.response && err.response.data && err.response.data.result) ||
 					'삭제에 실패했습니다.';
@@ -419,18 +772,18 @@ function Guestbook({ groupId, puuid }) {
 			});
 	}
 
-	function handleToggleLike(commentId) {
+	function handleToggleLike(comment) {
 		if (!isLoggedIn) {
 			showSnack('로그인이 필요합니다.', 'error');
 			return;
 		}
+		const commentId = comment.id;
 		if (pendingLikeIds[commentId]) return;
 
 		setPendingLikeIds(prev => ({ ...prev, [commentId]: true }));
 		const snapshot = comments;
-		setComments(curr =>
-			(curr || []).map(c => {
-				if (c.id !== commentId) return c;
+		setComments(prev =>
+			updateCommentById(prev || [], commentId, c => {
 				const nextLiked = !c.likedByMe;
 				return {
 					...c,
@@ -443,12 +796,12 @@ function Guestbook({ groupId, puuid }) {
 		toggleProfileCommentLike(commentId)
 			.then(result => {
 				if (!result) return;
-				setComments(curr =>
-					(curr || []).map(c =>
-						c.id === commentId
-							? { ...c, likedByMe: result.liked, likeCount: result.likeCount }
-							: c
-					)
+				setComments(prev =>
+					updateCommentById(prev || [], commentId, c => ({
+						...c,
+						likedByMe: result.liked,
+						likeCount: result.likeCount
+					}))
 				);
 			})
 			.catch(() => {
@@ -464,7 +817,12 @@ function Guestbook({ groupId, puuid }) {
 			});
 	}
 
+	function handleToggleReply(comment) {
+		setOpenReplyId(prev => (prev === comment.id ? null : comment.id));
+	}
+
 	function canDelete(comment) {
+		if (comment.isDeleted) return false;
 		if (!isLoggedIn) return false;
 		return isAdmin || comment.authorDiscordId === myDiscordId;
 	}
@@ -473,6 +831,49 @@ function Guestbook({ groupId, puuid }) {
 	const overLimit = trimmedLen > MAX_LEN;
 	const submitDisabled = submitting || trimmedLen === 0 || overLimit;
 
+	const totalCount =
+		Array.isArray(comments) ?
+			comments.reduce(
+				(sum, c) => sum + (c.isDeleted ? 0 : 1) + (c.replies ? c.replies.length : 0),
+				0
+			)
+			: 0;
+
+	function renderCommentItem(comment, isReply) {
+		return (
+			<CommentItem
+				key={comment.id}
+				comment={comment}
+				classes={classes}
+				cx={cx}
+				isReply={isReply}
+				canDelete={canDelete(comment)}
+				canReply={isLoggedIn}
+				canLike={isLoggedIn}
+				isLikePending={Boolean(pendingLikeIds[comment.id])}
+				isReplyOpen={openReplyId === comment.id}
+				onToggleLike={handleToggleLike}
+				onAskDelete={handleAskDelete}
+				onToggleReply={handleToggleReply}
+				onOpenLikers={c => setLikersDialog({ open: true, commentId: c.id })}
+			/>
+		);
+	}
+
+	function renderReplyForm(parentComment) {
+		return (
+			<div className={classes.replyFormWrapper}>
+				<ReplyForm
+					classes={classes}
+					cx={cx}
+					submitting={replySubmittingId === parentComment.id}
+					onSubmit={(payload, reset) => handleSubmitReply(parentComment, payload, reset)}
+					onCancel={() => setOpenReplyId(null)}
+				/>
+			</div>
+		);
+	}
+
 	return (
 		<div className={classes.section}>
 			<div className={classes.header}>
@@ -480,9 +881,7 @@ function Guestbook({ groupId, puuid }) {
 					<span role="img" aria-label="guestbook">💬</span>
 					방명록
 				</div>
-				{Array.isArray(comments) && comments.length > 0 && (
-					<span className={classes.count}>· {comments.length}</span>
-				)}
+				{totalCount > 0 && <span className={classes.count}>· {totalCount}</span>}
 			</div>
 
 			{isLoggedIn ? (
@@ -513,15 +912,13 @@ function Guestbook({ groupId, puuid }) {
 								}
 								label="비밀글"
 							/>
-							<span
-								className={cx(classes.charCount, overLimit && classes.charCountOver)}
-							>
+							<span className={cx(classes.charCount, overLimit && classes.charCountOver)}>
 								{trimmedLen} / {MAX_LEN}
 							</span>
 						</div>
 						<Button
 							className={classes.submitBtn}
-							onClick={handleSubmit}
+							onClick={handleSubmitTopLevel}
 							disabled={submitDisabled}
 						>
 							{submitting ? <CircularProgress size={18} style={{ color: '#000' }} /> : '작성'}
@@ -533,10 +930,7 @@ function Guestbook({ groupId, puuid }) {
 					<span className={classes.loginText}>
 						<span role="img" aria-label="lock">🔒</span> 로그인하면 글을 남길 수 있어요
 					</span>
-					<Button
-						className={classes.loginBtn}
-						href="/login"
-					>
+					<Button className={classes.loginBtn} href="/login">
 						Discord로 로그인
 					</Button>
 				</div>
@@ -558,62 +952,24 @@ function Guestbook({ groupId, puuid }) {
 
 			{comments !== null && comments.length > 0 && (
 				<div className={classes.list}>
-					{comments.map(comment => {
-						const isPending = Boolean(pendingLikeIds[comment.id]);
-						return (
-							<div
-								key={comment.id}
-								className={cx(classes.comment, comment.isSecret && classes.commentSecret)}
-							>
-								<div className={classes.commentTop}>
-									<div className={classes.commentMeta}>
-										<span className={classes.authorName}>{comment.authorName}</span>
-										{comment.isSecret && (
-											<span className={classes.secretBadge}>
-												<LockOutlinedIcon /> 비밀글
-											</span>
-										)}
-										<span className={classes.timeAgo}>{formatTimeAgo(comment.createdAt)}</span>
-									</div>
-									{canDelete(comment) && (
-										<IconButton
-											size="small"
-											className={classes.deleteBtn}
-											onClick={() => setConfirmDelete({ open: true, commentId: comment.id })}
-											aria-label="댓글 삭제"
-										>
-											<DeleteOutlineIcon fontSize="small" />
-										</IconButton>
-									)}
-								</div>
-								<div className={classes.content}>{comment.content}</div>
-								<div className={classes.commentBottom}>
-									<Button
-										className={cx(
-											classes.likeBtn,
-											comment.likedByMe && classes.likeBtnActive,
-											!isLoggedIn && classes.likeBtnDisabled
-										)}
-										onClick={() => handleToggleLike(comment.id)}
-										disabled={!isLoggedIn || isPending}
-										aria-label={comment.likedByMe ? '좋아요 취소' : '좋아요'}
-									>
-										{comment.likedByMe ? <FavoriteIcon /> : <FavoriteBorderIcon />}
-									</Button>
-									<Button
-										className={classes.likeCountBtn}
-										onClick={() =>
-											comment.likeCount > 0 &&
-											setLikersDialog({ open: true, commentId: comment.id })
-										}
-										disabled={comment.likeCount === 0}
-									>
-										{comment.likeCount}
-									</Button>
-								</div>
-							</div>
-						);
-					})}
+					{comments.map(top => (
+						<div key={top.id} className={classes.threadGroup}>
+							{renderCommentItem(top, false)}
+							{openReplyId === top.id && renderReplyForm(top)}
+							{Array.isArray(top.replies) &&
+								top.replies.map(reply => (
+									<React.Fragment key={reply.id}>
+										<div className={classes.replyWrapper}>
+											<div className={classes.replyConnector}>
+												<SubdirectoryArrowRightIcon />
+											</div>
+											{renderCommentItem(reply, true)}
+										</div>
+										{openReplyId === reply.id && renderReplyForm(reply)}
+									</React.Fragment>
+								))}
+						</div>
+					))}
 				</div>
 			)}
 
@@ -640,7 +996,7 @@ function Guestbook({ groupId, puuid }) {
 					<DialogContentText
 						style={{ fontFamily: '"Noto Sans KR", sans-serif', color: 'rgba(255, 255, 255, 0.7)' }}
 					>
-						이 방명록을 삭제하시겠습니까?
+						이 글을 삭제하시겠습니까?
 					</DialogContentText>
 				</DialogContent>
 				<DialogActions>
@@ -651,7 +1007,7 @@ function Guestbook({ groupId, puuid }) {
 						취소
 					</Button>
 					<Button
-						onClick={() => handleDelete(confirmDelete.commentId)}
+						onClick={handleConfirmDelete}
 						style={{ color: '#ff6b6b', fontFamily: '"Noto Sans KR", sans-serif', fontWeight: 700 }}
 					>
 						삭제

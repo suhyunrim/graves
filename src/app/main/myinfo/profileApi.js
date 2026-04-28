@@ -6,11 +6,11 @@ export function fetchProfileComments(groupId, puuid) {
 		.then(res => res.data.result);
 }
 
-export function createProfileComment(groupId, puuid, content, isSecret) {
+export function createProfileComment(groupId, puuid, content, isSecret, parentId = null) {
 	return createCamilleAxios()
 		.post(
 			`/api/profile/${groupId}/${puuid}/comments`,
-			{ content, isSecret: !!isSecret },
+			{ content, isSecret: !!isSecret, parentId: parentId || null },
 			{ silentError: true }
 		)
 		.then(res => res.data.result);
