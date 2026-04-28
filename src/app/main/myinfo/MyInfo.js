@@ -24,6 +24,8 @@ import AchievementContent from '../achievement/AchievementContent';
 import achievementReducer from '../achievement/store/reducers';
 import MyInfoHeader from './MyInfoHeader';
 import RatingChart from './RatingChart';
+import VisitorCounter from './VisitorCounter';
+import Guestbook from './Guestbook';
 import reducer from './store/reducers';
 import * as Actions from './store/actions';
 
@@ -78,9 +80,19 @@ const useStyles = makeStyles()((theme) => ({
 		borderRadius: 16,
 		border: '1px solid rgba(0, 212, 255, 0.2)',
 		animation: `${fadeIn} 0.5s ease`,
+		flexWrap: 'wrap',
 		[theme.breakpoints.down('sm')]: {
 			gap: 16,
 			padding: 16
+		}
+	},
+	profileVisitor: {
+		marginLeft: 'auto',
+		[theme.breakpoints.down('sm')]: {
+			marginLeft: 0,
+			width: '100%',
+			display: 'flex',
+			justifyContent: 'flex-end'
 		}
 	},
 	profileIcon: {
@@ -745,6 +757,7 @@ function MyInfoPage(props) {
 
 	const { puuid } = useParams();
 	const myPuuid = localStorage.getItem('camille_riot_puuid');
+	const isDiscordLoggedIn = Boolean(localStorage.getItem('camille_discord_token'));
 	const isOtherUser = puuid && puuid !== myPuuid;
 	const user = useSelector(state => state.auth.user);
 	const scoreInfo = useSelector(({ MyInfo }) => MyInfo.myInfo.scoreInfo);
@@ -945,14 +958,28 @@ function MyInfoPage(props) {
 								</div>
 							)}
 						</div>
+						{user?.reprGroup?.groupId && (
+							<div className={classes.profileVisitor}>
+								<VisitorCounter
+									groupId={user.reprGroup.groupId}
+									puuid={puuid || myPuuid}
+									isLoggedIn={isDiscordLoggedIn}
+								/>
+							</div>
+						)}
 					</div>
 
 					<Tabs value={activeTab} onChange={(e, v) => setActiveTab(v)} className={classes.tabs}>
 						<Tab label="정보" className={classes.tab} />
 						<Tab label="업적" className={classes.tab} />
+						<Tab label="방명록" className={classes.tab} />
 					</Tabs>
 
 					{activeTab === 1 && <AchievementContent />}
+
+					{activeTab === 2 && user?.reprGroup?.groupId && (
+						<Guestbook groupId={user.reprGroup.groupId} puuid={puuid || myPuuid} />
+					)}
 
 					{activeTab === 0 && (
 						<>
