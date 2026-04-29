@@ -73,7 +73,7 @@ const useStyles = makeStyles()((theme) => ({
 	},
 	profileSection: {
 		display: 'flex',
-		alignItems: 'center',
+		alignItems: 'flex-start',
 		gap: 24,
 		marginBottom: 32,
 		padding: 24,
@@ -144,11 +144,17 @@ const useStyles = makeStyles()((theme) => ({
 		color: '#00d4ff',
 		fontWeight: 600
 	},
+	subInfoRow: {
+		display: 'flex',
+		alignItems: 'center',
+		gap: 12,
+		marginTop: 10,
+		flexWrap: 'wrap'
+	},
 	honorInfo: {
 		display: 'flex',
 		alignItems: 'center',
 		gap: 12,
-		marginTop: 8,
 		flexWrap: 'wrap'
 	},
 	honorTitle: {
@@ -952,26 +958,28 @@ function MyInfoPage(props) {
 							<div className={classes.summonerLevel}>
 								<span className={classes.levelBadge}>Lv. {summonerInfo.summonerLevel}</span>
 							</div>
-							{honorStats && (
-								<div className={classes.honorInfo}>
-									{honorStats.title && (
-										<span className={classes.honorTitle}>
-											<span role="img" aria-label="honor title">
-												{honorStats.title.emoji}
-											</span>{' '}
-											{honorStats.title.title}
-										</span>
-									)}
-									<span className={classes.honorPoints}>명예 포인트: {honorStats.received}</span>
-								</div>
-							)}
-							{user?.reprGroup?.groupId && (puuid || myPuuid) && (
-								<StatusMessage
-									groupId={user.reprGroup.groupId}
-									puuid={puuid || myPuuid}
-									editable={isDiscordLoggedIn && isMyPage && !scoreInfo.primaryPuuid}
-								/>
-							)}
+							<div className={classes.subInfoRow}>
+								{honorStats && (
+									<div className={classes.honorInfo}>
+										{honorStats.title && (
+											<span className={classes.honorTitle}>
+												<span role="img" aria-label="honor title">
+													{honorStats.title.emoji}
+												</span>{' '}
+												{honorStats.title.title}
+											</span>
+										)}
+										<span className={classes.honorPoints}>명예 포인트: {honorStats.received}</span>
+									</div>
+								)}
+								{user?.reprGroup?.groupId && (puuid || myPuuid) && (
+									<StatusMessage
+										groupId={user.reprGroup.groupId}
+										puuid={puuid || myPuuid}
+										editable={isDiscordLoggedIn && isMyPage && !scoreInfo.primaryPuuid}
+									/>
+								)}
+							</div>
 						</div>
 						{user?.reprGroup?.groupId && (
 							<div className={classes.profileVisitor}>

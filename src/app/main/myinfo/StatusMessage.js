@@ -33,7 +33,6 @@ const useStyles = makeStyles()(theme => ({
 		display: 'flex',
 		alignItems: 'center',
 		gap: 10,
-		marginTop: 12,
 		flexWrap: 'wrap',
 		animation: `${fadeIn} 0.3s ease`
 	},
