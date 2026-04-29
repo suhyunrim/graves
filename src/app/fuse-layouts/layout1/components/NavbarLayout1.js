@@ -9,8 +9,10 @@ import NavbarFoldedToggleButton from 'app/fuse-layouts/shared-components/NavbarF
 import NavbarMobileToggleButton from 'app/fuse-layouts/shared-components/NavbarMobileToggleButton';
 import Navigation from 'app/fuse-layouts/shared-components/Navigation';
 import UserNavbarHeader from 'app/fuse-layouts/shared-components/UserNavbarHeader';
+import NotificationBell from 'app/fuse-layouts/shared-components/notifications/NotificationBell';
 import clsx from 'clsx';
 import React from 'react';
+import { useSelector } from 'react-redux';
 
 const useStyles = makeStyles()({
 	root: {
@@ -53,6 +55,8 @@ const useStyles = makeStyles()({
 function NavbarLayout1(props) {
 	const { classes } = useStyles();
 	const theme = useTheme();
+	const userRole = useSelector(({ auth }) => auth.user?.role);
+	const isAuthenticated = !!(userRole && userRole.length > 0);
 
 	return (
         <div className={clsx('flex flex-col overflow-hidden h-full', classes.root, props.className)}>
@@ -64,6 +68,8 @@ function NavbarLayout1(props) {
 				<div className="flex flex-1 mx-8">
 					<Logo />
 				</div>
+
+				{isAuthenticated && <NotificationBell />}
 
 				<Box sx={{ display: { xs: 'none', lg: 'block' } }}>
 					<NavbarFoldedToggleButton className={clsx('w-40 h-40 p-0', classes.toggleButton)} />
