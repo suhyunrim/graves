@@ -81,7 +81,7 @@ const useStyles = makeStyles()((theme) => ({
 }));
 
 function SlideTransition(props) {
-	return <Slide {...props} direction="left" />;
+	return <Slide {...props} direction="up" />;
 }
 
 function FuseMessage() {
@@ -95,8 +95,8 @@ function FuseMessage() {
 
 	const {
 		message,
-		anchorOrigin = { vertical: 'top', horizontal: 'right' },
-		autoHideDuration = 3500,
+		anchorOrigin = { vertical: 'bottom', horizontal: 'right' },
+		autoHideDuration = 5000,
 		// eslint-disable-next-line no-unused-vars
 		variant: _variantKey,
 		...rest
