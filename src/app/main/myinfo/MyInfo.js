@@ -26,6 +26,7 @@ import MyInfoHeader from './MyInfoHeader';
 import RatingChart from './RatingChart';
 import VisitorCounter from './VisitorCounter';
 import Guestbook from './Guestbook';
+import StatusMessage from './StatusMessage';
 import reducer from './store/reducers';
 import * as Actions from './store/actions';
 
@@ -956,6 +957,13 @@ function MyInfoPage(props) {
 									)}
 									<span className={classes.honorPoints}>명예 포인트: {honorStats.received}</span>
 								</div>
+							)}
+							{user?.reprGroup?.groupId && (puuid || myPuuid) && (
+								<StatusMessage
+									groupId={user.reprGroup.groupId}
+									puuid={puuid || myPuuid}
+									editable={isDiscordLoggedIn && isMyPage && !scoreInfo.primaryPuuid}
+								/>
 							)}
 						</div>
 						{user?.reprGroup?.groupId && (

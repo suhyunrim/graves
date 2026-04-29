@@ -7,6 +7,7 @@ export const GET_MYINFO = '[MYINFO] GET MYINFO';
 export const REFRESH_CHAMPION_SCORES = '[MYINFO] REFRESH CHAMPION SCORES';
 export const TRY_REFRESH_CHAMPION_SCORES = '[MYINFO] TRY REFRESH CHAMPION SCORES';
 export const SET_SUB_ACCOUNT = '[MYINFO] SET SUB ACCOUNT';
+export const SET_STATUS_MESSAGE = '[MYINFO] SET STATUS MESSAGE';
 
 // const getTotalMatchCount = champData => champData.win + champData.lose;
 // const getWinRate = champData => Math.ceil((champData.win / getTotalMatchCount(champData)) * 100);
@@ -104,6 +105,48 @@ export function removeSubAccount(groupId) {
 				type: SET_SUB_ACCOUNT,
 				payload: null
 			});
+		});
+}
+
+export function updateStatusMessage(groupId, puuid, content) {
+	if (isSampleMode()) {
+		return dispatch => {
+			const payload = { content, updatedAt: new Date().toISOString() };
+			dispatch({ type: SET_STATUS_MESSAGE, payload });
+			return Promise.resolve(payload);
+		};
+	}
+
+	const request = createCamilleAxios().put(
+		'/api/user/status-message',
+		{ groupId, puuid, content },
+		{ silentError: true }
+	);
+
+	return dispatch =>
+		request.then(response => {
+			const result = response.data.result;
+			dispatch({ type: SET_STATUS_MESSAGE, payload: result });
+			return result;
+		});
+}
+
+export function deleteStatusMessage(groupId, puuid) {
+	if (isSampleMode()) {
+		return dispatch => {
+			dispatch({ type: SET_STATUS_MESSAGE, payload: null });
+			return Promise.resolve();
+		};
+	}
+
+	const request = createCamilleAxios().delete('/api/user/status-message', {
+		data: { groupId, puuid },
+		silentError: true
+	});
+
+	return dispatch =>
+		request.then(() => {
+			dispatch({ type: SET_STATUS_MESSAGE, payload: null });
 		});
 }
 

@@ -2,7 +2,8 @@ import * as Actions from '../actions';
 
 const initialState = {
 	scoreInfo: null,
-	isRefreshingChampionScores: false
+	isRefreshingChampionScores: false,
+	statusMessage: null
 };
 
 const myInfoReducer = (state = initialState, action) => {
@@ -26,13 +27,20 @@ const myInfoReducer = (state = initialState, action) => {
 				worstOpponents: stats.worstOpponents || [],
 				ratingHistory: stats.ratingHistory || [],
 				honorStats: action.payload.honorStats || null,
-				subAccount: action.payload.subAccount || null
+				subAccount: action.payload.subAccount || null,
+				statusMessage: action.payload.statusMessage || null
 			};
 		}
 		case Actions.SET_SUB_ACCOUNT: {
 			return {
 				...state,
 				subAccount: action.payload
+			};
+		}
+		case Actions.SET_STATUS_MESSAGE: {
+			return {
+				...state,
+				statusMessage: action.payload
 			};
 		}
 		case Actions.TRY_REFRESH_CHAMPION_SCORES: {
