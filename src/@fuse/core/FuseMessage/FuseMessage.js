@@ -19,21 +19,21 @@ const VARIANTS = {
 const useStyles = makeStyles()((theme) => ({
 	root: {
 		[theme.breakpoints.up('sm')]: {
-			minWidth: 320,
-			maxWidth: 520
+			minWidth: 360,
+			maxWidth: 620
 		}
 	},
 	content: {
 		position: 'relative',
 		display: 'flex',
 		alignItems: 'flex-start',
-		gap: 12,
-		minHeight: 56,
-		padding: '14px 16px 14px 20px',
+		gap: 14,
+		minHeight: 70,
+		padding: '18px 22px 18px 26px',
 		background: 'rgba(26, 26, 46, 0.96)',
 		backdropFilter: 'blur(8px)',
 		WebkitBackdropFilter: 'blur(8px)',
-		borderRadius: 10,
+		borderRadius: 12,
 		border: '1px solid rgba(255, 255, 255, 0.08)',
 		boxShadow: '0 12px 32px rgba(0, 0, 0, 0.45)',
 		color: '#fff',
@@ -51,22 +51,22 @@ const useStyles = makeStyles()((theme) => ({
 		display: 'flex',
 		alignItems: 'center',
 		justifyContent: 'center',
-		width: 28,
-		height: 28,
+		width: 36,
+		height: 36,
 		borderRadius: '50%',
 		marginTop: 2,
 		'& .material-icons': {
-			fontSize: 22
+			fontSize: 24
 		}
 	},
 	message: {
 		flex: 1,
 		fontFamily: '"Noto Sans KR", sans-serif',
-		fontSize: '0.95rem',
+		fontSize: '1.3rem',
 		lineHeight: 1.5,
 		color: '#fff',
 		wordBreak: 'break-word',
-		paddingTop: 4
+		paddingTop: 6
 	},
 	closeButton: {
 		flex: '0 0 auto',
@@ -119,7 +119,7 @@ function FuseMessage() {
 				</span>
 				<Typography className={classes.message}>{message}</Typography>
 				<IconButton aria-label="알림 닫기" size="small" onClick={close} className={classes.closeButton}>
-					<Icon style={{ fontSize: 18 }}>close</Icon>
+					<Icon style={{ fontSize: 22 }}>close</Icon>
 				</IconButton>
 			</div>
 		</Snackbar>
