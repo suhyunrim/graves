@@ -12,10 +12,10 @@ const IGNORED = [
 	'ResizeObserver loop',
 	'Functions that are interpolated in css calls',
 	'non-boolean attribute',
-	'nth-child',
-	// mock API가 빈 result를 주면 getLatesetRiotDataVersion이 크래시 — 멘션 검증과 무관
-	'getLatesetRiotDataVersion'
+	'nth-child'
 ];
+
+const FAKE_DDRAGON_VERSION = '14.10.1';
 
 const FAKE_PUUID = 'test-puuid-1234';
 const FAKE_DISCORD_ID = '999000111';
@@ -80,8 +80,8 @@ const FAKE_GET_INFO = {
 
 const FAKE_MEMBERS = {
 	result: [
-		{ puuid: 'puuid-alice', name: 'Alice', avatarUrl: null },
-		{ puuid: 'puuid-bob', name: 'Bob', avatarUrl: null }
+		{ puuid: 'puuid-alice', name: 'Alice', profileIconId: 1234 },
+		{ puuid: 'puuid-bob', name: 'Bob', profileIconId: 5678 }
 	]
 };
 
@@ -119,7 +119,7 @@ test('[멘션] Discord 로그인 + 방명록 탭 → MentionsInput 마운트 시
 							discordId: '111',
 							name: 'Alice',
 							puuid: 'puuid-alice',
-							avatarUrl: 'https://via.placeholder.com/64/00d4ff/ffffff?text=A'
+							profileIconId: 1234
 						},
 						content: 'hello world',
 						isSecret: false,
@@ -138,6 +138,30 @@ test('[멘션] Discord 로그인 + 방명록 탭 → MentionsInput 마운트 시
 		if (url.includes('/api/notifications')) return route.fulfill(json({ result: [] }));
 		// 그 외는 빈 result로 응답해서 에러 인터셉터 안 타게
 		return route.fulfill(json({ result: null }));
+	});
+
+	// ddragon 버전 API 모킹 — Playwright route는 역순 매칭이므로 /api/.* 라우트보다 나중에 등록해야
+	// ddragon의 api/versions.json이 이 핸들러로 먼저 들어옴. getLatesetRiotDataVersion이 응답의 첫 요소를
+	// 꺼내므로 배열 응답이 필요.
+	await page.route('https://ddragon.leagueoflegends.com/**', async route => {
+		const url = route.request().url();
+		if (url.endsWith('/api/versions.json')) {
+			return route.fulfill({
+				status: 200,
+				contentType: 'application/json',
+				body: JSON.stringify([FAKE_DDRAGON_VERSION])
+			});
+		}
+		// profileicon 등 정적 자산은 1x1 투명 PNG로 응답 — 잘못된 PNG면 MUI Avatar가 fallback으로 전환되며
+		// img 태그 자체가 사라져 alt 셀렉터로 잡을 수 없게 됨.
+		return route.fulfill({
+			status: 200,
+			contentType: 'image/png',
+			body: Buffer.from(
+				'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=',
+				'base64'
+			)
+		});
 	});
 
 	// localStorage에 가짜 Discord JWT + puuid 주입
@@ -163,7 +187,8 @@ test('[멘션] Discord 로그인 + 방명록 탭 → MentionsInput 마운트 시
 	const avatarImg = page.locator('img[alt="Alice"]').first();
 	await expect(avatarImg).toBeVisible();
 	const avatarSrc = await avatarImg.getAttribute('src');
-	expect(avatarSrc).toContain('placeholder.com');
+	expect(avatarSrc).toContain('ddragon.leagueoflegends.com');
+	expect(avatarSrc).toContain('/profileicon/1234.png');
 
 	const commentBox = page.getByText('hello world').locator('xpath=ancestor::*[1]/ancestor::*[1]');
 	await commentBox.screenshot({ path: 'test-results/comment-avatar.png' });

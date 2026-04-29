@@ -27,6 +27,7 @@ import { keyframes } from '@emotion/react';
 import { formatDistanceToNow } from 'date-fns';
 import koLocale from 'date-fns/locale/ko';
 import camilleRiotAuthService from 'app/services/camilleRiotAuthService';
+import { getProfileIconUrl } from 'app/main/challenge/ddragonUtils';
 import {
 	fetchProfileComments,
 	createProfileComment,
@@ -604,7 +605,7 @@ function CommentItem({
 	const showDelete = !isDeleted && canDelete;
 	const showReplyButton = !isDeleted && canReply;
 	const author = comment.author || null;
-	const avatarUrl = author?.avatarUrl || null;
+	const avatarUrl = getProfileIconUrl(author?.profileIconId);
 	const authorName = author?.name || null;
 	const avatarInitial = !isDeleted && authorName ? authorName[0] : '?';
 	const authorClickable = !isDeleted && Boolean(author?.puuid);

@@ -32,6 +32,12 @@ export function getSpellIcon(spellId) {
 	return `https://ddragon.leagueoflegends.com/cdn/${v}/img/spell/${key}.png`;
 }
 
+export function getProfileIconUrl(profileIconId) {
+	if (profileIconId == null) return null;
+	const v = getDataVersion() || '14.10.1';
+	return `https://ddragon.leagueoflegends.com/cdn/${v}/img/profileicon/${profileIconId}.png`;
+}
+
 export function getKeystoneIcon(perkId) {
 	// Community Dragon CDN for rune icons (more reliable than parsing runesReforged.json)
 	return `https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/perk-images/styles/${getPerkPath(perkId)}`;

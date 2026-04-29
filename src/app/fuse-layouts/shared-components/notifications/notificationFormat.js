@@ -1,5 +1,6 @@
 import { formatDistanceToNow, parseISO } from 'date-fns';
 import { ko } from 'date-fns/locale';
+import { getProfileIconUrl } from 'app/main/challenge/ddragonUtils';
 
 export function formatRelative(iso) {
 	if (!iso) return '';
@@ -110,7 +111,7 @@ export function getNavigationPath(group, myPuuid) {
 export function getActorAvatar(group) {
 	const a = group.actors?.[0];
 	if (!a) return null;
-	return a.avatarUrl || null;
+	return getProfileIconUrl(a.profileIconId);
 }
 
 export function getActorInitial(group) {
