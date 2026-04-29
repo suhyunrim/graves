@@ -109,7 +109,29 @@ test('[멘션] Discord 로그인 + 방명록 탭 → MentionsInput 마운트 시
 		if (url.includes('/api/user/getGroupList')) return route.fulfill(json(FAKE_GROUP_LIST));
 		if (url.includes('/api/user/getInfo')) return route.fulfill(json(FAKE_GET_INFO));
 		if (url.includes(`/api/group/${GROUP_ID}/members`)) return route.fulfill(json(FAKE_MEMBERS));
-		if (url.includes(`/api/profile/${GROUP_ID}/${FAKE_PUUID}/comments`)) return route.fulfill(json({ result: [] }));
+		if (url.includes(`/api/profile/${GROUP_ID}/${FAKE_PUUID}/comments`)) {
+			return route.fulfill(json({
+				result: [
+					{
+						id: 100,
+						parentId: null,
+						author: {
+							discordId: '111',
+							name: 'Alice',
+							puuid: 'puuid-alice',
+							avatarUrl: 'https://via.placeholder.com/64/00d4ff/ffffff?text=A'
+						},
+						content: 'hello world',
+						isSecret: false,
+						isDeleted: false,
+						likeCount: 0,
+						likedByMe: false,
+						createdAt: '2026-04-29T10:00:00.000Z',
+						replies: []
+					}
+				]
+			}));
+		}
 		if (url.includes(`/api/profile/${GROUP_ID}/${FAKE_PUUID}/visit`)) return route.fulfill(json({ result: { counted: false } }));
 		if (url.includes(`/api/profile/${GROUP_ID}/${FAKE_PUUID}/stats`)) return route.fulfill(json({ result: { today: 0, total: 0 } }));
 		if (url.includes('/api/notifications/unread-count')) return route.fulfill(json({ result: { count: 0 } }));
@@ -134,6 +156,17 @@ test('[멘션] Discord 로그인 + 방명록 탭 → MentionsInput 마운트 시
 	const guestbookTab = page.getByRole('tab', { name: '방명록' });
 	await expect(guestbookTab).toBeVisible({ timeout: 10000 });
 	await guestbookTab.click();
+
+	// 기존 댓글의 작성자 닉네임 + 아바타가 렌더링되어야 함
+	await expect(page.getByText('hello world')).toBeVisible({ timeout: 10000 });
+	await expect(page.getByText('Alice', { exact: true }).first()).toBeVisible();
+	const avatarImg = page.locator('img[alt="Alice"]').first();
+	await expect(avatarImg).toBeVisible();
+	const avatarSrc = await avatarImg.getAttribute('src');
+	expect(avatarSrc).toContain('placeholder.com');
+
+	const commentBox = page.getByText('hello world').locator('xpath=ancestor::*[1]/ancestor::*[1]');
+	await commentBox.screenshot({ path: 'test-results/comment-avatar.png' });
 
 	// MentionsInput의 textarea가 떠야 함 (Discord 로그인 상태에서만)
 	const textarea = page.locator('textarea').first();

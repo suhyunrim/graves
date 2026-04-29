@@ -1,8 +1,9 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useSelector } from 'react-redux';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { MentionsInput, Mention } from 'react-mentions';
 import {
+	Avatar,
 	Button,
 	IconButton,
 	Checkbox,
@@ -308,6 +309,8 @@ const useStyles = makeStyles()(theme => ({
 		gap: 8
 	},
 	comment: {
+		display: 'flex',
+		gap: 12,
 		padding: '14px 18px',
 		background: 'rgba(0, 0, 0, 0.22)',
 		borderRadius: 14,
@@ -315,11 +318,54 @@ const useStyles = makeStyles()(theme => ({
 		animation: `${fadeIn} 0.3s ease`,
 		scrollMarginTop: 96,
 		[theme.breakpoints.down('sm')]: {
-			padding: '12px 14px'
+			padding: '12px 14px',
+			gap: 10
 		}
 	},
 	commentHighlight: {
 		animation: `${flashHighlight} 1.8s ease`
+	},
+	avatar: {
+		width: 40,
+		height: 40,
+		flexShrink: 0,
+		border: '1px solid rgba(0, 212, 255, 0.25)',
+		background: 'linear-gradient(135deg, #1a1a2e 0%, #0f0f1a 100%)',
+		color: '#00d4ff',
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.2rem',
+		fontWeight: 700,
+		[theme.breakpoints.down('sm')]: {
+			width: 32,
+			height: 32,
+			fontSize: '1rem'
+		}
+	},
+	avatarReply: {
+		width: 32,
+		height: 32,
+		fontSize: '1rem',
+		[theme.breakpoints.down('sm')]: {
+			width: 28,
+			height: 28,
+			fontSize: '0.9rem'
+		}
+	},
+	avatarDeleted: {
+		opacity: 0.4,
+		borderColor: 'rgba(255, 255, 255, 0.1)'
+	},
+	avatarClickable: {
+		cursor: 'pointer',
+		transition: 'transform 0.15s ease, border-color 0.15s ease',
+		'&:hover': {
+			transform: 'scale(1.06)',
+			borderColor: 'rgba(0, 212, 255, 0.7)'
+		}
+	},
+	commentBody: {
+		flex: 1,
+		minWidth: 0
 	},
 	commentSecret: {
 		borderColor: 'rgba(255, 215, 0, 0.18)',
@@ -373,6 +419,13 @@ const useStyles = makeStyles()(theme => ({
 		color: 'rgba(255, 255, 255, 0.4)',
 		fontStyle: 'italic',
 		fontWeight: 500
+	},
+	authorNameClickable: {
+		cursor: 'pointer',
+		'&:hover': {
+			color: '#00d4ff',
+			textDecoration: 'underline'
+		}
 	},
 	secretBadge: {
 		display: 'inline-flex',
@@ -540,6 +593,7 @@ function CommentItem({
 	isReplyOpen,
 	isHighlighted,
 	members,
+	onAuthorClick,
 	onToggleLike,
 	onAskDelete,
 	onToggleReply,
@@ -549,6 +603,16 @@ function CommentItem({
 	const showLike = !isDeleted;
 	const showDelete = !isDeleted && canDelete;
 	const showReplyButton = !isDeleted && canReply;
+	const author = comment.author || null;
+	const avatarUrl = author?.avatarUrl || null;
+	const authorName = author?.name || null;
+	const avatarInitial = !isDeleted && authorName ? authorName[0] : '?';
+	const authorClickable = !isDeleted && Boolean(author?.puuid);
+	const handleAuthorClick = e => {
+		if (!authorClickable) return;
+		e.stopPropagation();
+		onAuthorClick(author);
+	};
 
 	return (
 		<div
@@ -561,47 +625,75 @@ function CommentItem({
 				isHighlighted && classes.commentHighlight
 			)}
 		>
-			<div className={classes.commentTop}>
-				<div className={classes.commentMeta}>
-					<span
-						className={cx(classes.authorName, isDeleted && classes.authorNameDeleted)}
-					>
-						{isDeleted ? '[삭제된 댓글]' : comment.authorName}
-					</span>
-					{!isDeleted && comment.isSecret && (
-						<span className={classes.secretBadge}>
-							<LockOutlinedIcon /> 비밀글
-						</span>
-					)}
-					<span className={classes.timeAgo}>{formatTimeAgo(comment.createdAt)}</span>
-				</div>
-				{showDelete && (
-					<IconButton
-						size="small"
-						className={classes.deleteBtn}
-						onClick={() => onAskDelete(comment)}
-						aria-label="댓글 삭제"
-					>
-						<DeleteOutlineIcon fontSize="small" />
-					</IconButton>
+			<Avatar
+				className={cx(
+					classes.avatar,
+					isReply && classes.avatarReply,
+					isDeleted && classes.avatarDeleted,
+					authorClickable && classes.avatarClickable
 				)}
-			</div>
-
-			{!isDeleted && (
-				<div className={classes.content}>
-					<MentionContent content={comment.content} members={members} />
+				src={!isDeleted ? avatarUrl || undefined : undefined}
+				alt={isDeleted ? '' : authorName || ''}
+				onClick={handleAuthorClick}
+			>
+				{avatarInitial}
+			</Avatar>
+			<div className={classes.commentBody}>
+				<div className={classes.commentTop}>
+					<div className={classes.commentMeta}>
+						<span
+							className={cx(
+								classes.authorName,
+								isDeleted && classes.authorNameDeleted,
+								authorClickable && classes.authorNameClickable
+							)}
+							onClick={handleAuthorClick}
+							role={authorClickable ? 'link' : undefined}
+							tabIndex={authorClickable ? 0 : undefined}
+							onKeyDown={
+								authorClickable
+									? e => {
+											if (e.key === 'Enter' || e.key === ' ') handleAuthorClick(e);
+									  }
+									: undefined
+							}
+						>
+							{isDeleted ? '[삭제된 댓글]' : authorName}
+						</span>
+						{!isDeleted && comment.isSecret && (
+							<span className={classes.secretBadge}>
+								<LockOutlinedIcon /> 비밀글
+							</span>
+						)}
+						<span className={classes.timeAgo}>{formatTimeAgo(comment.createdAt)}</span>
+					</div>
+					{showDelete && (
+						<IconButton
+							size="small"
+							className={classes.deleteBtn}
+							onClick={() => onAskDelete(comment)}
+							aria-label="댓글 삭제"
+						>
+							<DeleteOutlineIcon fontSize="small" />
+						</IconButton>
+					)}
 				</div>
-			)}
-			{isDeleted && (
-				<div className={cx(classes.content, classes.contentDeleted)}>
-					삭제된 메시지입니다.
-				</div>
-			)}
 
-			{(showLike || showReplyButton) && (
-				<div className={classes.commentBottom}>
-					{showLike && (
-						<>
+				{!isDeleted && (
+					<div className={classes.content}>
+						<MentionContent content={comment.content} members={members} />
+					</div>
+				)}
+				{isDeleted && (
+					<div className={cx(classes.content, classes.contentDeleted)}>
+						삭제된 메시지입니다.
+					</div>
+				)}
+
+				{(showLike || showReplyButton) && (
+					<div className={classes.commentBottom}>
+						{showLike && (
+							<>
 							<Button
 								className={cx(
 									classes.likeBtn,
@@ -634,6 +726,7 @@ function CommentItem({
 					)}
 				</div>
 			)}
+			</div>
 		</div>
 	);
 }
@@ -744,10 +837,18 @@ function updateCommentById(comments, id, updater) {
 function Guestbook({ groupId, puuid }) {
 	const { classes, cx } = useStyles();
 	const location = useLocation();
+	const navigate = useNavigate();
 	const user = useSelector(state => state.auth.user);
 	const myDiscordId = user?.data?.discordUser?.discordId || null;
+	const myPuuid = camilleRiotAuthService.getPuuid();
 	const isAdmin = Boolean(user?.reprGroup?.isAdmin);
 	const isLoggedIn = Boolean(camilleRiotAuthService.getDiscordToken()) && Boolean(myDiscordId);
+
+	function handleAuthorClick(author) {
+		if (!author?.puuid) return;
+		if (author.puuid === myPuuid) navigate('/myinfo');
+		else navigate(`/userinfo/${author.puuid}`);
+	}
 
 	const [comments, setComments] = useState(null);
 	const [loadError, setLoadError] = useState(false);
@@ -903,8 +1004,7 @@ function Guestbook({ groupId, puuid }) {
 										...c,
 										isDeleted: true,
 										content: null,
-										authorName: null,
-										authorDiscordId: null,
+										author: null,
 										likeCount: 0,
 										likedByMe: false
 								  }
@@ -980,7 +1080,7 @@ function Guestbook({ groupId, puuid }) {
 	function canDelete(comment) {
 		if (comment.isDeleted) return false;
 		if (!isLoggedIn) return false;
-		return isAdmin || comment.authorDiscordId === myDiscordId;
+		return isAdmin || comment.author?.discordId === myDiscordId;
 	}
 
 	const trimmedLen = plainText.trim().length;
@@ -1010,6 +1110,7 @@ function Guestbook({ groupId, puuid }) {
 				isReplyOpen={openReplyId === comment.id}
 				isHighlighted={highlightId === comment.id}
 				members={members}
+				onAuthorClick={handleAuthorClick}
 				onToggleLike={handleToggleLike}
 				onAskDelete={handleAskDelete}
 				onToggleReply={handleToggleReply}
