@@ -18,6 +18,7 @@ const TYPE_ICONS = {
 	guestbook_comment: 'chat_bubble',
 	guestbook_reply: 'reply',
 	guestbook_like: 'favorite',
+	guestbook_mention: 'alternate_email',
 	challenge_end: 'emoji_events',
 	achievement_unlock: 'military_tech',
 	season_end: 'workspace_premium'

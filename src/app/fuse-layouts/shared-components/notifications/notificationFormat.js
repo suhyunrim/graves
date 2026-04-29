@@ -45,6 +45,10 @@ export function formatMessage(group) {
 			const target = payload.isReply ? '답글' : '댓글';
 			return `${actors}이 내 ${target}을 좋아해요`;
 		}
+		case 'guestbook_mention': {
+			const head = `${actors}이 회원님을 멘션했어요`;
+			return payload.textPreview ? `${head}: ${payload.textPreview}` : head;
+		}
 		case 'challenge_end': {
 			const name = payload.challengeTitle || '챌린지';
 			const rank = payload.finalRank;
@@ -78,7 +82,8 @@ export function getNavigationPath(group, myPuuid) {
 	switch (group.type) {
 		case 'guestbook_comment':
 		case 'guestbook_reply':
-		case 'guestbook_like': {
+		case 'guestbook_like':
+		case 'guestbook_mention': {
 			const profilePuuid = payload.profilePuuid;
 			const commentId = payload.commentId;
 			const hash = commentId != null ? `#comment-${commentId}` : '';

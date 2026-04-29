@@ -45,3 +45,9 @@ export function fetchProfileVisitStats(groupId, puuid) {
 		.get(`/api/profile/${groupId}/${puuid}/stats`, { silentError: true })
 		.then(res => res.data.result);
 }
+
+export function fetchGroupMembers(groupId) {
+	return createCamilleAxios()
+		.get(`/api/group/${groupId}/members`, { silentError: true })
+		.then(res => res.data.result);
+}

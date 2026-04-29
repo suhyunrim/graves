@@ -1,9 +1,9 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { useLocation } from 'react-router-dom';
+import { MentionsInput, Mention } from 'react-mentions';
 import {
 	Button,
-	TextField,
 	IconButton,
 	Checkbox,
 	FormControlLabel,
@@ -30,9 +30,11 @@ import {
 	fetchProfileComments,
 	createProfileComment,
 	deleteProfileComment,
-	toggleProfileCommentLike
+	toggleProfileCommentLike,
+	fetchGroupMembers
 } from './profileApi';
 import LikersDialog from './LikersDialog';
+import MentionContent from './MentionContent';
 
 const fadeIn = keyframes`
 	0% { opacity: 0; transform: translateY(8px); }
@@ -45,6 +47,69 @@ const flashHighlight = keyframes`
 `;
 
 const MAX_LEN = 500;
+
+const MENTIONS_INPUT_STYLE = {
+	control: {
+		backgroundColor: 'transparent',
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.3rem',
+		fontWeight: 400,
+		lineHeight: 1.5
+	},
+	'&multiLine': {
+		control: {
+			minHeight: 64
+		},
+		highlighter: {
+			padding: '12px 14px',
+			border: '1px solid transparent',
+			boxSizing: 'border-box'
+		},
+		input: {
+			padding: '12px 14px',
+			border: 'none',
+			outline: 'none',
+			color: '#fff',
+			caretColor: '#00d4ff',
+			background: 'transparent',
+			boxSizing: 'border-box',
+			fontFamily: 'inherit',
+			fontSize: 'inherit',
+			lineHeight: 'inherit'
+		}
+	},
+	suggestions: {
+		zIndex: 1300,
+		list: {
+			background: '#1a1a2e',
+			border: '1px solid rgba(0, 212, 255, 0.3)',
+			borderRadius: 10,
+			boxShadow: '0 8px 32px rgba(0, 0, 0, 0.5)',
+			maxHeight: 240,
+			overflowY: 'auto',
+			padding: 4
+		},
+		item: {
+			padding: '8px 12px',
+			borderRadius: 8,
+			fontFamily: '"Noto Sans KR", sans-serif',
+			fontSize: '1.25rem',
+			color: 'rgba(255, 255, 255, 0.85)',
+			cursor: 'pointer',
+			'&focused': {
+				background: 'rgba(0, 212, 255, 0.18)',
+				color: '#00d4ff'
+			}
+		}
+	}
+};
+
+const MENTION_HIGHLIGHT_STYLE = {
+	backgroundColor: 'rgba(0, 212, 255, 0.18)',
+	color: '#00d4ff',
+	borderRadius: 4,
+	padding: '0 2px'
+};
 
 const useStyles = makeStyles()(theme => ({
 	section: {
@@ -92,23 +157,23 @@ const useStyles = makeStyles()(theme => ({
 		borderRadius: 14,
 		border: '1px solid rgba(255, 255, 255, 0.06)'
 	},
-	textField: {
-		'& .MuiInputBase-root': {
-			color: '#fff',
-			fontFamily: '"Noto Sans KR", sans-serif',
-			fontSize: '1.3rem',
-			background: 'rgba(0, 0, 0, 0.2)',
-			borderRadius: 10
-		},
-		'& .MuiOutlinedInput-notchedOutline': {
-			borderColor: 'rgba(255, 255, 255, 0.15)'
-		},
-		'& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline': {
+	mentionsWrap: {
+		background: 'rgba(0, 0, 0, 0.2)',
+		border: '1px solid rgba(255, 255, 255, 0.15)',
+		borderRadius: 10,
+		transition: 'border-color 0.2s ease',
+		'&:hover': {
 			borderColor: 'rgba(0, 212, 255, 0.4)'
 		},
-		'& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline': {
+		'&:focus-within': {
 			borderColor: '#00d4ff'
 		}
+	},
+	mentionsHint: {
+		marginTop: 6,
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.1rem',
+		color: 'rgba(255, 215, 0, 0.7)'
 	},
 	formFooter: {
 		display: 'flex',
@@ -457,6 +522,7 @@ function CommentItem({
 	isLikePending,
 	isReplyOpen,
 	isHighlighted,
+	members,
 	onToggleLike,
 	onAskDelete,
 	onToggleReply,
@@ -505,7 +571,9 @@ function CommentItem({
 			</div>
 
 			{!isDeleted && (
-				<div className={classes.content}>{comment.content}</div>
+				<div className={classes.content}>
+					<MentionContent content={comment.content} members={members} />
+				</div>
 			)}
 			{isDeleted && (
 				<div className={cx(classes.content, classes.contentDeleted)}>
@@ -553,11 +621,12 @@ function CommentItem({
 	);
 }
 
-function ReplyForm({ classes, cx, submitting, onSubmit, onCancel }) {
+function ReplyForm({ classes, cx, submitting, members, mentionsData, onSubmit, onCancel }) {
 	const [content, setContent] = useState('');
+	const [plainText, setPlainText] = useState('');
 	const [isSecret, setIsSecret] = useState(false);
 
-	const trimmedLen = content.trim().length;
+	const trimmedLen = plainText.trim().length;
 	const overLimit = trimmedLen > MAX_LEN;
 	const submitDisabled = submitting || trimmedLen === 0 || overLimit;
 
@@ -565,25 +634,40 @@ function ReplyForm({ classes, cx, submitting, onSubmit, onCancel }) {
 		if (submitDisabled) return;
 		onSubmit({ content: content.trim(), isSecret }, () => {
 			setContent('');
+			setPlainText('');
 			setIsSecret(false);
 		});
 	}
 
 	return (
 		<div className={classes.replyForm}>
-			<TextField
-				className={classes.textField}
-				placeholder="답글을 입력하세요..."
-				multiline
-				minRows={2}
-				maxRows={6}
-				fullWidth
-				variant="outlined"
-				value={content}
-				onChange={e => setContent(e.target.value)}
-				disabled={submitting}
-				autoFocus
-			/>
+			<div className={classes.mentionsWrap}>
+				<MentionsInput
+					value={content}
+					onChange={(e, newValue, newPlainText) => {
+						setContent(newValue);
+						setPlainText(newPlainText);
+					}}
+					placeholder="답글을 입력하세요... (@로 멘션)"
+					disabled={submitting}
+					autoFocus
+					allowSpaceInQuery={false}
+					style={MENTIONS_INPUT_STYLE}
+				>
+					<Mention
+						trigger="@"
+						markup="<@__id__>"
+						displayTransform={(id, display) => `@${display}`}
+						appendSpaceOnAdd
+						data={mentionsData}
+						style={MENTION_HIGHLIGHT_STYLE}
+						renderSuggestion={s => <span>@{s.display}</span>}
+					/>
+				</MentionsInput>
+			</div>
+			{isSecret && members && members.length > 0 && (
+				<div className={classes.mentionsHint}>비밀글에서는 멘션 알림이 가지 않아요.</div>
+			)}
 			<div className={classes.formFooter}>
 				<div className={classes.leftFooter}>
 					<FormControlLabel
@@ -651,6 +735,7 @@ function Guestbook({ groupId, puuid }) {
 	const [comments, setComments] = useState(null);
 	const [loadError, setLoadError] = useState(false);
 	const [content, setContent] = useState('');
+	const [plainText, setPlainText] = useState('');
 	const [isSecret, setIsSecret] = useState(false);
 	const [submitting, setSubmitting] = useState(false);
 	const [replySubmittingId, setReplySubmittingId] = useState(null);
@@ -660,6 +745,12 @@ function Guestbook({ groupId, puuid }) {
 	const [confirmDelete, setConfirmDelete] = useState({ open: false, commentId: null });
 	const [snack, setSnack] = useState({ open: false, message: '', type: 'success' });
 	const [highlightId, setHighlightId] = useState(null);
+	const [members, setMembers] = useState([]);
+
+	const mentionsData = useMemo(
+		() => (members || []).map(m => ({ id: m.puuid, display: m.name })),
+		[members]
+	);
 
 	const showSnack = useCallback((message, type = 'success') => {
 		setSnack({ open: true, message, type });
@@ -677,6 +768,13 @@ function Guestbook({ groupId, puuid }) {
 				setLoadError(true);
 			});
 	}, [groupId, puuid]);
+
+	useEffect(() => {
+		if (!groupId) return;
+		fetchGroupMembers(groupId)
+			.then(result => setMembers(Array.isArray(result) ? result : []))
+			.catch(() => setMembers([]));
+	}, [groupId]);
 
 	useEffect(() => {
 		if (!comments || comments.length === 0) return undefined;
@@ -703,8 +801,9 @@ function Guestbook({ groupId, puuid }) {
 
 	function handleSubmitTopLevel() {
 		const trimmed = content.trim();
+		const trimmedPlainLen = plainText.trim().length;
 		if (!trimmed || submitting) return;
-		if (trimmed.length > MAX_LEN) {
+		if (trimmedPlainLen > MAX_LEN) {
 			showSnack(`최대 ${MAX_LEN}자까지 입력 가능합니다.`, 'error');
 			return;
 		}
@@ -713,6 +812,7 @@ function Guestbook({ groupId, puuid }) {
 			.then(newComment => {
 				setComments(prev => [{ ...newComment, replies: newComment.replies || [] }, ...(prev || [])]);
 				setContent('');
+				setPlainText('');
 				setIsSecret(false);
 				showSnack('방명록이 등록되었습니다.');
 			})
@@ -865,7 +965,7 @@ function Guestbook({ groupId, puuid }) {
 		return isAdmin || comment.authorDiscordId === myDiscordId;
 	}
 
-	const trimmedLen = content.trim().length;
+	const trimmedLen = plainText.trim().length;
 	const overLimit = trimmedLen > MAX_LEN;
 	const submitDisabled = submitting || trimmedLen === 0 || overLimit;
 
@@ -891,6 +991,7 @@ function Guestbook({ groupId, puuid }) {
 				isLikePending={Boolean(pendingLikeIds[comment.id])}
 				isReplyOpen={openReplyId === comment.id}
 				isHighlighted={highlightId === comment.id}
+				members={members}
 				onToggleLike={handleToggleLike}
 				onAskDelete={handleAskDelete}
 				onToggleReply={handleToggleReply}
@@ -906,6 +1007,8 @@ function Guestbook({ groupId, puuid }) {
 					classes={classes}
 					cx={cx}
 					submitting={replySubmittingId === parentComment.id}
+					members={members}
+					mentionsData={mentionsData}
 					onSubmit={(payload, reset) => handleSubmitReply(parentComment, payload, reset)}
 					onCancel={() => setOpenReplyId(null)}
 				/>
@@ -925,18 +1028,32 @@ function Guestbook({ groupId, puuid }) {
 
 			{isLoggedIn ? (
 				<div className={classes.formArea}>
-					<TextField
-						className={classes.textField}
-						placeholder="이 프로필에 한마디 남겨보세요..."
-						multiline
-						minRows={2}
-						maxRows={6}
-						fullWidth
-						variant="outlined"
-						value={content}
-						onChange={e => setContent(e.target.value)}
-						disabled={submitting}
-					/>
+					<div className={classes.mentionsWrap}>
+						<MentionsInput
+							value={content}
+							onChange={(e, newValue, newPlainText) => {
+								setContent(newValue);
+								setPlainText(newPlainText);
+							}}
+							placeholder="이 프로필에 한마디 남겨보세요... (@로 멘션)"
+							disabled={submitting}
+							allowSpaceInQuery={false}
+							style={MENTIONS_INPUT_STYLE}
+						>
+							<Mention
+								trigger="@"
+								markup="<@__id__>"
+								displayTransform={(id, display) => `@${display}`}
+								appendSpaceOnAdd
+								data={mentionsData}
+								style={MENTION_HIGHLIGHT_STYLE}
+								renderSuggestion={s => <span>@{s.display}</span>}
+							/>
+						</MentionsInput>
+					</div>
+					{isSecret && members.length > 0 && (
+						<div className={classes.mentionsHint}>비밀글에서는 멘션 알림이 가지 않아요.</div>
+					)}
 					<div className={classes.formFooter}>
 						<div className={classes.leftFooter}>
 							<FormControlLabel
