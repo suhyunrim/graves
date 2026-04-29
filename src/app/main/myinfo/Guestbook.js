@@ -8,7 +8,6 @@ import {
 	IconButton,
 	Checkbox,
 	FormControlLabel,
-	Snackbar,
 	CircularProgress,
 	Dialog,
 	DialogTitle,
@@ -16,6 +15,7 @@ import {
 	DialogContentText,
 	DialogActions
 } from '@mui/material';
+import useToast from 'app/utility/useToast';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutlineOutlined';
@@ -555,22 +555,6 @@ const useStyles = makeStyles()(theme => ({
 		border: '1px solid rgba(0, 212, 255, 0.15)',
 		animation: `${fadeIn} 0.2s ease`
 	},
-	snackSuccess: {
-		'& .MuiSnackbarContent-root': {
-			background: '#51cf66',
-			color: '#000',
-			fontFamily: '"Noto Sans KR", sans-serif',
-			fontWeight: 600
-		}
-	},
-	snackError: {
-		'& .MuiSnackbarContent-root': {
-			background: '#ff6b6b',
-			color: '#fff',
-			fontFamily: '"Noto Sans KR", sans-serif',
-			fontWeight: 600
-		}
-	}
 }));
 
 function formatTimeAgo(iso) {
@@ -862,9 +846,9 @@ function Guestbook({ groupId, puuid }) {
 	const [pendingLikeIds, setPendingLikeIds] = useState({});
 	const [likersDialog, setLikersDialog] = useState({ open: false, commentId: null });
 	const [confirmDelete, setConfirmDelete] = useState({ open: false, commentId: null });
-	const [snack, setSnack] = useState({ open: false, message: '', type: 'success' });
 	const [highlightId, setHighlightId] = useState(null);
 	const [members, setMembers] = useState([]);
+	const toast = useToast();
 
 	const mentionsData = useMemo(
 		() => (members || []).map(m => ({ id: m.puuid, display: m.name })),
@@ -872,8 +856,9 @@ function Guestbook({ groupId, puuid }) {
 	);
 
 	const showSnack = useCallback((message, type = 'success') => {
-		setSnack({ open: true, message, type });
-	}, []);
+		if (type === 'error') toast.error(message);
+		else toast.success(message);
+	}, [toast]);
 
 	useEffect(() => {
 		if (!groupId || !puuid) return;
@@ -1291,13 +1276,6 @@ function Guestbook({ groupId, puuid }) {
 				</DialogActions>
 			</Dialog>
 
-			<Snackbar
-				className={snack.type === 'success' ? classes.snackSuccess : classes.snackError}
-				open={snack.open}
-				autoHideDuration={3000}
-				onClose={() => setSnack(prev => ({ ...prev, open: false }))}
-				message={snack.message}
-			/>
 		</div>
 	);
 }

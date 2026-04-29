@@ -10,11 +10,11 @@ import {
 	DialogContent,
 	DialogContentText,
 	DialogActions,
-	Snackbar,
 	CircularProgress,
 	Tabs,
 	Tab
 } from '@mui/material';
+import useToast from 'app/utility/useToast';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams, useLocation } from 'react-router-dom';
 import withReducer from 'app/store/withReducer';
@@ -724,22 +724,6 @@ const useStyles = makeStyles()((theme) => ({
 		color: 'rgba(255, 255, 255, 0.4)',
 		marginTop: 12
 	},
-	snackSuccess: {
-		'& .MuiSnackbarContent-root': {
-			background: '#51cf66',
-			color: '#000',
-			fontFamily: '"Noto Sans KR", sans-serif',
-			fontWeight: 600
-		}
-	},
-	snackError: {
-		'& .MuiSnackbarContent-root': {
-			background: '#ff6b6b',
-			color: '#fff',
-			fontFamily: '"Noto Sans KR", sans-serif',
-			fontWeight: 600
-		}
-	},
 	tabs: {
 		marginBottom: 32,
 		animation: `${fadeInUp} 0.5s ease forwards`,
@@ -790,7 +774,7 @@ function MyInfoPage(props) {
 	const [subAccountInput, setSubAccountInput] = useState('');
 	const [subAccountLoading, setSubAccountLoading] = useState(false);
 	const [removeDialogOpen, setRemoveDialogOpen] = useState(false);
-	const [snack, setSnack] = useState({ open: false, message: '', type: 'success' });
+	const toast = useToast();
 	const [listDialog, setListDialog] = useState({ open: false, title: '', data: [], type: '' });
 
 	const isMyPage = !puuid || puuid === myPuuid;
@@ -803,12 +787,12 @@ function MyInfoPage(props) {
 			.then(result => {
 				setSubAccountLoading(false);
 				setSubAccountInput('');
-				setSnack({ open: true, message: result.message || '부캐가 등록되었습니다.', type: 'success' });
+				toast.success(result.message || '부캐가 등록되었습니다.');
 			})
 			.catch(err => {
 				setSubAccountLoading(false);
 				const msg = err.response && err.response.data ? err.response.data.result : '부캐 등록에 실패했습니다.';
-				setSnack({ open: true, message: msg, type: 'error' });
+				toast.error(msg);
 			});
 	}
 
@@ -816,10 +800,10 @@ function MyInfoPage(props) {
 		setRemoveDialogOpen(false);
 		dispatch(Actions.removeSubAccount(user.reprGroup.groupId))
 			.then(() => {
-				setSnack({ open: true, message: '부캐가 해제되었습니다.', type: 'success' });
+				toast.success('부캐가 해제되었습니다.');
 			})
 			.catch(() => {
-				setSnack({ open: true, message: '부캐 해제에 실패했습니다.', type: 'error' });
+				toast.error('부캐 해제에 실패했습니다.');
 			});
 	}
 
@@ -1396,14 +1380,6 @@ function MyInfoPage(props) {
 						</DialogActions>
 					</Dialog>
 
-					{/* Snackbar */}
-					<Snackbar
-						className={snack.type === 'success' ? classes.snackSuccess : classes.snackError}
-						open={snack.open}
-						autoHideDuration={3000}
-						onClose={() => setSnack(prev => ({ ...prev, open: false }))}
-						message={snack.message}
-					/>
 				</div>
 			}
 		/>

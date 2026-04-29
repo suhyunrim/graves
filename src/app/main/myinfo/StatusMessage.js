@@ -9,7 +9,6 @@ import {
 	DialogContent,
 	DialogContentText,
 	DialogActions,
-	Snackbar,
 	CircularProgress
 } from '@mui/material';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
@@ -18,6 +17,7 @@ import FormatQuoteIcon from '@mui/icons-material/FormatQuote';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutlined';
 import { makeStyles } from 'tss-react/mui';
 import { keyframes } from '@emotion/react';
+import useToast from 'app/utility/useToast';
 import * as Actions from './store/actions';
 
 const MAX_LEN = 50;
@@ -203,22 +203,6 @@ const useStyles = makeStyles()(theme => ({
 			boxShadow: 'none'
 		}
 	},
-	snackSuccess: {
-		'& .MuiSnackbarContent-root': {
-			background: '#51cf66',
-			color: '#000',
-			fontFamily: '"Noto Sans KR", sans-serif',
-			fontWeight: 600
-		}
-	},
-	snackError: {
-		'& .MuiSnackbarContent-root': {
-			background: '#ff6b6b',
-			color: '#fff',
-			fontFamily: '"Noto Sans KR", sans-serif',
-			fontWeight: 600
-		}
-	}
 }));
 
 function StatusMessage({ groupId, puuid, editable }) {
@@ -230,7 +214,7 @@ function StatusMessage({ groupId, puuid, editable }) {
 	const [draft, setDraft] = useState('');
 	const [saving, setSaving] = useState(false);
 	const [confirmDelete, setConfirmDelete] = useState(false);
-	const [snack, setSnack] = useState({ open: false, message: '', type: 'success' });
+	const toast = useToast();
 
 	useEffect(() => {
 		if (editOpen) {
@@ -239,7 +223,8 @@ function StatusMessage({ groupId, puuid, editable }) {
 	}, [editOpen, statusMessage]);
 
 	function showSnack(message, type = 'success') {
-		setSnack({ open: true, message, type });
+		if (type === 'error') toast.error(message);
+		else toast.success(message);
 	}
 
 	function getApiErrorMessage(err) {
@@ -405,13 +390,6 @@ function StatusMessage({ groupId, puuid, editable }) {
 				</DialogActions>
 			</Dialog>
 
-			<Snackbar
-				className={snack.type === 'success' ? classes.snackSuccess : classes.snackError}
-				open={snack.open}
-				autoHideDuration={3000}
-				onClose={() => setSnack(prev => ({ ...prev, open: false }))}
-				message={snack.message}
-			/>
 		</>
 	);
 }

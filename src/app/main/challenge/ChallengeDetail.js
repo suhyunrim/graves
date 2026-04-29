@@ -10,13 +10,13 @@ import {
 	TableHead,
 	TableRow,
 	CircularProgress,
-	Snackbar,
 	Dialog,
 	DialogTitle,
 	DialogContent,
 	DialogContentText,
 	DialogActions
 } from '@mui/material';
+import useToast from 'app/utility/useToast';
 import SyncIcon from '@mui/icons-material/Sync';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
@@ -352,25 +352,6 @@ const useStyles = makeStyles()((theme) => ({
 		fontSize: '1.6rem',
 		color: 'rgba(255, 255, 255, 0.4)'
 	},
-	snackbar: {
-		'& .MuiSnackbarContent-root': {
-			fontFamily: '"Noto Sans KR", sans-serif',
-			fontWeight: 600,
-			fontSize: '1.2rem'
-		}
-	},
-	snackSuccess: {
-		'& .MuiSnackbarContent-root': {
-			background: '#51cf66',
-			color: '#000'
-		}
-	},
-	snackError: {
-		'& .MuiSnackbarContent-root': {
-			background: '#ff6b6b',
-			color: '#fff'
-		}
-	},
 	loadingWrapper: {
 		display: 'flex',
 		justifyContent: 'center',
@@ -469,7 +450,7 @@ function ChallengeDetail() {
 
 	const [editOpen, setEditOpen] = useState(false);
 	const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
-	const [snack, setSnack] = useState({ open: false, message: '', type: 'success' });
+	const toast = useToast();
 	const [syncComplete, setSyncComplete] = useState(false);
 	const [sortKey, setSortKey] = useState('rank');
 	const [sortDir, setSortDir] = useState('asc');
@@ -509,16 +490,16 @@ function ChallengeDetail() {
 	useEffect(() => {
 		if (!syncMessage) return;
 		if (syncMessage.type === 'success') {
-			setSnack({ open: true, message: '전적 갱신을 요청했습니다.', type: 'success' });
+			toast.success('전적 갱신을 요청했습니다.');
 		} else if (syncMessage.type === 'error') {
 			const { status, message } = syncMessage.data || {};
 			if (status === 409) {
-				setSnack({ open: true, message: message || '이미 갱신 중입니다.', type: 'error' });
+				toast.error(message || '이미 갱신 중입니다.');
 			} else if (status === 429) {
-				setSnack({ open: true, message: message || '잠시 후 다시 시도해주세요.', type: 'error' });
+				toast.error(message || '잠시 후 다시 시도해주세요.');
 			}
 		}
-	}, [syncMessage]);
+	}, [syncMessage, toast]);
 
 	// Poll sync-status when syncing
 	const pollingRef = React.useRef(null);
@@ -553,13 +534,13 @@ function ChallengeDetail() {
 	useEffect(() => {
 		if (prevSyncStatus.current === 'syncing' && syncStatus === 'idle') {
 			setSyncComplete(true);
-			setSnack({ open: true, message: '전적 갱신이 완료되었습니다.', type: 'success' });
+			toast.success('전적 갱신이 완료되었습니다.');
 			dispatch(Actions.getChallengeDetail(groupId, challengeId));
 			dispatch(Actions.getLeaderboard(groupId, challengeId));
 			setTimeout(() => setSyncComplete(false), 2000);
 		}
 		prevSyncStatus.current = syncStatus;
-	}, [syncStatus, dispatch, groupId, challengeId]);
+	}, [syncStatus, dispatch, groupId, challengeId, toast]);
 
 	function handleSync() {
 		dispatch(Actions.syncChallenge(groupId, challengeId));
@@ -569,17 +550,17 @@ function ChallengeDetail() {
 		setCancelDialogOpen(false);
 		Actions.cancelChallenge(groupId, challengeId)
 			.then(() => {
-				setSnack({ open: true, message: '챌린지가 취소되었습니다.', type: 'success' });
+				toast.success('챌린지가 취소되었습니다.');
 				dispatch(Actions.getChallengeDetail(groupId, challengeId));
 			})
 			.catch(() => {
-				setSnack({ open: true, message: '챌린지 취소에 실패했습니다.', type: 'error' });
+				toast.error('챌린지 취소에 실패했습니다.');
 			});
 	}
 
 	function handleEditSuccess() {
 		setEditOpen(false);
-		setSnack({ open: true, message: '챌린지가 수정되었습니다.', type: 'success' });
+		toast.success('챌린지가 수정되었습니다.');
 		dispatch(Actions.getChallengeDetail(groupId, challengeId));
 	}
 
@@ -945,14 +926,6 @@ function ChallengeDetail() {
 						</DialogActions>
 					</Dialog>
 
-					{/* Snackbar */}
-					<Snackbar
-						className={`${classes.snackbar} ${snack.type === 'success' ? classes.snackSuccess : classes.snackError}`}
-						open={snack.open}
-						autoHideDuration={3000}
-						onClose={() => setSnack(prev => ({ ...prev, open: false }))}
-						message={snack.message}
-					/>
 				</div>
 			}
 		/>

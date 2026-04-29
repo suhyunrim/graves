@@ -1,7 +1,8 @@
 import FusePageSimple from '@fuse/core/FusePageSimple';
 import withReducer from 'app/store/withReducer';
 import { makeStyles } from 'tss-react/mui';
-import { Typography, Button, Snackbar } from '@mui/material';
+import { Typography, Button } from '@mui/material';
+import useToast from 'app/utility/useToast';
 import AddIcon from '@mui/icons-material/Add';
 import PeopleIcon from '@mui/icons-material/People';
 import React, { useEffect, useState } from 'react';
@@ -179,15 +180,6 @@ const useStyles = makeStyles()((theme) => ({
 		justifyContent: 'center',
 		padding: 60
 	},
-	snackbar: {
-		'& .MuiSnackbarContent-root': {
-			background: '#51cf66',
-			color: '#000',
-			fontFamily: '"Noto Sans KR", sans-serif',
-			fontWeight: 600,
-			fontSize: '1.2rem'
-		}
-	}
 }));
 
 function ChallengeList() {
@@ -198,7 +190,7 @@ function ChallengeList() {
 	const user = useSelector(state => state.auth.user);
 	const groupId = user && user.reprGroup ? user.reprGroup.groupId : null;
 	const [formOpen, setFormOpen] = useState(false);
-	const [snackMessage, setSnackMessage] = useState('');
+	const toast = useToast();
 
 	useEffect(() => {
 		if (groupId) {
@@ -208,7 +200,7 @@ function ChallengeList() {
 
 	function handleCreateSuccess() {
 		setFormOpen(false);
-		setSnackMessage('챌린지가 생성되었습니다.');
+		toast.success('챌린지가 생성되었습니다.');
 		if (groupId) {
 			dispatch(Actions.getChallengeList(groupId));
 		}
@@ -285,13 +277,6 @@ function ChallengeList() {
 							groupId={groupId}
 						/>
 					)}
-					<Snackbar
-						className={classes.snackbar}
-						open={Boolean(snackMessage)}
-						autoHideDuration={3000}
-						onClose={() => setSnackMessage('')}
-						message={snackMessage}
-					/>
 				</div>
 			}
 		/>
