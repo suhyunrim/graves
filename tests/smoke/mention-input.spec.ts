@@ -80,8 +80,8 @@ const FAKE_GET_INFO = {
 
 const FAKE_MEMBERS = {
 	result: [
-		{ puuid: 'puuid-홍길동', name: '홍길동', avatarUrl: null },
-		{ puuid: 'puuid-김철수', name: '김철수', avatarUrl: null }
+		{ puuid: 'puuid-alice', name: 'Alice', avatarUrl: null },
+		{ puuid: 'puuid-bob', name: 'Bob', avatarUrl: null }
 	]
 };
 
@@ -141,17 +141,23 @@ test('[멘션] Discord 로그인 + 방명록 탭 → MentionsInput 마운트 시
 
 	// @ 입력 → 드롭다운 표시
 	await textarea.click();
-	await textarea.type('@홍');
-	const suggestion = page.getByText('@홍길동', { exact: true });
+	await textarea.type('@al');
+	const suggestion = page.getByText('@Alice', { exact: true });
 	await expect(suggestion).toBeVisible({ timeout: 5000 });
 
-	// 드롭다운 항목 클릭 → @홍길동으로 표시되어야 함 (puuid 노출 X)
+	// 드롭다운 항목 클릭 → @Alice로 표시되어야 함 (puuid 노출 X)
 	await suggestion.click();
 	await page.waitForTimeout(300);
 
 	const text = await textarea.inputValue();
-	expect(text, '입력창에 @닉네임 표시되어야 함').toContain('@홍길동');
-	expect(text, '입력창에 puuid가 그대로 노출되면 안 됨').not.toContain('puuid-홍길동');
+	expect(text, '입력창에 @닉네임 표시되어야 함').toContain('@Alice');
+	expect(text, '입력창에 puuid가 그대로 노출되면 안 됨').not.toContain('puuid-alice');
+	expect(text.trim(), '쿼리 잔여물 없이 정확히 @Alice + 공백').toBe('@Alice');
+
+	// 평문 추가 입력 후 textarea 값에 잔여물 없는지 (정렬 깨짐 회귀 방지)
+	await textarea.type('hello there');
+	const finalText = await textarea.inputValue();
+	expect(finalText).toBe('@Alice hello there');
 
 	expect(crashes, `pageerror: ${crashes.join(' | ')}`).toEqual([]);
 	expect(consoleErrors, `console.error: ${consoleErrors.join(' | ')}`).toEqual([]);

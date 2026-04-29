@@ -64,10 +64,18 @@ const MENTIONS_INPUT_STYLE = {
 		control: {
 			minHeight: 64
 		},
+		// textarea는 가시 텍스트(평문 + 멘션 모두)를 흰색으로 렌더하고,
+		// highlighter는 멘션 위치에 cyan 강조만 덧그린다(평문은 transparent + visibility:hidden 디폴트).
+		// 두 레이어가 픽셀 단위로 겹쳐야 하니 padding/border/font 속성을 완벽히 동일하게 둔다.
 		highlighter: {
 			padding: '12px 14px',
-			border: '1px solid transparent',
-			boxSizing: 'border-box'
+			border: 'none',
+			boxSizing: 'border-box',
+			fontFamily: 'inherit',
+			fontSize: 'inherit',
+			fontWeight: 'inherit',
+			lineHeight: 'inherit',
+			letterSpacing: 'inherit'
 		},
 		input: {
 			padding: '12px 14px',
@@ -79,7 +87,9 @@ const MENTIONS_INPUT_STYLE = {
 			boxSizing: 'border-box',
 			fontFamily: 'inherit',
 			fontSize: 'inherit',
-			lineHeight: 'inherit'
+			fontWeight: 'inherit',
+			lineHeight: 'inherit',
+			letterSpacing: 'inherit'
 		}
 	},
 	suggestions: {
@@ -108,11 +118,14 @@ const MENTIONS_INPUT_STYLE = {
 	}
 };
 
+// highlighter의 <strong>이 textarea 글자와 폭이 어긋나지 않도록
+// fontWeight를 inherit으로 강제하고, padding/margin/border 등 박스 모델에
+// 영향을 주는 속성은 절대 추가하지 않는다.
 const MENTION_HIGHLIGHT_STYLE = {
-	backgroundColor: 'rgba(0, 212, 255, 0.18)',
+	backgroundColor: 'rgba(0, 212, 255, 0.22)',
 	color: '#00d4ff',
-	borderRadius: 4,
-	padding: '0 2px'
+	fontWeight: 'inherit',
+	borderRadius: 3
 };
 
 const useStyles = makeStyles()(theme => ({
