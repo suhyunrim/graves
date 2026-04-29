@@ -471,6 +471,16 @@ const useStyles = makeStyles()(theme => ({
 		color: 'rgba(255, 255, 255, 0.35)',
 		fontStyle: 'italic'
 	},
+	contentMasked: {
+		display: 'flex',
+		alignItems: 'center',
+		gap: 6,
+		color: 'rgba(255, 215, 0, 0.55)',
+		fontStyle: 'italic'
+	},
+	maskedIcon: {
+		fontSize: '1.4rem'
+	},
 	commentBottom: {
 		marginTop: 10,
 		display: 'flex',
@@ -587,9 +597,12 @@ function CommentItem({
 	onOpenLikers
 }) {
 	const isDeleted = comment.isDeleted;
-	const showLike = !isDeleted;
+	// 비밀글이지만 권한 없어 본문이 마스킹된 케이스 — author/메타는 보이고 content만 null로 옴
+	const isMasked = !isDeleted && comment.isSecret && comment.content === null;
+	const showLike = !isDeleted && !isMasked;
+	const showLikeCount = !isDeleted;
 	const showDelete = !isDeleted && canDelete;
-	const showReplyButton = !isDeleted && canReply;
+	const showReplyButton = !isDeleted && !isMasked && canReply;
 	const author = comment.author || null;
 	const avatarUrl = getProfileIconUrl(author?.profileIconId);
 	const authorName = author?.name || null;
@@ -666,9 +679,14 @@ function CommentItem({
 					)}
 				</div>
 
-				{!isDeleted && (
+				{!isDeleted && !isMasked && (
 					<div className={classes.content}>
 						<MentionContent content={comment.content} members={members} />
+					</div>
+				)}
+				{isMasked && (
+					<div className={cx(classes.content, classes.contentMasked)}>
+						<LockOutlinedIcon className={classes.maskedIcon} /> 비밀글입니다
 					</div>
 				)}
 				{isDeleted && (
@@ -677,10 +695,9 @@ function CommentItem({
 					</div>
 				)}
 
-				{(showLike || showReplyButton) && (
+				{(showLike || showLikeCount || showReplyButton) && (
 					<div className={classes.commentBottom}>
 						{showLike && (
-							<>
 							<Button
 								className={cx(
 									classes.likeBtn,
@@ -693,6 +710,8 @@ function CommentItem({
 							>
 								{comment.likedByMe ? <FavoriteIcon /> : <FavoriteBorderIcon />}
 							</Button>
+						)}
+						{showLikeCount && (
 							<Button
 								className={classes.likeCountBtn}
 								onClick={() => comment.likeCount > 0 && onOpenLikers(comment)}
@@ -700,19 +719,18 @@ function CommentItem({
 							>
 								{comment.likeCount}
 							</Button>
-						</>
-					)}
-					{showReplyButton && (
-						<Button
-							className={cx(classes.replyBtn, isReplyOpen && classes.replyBtnActive)}
-							onClick={() => onToggleReply(comment)}
-							aria-label="답글 작성"
-						>
-							<ChatBubbleOutlineIcon /> 답글
-						</Button>
-					)}
-				</div>
-			)}
+						)}
+						{showReplyButton && (
+							<Button
+								className={cx(classes.replyBtn, isReplyOpen && classes.replyBtnActive)}
+								onClick={() => onToggleReply(comment)}
+								aria-label="답글 작성"
+							>
+								<ChatBubbleOutlineIcon /> 답글
+							</Button>
+						)}
+					</div>
+				)}
 			</div>
 		</div>
 	);
