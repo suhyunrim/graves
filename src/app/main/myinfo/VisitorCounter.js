@@ -77,12 +77,12 @@ function VisitorCounter({ groupId, puuid, isLoggedIn }) {
 	return (
 		<div className={classes.root}>
 			<div className={classes.cell}>
-				<span className={classes.label}>투데이</span>
+				<span className={classes.label}>TODAY</span>
 				<span className={classes.value}>{stats.today}</span>
 			</div>
 			<div className={classes.divider} />
 			<div className={classes.cell}>
-				<span className={classes.label}>투탈</span>
+				<span className={classes.label}>TOTAL</span>
 				<span className={classes.totalValue}>{stats.total}</span>
 			</div>
 		</div>
