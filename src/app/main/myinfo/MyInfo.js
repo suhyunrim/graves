@@ -149,7 +149,11 @@ const useStyles = makeStyles()((theme) => ({
 		alignItems: 'center',
 		gap: 12,
 		marginTop: 10,
-		flexWrap: 'wrap'
+		flexWrap: 'wrap',
+		// honorStats 없고 StatusMessage가 null 반환할 때 빈 div가 marginTop만 남기는 케이스 방지
+		'&:empty': {
+			display: 'none'
+		}
 	},
 	honorInfo: {
 		display: 'flex',
