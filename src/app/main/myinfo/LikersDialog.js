@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { Dialog, DialogContent, DialogActions, Button, CircularProgress } from '@mui/material';
+import { Dialog, DialogContent, DialogActions, Button, CircularProgress, Avatar } from '@mui/material';
 import { makeStyles } from 'tss-react/mui';
 import { formatDistanceToNow } from 'date-fns';
 import koLocale from 'date-fns/locale/ko';
+import { getProfileIconUrl } from 'app/main/challenge/ddragonUtils';
 import { fetchProfileCommentLikers } from './profileApi';
 
 const useStyles = makeStyles()(() => ({
@@ -56,6 +57,23 @@ const useStyles = makeStyles()(() => ({
 		background: 'rgba(0, 0, 0, 0.22)',
 		borderRadius: 10,
 		fontFamily: '"Noto Sans KR", sans-serif'
+	},
+	userInfo: {
+		display: 'flex',
+		alignItems: 'center',
+		gap: 10,
+		minWidth: 0
+	},
+	avatar: {
+		width: 32,
+		height: 32,
+		flexShrink: 0,
+		border: '1px solid rgba(0, 212, 255, 0.25)',
+		background: 'linear-gradient(135deg, #1a1a2e 0%, #0f0f1a 100%)',
+		color: '#00d4ff',
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1rem',
+		fontWeight: 700
 	},
 	name: {
 		fontSize: '1.3rem',
@@ -127,12 +145,26 @@ function LikersDialog({ open, commentId, onClose }) {
 				)}
 				{likers !== null && likers.length > 0 && (
 					<div className={classes.list}>
-						{likers.map(liker => (
-							<div key={liker.likerDiscordId} className={classes.row}>
-								<span className={classes.name}>{liker.likerName}</span>
-								<span className={classes.time}>{formatTime(liker.createdAt)}</span>
-							</div>
-						))}
+						{likers.map(entry => {
+							const liker = entry.liker || {};
+							const avatarUrl = getProfileIconUrl(liker.profileIconId);
+							const initial = liker.name ? liker.name[0] : '?';
+							return (
+								<div key={liker.discordId || liker.puuid} className={classes.row}>
+									<div className={classes.userInfo}>
+										<Avatar
+											src={avatarUrl || undefined}
+											alt={liker.name || ''}
+											className={classes.avatar}
+										>
+											{initial}
+										</Avatar>
+										<span className={classes.name}>{liker.name}</span>
+									</div>
+									<span className={classes.time}>{formatTime(entry.createdAt)}</span>
+								</div>
+							);
+						})}
 					</div>
 				)}
 			</DialogContent>
