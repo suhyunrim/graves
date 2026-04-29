@@ -20,7 +20,8 @@ import { makeStyles } from 'tss-react/mui';
 import { keyframes } from '@emotion/react';
 import * as Actions from './store/actions';
 
-const MAX_LEN = 200;
+const MAX_LEN = 50;
+const sanitize = value => value.replace(/[\r\n]+/g, ' ');
 
 const fadeIn = keyframes`
 	0% { opacity: 0; transform: translateY(4px); }
@@ -57,7 +58,6 @@ const useStyles = makeStyles()(theme => ({
 		fontSize: '1.4rem',
 		color: 'rgba(255, 255, 255, 0.9)',
 		lineHeight: 1.5,
-		whiteSpace: 'pre-wrap',
 		wordBreak: 'break-word'
 	},
 	actionGroup: {
@@ -103,18 +103,38 @@ const useStyles = makeStyles()(theme => ({
 		background: 'linear-gradient(135deg, #1a1a2e 0%, #0f0f1a 100%)',
 		color: '#fff',
 		border: '1px solid rgba(0, 212, 255, 0.25)',
-		borderRadius: 16
+		borderRadius: '20px !important',
+		boxShadow: '0 8px 32px rgba(0, 0, 0, 0.5), 0 0 60px rgba(0, 212, 255, 0.08)',
+		overflow: 'hidden',
+		position: 'relative',
+		'&::before': {
+			content: '""',
+			position: 'absolute',
+			top: 0,
+			left: 0,
+			right: 0,
+			height: 1,
+			background: 'linear-gradient(90deg, transparent, rgba(0, 212, 255, 0.5), transparent)'
+		}
 	},
 	dialogTitleText: {
 		fontFamily: '"Rajdhani", "Noto Sans KR", sans-serif',
-		fontSize: '1.7rem',
+		fontSize: '2rem',
 		fontWeight: 700,
 		color: '#00d4ff',
-		letterSpacing: '0.04em',
-		padding: '20px 24px 4px'
+		letterSpacing: '0.05em',
+		textTransform: 'uppercase',
+		padding: '24px 28px 4px',
+		textShadow: '0 0 20px rgba(0, 212, 255, 0.3)'
+	},
+	dialogSubtitle: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.2rem',
+		color: 'rgba(255, 255, 255, 0.4)',
+		padding: '0 28px 12px'
 	},
 	dialogContent: {
-		padding: '8px 24px 12px !important'
+		padding: '8px 28px 20px !important'
 	},
 	textField: {
 		'& .MuiInputBase-root': {
@@ -146,16 +166,21 @@ const useStyles = makeStyles()(theme => ({
 		color: '#ff6b6b'
 	},
 	dialogActions: {
-		padding: '8px 20px 16px'
+		padding: '12px 28px 24px'
 	},
 	cancelBtn: {
-		color: 'rgba(255, 255, 255, 0.55)',
+		color: 'rgba(255, 255, 255, 0.5)',
+		border: '1px solid rgba(255, 255, 255, 0.15)',
+		borderRadius: 10,
+		padding: '8px 22px',
 		fontFamily: '"Noto Sans KR", sans-serif',
 		fontSize: '1.2rem',
 		textTransform: 'none',
+		transition: 'all 0.2s ease',
 		'&:hover': {
-			color: '#fff',
-			background: 'rgba(255, 255, 255, 0.04)'
+			color: '#00d4ff',
+			borderColor: 'rgba(0, 212, 255, 0.4)',
+			background: 'rgba(0, 212, 255, 0.08)'
 		}
 	},
 	saveBtn: {
@@ -164,15 +189,19 @@ const useStyles = makeStyles()(theme => ({
 		fontFamily: '"Noto Sans KR", sans-serif',
 		fontWeight: 700,
 		fontSize: '1.2rem',
-		padding: '6px 22px',
+		padding: '8px 26px',
 		borderRadius: 10,
 		textTransform: 'none',
+		marginLeft: 8,
+		boxShadow: '0 4px 18px rgba(0, 212, 255, 0.25)',
 		'&:hover': {
-			background: 'linear-gradient(135deg, #00bce0 0%, #0088bb 100%)'
+			background: 'linear-gradient(135deg, #00bce0 0%, #0088bb 100%)',
+			boxShadow: '0 6px 22px rgba(0, 212, 255, 0.4)'
 		},
 		'&.Mui-disabled': {
 			background: 'rgba(255, 255, 255, 0.1)',
-			color: 'rgba(255, 255, 255, 0.3)'
+			color: 'rgba(255, 255, 255, 0.3)',
+			boxShadow: 'none'
 		}
 	},
 	snackSuccess: {
@@ -301,22 +330,29 @@ function StatusMessage({ groupId, puuid, editable }) {
 				onClose={() => !saving && setEditOpen(false)}
 				maxWidth="sm"
 				fullWidth
-				PaperProps={{ className: classes.dialogPaper }}
+				slotProps={{ paper: { className: classes.dialogPaper } }}
 			>
-				<DialogTitle classes={{ root: classes.dialogTitleText }}>
+				<div className={classes.dialogTitleText}>
 					{statusMessage ? '한마디 수정' : '한마디 등록'}
-				</DialogTitle>
+				</div>
+				<div className={classes.dialogSubtitle}>
+					최대 {MAX_LEN}자, 한 줄로 작성됩니다.
+				</div>
 				<DialogContent className={classes.dialogContent}>
 					<TextField
 						className={classes.textField}
 						placeholder="지금 떠오르는 한마디를 적어보세요..."
-						multiline
-						minRows={3}
-						maxRows={6}
 						fullWidth
 						variant="outlined"
 						value={draft}
-						onChange={e => setDraft(e.target.value)}
+						onChange={e => setDraft(sanitize(e.target.value).slice(0, MAX_LEN))}
+						onKeyDown={e => {
+							if (e.key === 'Enter') {
+								e.preventDefault();
+								if (!saveDisabled) handleSave();
+							}
+						}}
+						inputProps={{ maxLength: MAX_LEN }}
 						disabled={saving}
 						autoFocus
 					/>
