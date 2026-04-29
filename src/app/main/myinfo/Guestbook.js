@@ -660,6 +660,7 @@ function ReplyForm({ classes, cx, submitting, members, mentionsData, onSubmit, o
 				>
 					<Mention
 						trigger="@"
+						markup="@[__display__](__id__)"
 						displayTransform={(id, display) => `@${display}`}
 						appendSpaceOnAdd
 						data={mentionsData}
@@ -1046,6 +1047,7 @@ function Guestbook({ groupId, puuid }) {
 						>
 							<Mention
 								trigger="@"
+								markup="@[__display__](__id__)"
 								displayTransform={(id, display) => `@${display}`}
 								appendSpaceOnAdd
 								data={mentionsData}
