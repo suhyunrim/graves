@@ -87,14 +87,17 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 
 ## Tech Stack
 
-- **Frontend**: React 16.13.1, React Router 5.1.2
-- **State Management**: Redux + Redux Thunk
-- **UI Framework**: Material-UI 4.x
-- **Styling**: Tailwind CSS 1.2.0, JSS, Styled Components
-- **HTTP Client**: Axios
-- **Authentication**: Auth0 Lock, JWT
-- **Charts**: Chart.js, React ChartJS 2
-- **Build Tool**: Create React App (react-scripts 3.4.1)
+- **Frontend**: React 19, react-router-dom 7
+- **State Management**: redux 5 + react-redux 9 + redux-thunk
+- **UI Framework**: @mui/material 9 (+ @mui/icons-material 9, @mui/lab, @mui/x-date-pickers)
+- **Styling**: tss-react 4 (`makeStyles`), @emotion/react 11, tailwindcss 3
+- **HTTP Client**: axios
+- **Authentication**: Discord OAuth → JWT (jwt-decode 2)
+- **Charts**: chart.js 4 + react-chartjs-2 5
+- **i18n**: i18next + react-i18next
+- **모니터링**: @sentry/react 7, @vercel/analytics, @vercel/speed-insights
+- **테스트**: @playwright/test (smoke / content / e2e / visual 프로젝트 분리)
+- **Build Tool**: Vite 6 + @vitejs/plugin-react
 
 ## Project Structure
 
@@ -107,25 +110,28 @@ src/
 │   ├── auth/           # 인증 모듈 (Redux store)
 │   ├── fuse-configs/   # 라우팅 & 네비게이션 설정
 │   ├── fuse-layouts/   # 레이아웃 컴포넌트
-│   ├── main/           # 주요 기능 모듈
-│   │   ├── login/      # 로그인 페이지
-│   │   ├── myinfo/     # 내 정보 페이지
-│   │   └── ranking/    # 랭킹 페이지
+│   ├── main/           # 주요 기능 모듈 (achievement, balanceReport,
+│   │                   #   challenge, dashboard, groupSettings, honorRanking,
+│   │                   #   login, matchHistory, myinfo, ranking, releaseNotes 등)
 │   ├── services/       # API 서비스 (Camille Riot)
 │   ├── store/          # 전역 Redux store
-│   └── utility/        # 헬퍼 유틸리티
+│   └── utility/        # 헬퍼 유틸리티 (camilleAxios 등)
 ├── styles/             # CSS/Tailwind 스타일
 ├── App.js              # 루트 컴포넌트
-└── index.js            # 엔트리 포인트
+└── index.jsx           # 엔트리 포인트
 ```
 
 ## Common Commands
 
 ```bash
-yarn start          # 개발 서버 실행 (포트 3000)
-yarn build          # 프로덕션 빌드
-yarn lint           # ESLint 실행
-yarn test           # 테스트 실행
+yarn dev            # 개발 서버 (vite, 기본 포트 5173)
+yarn start          # = yarn dev
+yarn build          # 프로덕션 빌드 (vite build → build/)
+yarn preview        # 빌드 미리보기
+yarn lint           # ESLint 실행 (인자로 파일/경로 전달)
+yarn test:smoke     # Playwright smoke 테스트
+yarn test:e2e       # Playwright e2e 테스트
+yarn test:visual    # Playwright 시각 회귀
 ```
 
 ## Key Files
@@ -144,9 +150,12 @@ yarn test           # 테스트 실행
 - Thunk 미들웨어로 비동기 API 호출 처리
 
 ### API Integration
-- `camilleAxios`를 통한 백엔드 통신
-- 환경변수 `REACT_APP_CAMILLE_HOST`로 API 엔드포인트 설정
-- Riot 토큰 기반 인증 헤더 자동 추가
+- `camilleAxios`를 통한 백엔드 통신 (`src/app/utility/camilleAxios.js`)
+- 환경변수 `VITE_CAMILLE_HOST`로 API 엔드포인트 설정 (`import.meta.env.VITE_CAMILLE_HOST`)
+- Discord JWT 토큰을 `Authorization: Bearer ...` 헤더로 자동 추가
+- Riot puuid를 `Puuid` 헤더로 자동 추가
+- 401(JWT 만료) 시 자동 로그아웃 + `/login` 리다이렉트
+- 5xx 에러 시 `/maintenance` 리다이렉트 (단 `silentError: true` 옵션 시 호출자가 처리)
 
 ### Ranking System
 - 레이팅 점수를 LoL 티어로 변환 (IRON → CHALLENGER)
@@ -155,58 +164,36 @@ yarn test           # 테스트 실행
 
 ## Code Style
 
-- **ESLint**: Airbnb 규칙 기반
+- **ESLint**: Airbnb 기반 (`.eslintrc`)
 - **Prettier**: 탭 사용, 싱글 쿼트, printWidth 120
-- **Import**: `src/` 기준 절대 경로 사용 가능 (jsconfig.json)
+- **Import**: `src/` 기준 절대 경로 + alias (`@fuse`, `@history`, `@lodash`, `app`, `styles`)
+- **JSX**: `.js` 파일에서도 JSX 작성 (vite의 `jsx-in-js` 플러그인이 처리)
+- **makeStyles**: `tss-react/mui`의 `makeStyles()(...)` 패턴. JSS의 `$ruleName` 참조는 미지원이라 애니메이션은 `@emotion/react`의 `keyframes` 헬퍼 사용
 
 ## Environment Variables
 
+Vite 빌드라 `VITE_` 접두어가 붙은 것만 클라이언트에 노출됨.
+
 ```
-REACT_APP_CAMILLE_HOST=<백엔드 API URL>
+VITE_CAMILLE_HOST=<백엔드 API URL, 예: https://zeroboom.lol>
+VITE_RIOT_DATA_VERSION=<Riot Data Dragon 버전>
+VITE_SENTRY_DSN=<Sentry DSN>
 ```
+
+코드에서는 `import.meta.env.VITE_XXX`로 접근 (옛날 `process.env.REACT_APP_XXX` 아님).
 
 ## Development Notes
 
-- Fuse 프레임워크 기반 레이아웃 시스템 사용
-- Material-UI 테마 커스터마이징 적용
-- IE 11 지원을 위한 폴리필 포함
-- Docker 배포 지원 (Dockerfile 포함)
+- Fuse 프레임워크 기반 레이아웃 시스템
+- Discord OAuth 로그인 → JWT를 `localStorage.camille_discord_token`에 저장
+- Riot puuid는 `localStorage.camille_riot_puuid`에 저장
+- 그룹 어드민 여부는 `state.auth.user.reprGroup.isAdmin`
+- 디스코드 ID는 `state.auth.user.data.discordUser.discordId`
 
-## CI/CD 주의사항 (Vercel) - 중요!!
+## CI/CD 주의사항 (Vercel)
 
-### ESLint 경고 = 빌드 실패
-Vercel은 `CI=true` 환경에서 빌드하므로 **ESLint 경고가 빌드 에러로 처리됨**.
-**코드 수정 시 ESLint 규칙을 반드시 준수해야 함!!**
-
-### 코드 수정 시 필수 체크리스트 (no-unused-vars)
-
-```jsx
-// ❌ 빌드 실패 - 사용하지 않는 변수/함수
-const [value, setValue] = useState(0);  // setValue를 사용하지 않으면 에러
-import { foo, bar } from 'module';      // bar를 사용하지 않으면 에러
-const unused = 'test';                   // 사용하지 않는 변수 에러
-
-// ✅ 올바른 사용
-const [value] = useState(0);            // setter가 필요없으면 생략
-const value = 0;                         // 변경이 필요없으면 상수로
-import { foo } from 'module';           // 필요한 것만 import
-```
-
-### 이모지 접근성 필수 (jsx-a11y/accessible-emoji)
-이모지 사용 시 반드시 접근성 속성을 추가해야 함:
-
-```jsx
-// ❌ 빌드 실패
-<span>🏆</span>
-<div className={classes.emoji}>🔥</div>
-
-// ✅ 올바른 사용
-<span role="img" aria-label="trophy">🏆</span>
-<span role="img" aria-label="fire" className={classes.emoji}>🔥</span>
-```
-
-### 기타 ESLint 규칙
-- 사용하지 않는 import 제거
-- 사용하지 않는 변수/함수 제거 (useState setter 포함!)
-- `console.log` 제거 (필요시 주석 처리)
-- 함수나 변수를 제거할 때 관련 참조도 모두 제거
+- 배포는 `yarn build` → `vite build` 결과(`build/`)를 Vercel이 호스팅
+- Vite 빌드 파이프라인엔 ESLint 플러그인이 연결돼 있지 **않음** → ESLint 경고로 빌드가 깨지진 않는다 (옛 CRA 시절 규칙)
+- 그래도 코드 정합성을 위해 미사용 import/변수, console.log는 제거하고 PR 올린다
+- 이모지에는 a11y 속성 부여 (`<span role="img" aria-label="trophy">🏆</span>`)
+- 빌드 사전 검증이 필요하면 `node`로 esbuild 호출해 syntax만 확인 가능 (vite와 같은 transform 사용)
