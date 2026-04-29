@@ -57,6 +57,8 @@ function NavbarLayout1(props) {
 	const theme = useTheme();
 	const userRole = useSelector(({ auth }) => auth.user?.role);
 	const isAuthenticated = !!(userRole && userRole.length > 0);
+	// 알림 API는 Discord JWT를 요구. RiotID-only 사용자는 401만 받으므로 벨 자체를 숨김.
+	const isDiscordLoggedIn = useSelector(({ auth }) => Boolean(auth.user?.data?.discordUser));
 
 	return (
         <div className={clsx('flex flex-col overflow-hidden h-full', classes.root, props.className)}>
@@ -69,7 +71,7 @@ function NavbarLayout1(props) {
 					<Logo />
 				</div>
 
-				{isAuthenticated && <NotificationBell />}
+				{isAuthenticated && isDiscordLoggedIn && <NotificationBell />}
 
 				<Box sx={{ display: { xs: 'none', lg: 'block' } }}>
 					<NavbarFoldedToggleButton className={clsx('w-40 h-40 p-0', classes.toggleButton)} />

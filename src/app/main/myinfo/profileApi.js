@@ -47,7 +47,8 @@ export function fetchProfileVisitStats(groupId, puuid) {
 }
 
 export function fetchGroupMembers(groupId) {
+	// /members 는 admin 전용이라 일반 유저가 호출하면 401. 멘션 후보용 잔류 멤버 목록은 /active-members 사용.
 	return createCamilleAxios()
-		.get(`/api/group/${groupId}/members`, { silentError: true })
+		.get(`/api/group/${groupId}/active-members`, { silentError: true })
 		.then(res => res.data.result);
 }

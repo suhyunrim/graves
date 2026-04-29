@@ -108,7 +108,7 @@ test('[멘션] Discord 로그인 + 방명록 탭 → MentionsInput 마운트 시
 		if (url.includes('/api/auth/me')) return route.fulfill(json(FAKE_AUTH_ME));
 		if (url.includes('/api/user/getGroupList')) return route.fulfill(json(FAKE_GROUP_LIST));
 		if (url.includes('/api/user/getInfo')) return route.fulfill(json(FAKE_GET_INFO));
-		if (url.includes(`/api/group/${GROUP_ID}/members`)) return route.fulfill(json(FAKE_MEMBERS));
+		if (url.includes(`/api/group/${GROUP_ID}/active-members`)) return route.fulfill(json(FAKE_MEMBERS));
 		if (url.includes(`/api/profile/${GROUP_ID}/${FAKE_PUUID}/comments`)) {
 			return route.fulfill(json({
 				result: [
