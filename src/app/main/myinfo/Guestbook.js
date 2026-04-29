@@ -48,6 +48,10 @@ const flashHighlight = keyframes`
 
 const MAX_LEN = 500;
 
+const MENTIONS_INTERNAL_REGEX = /@\[([^\]]+)\]\(([^)]+)\)/g;
+const toBackendMentionFormat = value =>
+	(value || '').replace(MENTIONS_INTERNAL_REGEX, (_m, _display, id) => `<@${id}>`);
+
 const MENTIONS_INPUT_STYLE = {
 	control: {
 		backgroundColor: 'transparent',
@@ -632,7 +636,7 @@ function ReplyForm({ classes, cx, submitting, members, mentionsData, onSubmit, o
 
 	function handleSubmit() {
 		if (submitDisabled) return;
-		onSubmit({ content: content.trim(), isSecret }, () => {
+		onSubmit({ content: toBackendMentionFormat(content.trim()), isSecret }, () => {
 			setContent('');
 			setPlainText('');
 			setIsSecret(false);
@@ -656,7 +660,6 @@ function ReplyForm({ classes, cx, submitting, members, mentionsData, onSubmit, o
 				>
 					<Mention
 						trigger="@"
-						markup="<@__id__>"
 						displayTransform={(id, display) => `@${display}`}
 						appendSpaceOnAdd
 						data={mentionsData}
@@ -808,7 +811,8 @@ function Guestbook({ groupId, puuid }) {
 			return;
 		}
 		setSubmitting(true);
-		createProfileComment(groupId, puuid, trimmed, isSecret, null)
+		const backendContent = toBackendMentionFormat(trimmed);
+		createProfileComment(groupId, puuid, backendContent, isSecret, null)
 			.then(newComment => {
 				setComments(prev => [{ ...newComment, replies: newComment.replies || [] }, ...(prev || [])]);
 				setContent('');
@@ -1042,7 +1046,6 @@ function Guestbook({ groupId, puuid }) {
 						>
 							<Mention
 								trigger="@"
-								markup="<@__id__>"
 								displayTransform={(id, display) => `@${display}`}
 								appendSpaceOnAdd
 								data={mentionsData}
