@@ -599,8 +599,10 @@ function CommentItem({
 	const isDeleted = comment.isDeleted;
 	// 비밀글이지만 권한 없어 본문이 마스킹된 케이스 — author/메타는 보이고 content만 null로 옴
 	const isMasked = !isDeleted && comment.isSecret && comment.content === null;
-	const showLike = !isDeleted && !isMasked;
+	const showLike = !isDeleted;
 	const showLikeCount = !isDeleted;
+	// 마스킹된 글에 좋아요는 부적절 — 버튼은 보이되 disabled 처리
+	const canLikeEffective = canLike && !isMasked;
 	const showDelete = !isDeleted && canDelete;
 	const showReplyButton = !isDeleted && !isMasked && canReply;
 	const author = comment.author || null;
@@ -702,10 +704,10 @@ function CommentItem({
 								className={cx(
 									classes.likeBtn,
 									comment.likedByMe && classes.likeBtnActive,
-									!canLike && classes.likeBtnDisabled
+									!canLikeEffective && classes.likeBtnDisabled
 								)}
 								onClick={() => onToggleLike(comment)}
-								disabled={!canLike || isLikePending}
+								disabled={!canLikeEffective || isLikePending}
 								aria-label={comment.likedByMe ? '좋아요 취소' : '좋아요'}
 							>
 								{comment.likedByMe ? <FavoriteIcon /> : <FavoriteBorderIcon />}
