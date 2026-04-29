@@ -4,7 +4,15 @@ import Typography from '@mui/material/Typography';
 import Icon from '@mui/material/Icon';
 import { makeStyles } from 'tss-react/mui';
 import clsx from 'clsx';
-import { formatMessage, formatRelative, getActorAvatar, getActorInitial } from './notificationFormat';
+import { useNavigate } from 'react-router-dom';
+import camilleRiotAuthService from 'app/services/camilleRiotAuthService';
+import {
+	formatMessage,
+	formatRelative,
+	getActorAvatar,
+	getActorInitial,
+	getPrimaryActorProfile
+} from './notificationFormat';
 
 const TYPE_ICONS = {
 	guestbook_comment: 'chat_bubble',
@@ -44,6 +52,14 @@ const useStyles = makeStyles()((theme) => ({
 		color: '#00d4ff',
 		fontFamily: '"Noto Sans KR", sans-serif',
 		fontWeight: 600
+	},
+	avatarClickable: {
+		cursor: 'pointer',
+		transition: 'transform 0.15s ease, border-color 0.15s ease',
+		'&:hover': {
+			transform: 'scale(1.06)',
+			borderColor: 'rgba(0, 212, 255, 0.7)'
+		}
 	},
 	systemAvatar: {
 		background: 'linear-gradient(135deg, rgba(0, 212, 255, 0.2) 0%, rgba(0, 212, 255, 0.05) 100%)'
@@ -99,10 +115,22 @@ const useStyles = makeStyles()((theme) => ({
 
 function NotificationItem({ group, onClick }) {
 	const { classes } = useStyles();
+	const navigate = useNavigate();
 	const avatarUrl = getActorAvatar(group);
 	const initial = getActorInitial(group);
 	const isSystem = !group.latestActorName && !group.actors?.length;
 	const typeIcon = TYPE_ICONS[group.type];
+	const primaryActor = getPrimaryActorProfile(group);
+	const myPuuid = camilleRiotAuthService.getPuuid();
+	const avatarClickable = !isSystem && Boolean(primaryActor);
+
+	const handleAvatarClick = (e) => {
+		if (!avatarClickable) return;
+		e.stopPropagation();
+		const targetPuuid = primaryActor.puuid;
+		if (targetPuuid === myPuuid) navigate('/myinfo');
+		else navigate(`/userinfo/${targetPuuid}`);
+	};
 
 	return (
 		<div
@@ -116,9 +144,21 @@ function NotificationItem({ group, onClick }) {
 		>
 			<div className={classes.avatarWrap}>
 				{avatarUrl ? (
-					<Avatar src={avatarUrl} alt="" className={classes.avatar} />
+					<Avatar
+						src={avatarUrl}
+						alt=""
+						className={clsx(classes.avatar, avatarClickable && classes.avatarClickable)}
+						onClick={handleAvatarClick}
+					/>
 				) : (
-					<Avatar className={clsx(classes.avatar, isSystem && classes.systemAvatar)}>
+					<Avatar
+						className={clsx(
+							classes.avatar,
+							isSystem && classes.systemAvatar,
+							avatarClickable && classes.avatarClickable
+						)}
+						onClick={handleAvatarClick}
+					>
 						{isSystem ? <Icon style={{ fontSize: 20 }}>{typeIcon || 'notifications'}</Icon> : initial}
 					</Avatar>
 				)}

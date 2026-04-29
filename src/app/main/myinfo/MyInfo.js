@@ -16,7 +16,7 @@ import {
 	Tab
 } from '@mui/material';
 import { useDispatch, useSelector } from 'react-redux';
-import { useParams } from 'react-router-dom';
+import { useParams, useLocation } from 'react-router-dom';
 import withReducer from 'app/store/withReducer';
 import getLatesetRiotDataVersion from 'app/utility/getLatesetRiotDataVersion';
 import { MyInfoSkeleton } from '../components/SkeletonLoaders';
@@ -905,6 +905,13 @@ function MyInfoPage(props) {
 	useEffect(() => {
 		dispatch(Actions.getMyInfo(user.reprGroup.groupId, puuid));
 	}, [dispatch, user, puuid]);
+
+	const location = useLocation();
+	useEffect(() => {
+		if (location.hash && location.hash.startsWith('#comment-')) {
+			setActiveTab(2);
+		}
+	}, [location.hash]);
 
 	if (!scoreInfo) {
 		return (

@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useSelector } from 'react-redux';
+import { useLocation } from 'react-router-dom';
 import {
 	Button,
 	TextField,
@@ -36,6 +37,11 @@ import LikersDialog from './LikersDialog';
 const fadeIn = keyframes`
 	0% { opacity: 0; transform: translateY(8px); }
 	100% { opacity: 1; transform: translateY(0); }
+`;
+
+const flashHighlight = keyframes`
+	0%   { box-shadow: 0 0 0 2px rgba(0, 212, 255, 0.7), 0 0 30px rgba(0, 212, 255, 0.45); background: rgba(0, 212, 255, 0.18); }
+	100% { box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.05); background: rgba(0, 0, 0, 0.22); }
 `;
 
 const MAX_LEN = 500;
@@ -225,9 +231,13 @@ const useStyles = makeStyles()(theme => ({
 		borderRadius: 14,
 		border: '1px solid rgba(255, 255, 255, 0.05)',
 		animation: `${fadeIn} 0.3s ease`,
+		scrollMarginTop: 96,
 		[theme.breakpoints.down('sm')]: {
 			padding: '12px 14px'
 		}
+	},
+	commentHighlight: {
+		animation: `${flashHighlight} 1.8s ease`
 	},
 	commentSecret: {
 		borderColor: 'rgba(255, 215, 0, 0.18)',
@@ -446,6 +456,7 @@ function CommentItem({
 	canLike,
 	isLikePending,
 	isReplyOpen,
+	isHighlighted,
 	onToggleLike,
 	onAskDelete,
 	onToggleReply,
@@ -458,11 +469,13 @@ function CommentItem({
 
 	return (
 		<div
+			id={`comment-${comment.id}`}
 			className={cx(
 				classes.comment,
 				comment.isSecret && classes.commentSecret,
 				isDeleted && classes.commentDeleted,
-				isReply && classes.replyComment
+				isReply && classes.replyComment,
+				isHighlighted && classes.commentHighlight
 			)}
 		>
 			<div className={classes.commentTop}>
@@ -629,6 +642,7 @@ function updateCommentById(comments, id, updater) {
 
 function Guestbook({ groupId, puuid }) {
 	const { classes, cx } = useStyles();
+	const location = useLocation();
 	const user = useSelector(state => state.auth.user);
 	const myDiscordId = user?.data?.discordUser?.discordId || null;
 	const isAdmin = Boolean(user?.reprGroup?.isAdmin);
@@ -645,6 +659,7 @@ function Guestbook({ groupId, puuid }) {
 	const [likersDialog, setLikersDialog] = useState({ open: false, commentId: null });
 	const [confirmDelete, setConfirmDelete] = useState({ open: false, commentId: null });
 	const [snack, setSnack] = useState({ open: false, message: '', type: 'success' });
+	const [highlightId, setHighlightId] = useState(null);
 
 	const showSnack = useCallback((message, type = 'success') => {
 		setSnack({ open: true, message, type });
@@ -662,6 +677,29 @@ function Guestbook({ groupId, puuid }) {
 				setLoadError(true);
 			});
 	}, [groupId, puuid]);
+
+	useEffect(() => {
+		if (!comments || comments.length === 0) return undefined;
+		const hash = location.hash;
+		if (!hash || !hash.startsWith('#comment-')) return undefined;
+		const idStr = hash.slice('#comment-'.length);
+		const idNum = Number(idStr);
+		if (!Number.isFinite(idNum)) return undefined;
+
+		const scrollTimer = setTimeout(() => {
+			const el = document.getElementById(`comment-${idNum}`);
+			if (!el) return;
+			el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+			setHighlightId(idNum);
+		}, 80);
+
+		const clearTimer = setTimeout(() => setHighlightId(null), 2000);
+
+		return () => {
+			clearTimeout(scrollTimer);
+			clearTimeout(clearTimer);
+		};
+	}, [comments, location.hash]);
 
 	function handleSubmitTopLevel() {
 		const trimmed = content.trim();
@@ -852,6 +890,7 @@ function Guestbook({ groupId, puuid }) {
 				canLike={isLoggedIn}
 				isLikePending={Boolean(pendingLikeIds[comment.id])}
 				isReplyOpen={openReplyId === comment.id}
+				isHighlighted={highlightId === comment.id}
 				onToggleLike={handleToggleLike}
 				onAskDelete={handleAskDelete}
 				onToggleReply={handleToggleReply}
