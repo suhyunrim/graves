@@ -12,6 +12,7 @@ import clsx from 'clsx';
 import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import * as authActions from 'app/auth/store/actions';
+import startDiscordLogin from 'app/utility/discordAuth';
 
 // keyframes 헬퍼로 애니메이션 정의 (tss-react는 JSS $ruleName 참조 미지원)
 const pulseGlow = keyframes`
@@ -229,7 +230,7 @@ function LoginPage() {
 	}
 
 	function handleDiscordLogin() {
-		window.location.href = `${import.meta.env.VITE_CAMILLE_HOST}api/auth/discord`;
+		startDiscordLogin();
 	}
 
 	if (isPending) return <FuseSplashScreen />;

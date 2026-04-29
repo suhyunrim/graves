@@ -28,6 +28,7 @@ import { formatDistanceToNow } from 'date-fns';
 import koLocale from 'date-fns/locale/ko';
 import camilleRiotAuthService from 'app/services/camilleRiotAuthService';
 import getApiErrorMessage from 'app/utility/getApiErrorMessage';
+import startDiscordLogin from 'app/utility/discordAuth';
 import { getProfileIconUrl } from 'app/main/challenge/ddragonUtils';
 import {
 	fetchProfileComments,
@@ -1178,7 +1179,14 @@ function Guestbook({ groupId, puuid }) {
 					<span className={classes.loginText}>
 						<span role="img" aria-label="lock">🔒</span> 로그인하면 글을 남길 수 있어요
 					</span>
-					<Button className={classes.loginBtn} href="/login">
+					<Button
+						className={classes.loginBtn}
+						onClick={() => {
+							const returnTo =
+								window.location.pathname + window.location.search + window.location.hash;
+							startDiscordLogin(returnTo);
+						}}
+					>
 						Discord로 로그인
 					</Button>
 				</div>

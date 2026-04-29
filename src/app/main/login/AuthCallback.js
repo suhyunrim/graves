@@ -1,24 +1,29 @@
 import FuseSplashScreen from '@fuse/core/FuseSplashScreen';
 import React, { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import * as LoginActions from 'app/auth/store/actions/login.actions';
-import history from '@history';
+import { consumePostLoginReturnTo } from 'app/utility/discordAuth';
 
 function AuthCallback() {
 	const dispatch = useDispatch();
 	const location = useLocation();
+	const navigate = useNavigate();
 
 	useEffect(() => {
 		const params = new URLSearchParams(location.search);
 		const token = params.get('token');
+		const returnTo = consumePostLoginReturnTo() || '/';
 
-		if (token) {
-			dispatch(LoginActions.submitDiscordLogin(token));
-		} else {
-			history.push('/login');
+		if (!token) {
+			navigate('/login', { replace: true });
+			return;
 		}
-	}, [dispatch, location.search]);
+
+		dispatch(LoginActions.submitDiscordLogin(token)).then(() => {
+			navigate(returnTo, { replace: true });
+		});
+	}, [dispatch, location.search, navigate]);
 
 	return <FuseSplashScreen />;
 }
