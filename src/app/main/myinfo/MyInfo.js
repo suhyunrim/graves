@@ -19,6 +19,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useParams, useLocation } from 'react-router-dom';
 import withReducer from 'app/store/withReducer';
 import getLatesetRiotDataVersion from 'app/utility/getLatesetRiotDataVersion';
+import getApiErrorMessage from 'app/utility/getApiErrorMessage';
 import { MyInfoSkeleton } from '../components/SkeletonLoaders';
 import AchievementContent from '../achievement/AchievementContent';
 import achievementReducer from '../achievement/store/reducers';
@@ -791,8 +792,7 @@ function MyInfoPage(props) {
 			})
 			.catch(err => {
 				setSubAccountLoading(false);
-				const msg = err.response && err.response.data ? err.response.data.result : '부캐 등록에 실패했습니다.';
-				toast.error(msg);
+				toast.error(getApiErrorMessage(err, '부캐 등록에 실패했습니다.'));
 			});
 	}
 

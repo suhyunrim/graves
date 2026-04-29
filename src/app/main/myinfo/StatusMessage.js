@@ -18,6 +18,7 @@ import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutlined';
 import { makeStyles } from 'tss-react/mui';
 import { keyframes } from '@emotion/react';
 import useToast from 'app/utility/useToast';
+import getApiErrorMessage from 'app/utility/getApiErrorMessage';
 import * as Actions from './store/actions';
 
 const MAX_LEN = 50;
@@ -222,18 +223,6 @@ function StatusMessage({ groupId, puuid, editable }) {
 		}
 	}, [editOpen, statusMessage]);
 
-	function showSnack(message, type = 'success') {
-		if (type === 'error') toast.error(message);
-		else toast.success(message);
-	}
-
-	function getApiErrorMessage(err) {
-		if (err && err.response && err.response.data && typeof err.response.data.result === 'string') {
-			return err.response.data.result;
-		}
-		return '서버 오류가 발생했습니다';
-	}
-
 	function handleSave() {
 		const trimmed = draft.trim();
 		if (!trimmed || saving) return;
@@ -245,19 +234,19 @@ function StatusMessage({ groupId, puuid, editable }) {
 			.then(() => {
 				setSaving(false);
 				setEditOpen(false);
-				showSnack(isUpdate ? '한마디가 수정되었습니다.' : '한마디가 등록되었습니다.');
+				toast.success(isUpdate ? '한마디가 수정되었습니다.' : '한마디가 등록되었습니다.');
 			})
 			.catch(err => {
 				setSaving(false);
-				showSnack(getApiErrorMessage(err), 'error');
+				toast.error(getApiErrorMessage(err, '서버 오류가 발생했습니다'));
 			});
 	}
 
 	function handleDelete() {
 		setConfirmDelete(false);
 		dispatch(Actions.deleteStatusMessage(groupId, puuid))
-			.then(() => showSnack('한마디가 삭제되었습니다.'))
-			.catch(err => showSnack(getApiErrorMessage(err), 'error'));
+			.then(() => toast.success('한마디가 삭제되었습니다.'))
+			.catch(err => toast.error(getApiErrorMessage(err, '서버 오류가 발생했습니다')));
 	}
 
 	if (!statusMessage && !editable) return null;

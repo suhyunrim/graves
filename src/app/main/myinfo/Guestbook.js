@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { MentionsInput, Mention } from 'react-mentions';
@@ -27,6 +27,7 @@ import { keyframes } from '@emotion/react';
 import { formatDistanceToNow } from 'date-fns';
 import koLocale from 'date-fns/locale/ko';
 import camilleRiotAuthService from 'app/services/camilleRiotAuthService';
+import getApiErrorMessage from 'app/utility/getApiErrorMessage';
 import { getProfileIconUrl } from 'app/main/challenge/ddragonUtils';
 import {
 	fetchProfileComments,
@@ -855,11 +856,6 @@ function Guestbook({ groupId, puuid }) {
 		[members]
 	);
 
-	const showSnack = useCallback((message, type = 'success') => {
-		if (type === 'error') toast.error(message);
-		else toast.success(message);
-	}, [toast]);
-
 	useEffect(() => {
 		if (!groupId || !puuid) return;
 		setComments(null);
@@ -908,7 +904,7 @@ function Guestbook({ groupId, puuid }) {
 		const trimmedPlainLen = plainText.trim().length;
 		if (!trimmed || submitting) return;
 		if (trimmedPlainLen > MAX_LEN) {
-			showSnack(`최대 ${MAX_LEN}자까지 입력 가능합니다.`, 'error');
+			toast.error(`최대 ${MAX_LEN}자까지 입력 가능합니다.`);
 			return;
 		}
 		setSubmitting(true);
@@ -919,13 +915,10 @@ function Guestbook({ groupId, puuid }) {
 				setContent('');
 				setPlainText('');
 				setIsSecret(false);
-				showSnack('방명록이 등록되었습니다.');
+				toast.success('방명록이 등록되었습니다.');
 			})
 			.catch(err => {
-				const msg =
-					(err && err.response && err.response.data && err.response.data.result) ||
-					'방명록 등록에 실패했습니다.';
-				showSnack(msg, 'error');
+				toast.error(getApiErrorMessage(err, '방명록 등록에 실패했습니다.'));
 			})
 			.finally(() => setSubmitting(false));
 	}
@@ -945,13 +938,10 @@ function Guestbook({ groupId, puuid }) {
 				);
 				setOpenReplyId(null);
 				resetForm();
-				showSnack('답글이 등록되었습니다.');
+				toast.success('답글이 등록되었습니다.');
 			})
 			.catch(err => {
-				const msg =
-					(err && err.response && err.response.data && err.response.data.result) ||
-					'답글 등록에 실패했습니다.';
-				showSnack(msg, 'error');
+				toast.error(getApiErrorMessage(err, '답글 등록에 실패했습니다.'));
 			})
 			.finally(() => setReplySubmittingId(null));
 	}
@@ -1004,19 +994,16 @@ function Guestbook({ groupId, puuid }) {
 		}
 
 		deleteProfileComment(commentId)
-			.then(() => showSnack('삭제되었습니다.'))
+			.then(() => toast.success('삭제되었습니다.'))
 			.catch(err => {
 				setComments(snapshot);
-				const msg =
-					(err && err.response && err.response.data && err.response.data.result) ||
-					'삭제에 실패했습니다.';
-				showSnack(msg, 'error');
+				toast.error(getApiErrorMessage(err, '삭제에 실패했습니다.'));
 			});
 	}
 
 	function handleToggleLike(comment) {
 		if (!isLoggedIn) {
-			showSnack('로그인이 필요합니다.', 'error');
+			toast.error('로그인이 필요합니다.');
 			return;
 		}
 		const commentId = comment.id;
@@ -1048,7 +1035,7 @@ function Guestbook({ groupId, puuid }) {
 			})
 			.catch(() => {
 				setComments(snapshot);
-				showSnack('좋아요 처리에 실패했습니다.', 'error');
+				toast.error('좋아요 처리에 실패했습니다.');
 			})
 			.finally(() => {
 				setPendingLikeIds(prev => {
