@@ -2,7 +2,6 @@ import React, { useEffect, useState, useTransition, useOptimistic } from 'react'
 import {
 	TextField,
 	Switch,
-	Snackbar,
 	IconButton,
 	Button,
 	ToggleButton,
@@ -23,6 +22,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import EditIcon from '@mui/icons-material/Edit';
 import SettingsIcon from '@mui/icons-material/Settings';
 import { useDispatch, useSelector } from 'react-redux';
+import useToast from 'app/utility/useToast';
 import { SettingsSkeleton } from '../components/SkeletonLoaders';
 import * as Actions from './store/actions';
 import OnboardingSettingsDialog from './OnboardingSettingsDialog';
@@ -367,19 +367,12 @@ const useStyles = makeStyles()((theme) => ({
 		color: 'rgba(255, 255, 255, 0.75)',
 		lineHeight: 1.6
 	},
-	snackbar: {
-		'& .MuiSnackbarContent-root': {
-			fontFamily: '"Noto Sans KR", sans-serif',
-			fontSize: '1.15rem',
-			background: '#1a1a2e',
-			border: '1px solid rgba(0, 212, 255, 0.3)'
-		}
-	}
 }));
 
 function GroupInfoContent() {
 	const { classes } = useStyles();
 	const dispatch = useDispatch();
+	const toast = useToast();
 	const theme = useTheme();
 	const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 	const user = useSelector(state => state.auth.user);
@@ -387,7 +380,6 @@ function GroupInfoContent() {
 
 	const [editingName, setEditingName] = useState(false);
 	const [nameValue, setNameValue] = useState('');
-	const [snackMsg, setSnackMsg] = useState('');
 	const [onboardingDialogOpen, setOnboardingDialogOpen] = useState(false);
 	const [resetConfirmOpen, setResetConfirmOpen] = useState(false);
 	const [isSaving, startSaveTransition] = useTransition();
@@ -432,10 +424,10 @@ function GroupInfoContent() {
 		startSaveTransition(async () => {
 			try {
 				await dispatch(Actions.updateGroupName(groupId, nameValue.trim()));
-				setSnackMsg('방 이름이 변경되었습니다.');
+				toast.success('방 이름이 변경되었습니다.');
 				setEditingName(false);
 			} catch {
-				setSnackMsg('변경에 실패했습니다.');
+				toast.error('변경에 실패했습니다.');
 			}
 		});
 	}
@@ -451,16 +443,16 @@ function GroupInfoContent() {
 			applyOptimisticSettings({ onboardingEnabled: next });
 			try {
 				await dispatch(Actions.updateGroupSettings(groupId, { onboardingEnabled: next }));
-				setSnackMsg(next ? '온보딩이 활성화되었습니다.' : '온보딩이 비활성화되었습니다.');
+				toast.success(next ? '온보딩이 활성화되었습니다.' : '온보딩이 비활성화되었습니다.');
 			} catch {
-				setSnackMsg('설정 변경에 실패했습니다.');
+				toast.error('설정 변경에 실패했습니다.');
 			}
 		});
 	}
 
 	function handleOnboardingDialogClose(msg) {
 		setOnboardingDialogOpen(false);
-		if (msg) setSnackMsg(msg);
+		if (msg) toast.success(msg);
 	}
 
 	function handleChangeVoteMode(_event, nextMode) {
@@ -469,9 +461,9 @@ function GroupInfoContent() {
 			applyOptimisticSettings({ matchVoteMode: nextMode });
 			try {
 				await dispatch(Actions.updateGroupSettings(groupId, { matchVoteMode: nextMode }));
-				setSnackMsg(`매칭 투표 모드가 '${VOTE_MODE_LABELS[nextMode]}'(으)로 변경되었습니다.`);
+				toast.success(`매칭 투표 모드가 '${VOTE_MODE_LABELS[nextMode]}'(으)로 변경되었습니다.`);
 			} catch {
-				setSnackMsg('설정 변경에 실패했습니다.');
+				toast.error('설정 변경에 실패했습니다.');
 			}
 		});
 	}
@@ -484,9 +476,9 @@ function GroupInfoContent() {
 			applyOptimisticSettings({ seasonEndMonth: next });
 			try {
 				await dispatch(Actions.updateGroupSettings(groupId, { seasonEndMonth: next }));
-				setSnackMsg(`시즌 자동 종료가 ${next}로 설정되었습니다.`);
+				toast.success(`시즌 자동 종료가 ${next}로 설정되었습니다.`);
 			} catch {
-				setSnackMsg('설정 변경에 실패했습니다.');
+				toast.error('설정 변경에 실패했습니다.');
 			}
 		});
 	}
@@ -497,9 +489,9 @@ function GroupInfoContent() {
 			applyOptimisticSettings({ seasonEndMonth: null });
 			try {
 				await dispatch(Actions.updateGroupSettings(groupId, { seasonEndMonth: null }));
-				setSnackMsg('시즌 자동 종료가 해제되었습니다.');
+				toast.success('시즌 자동 종료가 해제되었습니다.');
 			} catch {
-				setSnackMsg('설정 변경에 실패했습니다.');
+				toast.error('설정 변경에 실패했습니다.');
 			}
 		});
 	}
@@ -508,10 +500,10 @@ function GroupInfoContent() {
 		startResetTransition(async () => {
 			try {
 				await dispatch(Actions.resetSeason(groupId));
-				setSnackMsg('시즌이 리셋되었습니다.');
+				toast.success('시즌이 리셋되었습니다.');
 				setResetConfirmOpen(false);
 			} catch {
-				setSnackMsg('시즌 리셋에 실패했습니다.');
+				toast.error('시즌 리셋에 실패했습니다.');
 			}
 		});
 	}
@@ -730,14 +722,6 @@ function GroupInfoContent() {
 				</DialogActions>
 			</Dialog>
 
-			<Snackbar
-				className={classes.snackbar}
-				open={Boolean(snackMsg)}
-				autoHideDuration={2000}
-				onClose={() => setSnackMsg('')}
-				message={snackMsg}
-				anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-			/>
 		</div>
 	);
 }
