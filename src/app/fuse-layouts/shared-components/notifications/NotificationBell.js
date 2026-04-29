@@ -8,8 +8,9 @@ import Tooltip from '@mui/material/Tooltip';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { useTheme } from '@mui/material/styles';
 import { makeStyles } from 'tss-react/mui';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import * as Actions from 'app/store/actions';
 import camilleRiotAuthService from 'app/services/camilleRiotAuthService';
 import useNotifications from './useNotifications';
 import NotificationPanel from './NotificationPanel';
@@ -60,6 +61,7 @@ function NotificationBell() {
 	const theme = useTheme();
 	const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 	const navigate = useNavigate();
+	const dispatch = useDispatch();
 	const user = useSelector(({ auth }) => auth.user);
 	const isAuthenticated = !!(user?.role && user.role.length > 0);
 
@@ -107,8 +109,10 @@ function NotificationBell() {
 			readNotification({ id: group.representativeId }).catch(() => {});
 		}
 		handleClose();
+		// 모바일에서 알림 항목 클릭은 NavVertical 항목과 달리 navbar 자동 닫기 분기를 안 타므로 직접 dispatch
+		dispatch(Actions.navbarCloseMobile());
 		if (path) navigate(path);
-	}, [handleClose, navigate]);
+	}, [handleClose, navigate, dispatch]);
 
 	const handleReadAll = useCallback(() => {
 		markAllRead();
