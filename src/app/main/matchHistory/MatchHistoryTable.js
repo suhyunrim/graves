@@ -799,7 +799,7 @@ function MatchHistoryTable() {
 				anchorEl={menuAnchorEl}
 				open={Boolean(menuAnchorEl)}
 				onClose={handleMenuClose}
-				PaperProps={{ className: dialogClasses.menuPaper }}
+				slotProps={{ paper: { className: dialogClasses.menuPaper } }}
 			>
 				<MenuItem
 					onClick={handleDuplicateClick}
@@ -942,7 +942,7 @@ function MatchHistoryTable() {
 			<Dialog
 				open={cancelDialogOpen}
 				onClose={handleCancelDialogClose}
-				PaperProps={{ className: dialogClasses.paperDestructive }}
+				slotProps={{ paper: { className: dialogClasses.paperDestructive } }}
 			>
 				<DialogTitle className={dialogClasses.titleDestructive} style={{ color: '#ff6b6b' }}>
 					매치 취소

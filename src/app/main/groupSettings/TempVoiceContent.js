@@ -373,7 +373,7 @@ function TempVoiceContent() {
 			<Dialog
 				open={Boolean(editDialog)}
 				onClose={() => setEditDialog(null)}
-				PaperProps={{ className: cx(dialogClasses.paperCyan, classes.dialogPaperWidth) }}
+				slotProps={{ paper: { className: cx(dialogClasses.paperCyan, classes.dialogPaperWidth) } }}
 			>
 				{editDialog && (
 					<>
@@ -441,7 +441,7 @@ function TempVoiceContent() {
 			<Dialog
 				open={Boolean(deleteDialog)}
 				onClose={() => setDeleteDialog(null)}
-				PaperProps={{ className: dialogClasses.paperDestructive }}
+				slotProps={{ paper: { className: dialogClasses.paperDestructive } }}
 			>
 				{deleteDialog && (
 					<>

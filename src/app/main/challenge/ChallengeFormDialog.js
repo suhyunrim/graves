@@ -179,7 +179,7 @@ function ChallengeFormDialog({ open, onClose, onSuccess, groupId, challenge }) {
 		<Dialog
 			open={open}
 			onClose={onClose}
-			PaperProps={{ className: cx(dialogClasses.paperCyan, classes.paperWidth) }}
+			slotProps={{ paper: { className: cx(dialogClasses.paperCyan, classes.paperWidth) } }}
 		>
 			<DialogTitle className={dialogClasses.titleCyan}>{isEdit ? '챌린지 수정' : '챌린지 생성'}</DialogTitle>
 			<DialogContent>

@@ -4,9 +4,10 @@ import { makeStyles } from 'tss-react/mui';
 // .claude/rules/design-consistency.md, MyInfo.js 의 listDialog(메인 cyan)
 // 와 부캐 해제 다이얼로그(destructive) 패턴을 그대로 따른다.
 //
-// 사용법:
+// 사용법 (MUI v9 — Paper 슬롯에 className 을 입히려면 slotProps 사용 필수.
+// PaperProps={{ className }} 는 v9 에서 paper element 까지 className 이 전달되지 않는다):
 //   const { classes: dialogClasses } = useDialogStyles();
-//   <Dialog PaperProps={{ className: dialogClasses.paperCyan }}>
+//   <Dialog slotProps={{ paper: { className: dialogClasses.paperCyan } }}>
 //     <DialogTitle className={dialogClasses.titleCyan}>...</DialogTitle>
 //     ...
 //     <DialogActions>

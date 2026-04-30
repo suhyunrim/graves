@@ -503,7 +503,7 @@ function OnboardingSettingsDialog({ open, onClose, groupId }) {
 		<Dialog
 			open={open}
 			onClose={() => onClose()}
-			PaperProps={{ className: cx(dialogClasses.paperCyan, classes.paperWidth) }}
+			slotProps={{ paper: { className: cx(dialogClasses.paperCyan, classes.paperWidth) } }}
 		>
 			<DialogTitle className={dialogClasses.titleCyan}>온보딩 설정</DialogTitle>
 			<DialogContent>

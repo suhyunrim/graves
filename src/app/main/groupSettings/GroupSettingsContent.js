@@ -611,7 +611,7 @@ function GroupSettingsContent() {
 			<Dialog
 				open={Boolean(confirmDialog)}
 				onClose={() => setConfirmDialog(null)}
-				PaperProps={{ className: dialogClasses.paperDestructive }}
+				slotProps={{ paper: { className: dialogClasses.paperDestructive } }}
 			>
 				{confirmDialog && (
 					<>
