@@ -8,7 +8,8 @@ import {
 	TextField,
 	MenuItem,
 	FormControlLabel,
-	Checkbox
+	Checkbox,
+	Alert
 } from '@mui/material';
 import { makeStyles } from 'tss-react/mui';
 import { DatePicker } from '@mui/x-date-pickers';
@@ -62,6 +63,17 @@ const useStyles = makeStyles()((theme) => ({
 		fontFamily: '"Noto Sans KR", sans-serif',
 		color: 'rgba(255, 255, 255, 0.8)'
 	},
+	lockBanner: {
+		marginBottom: 16,
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.1rem',
+		background: 'rgba(0, 212, 255, 0.08)',
+		border: '1px solid rgba(0, 212, 255, 0.25)',
+		color: 'rgba(255, 255, 255, 0.9)',
+		'& .MuiAlert-icon': {
+			color: '#00d4ff'
+		}
+	},
 	errorText: {
 		fontFamily: '"Noto Sans KR", sans-serif',
 		fontSize: '1.1rem',
@@ -79,6 +91,13 @@ function ChallengeFormDialog({ open, onClose, onSuccess, groupId, challenge }) {
 	const { classes, cx } = useStyles();
 	const { classes: dialogClasses } = useDialogStyles();
 	const isEdit = Boolean(challenge);
+	// 종료/취소된 챌린지는 백엔드가 cosmetic 필드(title/description/displayOrder/isVisible)만 허용한다.
+	// 차단 대상 입력을 disabled 처리하고 PUT body 에서도 제외한다.
+	const isLocked = isEdit && (challenge.status === 'ended' || challenge.status === 'canceled');
+	const lockHelper = isLocked ? '종료/취소된 챌린지는 이 항목을 수정할 수 없습니다.' : undefined;
+	const lockBannerText = isLocked
+		? `${challenge.status === 'canceled' ? '취소된' : '종료된'} 챌린지입니다. 제목/설명/노출 설정만 수정 가능합니다.`
+		: '';
 
 	const [form, setForm] = useState({
 		title: challenge ? challenge.title : '',
@@ -107,9 +126,11 @@ function ChallengeFormDialog({ open, onClose, onSuccess, groupId, challenge }) {
 
 	function validate() {
 		if (!form.title.trim()) return '제목을 입력하세요.';
-		if (!form.startAt) return '시작일을 선택하세요.';
-		if (!form.endAt) return '종료일을 선택하세요.';
-		if (form.endAt <= form.startAt) return '종료일은 시작일 이후여야 합니다.';
+		if (!isLocked) {
+			if (!form.startAt) return '시작일을 선택하세요.';
+			if (!form.endAt) return '종료일을 선택하세요.';
+			if (form.endAt <= form.startAt) return '종료일은 시작일 이후여야 합니다.';
+		}
 		return null;
 	}
 
@@ -122,15 +143,21 @@ function ChallengeFormDialog({ open, onClose, onSuccess, groupId, challenge }) {
 		setError('');
 		setLoading(true);
 
-		const body = {
-			title: form.title.trim(),
-			description: form.description.trim() || undefined,
-			gameType: form.gameType,
-			startAt: form.startAt.toISOString(),
-			endAt: form.endAt.toISOString(),
-			scoringType: form.scoringType,
-			isVisible: form.isVisible
-		};
+		const body = isLocked
+			? {
+				title: form.title.trim(),
+				description: form.description.trim() || undefined,
+				isVisible: form.isVisible
+			}
+			: {
+				title: form.title.trim(),
+				description: form.description.trim() || undefined,
+				gameType: form.gameType,
+				startAt: form.startAt.toISOString(),
+				endAt: form.endAt.toISOString(),
+				scoringType: form.scoringType,
+				isVisible: form.isVisible
+			};
 
 		const request = isEdit
 			? Actions.updateChallenge(groupId, challenge.id, body)
@@ -156,6 +183,11 @@ function ChallengeFormDialog({ open, onClose, onSuccess, groupId, challenge }) {
 		>
 			<DialogTitle className={dialogClasses.titleCyan}>{isEdit ? '챌린지 수정' : '챌린지 생성'}</DialogTitle>
 			<DialogContent>
+				{isLocked && (
+					<Alert severity="info" className={classes.lockBanner}>
+						{lockBannerText}
+					</Alert>
+				)}
 				<TextField
 					className={classes.field}
 					label="제목"
@@ -188,6 +220,8 @@ function ChallengeFormDialog({ open, onClose, onSuccess, groupId, challenge }) {
 					fullWidth
 					select
 					required
+					disabled={isLocked}
+					helperText={lockHelper}
 				>
 					<MenuItem value="soloRank">솔로랭크</MenuItem>
 					<MenuItem value="flexRank">자유랭크</MenuItem>
@@ -201,7 +235,15 @@ function ChallengeFormDialog({ open, onClose, onSuccess, groupId, challenge }) {
 						format="yyyy-MM-dd"
 						value={form.startAt}
 						onChange={handleStartDateChange}
-						slotProps={{ textField: { variant: 'outlined', fullWidth: true, required: true } }}
+						disabled={isLocked}
+						slotProps={{
+							textField: {
+								variant: 'outlined',
+								fullWidth: true,
+								required: !isLocked,
+								helperText: lockHelper
+							}
+						}}
 					/>
 					<DatePicker
 						className={classes.field}
@@ -210,7 +252,15 @@ function ChallengeFormDialog({ open, onClose, onSuccess, groupId, challenge }) {
 						value={form.endAt}
 						onChange={handleEndDateChange}
 						minDate={form.startAt || undefined}
-						slotProps={{ textField: { variant: 'outlined', fullWidth: true, required: true } }}
+						disabled={isLocked}
+						slotProps={{
+							textField: {
+								variant: 'outlined',
+								fullWidth: true,
+								required: !isLocked,
+								helperText: lockHelper
+							}
+						}}
 					/>
 				</LocalizationProvider>
 				<TextField
@@ -223,6 +273,8 @@ function ChallengeFormDialog({ open, onClose, onSuccess, groupId, challenge }) {
 					fullWidth
 					select
 					required
+					disabled={isLocked}
+					helperText={lockHelper}
 				>
 					<MenuItem value="points">포인트 (판당 1점)</MenuItem>
 					<MenuItem value="games">판수</MenuItem>
