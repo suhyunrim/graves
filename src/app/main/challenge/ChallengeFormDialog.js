@@ -15,27 +15,16 @@ import { DatePicker } from '@mui/x-date-pickers';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import koLocale from 'date-fns/locale/ko';
+import useDialogStyles from '../components/dialogStyles';
 import * as Actions from './store/actions';
 
 const useStyles = makeStyles()((theme) => ({
-	paper: {
-		background: 'linear-gradient(135deg, #1a1a2e 0%, #0f0f1a 100%)',
-		color: '#fff',
-		borderRadius: 20,
-		border: '1px solid rgba(0, 212, 255, 0.3)',
+	paperWidth: {
 		minWidth: 400,
 		[theme.breakpoints.down('sm')]: {
 			minWidth: 'auto',
-			margin: 16,
-			borderRadius: 16
+			margin: 16
 		}
-	},
-	title: {
-		fontFamily: '"Noto Sans KR", sans-serif',
-		fontWeight: 700,
-		fontSize: '1.8rem',
-		borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-		color: '#fff'
 	},
 	field: {
 		marginBottom: 16,
@@ -73,27 +62,6 @@ const useStyles = makeStyles()((theme) => ({
 		fontFamily: '"Noto Sans KR", sans-serif',
 		color: 'rgba(255, 255, 255, 0.8)'
 	},
-	cancelBtn: {
-		color: 'rgba(255, 255, 255, 0.7)',
-		fontFamily: '"Noto Sans KR", sans-serif',
-		fontWeight: 600
-	},
-	submitBtn: {
-		background: 'linear-gradient(135deg, #00d4ff 0%, #0099cc 100%)',
-		color: '#000',
-		fontFamily: '"Noto Sans KR", sans-serif',
-		fontWeight: 700,
-		borderRadius: 10,
-		padding: '8px 24px',
-		textTransform: 'none',
-		'&:hover': {
-			background: 'linear-gradient(135deg, #00bce0 0%, #0088bb 100%)'
-		},
-		'&.Mui-disabled': {
-			background: 'rgba(255, 255, 255, 0.1)',
-			color: 'rgba(255, 255, 255, 0.3)'
-		}
-	},
 	errorText: {
 		fontFamily: '"Noto Sans KR", sans-serif',
 		fontSize: '1.1rem',
@@ -108,7 +76,8 @@ function toLocalDate(dateStr) {
 }
 
 function ChallengeFormDialog({ open, onClose, onSuccess, groupId, challenge }) {
-	const { classes } = useStyles();
+	const { classes, cx } = useStyles();
+	const { classes: dialogClasses } = useDialogStyles();
 	const isEdit = Boolean(challenge);
 
 	const [form, setForm] = useState({
@@ -180,8 +149,12 @@ function ChallengeFormDialog({ open, onClose, onSuccess, groupId, challenge }) {
 	}
 
 	return (
-		<Dialog open={open} onClose={onClose} PaperProps={{ className: classes.paper }}>
-			<DialogTitle className={classes.title}>{isEdit ? '챌린지 수정' : '챌린지 생성'}</DialogTitle>
+		<Dialog
+			open={open}
+			onClose={onClose}
+			PaperProps={{ className: cx(dialogClasses.paperCyan, classes.paperWidth) }}
+		>
+			<DialogTitle className={dialogClasses.titleCyan}>{isEdit ? '챌린지 수정' : '챌린지 생성'}</DialogTitle>
 			<DialogContent>
 				<TextField
 					className={classes.field}
@@ -271,10 +244,10 @@ function ChallengeFormDialog({ open, onClose, onSuccess, groupId, challenge }) {
 				{error && <div className={classes.errorText}>{error}</div>}
 			</DialogContent>
 			<DialogActions>
-				<Button className={classes.cancelBtn} onClick={onClose}>
+				<Button className={dialogClasses.cancelBtn} onClick={onClose}>
 					취소
 				</Button>
-				<Button className={classes.submitBtn} onClick={handleSubmit} disabled={loading}>
+				<Button className={dialogClasses.saveBtn} onClick={handleSubmit} disabled={loading}>
 					{loading ? '처리 중...' : isEdit ? '수정' : '생성'}
 				</Button>
 			</DialogActions>

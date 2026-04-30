@@ -14,6 +14,7 @@ import { useTheme } from '@mui/material/styles';
 import { makeStyles } from 'tss-react/mui';
 import { useDispatch, useSelector } from 'react-redux';
 import { SettingsSkeleton } from '../components/SkeletonLoaders';
+import useDialogStyles from '../components/dialogStyles';
 import * as Actions from './store/actions';
 
 const useStyles = makeStyles()((theme) => ({
@@ -160,24 +161,12 @@ const useStyles = makeStyles()((theme) => ({
 		color: 'rgba(255, 255, 255, 0.85)',
 		marginLeft: 8
 	},
-	dialogPaper: {
-		background: 'linear-gradient(135deg, #1a1a2e 0%, #0f0f1a 100%)',
-		border: '1px solid rgba(0, 212, 255, 0.3)',
-		borderRadius: 16,
-		color: '#fff',
+	dialogPaperWidth: {
 		minWidth: 400,
 		[theme.breakpoints.down('md')]: {
 			minWidth: 'auto',
 			margin: 16
 		}
-	},
-	dialogTitle: {
-		fontFamily: '"Rajdhani", "Noto Sans KR", sans-serif',
-		fontWeight: 700,
-		color: '#fff'
-	},
-	dialogText: {
-		color: 'rgba(255, 255, 255, 0.7)'
 	},
 	formField: {
 		marginBottom: 20
@@ -242,7 +231,8 @@ const useStyles = makeStyles()((theme) => ({
 }));
 
 function TempVoiceContent() {
-	const { classes } = useStyles();
+	const { classes, cx } = useStyles();
+	const { classes: dialogClasses } = useDialogStyles();
 	const dispatch = useDispatch();
 	const theme = useTheme();
 	const isMobile = useMediaQuery(theme.breakpoints.down('md'));
@@ -383,11 +373,11 @@ function TempVoiceContent() {
 			<Dialog
 				open={Boolean(editDialog)}
 				onClose={() => setEditDialog(null)}
-				PaperProps={{ className: classes.dialogPaper }}
+				PaperProps={{ className: cx(dialogClasses.paperCyan, classes.dialogPaperWidth) }}
 			>
 				{editDialog && (
 					<>
-						<DialogTitle className={classes.dialogTitle}>
+						<DialogTitle className={dialogClasses.titleCyan}>
 							{generatorMap[editDialog.id] ? '생성기 수정' : '생성기 등록'} - {editDialog.name}
 						</DialogTitle>
 						<DialogContent>
@@ -436,10 +426,10 @@ function TempVoiceContent() {
 							</div>
 						</DialogContent>
 						<DialogActions>
-							<Button onClick={() => setEditDialog(null)} style={{ color: 'rgba(255,255,255,0.6)' }}>
+							<Button onClick={() => setEditDialog(null)} className={dialogClasses.cancelBtn}>
 								취소
 							</Button>
-							<Button onClick={handleSave} style={{ color: '#00d4ff' }}>
+							<Button onClick={handleSave} className={dialogClasses.saveBtn}>
 								{generatorMap[editDialog.id] ? '수정' : '등록'}
 							</Button>
 						</DialogActions>
@@ -451,21 +441,21 @@ function TempVoiceContent() {
 			<Dialog
 				open={Boolean(deleteDialog)}
 				onClose={() => setDeleteDialog(null)}
-				PaperProps={{ className: classes.dialogPaper }}
+				PaperProps={{ className: dialogClasses.paperDestructive }}
 			>
 				{deleteDialog && (
 					<>
-						<DialogTitle className={classes.dialogTitle}>생성기 해제</DialogTitle>
+						<DialogTitle className={dialogClasses.titleDestructive}>생성기 해제</DialogTitle>
 						<DialogContent>
-							<DialogContentText className={classes.dialogText}>
+							<DialogContentText className={dialogClasses.contentText}>
 								"{deleteDialog.name}" 채널의 생성기를 해제하시겠습니까?
 							</DialogContentText>
 						</DialogContent>
 						<DialogActions>
-							<Button onClick={() => setDeleteDialog(null)} style={{ color: 'rgba(255,255,255,0.6)' }}>
+							<Button onClick={() => setDeleteDialog(null)} className={dialogClasses.destructiveCancelBtn}>
 								취소
 							</Button>
-							<Button onClick={handleDelete} style={{ color: '#ff6b6b' }}>
+							<Button onClick={handleDelete} className={dialogClasses.destructiveConfirmBtn}>
 								해제
 							</Button>
 						</DialogActions>

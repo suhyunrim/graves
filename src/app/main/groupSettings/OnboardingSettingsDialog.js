@@ -18,6 +18,7 @@ import { makeStyles } from 'tss-react/mui';
 import { useDispatch, useSelector } from 'react-redux';
 import SaveButton from '../components/SaveButton';
 import useSaveAction from '../components/useSaveAction';
+import useDialogStyles from '../components/dialogStyles';
 import * as Actions from './store/actions';
 
 const POSITIONS = [
@@ -141,24 +142,13 @@ function getTierIconUrl(tierKey) {
 }
 
 const useStyles = makeStyles()((theme) => ({
-	paper: {
-		background: 'linear-gradient(135deg, #1a1a2e 0%, #0f0f1a 100%)',
-		color: '#fff',
-		borderRadius: 16,
-		border: '1px solid rgba(0, 212, 255, 0.3)',
+	paperWidth: {
 		minWidth: 520,
 		maxHeight: '80vh',
 		[theme.breakpoints.down('sm')]: {
 			minWidth: 'auto',
 			margin: 16
 		}
-	},
-	title: {
-		fontFamily: '"Rajdhani", "Noto Sans KR", sans-serif',
-		fontWeight: 700,
-		fontSize: '1.8rem',
-		letterSpacing: '0.05em',
-		color: '#fff'
 	},
 	sectionTitle: {
 		fontFamily: '"Rajdhani", "Noto Sans KR", sans-serif',
@@ -285,27 +275,6 @@ const useStyles = makeStyles()((theme) => ({
 			color: '#00d4ff'
 		}
 	},
-	cancelBtn: {
-		color: 'rgba(255, 255, 255, 0.7)',
-		fontFamily: '"Noto Sans KR", sans-serif',
-		fontWeight: 600
-	},
-	submitBtn: {
-		background: 'linear-gradient(135deg, #00d4ff 0%, #0099cc 100%)',
-		color: '#000',
-		fontFamily: '"Noto Sans KR", sans-serif',
-		fontWeight: 700,
-		borderRadius: 10,
-		padding: '8px 24px',
-		textTransform: 'none',
-		'&:hover': {
-			background: 'linear-gradient(135deg, #00bce0 0%, #0088bb 100%)'
-		},
-		'&.Mui-disabled': {
-			background: 'rgba(255, 255, 255, 0.1)',
-			color: 'rgba(255, 255, 255, 0.3)'
-		}
-	},
 	loadingWrap: {
 		display: 'flex',
 		justifyContent: 'center',
@@ -416,7 +385,8 @@ const useStyles = makeStyles()((theme) => ({
 }));
 
 function OnboardingSettingsDialog({ open, onClose, groupId }) {
-	const { classes } = useStyles();
+	const { classes, cx } = useStyles();
+	const { classes: dialogClasses } = useDialogStyles();
 	const dispatch = useDispatch();
 	const { info, discordRoles } = useSelector(({ GroupSettings }) => GroupSettings.groupInfo);
 
@@ -530,8 +500,12 @@ function OnboardingSettingsDialog({ open, onClose, groupId }) {
 	}
 
 	return (
-		<Dialog open={open} onClose={() => onClose()} PaperProps={{ className: classes.paper }}>
-			<DialogTitle className={classes.title}>온보딩 설정</DialogTitle>
+		<Dialog
+			open={open}
+			onClose={() => onClose()}
+			PaperProps={{ className: cx(dialogClasses.paperCyan, classes.paperWidth) }}
+		>
+			<DialogTitle className={dialogClasses.titleCyan}>온보딩 설정</DialogTitle>
 			<DialogContent>
 				{rolesLoading && (
 					<div className={classes.loadingWrap}>
@@ -667,11 +641,11 @@ function OnboardingSettingsDialog({ open, onClose, groupId }) {
 				</div>
 			)}
 			<DialogActions>
-				<Button className={classes.cancelBtn} onClick={() => onClose()}>
+				<Button className={dialogClasses.cancelBtn} onClick={() => onClose()}>
 					취소
 				</Button>
 				<SaveButton
-					className={classes.submitBtn}
+					className={dialogClasses.saveBtn}
 					onClick={handleSave}
 					isPending={isPending}
 					disabled={rolesLoading || Boolean(rolesError)}

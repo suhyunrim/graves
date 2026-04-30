@@ -29,6 +29,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { MatchHistorySkeleton } from '../components/SkeletonLoaders';
+import useDialogStyles from '../components/dialogStyles';
 import * as Actions from './store/actions';
 
 const tierColors = {
@@ -461,21 +462,12 @@ const useStyles = makeStyles()((theme) => ({
 	settingsIcon: {
 		fontSize: '1.6rem'
 	},
-	dialogPaper: {
-		background: 'linear-gradient(135deg, #1a1a2e 0%, #0f0f1a 100%)',
-		border: '1px solid rgba(0, 212, 255, 0.3)',
-		borderRadius: 16,
-		color: '#fff',
+	dialogPaperWidth: {
 		minWidth: 360,
 		[theme.breakpoints.down('sm')]: {
 			minWidth: 'auto',
 			margin: 16
 		}
-	},
-	dialogTitle: {
-		fontFamily: '"Rajdhani", "Noto Sans KR", sans-serif',
-		color: '#00d4ff',
-		borderBottom: '1px solid rgba(255, 255, 255, 0.1)'
 	},
 	dialogContent: {
 		paddingTop: '24px !important'
@@ -516,23 +508,6 @@ const useStyles = makeStyles()((theme) => ({
 			color: '#00d4ff'
 		}
 	},
-	dialogCancelBtn: {
-		color: 'rgba(255, 255, 255, 0.5)'
-	},
-	dialogConfirmBtn: {
-		background: 'linear-gradient(135deg, #00d4ff 0%, #0094ff 100%)',
-		color: '#fff',
-		fontWeight: 700,
-		borderRadius: 8,
-		padding: '6px 20px',
-		'&:hover': {
-			background: 'linear-gradient(135deg, #00b8e6 0%, #0080e6 100%)'
-		},
-		'&.Mui-disabled': {
-			background: 'rgba(255, 255, 255, 0.1)',
-			color: 'rgba(255, 255, 255, 0.3)'
-		}
-	}
 }));
 
 const StyledTableCell = withStyles(TableCell, (theme) => ({
@@ -556,7 +531,8 @@ const StyledTableRow = withStyles(TableRow, (theme) => ({
 }));
 
 function MatchHistoryTable() {
-	const { classes } = useStyles();
+	const { classes, cx } = useStyles();
+	const { classes: dialogClasses } = useDialogStyles();
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
 
@@ -823,13 +799,7 @@ function MatchHistoryTable() {
 				anchorEl={menuAnchorEl}
 				open={Boolean(menuAnchorEl)}
 				onClose={handleMenuClose}
-				PaperProps={{
-					style: {
-						background: '#1a1a2e',
-						border: '1px solid rgba(0, 212, 255, 0.3)',
-						color: '#fff'
-					}
-				}}
+				PaperProps={{ className: dialogClasses.menuPaper }}
 			>
 				<MenuItem
 					onClick={handleDuplicateClick}
@@ -852,8 +822,12 @@ function MatchHistoryTable() {
 					</MenuItem>
 				)}
 			</Menu>
-			<Dialog open={dupDialogOpen} onClose={handleDupDialogClose} classes={{ paper: classes.dialogPaper }}>
-				<DialogTitle className={classes.dialogTitle}>매치 복제</DialogTitle>
+			<Dialog
+				open={dupDialogOpen}
+				onClose={handleDupDialogClose}
+				classes={{ paper: cx(dialogClasses.paperCyan, classes.dialogPaperWidth) }}
+			>
+				<DialogTitle className={dialogClasses.titleCyan}>매치 복제</DialogTitle>
 				<DialogContent className={classes.dialogContent}>
 					{menuMatch && (
 						<div style={{ display: 'flex', gap: 16, marginBottom: 24 }}>
@@ -953,23 +927,29 @@ function MatchHistoryTable() {
 					</FormControl>
 				</DialogContent>
 				<DialogActions>
-					<Button onClick={handleDupDialogClose} className={classes.dialogCancelBtn}>
+					<Button onClick={handleDupDialogClose} className={dialogClasses.cancelBtn}>
 						취소
 					</Button>
 					<Button
 						onClick={handleDuplicateSubmit}
-						className={classes.dialogConfirmBtn}
+						className={dialogClasses.saveBtn}
 						disabled={!dupDate || dupLoading}
 					>
 						{dupLoading ? <CircularProgress size={20} color="inherit" /> : '복제'}
 					</Button>
 				</DialogActions>
 			</Dialog>
-			<Dialog open={cancelDialogOpen} onClose={handleCancelDialogClose} classes={{ paper: classes.dialogPaper }}>
-				<DialogTitle className={classes.dialogTitle}>매치 취소</DialogTitle>
-				<DialogContent className={classes.dialogContent}>
+			<Dialog
+				open={cancelDialogOpen}
+				onClose={handleCancelDialogClose}
+				PaperProps={{ className: dialogClasses.paperDestructive }}
+			>
+				<DialogTitle className={dialogClasses.titleDestructive} style={{ color: '#ff6b6b' }}>
+					매치 취소
+				</DialogTitle>
+				<DialogContent>
 					<span
-						style={{ fontFamily: '"Noto Sans KR", sans-serif', fontSize: '1.3rem', color: 'rgba(255,255,255,0.8)' }}
+						style={{ fontFamily: '"Noto Sans KR", sans-serif', fontSize: '1.3rem', color: 'rgba(255,255,255,0.7)' }}
 					>
 						정말 이 매치를 취소하시겠습니까?
 						<br />
@@ -979,19 +959,10 @@ function MatchHistoryTable() {
 					</span>
 				</DialogContent>
 				<DialogActions>
-					<Button onClick={handleCancelDialogClose} className={classes.dialogCancelBtn}>
+					<Button onClick={handleCancelDialogClose} className={dialogClasses.destructiveCancelBtn}>
 						아니오
 					</Button>
-					<Button
-						onClick={handleCancelSubmit}
-						style={{
-							background: 'linear-gradient(135deg, #ff5252 0%, #ff1744 100%)',
-							color: '#fff',
-							fontWeight: 700,
-							borderRadius: 8,
-							padding: '6px 20px'
-						}}
-					>
+					<Button onClick={handleCancelSubmit} className={dialogClasses.destructiveConfirmBtn}>
 						취소하기
 					</Button>
 				</DialogActions>

@@ -24,6 +24,7 @@ import { useTheme } from '@mui/material/styles';
 import { makeStyles } from 'tss-react/mui';
 import { useDispatch, useSelector } from 'react-redux';
 import { SettingsSkeleton } from '../components/SkeletonLoaders';
+import useDialogStyles from '../components/dialogStyles';
 import * as Actions from './store/actions';
 
 const TIER_THRESHOLDS = {
@@ -226,20 +227,6 @@ const useStyles = makeStyles()((theme) => ({
 		fontSize: '1.6rem',
 		color: 'rgba(255, 255, 255, 0.5)'
 	},
-	dialogPaper: {
-		background: 'linear-gradient(135deg, #1a1a2e 0%, #0f0f1a 100%)',
-		border: '1px solid rgba(0, 212, 255, 0.3)',
-		borderRadius: 16,
-		color: '#fff'
-	},
-	dialogTitle: {
-		fontFamily: '"Rajdhani", "Noto Sans KR", sans-serif',
-		fontWeight: 700,
-		color: '#fff'
-	},
-	dialogText: {
-		color: 'rgba(255, 255, 255, 0.7)'
-	},
 	tierCell: {
 		display: 'flex',
 		alignItems: 'center',
@@ -387,6 +374,7 @@ const useStyles = makeStyles()((theme) => ({
 
 function GroupSettingsContent() {
 	const { classes } = useStyles();
+	const { classes: dialogClasses } = useDialogStyles();
 	const dispatch = useDispatch();
 	const theme = useTheme();
 	const isMobile = useMediaQuery(theme.breakpoints.down('md'));
@@ -618,33 +606,36 @@ function GroupSettingsContent() {
 	}
 
 	function renderConfirmDialog() {
+		const isBlacklist = confirmDialog?.type === 'blacklist';
 		return (
 			<Dialog
 				open={Boolean(confirmDialog)}
 				onClose={() => setConfirmDialog(null)}
-				PaperProps={{ className: classes.dialogPaper }}
+				PaperProps={{ className: dialogClasses.paperDestructive }}
 			>
 				{confirmDialog && (
 					<>
-						<DialogTitle className={classes.dialogTitle}>
-							{confirmDialog.type === 'blacklist' ? '멤버 추방' : '멤버 복구'}
+						<DialogTitle
+							className={dialogClasses.titleDestructive}
+							style={{ color: isBlacklist ? '#ff6b6b' : '#00ff7f' }}
+						>
+							{isBlacklist ? '멤버 추방' : '멤버 복구'}
 						</DialogTitle>
 						<DialogContent>
-							<DialogContentText className={classes.dialogText}>
-								{confirmDialog.type === 'blacklist'
+							<DialogContentText className={dialogClasses.contentText}>
+								{isBlacklist
 									? `"${confirmDialog.member.name}" 을(를) 추방하시겠습니까? 추방된 유저는 랭킹, 대시보드 등에서 제외됩니다.`
 									: `"${confirmDialog.member.name}" 을(를) 복구하시겠습니까?`}
 							</DialogContentText>
 						</DialogContent>
 						<DialogActions>
-							<Button onClick={() => setConfirmDialog(null)} style={{ color: 'rgba(255,255,255,0.6)' }}>
+							<Button onClick={() => setConfirmDialog(null)} className={dialogClasses.destructiveCancelBtn}>
 								취소
 							</Button>
 							<Button
 								onClick={handleConfirm}
-								style={{
-									color: confirmDialog.type === 'blacklist' ? '#ff6b6b' : '#00ff7f'
-								}}
+								className={dialogClasses.destructiveConfirmBtn}
+								style={{ color: isBlacklist ? '#ff6b6b' : '#00ff7f' }}
 							>
 								확인
 							</Button>
