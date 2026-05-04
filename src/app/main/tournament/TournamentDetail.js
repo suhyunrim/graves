@@ -52,12 +52,20 @@ import ScrimContent from './ScrimContent';
 const useStyles = makeStyles()((theme) => ({
 	layoutRoot: {
 		background: 'linear-gradient(180deg, #0f0f1a 0%, #1a1a2e 100%)',
-		minHeight: '100vh'
+		minHeight: '100vh',
+		width: '100%',
+		maxWidth: '100%',
+		overflowX: 'hidden'
+	},
+	contentWrapperOverride: {
+		overflowX: 'hidden !important',
+		maxWidth: '100%'
 	},
 	headerRoot: {
 		display: 'flex',
 		flexDirection: 'column',
 		width: '100%',
+		boxSizing: 'border-box',
 		padding: '20px 28px 18px',
 		background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
 		[theme.breakpoints.down('sm')]: {
@@ -146,6 +154,8 @@ const useStyles = makeStyles()((theme) => ({
 		color: '#ffd700',
 		fontWeight: 700,
 		letterSpacing: '0.03em',
+		minWidth: 0,
+		wordBreak: 'break-word',
 		[theme.breakpoints.down('sm')]: {
 			padding: '10px 14px',
 			fontSize: '1.35rem',
@@ -165,6 +175,7 @@ const useStyles = makeStyles()((theme) => ({
 		margin: '0 auto',
 		width: '100%',
 		minWidth: 0,
+		boxSizing: 'border-box',
 		[theme.breakpoints.down('sm')]: {
 			padding: '16px'
 		}
@@ -595,7 +606,7 @@ function TournamentDetail() {
 	if (loadingDetail && !detail) {
 		return (
 			<FusePageSimple
-				classes={{ root: classes.layoutRoot }}
+				classes={{ root: classes.layoutRoot, contentWrapper: classes.contentWrapperOverride }}
 				content={<div className={classes.loadingWrapper}>불러오는 중...</div>}
 			/>
 		);
@@ -604,7 +615,7 @@ function TournamentDetail() {
 	if (!detail) {
 		return (
 			<FusePageSimple
-				classes={{ root: classes.layoutRoot }}
+				classes={{ root: classes.layoutRoot, contentWrapper: classes.contentWrapperOverride }}
 				content={<div className={classes.emptyText}>토너먼트를 찾을 수 없습니다.</div>}
 			/>
 		);
@@ -621,7 +632,7 @@ function TournamentDetail() {
 
 	return (
 		<FusePageSimple
-			classes={{ root: classes.layoutRoot }}
+			classes={{ root: classes.layoutRoot, contentWrapper: classes.contentWrapperOverride }}
 			header={
 				<div className={classes.headerRoot}>
 					<div className={classes.backRow}>

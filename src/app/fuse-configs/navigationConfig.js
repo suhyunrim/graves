@@ -58,7 +58,7 @@ const navigationConfig = [
 				id: 'tournament-component',
 				title: 'Tournament',
 				type: 'item',
-				icon: 'military_tech',
+				icon: 'account_tree',
 				url: '/tournament'
 			},
 			{

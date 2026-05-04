@@ -20,14 +20,25 @@ import { STATUS_LABELS, STATUS_COLORS, checkIsAdmin } from './tournamentUtils';
 const useStyles = makeStyles()((theme) => ({
 	layoutRoot: {
 		background: 'linear-gradient(180deg, #0f0f1a 0%, #1a1a2e 100%)',
-		minHeight: '100vh'
+		minHeight: '100vh',
+		width: '100%',
+		maxWidth: '100%',
+		overflowX: 'hidden'
+	},
+	contentWrapperOverride: {
+		overflowX: 'hidden !important',
+		maxWidth: '100%'
 	},
 	headerRoot: {
 		display: 'flex',
 		flexDirection: 'column',
 		width: '100%',
+		boxSizing: 'border-box',
 		padding: '24px 28px 20px',
-		background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)'
+		background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
+		[theme.breakpoints.down('sm')]: {
+			padding: '16px 16px 14px'
+		}
 	},
 	title: {
 		fontFamily: '"Rajdhani", "Noto Sans KR", sans-serif',
@@ -280,7 +291,7 @@ function TournamentList() {
 
 	return (
 		<FusePageSimple
-			classes={{ root: classes.layoutRoot }}
+			classes={{ root: classes.layoutRoot, contentWrapper: classes.contentWrapperOverride }}
 			header={
 				<div className={classes.headerRoot}>
 					<Typography className={classes.title} variant="h4">
