@@ -81,14 +81,18 @@ const useStyles = makeStyles()((theme) => ({
 		padding: '28px',
 		maxWidth: 1400,
 		margin: '0 auto',
-		width: '100%'
+		width: '100%',
+		[theme.breakpoints.down('sm')]: {
+			padding: '16px'
+		}
 	},
 	cardGrid: {
 		display: 'grid',
 		gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))',
 		gap: 20,
 		[theme.breakpoints.down('sm')]: {
-			gridTemplateColumns: '1fr'
+			gridTemplateColumns: '1fr',
+			gap: 14
 		}
 	},
 	card: {
@@ -103,6 +107,10 @@ const useStyles = makeStyles()((theme) => ({
 			borderColor: 'rgba(0, 212, 255, 0.5)',
 			transform: 'translateY(-4px)',
 			boxShadow: '0 8px 30px rgba(0, 212, 255, 0.15)'
+		},
+		[theme.breakpoints.down('sm')]: {
+			padding: '18px',
+			borderRadius: 16
 		}
 	},
 	cardHeader: {
@@ -120,7 +128,10 @@ const useStyles = makeStyles()((theme) => ({
 		lineHeight: 1.3,
 		flex: 1,
 		minWidth: 0,
-		wordBreak: 'break-word'
+		wordBreak: 'break-word',
+		[theme.breakpoints.down('sm')]: {
+			fontSize: '1.55rem'
+		}
 	},
 	statusBadge: {
 		fontFamily: '"Noto Sans KR", sans-serif',
