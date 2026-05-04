@@ -31,7 +31,7 @@ const useStyles = makeStyles()((theme) => ({
 	},
 	pageOuter: {
 		width: '100%',
-		maxWidth: '100%',
+		maxWidth: '100vw',
 		minWidth: 0,
 		overflowX: 'hidden',
 		boxSizing: 'border-box'
