@@ -148,7 +148,7 @@ function TournamentBracket({ matches, teams, roundLabels, championTeamId, canEdi
 		return <div className={classes.emptyText}>매치 정보가 없습니다.</div>;
 	}
 
-	function renderTeamRow(teamId, score, otherScore, winnerTeamId, isFinishedMatch) {
+	function renderTeamRow(teamId, score, winnerTeamId, isFinishedMatch, emptyLabel) {
 		const team = teamId ? teamMap.get(teamId) : null;
 		const isWinner = winnerTeamId && winnerTeamId === teamId;
 		const isLoser = winnerTeamId && winnerTeamId !== teamId && teamId;
@@ -163,7 +163,7 @@ function TournamentBracket({ matches, teams, roundLabels, championTeamId, canEdi
 		return (
 			<div className={rowCls}>
 				<span className={classes.teamName}>
-					{team ? team.name : 'TBD'}
+					{team ? team.name : emptyLabel}
 					{isChampion && <EmojiEventsIcon className={classes.championBadge} />}
 				</span>
 				{showScore && <span className={classes.score}>{score}</span>}
@@ -175,9 +175,14 @@ function TournamentBracket({ matches, teams, roundLabels, championTeamId, canEdi
 		<div className={classes.root}>
 			<div className={classes.scroll}>
 				{grouped.map(([round, roundMatches]) => {
-					// BYE 매치는 숨김 — 부전승팀이 다음 라운드로 자연스럽게 진출한 것처럼 보이게
-					const visibleMatches = roundMatches.filter(m => !isByeMatch(m));
+					// R1 의 BYE(한쪽만 null) 는 숨겨서 부전승팀이 다음 라운드로 자연스럽게 진출한 듯
+					// 보이게 한다. R2 이상에선 한쪽이 비어 있어도 매치 자체는 표시 — 빈 자리는
+					// "이전 라운드 승자 대기" 로 안내.
+					const visibleMatches = round === 1
+						? roundMatches.filter(m => !isByeMatch(m))
+						: roundMatches;
 					const label = roundLabels[round] || `${round}라운드`;
+					const emptyLabel = round === 1 ? 'TBD' : '이전 라운드 승자 대기';
 
 					return (
 						<div key={round} className={classes.column}>
@@ -206,8 +211,8 @@ function TournamentBracket({ matches, teams, roundLabels, championTeamId, canEdi
 													<span className={classes.matchHeaderBO}>BO{m.bestOf}</span>
 													{editable && <EditIcon className={classes.editIcon} />}
 												</div>
-												{renderTeamRow(m.team1Id, m.team1Score, m.team2Score, m.winnerTeamId, finished)}
-												{renderTeamRow(m.team2Id, m.team2Score, m.team1Score, m.winnerTeamId, finished)}
+												{renderTeamRow(m.team1Id, m.team1Score, m.winnerTeamId, finished, emptyLabel)}
+												{renderTeamRow(m.team2Id, m.team2Score, m.winnerTeamId, finished, emptyLabel)}
 											</div>
 										);
 									})

@@ -27,6 +27,14 @@ export function bracketSizeForTeamCount(teamCount) {
 	return 2 ** Math.ceil(Math.log2(teamCount));
 }
 
+// 라운드 → 한국어 라벨. 시작 전(슬롯 배치 단계)엔 백엔드 roundLabels 가 비어있어
+// 클라이언트가 직접 라벨을 만든다. ("4강", "8강", "결승" ...)
+export function roundLabelFor(round, totalRounds) {
+	const teamsThisRound = 2 ** (totalRounds - round + 1);
+	if (teamsThisRound === 2) return '결승';
+	return `${teamsThisRound}강`;
+}
+
 // 매치 그룹핑: round 별로 매치 정렬
 export function groupMatchesByRound(matches) {
 	const map = new Map();
