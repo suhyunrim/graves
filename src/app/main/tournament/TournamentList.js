@@ -29,6 +29,13 @@ const useStyles = makeStyles()((theme) => ({
 		overflowX: 'hidden !important',
 		maxWidth: '100%'
 	},
+	pageOuter: {
+		width: '100%',
+		maxWidth: '100%',
+		minWidth: 0,
+		overflowX: 'hidden',
+		boxSizing: 'border-box'
+	},
 	headerRoot: {
 		display: 'flex',
 		flexDirection: 'column',
@@ -312,6 +319,7 @@ function TournamentList() {
 				</div>
 			}
 			content={
+				<div className={classes.pageOuter}>
 				<div className={classes.container}>
 					{loadingList ? (
 						<div className={classes.loadingWrapper}>불러오는 중...</div>
@@ -394,6 +402,7 @@ function TournamentList() {
 							groupId={groupId}
 						/>
 					)}
+				</div>
 				</div>
 			}
 		/>

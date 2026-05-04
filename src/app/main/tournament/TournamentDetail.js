@@ -61,6 +61,13 @@ const useStyles = makeStyles()((theme) => ({
 		overflowX: 'hidden !important',
 		maxWidth: '100%'
 	},
+	pageOuter: {
+		width: '100%',
+		maxWidth: '100%',
+		minWidth: 0,
+		overflowX: 'hidden',
+		boxSizing: 'border-box'
+	},
 	headerRoot: {
 		display: 'flex',
 		flexDirection: 'column',
@@ -696,6 +703,7 @@ function TournamentDetail() {
 				</div>
 			}
 			content={
+				<div className={classes.pageOuter}>
 				<div className={classes.container}>
 					{(isInProgress || isFinished) && (
 						<Tabs
@@ -946,6 +954,7 @@ function TournamentDetail() {
 							</DialogActions>
 						</Dialog>
 					)}
+				</div>
 				</div>
 			}
 		/>
