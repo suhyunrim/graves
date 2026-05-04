@@ -49,7 +49,10 @@ const useStyles = makeStyles()((theme) => ({
 		zIndex: 1
 	},
 	columnVerbose: {
-		minWidth: 320
+		minWidth: 320,
+		[theme.breakpoints.down('sm')]: {
+			minWidth: 280
+		}
 	},
 	columnTitle: {
 		fontFamily: '"Rajdhani", "Noto Sans KR", sans-serif',
@@ -165,7 +168,10 @@ const useStyles = makeStyles()((theme) => ({
 		borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
 		display: 'flex',
 		flexDirection: 'column',
-		gap: 6
+		gap: 6,
+		[theme.breakpoints.down('sm')]: {
+			padding: '6px 12px 8px'
+		}
 	},
 	teamTierBadgeMini: {
 		display: 'inline-flex',
@@ -249,7 +255,10 @@ const useStyles = makeStyles()((theme) => ({
 	detailSection: {
 		padding: '10px 14px',
 		background: 'rgba(0, 0, 0, 0.25)',
-		borderTop: '1px solid rgba(0, 212, 255, 0.1)'
+		borderTop: '1px solid rgba(0, 212, 255, 0.1)',
+		[theme.breakpoints.down('sm')]: {
+			padding: '8px 12px'
+		}
 	},
 	detailSectionLabel: {
 		fontFamily: '"Noto Sans KR", sans-serif',

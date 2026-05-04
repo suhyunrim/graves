@@ -62,6 +62,11 @@ const useStyles = makeStyles()((theme) => ({
 			height: 22,
 			borderRadius: 2,
 			background: 'linear-gradient(180deg, #00d4ff, #0066ff)'
+		},
+		[theme.breakpoints.down('sm')]: {
+			fontSize: '1.5rem',
+			gap: 10,
+			'&::before': { height: 18 }
 		}
 	},
 	primaryBtn: {
@@ -98,7 +103,11 @@ const useStyles = makeStyles()((theme) => ({
 		padding: '10px 12px',
 		textAlign: 'left',
 		borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
-		fontWeight: 600
+		fontWeight: 600,
+		[theme.breakpoints.down('sm')]: {
+			padding: '8px 8px',
+			fontSize: '1rem'
+		}
 	},
 	headerCellNum: {
 		textAlign: 'center'
@@ -117,7 +126,11 @@ const useStyles = makeStyles()((theme) => ({
 		padding: '12px',
 		fontSize: '1.3rem',
 		color: 'rgba(255, 255, 255, 0.9)',
-		borderBottom: '1px solid rgba(255, 255, 255, 0.05)'
+		borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
+		[theme.breakpoints.down('sm')]: {
+			padding: '8px',
+			fontSize: '1.15rem'
+		}
 	},
 	cellNum: {
 		textAlign: 'center',
@@ -165,7 +178,10 @@ const useStyles = makeStyles()((theme) => ({
 	},
 	vsCell: {
 		padding: '12px 16px 16px 60px',
-		borderBottom: '1px solid rgba(255, 255, 255, 0.05)'
+		borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
+		[theme.breakpoints.down('sm')]: {
+			padding: '10px 12px 14px 36px'
+		}
 	},
 	vsTitle: {
 		fontFamily: '"Noto Sans KR", sans-serif',
@@ -225,14 +241,22 @@ const useStyles = makeStyles()((theme) => ({
 		background: 'rgba(0, 0, 0, 0.25)',
 		border: '1px solid rgba(0, 212, 255, 0.12)',
 		borderRadius: 12,
-		flexWrap: 'wrap'
+		flexWrap: 'wrap',
+		[theme.breakpoints.down('sm')]: {
+			padding: '10px 12px',
+			gap: 8
+		}
 	},
 	scrimMatchup: {
 		display: 'flex',
 		alignItems: 'center',
 		gap: 10,
 		flex: 1,
-		minWidth: 220
+		minWidth: 220,
+		[theme.breakpoints.down('sm')]: {
+			minWidth: 180,
+			gap: 8
+		}
 	},
 	scrimTeam: {
 		fontFamily: '"Noto Sans KR", sans-serif',
@@ -243,7 +267,10 @@ const useStyles = makeStyles()((theme) => ({
 		minWidth: 0,
 		overflow: 'hidden',
 		textOverflow: 'ellipsis',
-		whiteSpace: 'nowrap'
+		whiteSpace: 'nowrap',
+		[theme.breakpoints.down('sm')]: {
+			fontSize: '1.2rem'
+		}
 	},
 	scrimTeamWinner: {
 		color: '#00ff7f'
@@ -258,7 +285,11 @@ const useStyles = makeStyles()((theme) => ({
 		color: '#fff',
 		minWidth: 60,
 		textAlign: 'center',
-		letterSpacing: '0.05em'
+		letterSpacing: '0.05em',
+		[theme.breakpoints.down('sm')]: {
+			fontSize: '1.4rem',
+			minWidth: 52
+		}
 	},
 	scrimMeta: {
 		fontFamily: '"Noto Sans KR", sans-serif',

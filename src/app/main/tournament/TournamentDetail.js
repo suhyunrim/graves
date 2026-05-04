@@ -59,7 +59,10 @@ const useStyles = makeStyles()((theme) => ({
 		flexDirection: 'column',
 		width: '100%',
 		padding: '20px 28px 18px',
-		background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)'
+		background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
+		[theme.breakpoints.down('sm')]: {
+			padding: '14px 16px 12px'
+		}
 	},
 	backRow: {
 		display: 'flex',
@@ -89,6 +92,10 @@ const useStyles = makeStyles()((theme) => ({
 		margin: 0,
 		[theme.breakpoints.down('md')]: {
 			fontSize: '2.4rem'
+		},
+		[theme.breakpoints.down('sm')]: {
+			fontSize: '2rem',
+			letterSpacing: '0.02em'
 		}
 	},
 	statusBadge: {
@@ -96,7 +103,11 @@ const useStyles = makeStyles()((theme) => ({
 		fontSize: '1.2rem',
 		fontWeight: 600,
 		padding: '4px 14px',
-		borderRadius: 20
+		borderRadius: 20,
+		[theme.breakpoints.down('sm')]: {
+			fontSize: '1.05rem',
+			padding: '3px 10px'
+		}
 	},
 	metaRow: {
 		display: 'flex',
@@ -105,13 +116,21 @@ const useStyles = makeStyles()((theme) => ({
 		fontFamily: '"Noto Sans KR", sans-serif',
 		fontSize: '1.3rem',
 		color: 'rgba(255, 255, 255, 0.55)',
-		flexWrap: 'wrap'
+		flexWrap: 'wrap',
+		[theme.breakpoints.down('sm')]: {
+			gap: 6,
+			fontSize: '1.15rem'
+		}
 	},
 	metaPill: {
 		background: 'rgba(0, 212, 255, 0.08)',
 		border: '1px solid rgba(0, 212, 255, 0.2)',
 		borderRadius: 16,
-		padding: '3px 12px'
+		padding: '3px 12px',
+		[theme.breakpoints.down('sm')]: {
+			padding: '2px 9px',
+			borderRadius: 12
+		}
 	},
 	championBanner: {
 		marginTop: 14,
@@ -126,10 +145,19 @@ const useStyles = makeStyles()((theme) => ({
 		fontSize: '1.6rem',
 		color: '#ffd700',
 		fontWeight: 700,
-		letterSpacing: '0.03em'
+		letterSpacing: '0.03em',
+		[theme.breakpoints.down('sm')]: {
+			padding: '10px 14px',
+			fontSize: '1.35rem',
+			gap: 8,
+			borderRadius: 12
+		}
 	},
 	championIcon: {
-		fontSize: '2.4rem'
+		fontSize: '2.4rem',
+		[theme.breakpoints.down('sm')]: {
+			fontSize: '1.8rem'
+		}
 	},
 	container: {
 		padding: '24px 28px',
@@ -176,6 +204,11 @@ const useStyles = makeStyles()((theme) => ({
 			height: 22,
 			borderRadius: 2,
 			background: 'linear-gradient(180deg, #00d4ff, #0066ff)'
+		},
+		[theme.breakpoints.down('sm')]: {
+			fontSize: '1.5rem',
+			gap: 10,
+			'&::before': { height: 18 }
 		}
 	},
 	primaryBtn: {
@@ -214,13 +247,20 @@ const useStyles = makeStyles()((theme) => ({
 	teamGrid: {
 		display: 'grid',
 		gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-		gap: 14
+		gap: 14,
+		[theme.breakpoints.down('sm')]: {
+			gridTemplateColumns: '1fr',
+			gap: 12
+		}
 	},
 	teamCard: {
 		background: 'rgba(0, 0, 0, 0.25)',
 		border: '1px solid rgba(0, 212, 255, 0.15)',
 		borderRadius: 12,
-		padding: '14px 16px'
+		padding: '14px 16px',
+		[theme.breakpoints.down('sm')]: {
+			padding: '12px 14px'
+		}
 	},
 	teamCardHeader: {
 		display: 'flex',
@@ -238,7 +278,10 @@ const useStyles = makeStyles()((theme) => ({
 		minWidth: 0,
 		overflow: 'hidden',
 		textOverflow: 'ellipsis',
-		whiteSpace: 'nowrap'
+		whiteSpace: 'nowrap',
+		[theme.breakpoints.down('sm')]: {
+			fontSize: '1.35rem'
+		}
 	},
 	teamActions: {
 		display: 'flex',
@@ -273,7 +316,11 @@ const useStyles = makeStyles()((theme) => ({
 		padding: '4px 0',
 		fontFamily: '"Noto Sans KR", sans-serif',
 		fontSize: '1.2rem',
-		color: 'rgba(255, 255, 255, 0.85)'
+		color: 'rgba(255, 255, 255, 0.85)',
+		[theme.breakpoints.down('sm')]: {
+			gap: 8,
+			fontSize: '1.1rem'
+		}
 	},
 	memberPositionCell: {
 		width: 22,
@@ -351,7 +398,11 @@ const useStyles = makeStyles()((theme) => ({
 		fontSize: '1.15rem',
 		fontWeight: 600,
 		letterSpacing: '0.02em',
-		color: 'rgba(255, 255, 255, 0.85)'
+		color: 'rgba(255, 255, 255, 0.85)',
+		[theme.breakpoints.down('sm')]: {
+			fontSize: '1.05rem',
+			padding: '3px 9px'
+		}
 	},
 	teamTierEmblem: {
 		width: 22,
@@ -400,6 +451,11 @@ const useStyles = makeStyles()((theme) => ({
 		},
 		'& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
 			backgroundColor: '#00d4ff'
+		},
+		[theme.breakpoints.down('sm')]: {
+			'& .MuiFormControlLabel-label': {
+				fontSize: '1.05rem'
+			}
 		}
 	},
 	headerActions: {

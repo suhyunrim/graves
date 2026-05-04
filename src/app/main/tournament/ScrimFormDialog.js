@@ -25,14 +25,25 @@ const useStyles = makeStyles()((theme) => ({
 		gridTemplateColumns: '1fr auto 1fr',
 		alignItems: 'end',
 		gap: 12,
-		marginBottom: 12
+		marginBottom: 12,
+		[theme.breakpoints.down('sm')]: {
+			display: 'flex',
+			flexDirection: 'column',
+			alignItems: 'stretch',
+			gap: 8
+		}
 	},
 	versus: {
 		fontFamily: '"Rajdhani", sans-serif',
 		fontSize: '1.6rem',
 		fontWeight: 700,
 		color: 'rgba(0, 212, 255, 0.6)',
-		paddingBottom: 12
+		paddingBottom: 12,
+		[theme.breakpoints.down('sm')]: {
+			padding: 0,
+			fontSize: '1.3rem',
+			textAlign: 'center'
+		}
 	},
 	field: {
 		'& .MuiInputBase-root': {
