@@ -13,10 +13,8 @@ import ShuffleIcon from '@mui/icons-material/Shuffle';
 import ClearIcon from '@mui/icons-material/Clear';
 import useDialogStyles from '../components/dialogStyles';
 import * as Actions from './store/actions';
-import { roundLabelFor } from './tournamentUtils';
+import { roundLabelFor, BRACKET_LINE_COLOR } from './tournamentUtils';
 import useBracketLines, { buildLinePath } from './useBracketLines';
-
-const LINE_COLOR = 'rgba(0, 212, 255, 0.3)';
 
 const useStyles = makeStyles()((theme) => ({
 	paperWidth: {
@@ -222,7 +220,6 @@ function SlotMappingDialog({ open, onClose, onSuccess, tournamentId, teams, brac
 		if (new Set(placed).size !== placed.length) {
 			return '같은 팀이 여러 슬롯에 배치되어 있습니다.';
 		}
-		// 한 R1 매치(슬롯 i, i+1) 양쪽이 모두 BYE 인지 검사
 		for (let i = 0; i < bracketSize; i += 2) {
 			if (slots[i] == null && slots[i + 1] == null) {
 				return `${roundLabelFor(1, totalRounds)} 매치 ${i / 2 + 1}: 한 매치에 두 BYE 는 허용되지 않습니다.`;
@@ -252,9 +249,7 @@ function SlotMappingDialog({ open, onClose, onSuccess, tournamentId, teams, brac
 			});
 	}
 
-	// 라운드별 매치 메타데이터 계산
-	// R1 매치 m 의 두 슬롯: 2m, 2m+1
-	// R(r) 매치 m 은 R(r-1) 매치 (2m), (2m+1) 의 승자가 만난다.
+	// R1 매치 m 의 두 슬롯은 2m, 2m+1. R(r) 매치 m 은 R(r-1) 의 매치 2m, 2m+1 승자가 만난다.
 	const roundColumns = useMemo(() => {
 		const cols = [];
 		for (let r = 1; r <= totalRounds; r += 1) {
@@ -396,7 +391,7 @@ function SlotMappingDialog({ open, onClose, onSuccess, tournamentId, teams, brac
 								<path
 									key={l.key}
 									d={buildLinePath(l.x1, l.y1, l.x2, l.y2)}
-									stroke={LINE_COLOR}
+									stroke={BRACKET_LINE_COLOR}
 									strokeWidth={1.5}
 									fill="none"
 								/>

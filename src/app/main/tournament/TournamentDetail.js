@@ -28,13 +28,15 @@ import useDialogStyles from '../components/dialogStyles';
 import reducer from './store/reducers';
 import * as Actions from './store/actions';
 import {
+	STATUS,
 	STATUS_LABELS,
 	STATUS_COLORS,
 	checkIsAdmin,
 	bracketSizeForTeamCount,
 	getTierName,
 	getTierLabel,
-	getTierEmblemUrl
+	getTierEmblemUrl,
+	CYAN_ICON_FILTER
 } from './tournamentUtils';
 import PositionIcon from './PositionIcon';
 import TournamentBracket from './TournamentBracket';
@@ -278,7 +280,7 @@ const useStyles = makeStyles()((theme) => ({
 	memberPositionIcon: {
 		width: 20,
 		height: 20,
-		filter: 'invert(70%) sepia(80%) saturate(500%) hue-rotate(160deg) brightness(105%) contrast(95%)'
+		filter: CYAN_ICON_FILTER
 	},
 	memberPositionFallback: {
 		fontFamily: '"Noto Sans KR", sans-serif',
@@ -394,6 +396,12 @@ function TournamentDetail() {
 		return m;
 	}, [teams]);
 
+	const memberMap = useMemo(() => {
+		const m = new Map();
+		(activeMembers || []).forEach(am => m.set(am.puuid, am));
+		return m;
+	}, [activeMembers]);
+
 	const championTeam = detail && detail.championTeamId ? teamMap.get(detail.championTeamId) : null;
 
 	function reload() {
@@ -490,8 +498,9 @@ function TournamentDetail() {
 	}
 
 	const statusColor = STATUS_COLORS[detail.status] || '#868e96';
-	const isPreparing = detail.status === 'preparing';
-	const isInProgress = detail.status === 'in_progress';
+	const isPreparing = detail.status === STATUS.PREPARING;
+	const isInProgress = detail.status === STATUS.IN_PROGRESS;
+	const isFinished = detail.status === STATUS.FINISHED;
 	const teamCount = teams.length;
 	const canStart = isAdmin && isPreparing && teamCount >= 2;
 	// preparation 단계에선 detail.bracketSize/teamCount 가 null. 시작 시점에 등록된 팀 수로 산출한다.
@@ -564,7 +573,7 @@ function TournamentDetail() {
 			}
 			content={
 				<div className={classes.container}>
-					{(isInProgress || detail.status === 'finished') && (
+					{(isInProgress || isFinished) && (
 						<div className={classes.section}>
 							<div className={classes.sectionHeader}>
 								<div className={classes.sectionTitle}>대진표</div>
@@ -638,7 +647,7 @@ function TournamentDetail() {
 											)}
 											<div className={classes.memberList}>
 												{(t.members || []).map(m => {
-													const memberInfo = activeMembers.find(am => am.puuid === m.puuid);
+													const memberInfo = memberMap.get(m.puuid);
 													const displayName = memberInfo ? memberInfo.name : `${m.puuid.slice(0, 8)}…`;
 													const avatarUrl = memberInfo
 														? getProfileIconUrl(memberInfo.profileIconId)

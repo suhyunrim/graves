@@ -2,11 +2,14 @@ import React from 'react';
 import { makeStyles } from 'tss-react/mui';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import EditIcon from '@mui/icons-material/Edit';
-import { groupMatchesByRound, isByeMatch, isEmptyMatch } from './tournamentUtils';
+import {
+	groupMatchesByRound,
+	isByeMatch,
+	isEmptyMatch,
+	BRACKET_LINE_COLOR,
+	BRACKET_LINE_COLOR_FINISHED
+} from './tournamentUtils';
 import useBracketLines, { buildLinePath } from './useBracketLines';
-
-const LINE_COLOR = 'rgba(0, 212, 255, 0.3)';
-const LINE_COLOR_FINISHED = 'rgba(0, 255, 127, 0.6)';
 
 const useStyles = makeStyles()((theme) => ({
 	root: {
@@ -238,7 +241,7 @@ function TournamentBracket({ matches, teams, roundLabels, championTeamId, canEdi
 						<path
 							key={l.key}
 							d={buildLinePath(l.x1, l.y1, l.x2, l.y2)}
-							stroke={l.finished ? LINE_COLOR_FINISHED : LINE_COLOR}
+							stroke={l.finished ? BRACKET_LINE_COLOR_FINISHED : BRACKET_LINE_COLOR}
 							strokeWidth={l.finished ? 2 : 1.5}
 							fill="none"
 						/>
@@ -267,7 +270,6 @@ function TournamentBracket({ matches, teams, roundLabels, championTeamId, canEdi
 										const editable = canEdit && !empty && !finished
 											&& m.team1Id != null && m.team2Id != null;
 
-										// 백엔드 산출 승률 사용. 미완료 매치 + 양쪽 다 채워졌을 때만 노출.
 										let prob1 = null;
 										let prob2 = null;
 										if (!finished && m.team1WinProb != null && m.team2WinProb != null) {

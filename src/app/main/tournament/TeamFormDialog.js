@@ -13,7 +13,7 @@ import { makeStyles } from 'tss-react/mui';
 import { getProfileIconUrl } from 'app/main/challenge/ddragonUtils';
 import useDialogStyles from '../components/dialogStyles';
 import * as Actions from './store/actions';
-import { POSITIONS, POSITION_LABELS } from './tournamentUtils';
+import { POSITIONS, POSITION_LABELS, CYAN_ICON_FILTER } from './tournamentUtils';
 import PositionIcon from './PositionIcon';
 
 const useStyles = makeStyles()((theme) => ({
@@ -78,7 +78,7 @@ const useStyles = makeStyles()((theme) => ({
 	positionIcon: {
 		width: 26,
 		height: 26,
-		filter: 'invert(70%) sepia(80%) saturate(500%) hue-rotate(160deg) brightness(105%) contrast(95%)'
+		filter: CYAN_ICON_FILTER
 	},
 	positionFallback: {
 		fontFamily: '"Noto Sans KR", sans-serif',
@@ -142,7 +142,6 @@ const useStyles = makeStyles()((theme) => ({
 	}
 }));
 
-// 5개 슬롯은 무조건 [탑, 정글, 미드, 원딜, 서폿] 순서로 고정.
 function makeEmptySlots() {
 	return POSITIONS.map(p => ({ puuid: null, position: p }));
 }
@@ -174,7 +173,6 @@ function TeamFormDialog({ open, onClose, onSuccess, tournamentId, team, allTeams
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState('');
 
-	// 다른 팀에 등록된 puuid 집합 (현재 편집 중인 팀은 제외) — 아예 옵션에서 제외한다.
 	const otherTeamPuuids = useMemo(() => {
 		const s = new Set();
 		(allTeams || []).forEach(t => {
@@ -190,7 +188,6 @@ function TeamFormDialog({ open, onClose, onSuccess, tournamentId, team, allTeams
 		return m;
 	}, [activeMembers]);
 
-	// 드롭다운 옵션: 다른 팀 멤버는 아예 제외
 	const availableMembers = useMemo(
 		() => (activeMembers || []).filter(m => !otherTeamPuuids.has(m.puuid)),
 		[activeMembers, otherTeamPuuids]
@@ -210,7 +207,6 @@ function TeamFormDialog({ open, onClose, onSuccess, tournamentId, team, allTeams
 			}
 			return next;
 		});
-		// 팀장 puuid 가 비워졌으면 해제
 		if (captainPuuid && (!member || member.puuid !== captainPuuid)) {
 			const stillIn = members.some((s, i) => i !== idx && s.puuid === captainPuuid);
 			const becomingCaptain = member && member.puuid === captainPuuid;
