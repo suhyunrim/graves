@@ -208,12 +208,67 @@ function SlotMappingDialog({ open, onClose, onSuccess, tournamentId, teams, brac
 		});
 	}
 
+	// R2 매치 m, 내부 슬롯 s → R1 매치 (2m+s) 의 winner 가 흘러들어간다.
+	// R2 슬롯에 팀 X 를 직접 배치한다 = 그 R1 매치를 BYE 매치로 만든다 (한쪽 X, 한쪽 null).
+	function handleR2SlotChange(r2MatchIdx, slotIdxInR2, value) {
+		const r1MatchIdx = r2MatchIdx * 2 + slotIdxInR2;
+		const r1Slot0 = r1MatchIdx * 2;
+		const r1Slot1 = r1MatchIdx * 2 + 1;
+		setSlots(prev => {
+			const next = prev.slice();
+			if (!value) {
+				// "자리 비움" 선택 — 해당 R1 매치의 두 슬롯을 모두 비운다
+				next[r1Slot0] = null;
+				next[r1Slot1] = null;
+			} else {
+				// 다른 슬롯에서 같은 팀 제거
+				next.forEach((s, i) => {
+					if (i !== r1Slot0 && i !== r1Slot1 && s === value) next[i] = null;
+				});
+				// 그 R1 매치를 BYE 매치로 인코딩
+				next[r1Slot0] = value;
+				next[r1Slot1] = null;
+			}
+			return next;
+		});
+	}
+
+	// R2 슬롯 select 의 현재 값. R1 매치가 BYE 면 그 팀 id, Real 이면 '' (잠금), 빈 매치면 ''.
+	function getR2SlotValue(r2MatchIdx, slotIdxInR2) {
+		const r1MatchIdx = r2MatchIdx * 2 + slotIdxInR2;
+		const team0 = slots[r1MatchIdx * 2];
+		const team1 = slots[r1MatchIdx * 2 + 1];
+		if (team0 && team1) return ''; // Real R1 매치 — 직접 배치 불가
+		if (team0 && !team1) return team0;
+		if (!team0 && team1) return team1;
+		return '';
+	}
+
+	// R1 매치가 Real(두 팀 다 채워짐) 이면 R2 슬롯에서 직접 배치 못 함.
+	function isR2SlotLocked(r2MatchIdx, slotIdxInR2) {
+		const r1MatchIdx = r2MatchIdx * 2 + slotIdxInR2;
+		return slots[r1MatchIdx * 2] != null && slots[r1MatchIdx * 2 + 1] != null;
+	}
+
 	function handleAutoSeed() {
 		const next = Array(bracketSize).fill(null);
+		const totalMatches = bracketSize / 2;
+		// Real 매치 수 = N - totalMatches (음수면 0). N 팀 중 양쪽 채워야 하는 매치 수.
+		const realMatchCount = Math.max(0, teams.length - totalMatches);
 		const shuffled = shuffle(teams.map(t => t.id));
-		shuffled.forEach((id, i) => {
-			next[i] = id;
-		});
+		let idx = 0;
+		// 앞 매치들을 Real 로 채움
+		for (let m = 0; m < realMatchCount; m += 1) {
+			next[m * 2] = shuffled[idx];
+			idx += 1;
+			next[m * 2 + 1] = shuffled[idx];
+			idx += 1;
+		}
+		// 나머지 매치들은 BYE (한쪽만)
+		for (let m = realMatchCount; m < totalMatches && idx < shuffled.length; m += 1) {
+			next[m * 2] = shuffled[idx];
+			idx += 1;
+		}
 		setSlots(next);
 	}
 
@@ -342,10 +397,61 @@ function SlotMappingDialog({ open, onClose, onSuccess, tournamentId, teams, brac
 		);
 	}
 
+	function renderR2Slot(r2MatchIdx, slotIdxInR2) {
+		const r1MatchIdx = r2MatchIdx * 2 + slotIdxInR2;
+		const value = getR2SlotValue(r2MatchIdx, slotIdxInR2);
+		const locked = isR2SlotLocked(r2MatchIdx, slotIdxInR2);
+		return (
+			<TextField
+				key={slotIdxInR2}
+				className={classes.slotField}
+				value={value || ''}
+				onChange={(e) => handleR2SlotChange(r2MatchIdx, slotIdxInR2, e.target.value)}
+				variant="outlined"
+				select
+				size="small"
+				fullWidth
+				disabled={locked}
+			>
+				<MenuItem value="">
+					{locked
+						? `예선 매치 ${r1MatchIdx + 1} 승자`
+						: '— 자리 비움 (R1 매치 승자 대기) —'}
+				</MenuItem>
+				{teams.map(t => {
+					const usedElsewhere = placedSet.has(t.id) && value !== t.id;
+					return (
+						<MenuItem
+							key={t.id}
+							value={t.id}
+							disabled={usedElsewhere}
+						>
+							{t.name}{usedElsewhere ? ' (배치됨)' : ''}
+						</MenuItem>
+					);
+				})}
+			</TextField>
+		);
+	}
+
 	function renderUpcomingMatch(round, matchIdx) {
 		const fromA = matchIdx * 2;
 		const fromB = matchIdx * 2 + 1;
 		const prevLabel = roundLabelFor(round - 1, totalRounds);
+		// R2 만 직접 팀 배치 가능 — R1 BYE 슬롯의 대안 입력 경로
+		if (round === 2) {
+			return (
+				<div
+					key={matchIdx}
+					ref={el => { itemRefs.current[matchKey(round, matchIdx)] = el; }}
+					className={classes.matchBox}
+				>
+					<div className={classes.matchTitle}>매치 {matchIdx + 1}</div>
+					{[0, 1].map(slotIdxInR2 => renderR2Slot(matchIdx, slotIdxInR2))}
+				</div>
+			);
+		}
+		// R3 이상은 표시만
 		return (
 			<div
 				key={matchIdx}
@@ -367,7 +473,8 @@ function SlotMappingDialog({ open, onClose, onSuccess, tournamentId, teams, brac
 		>
 			<DialogTitle className={dialogClasses.titleCyan}>브래킷 슬롯 배치</DialogTitle>
 			<div className={dialogClasses.subtitle}>
-				{teams.length}팀 · {bracketSize}강 브래킷 · 빈 슬롯은 BYE 처리
+				{teams.length}팀 · {bracketSize}강 브래킷
+				{totalRounds >= 2 && ` · ${roundLabelFor(2, totalRounds)} 컬럼에 팀을 직접 배치하면 R1 BYE 로 자동 진출`}
 			</div>
 			<DialogContent className={dialogClasses.contentPad}>
 				<div className={classes.helperRow}>
