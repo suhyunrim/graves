@@ -88,3 +88,15 @@ export function updateMatchResult(matchId, team1Score, team2Score) {
 		{ silentError: true }
 	);
 }
+
+export function createScrim(tournamentId, body) {
+	return createCamilleAxios().post(`/api/tournament/${tournamentId}/scrims`, body, { silentError: true });
+}
+
+export function updateScrim(tournamentId, scrimId, body) {
+	return createCamilleAxios().patch(`/api/tournament/${tournamentId}/scrims/${scrimId}`, body, { silentError: true });
+}
+
+export function deleteScrim(tournamentId, scrimId) {
+	return createCamilleAxios().delete(`/api/tournament/${tournamentId}/scrims/${scrimId}`, { silentError: true });
+}

@@ -10,7 +10,9 @@ import {
 	DialogContent,
 	DialogContentText,
 	DialogActions,
-	Tooltip
+	Tooltip,
+	Tabs,
+	Tab
 } from '@mui/material';
 import useToast from 'app/utility/useToast';
 import { getProfileIconUrl } from 'app/main/challenge/ddragonUtils';
@@ -43,6 +45,7 @@ import TournamentBracket from './TournamentBracket';
 import TeamFormDialog from './TeamFormDialog';
 import SlotMappingDialog from './SlotMappingDialog';
 import MatchResultDialog from './MatchResultDialog';
+import ScrimContent from './ScrimContent';
 
 const useStyles = makeStyles()((theme) => ({
 	layoutRoot: {
@@ -366,6 +369,23 @@ const useStyles = makeStyles()((theme) => ({
 		textAlign: 'center',
 		padding: 60
 	},
+	tabs: {
+		marginBottom: 20,
+		'& .MuiTabs-indicator': {
+			background: '#00d4ff'
+		}
+	},
+	tab: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.3rem',
+		fontWeight: 600,
+		color: 'rgba(255, 255, 255, 0.5)',
+		textTransform: 'none',
+		minWidth: 100,
+		'&.Mui-selected': {
+			color: '#00d4ff'
+		}
+	},
 	headerActions: {
 		marginTop: 14,
 		display: 'flex',
@@ -391,6 +411,7 @@ function TournamentDetail() {
 	const detail = useSelector(({ Tournament }) => Tournament.tournament.detail);
 	const teams = useSelector(({ Tournament }) => Tournament.tournament.teams);
 	const matches = useSelector(({ Tournament }) => Tournament.tournament.matches);
+	const scrims = useSelector(({ Tournament }) => Tournament.tournament.scrims);
 	const roundLabels = useSelector(({ Tournament }) => Tournament.tournament.roundLabels);
 	const loadingDetail = useSelector(({ Tournament }) => Tournament.tournament.loadingDetail);
 	const activeMembers = useSelector(({ Tournament }) => Tournament.tournament.activeMembers);
@@ -403,6 +424,7 @@ function TournamentDetail() {
 	const [slotMappingOpen, setSlotMappingOpen] = useState(false);
 	const [matchEditTarget, setMatchEditTarget] = useState(null);
 	const [deleteTournamentOpen, setDeleteTournamentOpen] = useState(false);
+	const [activeTab, setActiveTab] = useState(0);
 
 	const teamMap = useMemo(() => {
 		const m = new Map();
@@ -588,6 +610,17 @@ function TournamentDetail() {
 			content={
 				<div className={classes.container}>
 					{(isInProgress || isFinished) && (
+						<Tabs
+							value={activeTab}
+							onChange={(_, v) => setActiveTab(v)}
+							className={classes.tabs}
+						>
+							<Tab label="대진표" className={classes.tab} />
+							<Tab label="스크림" className={classes.tab} />
+						</Tabs>
+					)}
+
+					{(isInProgress || isFinished) && activeTab === 0 && (
 						<div className={classes.section}>
 							<div className={classes.sectionHeader}>
 								<div className={classes.sectionTitle}>대진표</div>
@@ -603,6 +636,16 @@ function TournamentDetail() {
 						</div>
 					)}
 
+					{(isInProgress || isFinished) && activeTab === 1 && (
+						<ScrimContent
+							tournamentId={tournamentId}
+							teams={teams}
+							scrims={scrims}
+							onMutated={reload}
+						/>
+					)}
+
+					{(isPreparing || activeTab === 0) && (
 					<div className={classes.section}>
 						<div className={classes.sectionHeader}>
 							<div className={classes.sectionTitle}>
@@ -710,6 +753,7 @@ function TournamentDetail() {
 							</div>
 						)}
 					</div>
+					)}
 
 					{teamFormOpen && (
 						<TeamFormDialog

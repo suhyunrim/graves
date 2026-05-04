@@ -6,6 +6,7 @@ const initialState = {
 	detail: null,
 	teams: [],
 	matches: [],
+	scrims: [],
 	roundLabels: {},
 	loadingDetail: false,
 	activeMembers: []
@@ -28,6 +29,7 @@ const tournamentReducer = (state = initialState, action) => {
 				detail: action.payload.tournament,
 				teams: action.payload.teams || [],
 				matches: action.payload.matches || [],
+				scrims: action.payload.scrims || [],
 				roundLabels: action.payload.roundLabels || {},
 				loadingDetail: false
 			};
@@ -38,6 +40,7 @@ const tournamentReducer = (state = initialState, action) => {
 				detail: null,
 				teams: [],
 				matches: [],
+				scrims: [],
 				roundLabels: {},
 				activeMembers: []
 			};
