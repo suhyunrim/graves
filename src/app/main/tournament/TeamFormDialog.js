@@ -13,7 +13,7 @@ import { makeStyles } from 'tss-react/mui';
 import { getProfileIconUrl } from 'app/main/challenge/ddragonUtils';
 import useDialogStyles from '../components/dialogStyles';
 import * as Actions from './store/actions';
-import { POSITIONS, POSITION_LABELS, CYAN_ICON_FILTER } from './tournamentUtils';
+import { POSITIONS, POSITION_LABELS } from './tournamentUtils';
 import PositionIcon from './PositionIcon';
 
 const useStyles = makeStyles()((theme) => ({
@@ -78,7 +78,7 @@ const useStyles = makeStyles()((theme) => ({
 	positionIcon: {
 		width: 26,
 		height: 26,
-		filter: CYAN_ICON_FILTER
+		color: '#00d4ff'
 	},
 	positionFallback: {
 		fontFamily: '"Noto Sans KR", sans-serif',

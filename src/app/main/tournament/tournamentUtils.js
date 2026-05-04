@@ -26,24 +26,6 @@ export const POSITION_LABELS = {
 	support: '서폿'
 };
 
-// DDragon 엔 포지션 아이콘이 없어서 CommunityDragon 의 SVG 를 쓴다.
-const POSITION_CDN_KEY = {
-	top: 'top',
-	jungle: 'jungle',
-	mid: 'middle',
-	adc: 'bottom',
-	support: 'utility'
-};
-
-export function getPositionIconUrl(position) {
-	const key = POSITION_CDN_KEY[position];
-	if (!key) return null;
-	return `https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-static-assets/global/default/images/lol-positions/position-${key}.svg`;
-}
-
-// 흑백 SVG 를 cyan 톤으로 칠하는 필터 — 포지션 아이콘 컬러 통일용
-export const CYAN_ICON_FILTER = 'invert(70%) sepia(80%) saturate(500%) hue-rotate(160deg) brightness(105%) contrast(95%)';
-
 // 브래킷 connector 라인 색 — 진행 중은 cyan, 종료된 매치는 녹색
 export const BRACKET_LINE_COLOR = 'rgba(0, 212, 255, 0.3)';
 export const BRACKET_LINE_COLOR_FINISHED = 'rgba(0, 255, 127, 0.6)';
@@ -64,8 +46,25 @@ const TIER_BASES = [
 ];
 const TIER_STEPS = ['IV', 'III', 'II', 'I'];
 
+const TIER_INITIAL = {
+	IRON: 'I',
+	BRONZE: 'B',
+	SILVER: 'S',
+	GOLD: 'G',
+	PLATINUM: 'P',
+	EMERALD: 'E',
+	DIAMOND: 'D',
+	MASTER: 'M',
+	GRANDMASTER: 'GM',
+	CHALLENGER: 'C'
+};
+
 function isNonStepTier(name) {
 	return name === 'MASTER' || name === 'GRANDMASTER' || name === 'CHALLENGER';
+}
+
+function tierStepIndex(rating, base) {
+	return Math.min(3, Math.floor((rating - base) / 25));
 }
 
 export function getTierName(rating) {
@@ -81,10 +80,23 @@ export function getTierLabel(rating) {
 	for (const [name, base] of TIER_BASES) {
 		if (rating >= base) {
 			if (isNonStepTier(name)) return name;
-			return `${name} ${TIER_STEPS[Math.min(3, Math.floor((rating - base) / 25))]}`;
+			return `${name} ${TIER_STEPS[tierStepIndex(rating, base)]}`;
 		}
 	}
 	return 'IRON IV';
+}
+
+// 'D2', 'GM', 'C' 같은 짧은 표기. 좁은 공간(멤버 행 등) 에서 쓴다.
+export function getTierShortLabel(rating) {
+	if (rating == null) return null;
+	for (const [name, base] of TIER_BASES) {
+		if (rating >= base) {
+			const initial = TIER_INITIAL[name];
+			if (isNonStepTier(name)) return initial;
+			return `${initial}${4 - tierStepIndex(rating, base)}`;
+		}
+	}
+	return 'I4';
 }
 
 export function getTierEmblemUrl(tierName) {

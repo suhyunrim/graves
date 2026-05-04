@@ -35,8 +35,8 @@ import {
 	bracketSizeForTeamCount,
 	getTierName,
 	getTierLabel,
-	getTierEmblemUrl,
-	CYAN_ICON_FILTER
+	getTierShortLabel,
+	getTierEmblemUrl
 } from './tournamentUtils';
 import PositionIcon from './PositionIcon';
 import TournamentBracket from './TournamentBracket';
@@ -280,7 +280,7 @@ const useStyles = makeStyles()((theme) => ({
 	memberPositionIcon: {
 		width: 20,
 		height: 20,
-		filter: CYAN_ICON_FILTER
+		color: '#00d4ff'
 	},
 	memberPositionFallback: {
 		fontFamily: '"Noto Sans KR", sans-serif',
@@ -312,11 +312,25 @@ const useStyles = makeStyles()((theme) => ({
 		fontSize: '1.2rem',
 		color: '#ffd700'
 	},
+	memberTier: {
+		display: 'inline-flex',
+		alignItems: 'center',
+		gap: 4,
+		flexShrink: 0
+	},
 	memberTierEmblem: {
 		width: 18,
 		height: 18,
-		flexShrink: 0,
 		opacity: 0.9
+	},
+	memberTierShort: {
+		fontFamily: '"Rajdhani", sans-serif',
+		fontSize: '1.05rem',
+		fontWeight: 700,
+		color: 'rgba(255, 255, 255, 0.7)',
+		letterSpacing: '0.02em',
+		minWidth: 18,
+		textAlign: 'right'
 	},
 	teamTierBadge: {
 		display: 'inline-flex',
@@ -655,6 +669,7 @@ function TournamentDetail() {
 													const memberRating = memberInfo ? memberInfo.rating : null;
 													const memberTierName = getTierName(memberRating);
 													const memberTierLabel = getTierLabel(memberRating);
+													const memberTierShort = getTierShortLabel(memberRating);
 													const memberTierEmblem = getTierEmblemUrl(memberTierName);
 													const isCaptain = t.captainPuuid === m.puuid;
 													return (
@@ -673,13 +688,17 @@ function TournamentDetail() {
 															)}
 															<span className={classes.memberName}>{displayName}</span>
 															{isCaptain && <StarIcon className={classes.captainStar} />}
-															{memberTierEmblem && (
-																<img
-																	src={memberTierEmblem}
-																	alt={memberTierLabel}
-																	title={memberTierLabel}
-																	className={classes.memberTierEmblem}
-																/>
+															{memberTierShort && (
+																<span className={classes.memberTier} title={memberTierLabel}>
+																	{memberTierEmblem && (
+																		<img
+																			src={memberTierEmblem}
+																			alt=""
+																			className={classes.memberTierEmblem}
+																		/>
+																	)}
+																	<span className={classes.memberTierShort}>{memberTierShort}</span>
+																</span>
 															)}
 														</div>
 													);

@@ -15,7 +15,7 @@ import reducer from './store/reducers';
 import * as Actions from './store/actions';
 import TournamentCreateDialog from './TournamentCreateDialog';
 import PositionIcon from './PositionIcon';
-import { STATUS_LABELS, STATUS_COLORS, checkIsAdmin, CYAN_ICON_FILTER } from './tournamentUtils';
+import { STATUS_LABELS, STATUS_COLORS, checkIsAdmin } from './tournamentUtils';
 
 const useStyles = makeStyles()((theme) => ({
 	layoutRoot: {
@@ -179,7 +179,7 @@ const useStyles = makeStyles()((theme) => ({
 	championPositionIcon: {
 		width: 16,
 		height: 16,
-		filter: CYAN_ICON_FILTER
+		color: '#00d4ff'
 	},
 	championPositionFallback: {
 		fontFamily: '"Noto Sans KR", sans-serif',
