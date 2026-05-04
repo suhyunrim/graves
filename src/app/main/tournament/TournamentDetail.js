@@ -52,12 +52,27 @@ import ScrimContent from './ScrimContent';
 const useStyles = makeStyles()((theme) => ({
 	layoutRoot: {
 		background: 'linear-gradient(180deg, #0f0f1a 0%, #1a1a2e 100%)',
-		minHeight: '100vh'
+		minHeight: '100vh',
+		width: '100%',
+		maxWidth: '100%',
+		overflowX: 'hidden'
+	},
+	contentWrapperOverride: {
+		overflowX: 'hidden !important',
+		maxWidth: '100%'
+	},
+	pageOuter: {
+		width: '100%',
+		maxWidth: '100vw',
+		minWidth: 0,
+		overflowX: 'hidden',
+		boxSizing: 'border-box'
 	},
 	headerRoot: {
 		display: 'flex',
 		flexDirection: 'column',
 		width: '100%',
+		boxSizing: 'border-box',
 		padding: '20px 28px 18px',
 		background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
 		[theme.breakpoints.down('sm')]: {
@@ -146,6 +161,8 @@ const useStyles = makeStyles()((theme) => ({
 		color: '#ffd700',
 		fontWeight: 700,
 		letterSpacing: '0.03em',
+		minWidth: 0,
+		wordBreak: 'break-word',
 		[theme.breakpoints.down('sm')]: {
 			padding: '10px 14px',
 			fontSize: '1.35rem',
@@ -164,6 +181,8 @@ const useStyles = makeStyles()((theme) => ({
 		maxWidth: 1400,
 		margin: '0 auto',
 		width: '100%',
+		minWidth: 0,
+		boxSizing: 'border-box',
 		[theme.breakpoints.down('sm')]: {
 			padding: '16px'
 		}
@@ -174,6 +193,9 @@ const useStyles = makeStyles()((theme) => ({
 		border: '1px solid rgba(0, 212, 255, 0.15)',
 		padding: '24px 28px',
 		marginBottom: 24,
+		// 안의 가로 스크롤 영역(브래킷 등)이 페이지로 새지 않도록 격리
+		minWidth: 0,
+		overflow: 'hidden',
 		[theme.breakpoints.down('sm')]: {
 			padding: '18px 20px',
 			borderRadius: 14
@@ -591,7 +613,7 @@ function TournamentDetail() {
 	if (loadingDetail && !detail) {
 		return (
 			<FusePageSimple
-				classes={{ root: classes.layoutRoot }}
+				classes={{ root: classes.layoutRoot, contentWrapper: classes.contentWrapperOverride }}
 				content={<div className={classes.loadingWrapper}>불러오는 중...</div>}
 			/>
 		);
@@ -600,7 +622,7 @@ function TournamentDetail() {
 	if (!detail) {
 		return (
 			<FusePageSimple
-				classes={{ root: classes.layoutRoot }}
+				classes={{ root: classes.layoutRoot, contentWrapper: classes.contentWrapperOverride }}
 				content={<div className={classes.emptyText}>토너먼트를 찾을 수 없습니다.</div>}
 			/>
 		);
@@ -617,7 +639,7 @@ function TournamentDetail() {
 
 	return (
 		<FusePageSimple
-			classes={{ root: classes.layoutRoot }}
+			classes={{ root: classes.layoutRoot, contentWrapper: classes.contentWrapperOverride }}
 			header={
 				<div className={classes.headerRoot}>
 					<div className={classes.backRow}>
@@ -681,6 +703,7 @@ function TournamentDetail() {
 				</div>
 			}
 			content={
+				<div className={classes.pageOuter}>
 				<div className={classes.container}>
 					{(isInProgress || isFinished) && (
 						<Tabs
@@ -931,6 +954,7 @@ function TournamentDetail() {
 							</DialogActions>
 						</Dialog>
 					)}
+				</div>
 				</div>
 			}
 		/>

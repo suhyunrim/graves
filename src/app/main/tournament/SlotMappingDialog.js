@@ -55,14 +55,20 @@ const useStyles = makeStyles()((theme) => ({
 	},
 	bracketScroll: {
 		overflowX: 'auto',
-		paddingBottom: 8
+		paddingBottom: 8,
+		width: '100%',
+		minWidth: 0,
+		maxWidth: '100%'
 	},
 	bracket: {
 		display: 'flex',
 		gap: 56,
 		minWidth: 'min-content',
 		padding: '4px 4px 8px',
-		position: 'relative'
+		position: 'relative',
+		[theme.breakpoints.down('sm')]: {
+			gap: 32
+		}
 	},
 	linesSvg: {
 		position: 'absolute',
@@ -80,7 +86,10 @@ const useStyles = makeStyles()((theme) => ({
 		minWidth: 240,
 		flexShrink: 0,
 		position: 'relative',
-		zIndex: 1
+		zIndex: 1,
+		[theme.breakpoints.down('sm')]: {
+			minWidth: 200
+		}
 	},
 	columnTitle: {
 		fontFamily: '"Rajdhani", "Noto Sans KR", sans-serif',

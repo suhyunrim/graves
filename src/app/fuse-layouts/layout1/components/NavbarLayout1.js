@@ -49,8 +49,19 @@ const useStyles = makeStyles()({
 			color: '#00d4ff',
 			background: 'rgba(0, 212, 255, 0.1)'
 		}
+	},
+	commitFooter: {
+		padding: '14px 16px 18px',
+		fontFamily: '"Rajdhani", monospace',
+		fontSize: '1rem',
+		color: 'rgba(255, 255, 255, 0.25)',
+		textAlign: 'center',
+		letterSpacing: '0.05em',
+		userSelect: 'all'
 	}
 });
+
+const COMMIT_HASH = typeof __COMMIT_HASH__ !== 'undefined' ? __COMMIT_HASH__ : 'unknown';
 
 function NavbarLayout1(props) {
 	const { classes } = useStyles();
@@ -87,6 +98,8 @@ function NavbarLayout1(props) {
 				<UserNavbarHeader />
 
 				<Navigation layout="vertical" />
+
+				<div className={classes.commitFooter}>build #{COMMIT_HASH}</div>
 			</FuseScrollbars>
         </div>
     );
