@@ -413,7 +413,7 @@ function TournamentBracket({
 				})}
 				{r && r.played > 0 && (
 					<div className={classes.teamScrimSummary}>
-						누적 스크림{' '}
+						전체 스크림 전적{' '}
 						<span className="win">{r.won}</span>
 						<span className="sep">-</span>
 						<span className="loss">{r.lost}</span>
@@ -451,14 +451,14 @@ function TournamentBracket({
 		if (!h2h || h2h.played === 0) {
 			return (
 				<div className={classes.detailSection}>
-					<div className={classes.detailSectionLabel}>스크림 H2H</div>
+					<div className={classes.detailSectionLabel}>스크림 상대 전적</div>
 					<div className={classes.detailEmpty}>아직 두 팀의 스크림 기록이 없습니다</div>
 				</div>
 			);
 		}
 		return (
 			<div className={classes.detailSection}>
-				<div className={classes.detailSectionLabel}>스크림 H2H</div>
+				<div className={classes.detailSectionLabel}>스크림 상대 전적</div>
 				<div className={classes.detailSectionRow}>
 					<span className={classes.detailTeamLeft}>{team1.name}</span>
 					<span className={classes.detailScore}>
