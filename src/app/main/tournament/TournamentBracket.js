@@ -2,14 +2,19 @@ import React from 'react';
 import { makeStyles } from 'tss-react/mui';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import EditIcon from '@mui/icons-material/Edit';
+import StarIcon from '@mui/icons-material/Star';
 import { getProfileIconUrl } from 'app/main/challenge/ddragonUtils';
 import {
 	groupMatchesByRound,
 	isByeMatch,
 	isEmptyMatch,
+	getTierName,
+	getTierShortLabel,
+	getTierEmblemUrl,
 	BRACKET_LINE_COLOR,
 	BRACKET_LINE_COLOR_FINISHED
 } from './tournamentUtils';
+import PositionIcon from './PositionIcon';
 import useBracketLines, { buildLinePath } from './useBracketLines';
 
 const useStyles = makeStyles()((theme) => ({
@@ -42,6 +47,9 @@ const useStyles = makeStyles()((theme) => ({
 		flexShrink: 0,
 		position: 'relative',
 		zIndex: 1
+	},
+	columnVerbose: {
+		minWidth: 320
 	},
 	columnTitle: {
 		fontFamily: '"Rajdhani", "Noto Sans KR", sans-serif',
@@ -141,15 +149,6 @@ const useStyles = makeStyles()((theme) => ({
 		minWidth: 24,
 		textAlign: 'right'
 	},
-	winProb: {
-		fontFamily: '"Rajdhani", sans-serif',
-		fontSize: '1.1rem',
-		color: 'rgba(0, 212, 255, 0.85)',
-		marginLeft: 12,
-		minWidth: 42,
-		textAlign: 'right',
-		fontWeight: 600
-	},
 	championBadge: {
 		fontSize: '1.4rem',
 		color: '#ffd700'
@@ -161,61 +160,156 @@ const useStyles = makeStyles()((theme) => ({
 		textAlign: 'center',
 		padding: 40
 	},
-	teamDetails: {
+	teamFullDetails: {
+		padding: '8px 14px 10px',
+		borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
+		display: 'flex',
+		flexDirection: 'column',
+		gap: 6
+	},
+	teamTierBadgeMini: {
+		display: 'inline-flex',
+		alignItems: 'center',
+		gap: 5,
+		padding: '2px 8px',
+		borderRadius: 14,
+		background: 'rgba(0, 0, 0, 0.3)',
+		border: '1px solid rgba(0, 212, 255, 0.2)',
+		fontFamily: '"Rajdhani", "Noto Sans KR", sans-serif',
+		fontSize: '1rem',
+		fontWeight: 600,
+		color: 'rgba(255, 255, 255, 0.85)',
+		alignSelf: 'flex-start'
+	},
+	teamTierEmblemMini: {
+		width: 14,
+		height: 14
+	},
+	memberLine: {
 		display: 'flex',
 		alignItems: 'center',
-		gap: 8,
-		padding: '6px 14px 8px',
-		borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
-		'&:last-child': { borderBottom: 'none' }
+		gap: 6,
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.1rem',
+		color: 'rgba(255, 255, 255, 0.85)'
 	},
-	teamMembers: {
-		display: 'flex',
-		gap: 3,
-		flex: 1,
-		minWidth: 0
+	memberLinePosIcon: {
+		width: 14,
+		height: 14,
+		color: '#00d4ff',
+		flexShrink: 0
 	},
-	teamMemberAvatar: {
+	memberLinePosFallback: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '0.85rem',
+		color: 'rgba(0, 212, 255, 0.7)',
+		fontWeight: 600
+	},
+	memberLineAvatar: {
 		width: 18,
 		height: 18,
 		borderRadius: 4,
 		flexShrink: 0
 	},
-	teamMemberPlaceholder: {
+	memberLinePlaceholder: {
 		width: 18,
 		height: 18,
 		borderRadius: 4,
 		background: 'rgba(0, 212, 255, 0.15)',
 		flexShrink: 0
 	},
-	teamScrimRecord: {
+	memberLineName: {
+		flex: 1,
+		minWidth: 0,
+		overflow: 'hidden',
+		textOverflow: 'ellipsis',
+		whiteSpace: 'nowrap'
+	},
+	memberLineCaptain: {
+		fontSize: '1rem',
+		color: '#ffd700'
+	},
+	memberLineTier: {
 		fontFamily: '"Rajdhani", sans-serif',
-		fontSize: '1.1rem',
+		fontSize: '0.95rem',
 		fontWeight: 700,
-		color: 'rgba(255, 255, 255, 0.6)',
-		whiteSpace: 'nowrap',
+		color: 'rgba(255, 255, 255, 0.55)',
+		minWidth: 18,
+		textAlign: 'right'
+	},
+	teamScrimSummary: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.05rem',
+		color: 'rgba(255, 255, 255, 0.55)',
+		marginTop: 2,
+		'& > .win': { color: '#00ff7f', fontFamily: '"Rajdhani", sans-serif', fontWeight: 700 },
+		'& > .loss': { color: '#ff6b6b', fontFamily: '"Rajdhani", sans-serif', fontWeight: 700 },
+		'& > .sep': { color: 'rgba(255, 255, 255, 0.3)', margin: '0 3px' }
+	},
+	detailSection: {
+		padding: '10px 14px',
+		background: 'rgba(0, 0, 0, 0.25)',
+		borderTop: '1px solid rgba(0, 212, 255, 0.1)'
+	},
+	detailSectionLabel: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '0.95rem',
+		color: 'rgba(0, 212, 255, 0.6)',
+		fontWeight: 600,
+		letterSpacing: '0.05em',
+		textTransform: 'uppercase',
+		marginBottom: 6
+	},
+	detailSectionRow: {
+		display: 'grid',
+		gridTemplateColumns: '1fr auto 1fr',
+		alignItems: 'center',
+		gap: 8
+	},
+	detailTeamLeft: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.15rem',
+		color: '#fff',
+		textAlign: 'right',
+		overflow: 'hidden',
+		textOverflow: 'ellipsis',
+		whiteSpace: 'nowrap'
+	},
+	detailTeamRight: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.15rem',
+		color: '#fff',
+		textAlign: 'left',
+		overflow: 'hidden',
+		textOverflow: 'ellipsis',
+		whiteSpace: 'nowrap'
+	},
+	detailScore: {
+		fontFamily: '"Rajdhani", sans-serif',
+		fontWeight: 700,
+		fontSize: '1.5rem',
+		display: 'inline-flex',
+		alignItems: 'baseline',
+		gap: 4,
+		color: '#fff',
 		'& > .win': { color: '#00ff7f' },
 		'& > .loss': { color: '#ff6b6b' },
-		'& > .sep': { color: 'rgba(255, 255, 255, 0.3)', margin: '0 2px' }
+		'& > .cyan': { color: '#00d4ff' },
+		'& > .sep': { color: 'rgba(255, 255, 255, 0.4)' }
 	},
-	h2hRow: {
-		display: 'flex',
-		alignItems: 'center',
-		justifyContent: 'space-between',
-		padding: '8px 14px',
+	detailSubRow: {
 		fontFamily: '"Noto Sans KR", sans-serif',
-		fontSize: '1.1rem',
-		color: 'rgba(255, 255, 255, 0.55)',
-		background: 'rgba(0, 0, 0, 0.25)'
+		fontSize: '1rem',
+		color: 'rgba(255, 255, 255, 0.4)',
+		marginTop: 4,
+		textAlign: 'center'
 	},
-	h2hLabel: {
-		letterSpacing: '0.03em'
-	},
-	h2hScore: {
-		fontFamily: '"Rajdhani", sans-serif',
-		fontSize: '1.3rem',
-		fontWeight: 700,
-		color: '#fff'
+	detailEmpty: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.05rem',
+		color: 'rgba(255, 255, 255, 0.35)',
+		fontStyle: 'italic',
+		textAlign: 'center'
 	}
 }));
 
@@ -279,35 +373,107 @@ function TournamentBracket({
 		return <div className={classes.emptyText}>매치 정보가 없습니다.</div>;
 	}
 
-	function renderTeamDetails(team) {
+	function renderTeamFullDetails(team) {
 		if (!team) return null;
-		const r = team.scrimRecord || { won: 0, lost: 0, played: 0 };
+		const tierName = getTierName(team.avgRating);
+		const tierShort = getTierShortLabel(team.avgRating);
+		const tierEmblem = getTierEmblemUrl(tierName);
+		const r = team.scrimRecord;
 		return (
-			<div className={classes.teamDetails}>
-				<div className={classes.teamMembers}>
-					{(team.members || []).map(m => {
-						const info = memberMap.get(m.puuid);
-						const url = info && info.profileIconId ? getProfileIconUrl(info.profileIconId) : null;
-						const name = info ? info.name : m.puuid;
-						return url ? (
-							<img key={m.puuid} src={url} alt={name} title={name} className={classes.teamMemberAvatar} />
-						) : (
-							<div key={m.puuid} className={classes.teamMemberPlaceholder} title={name} />
-						);
-					})}
-				</div>
-				{r.played > 0 && (
-					<span className={classes.teamScrimRecord}>
+			<div className={classes.teamFullDetails}>
+				{tierShort && (
+					<div className={classes.teamTierBadgeMini}>
+						{tierEmblem && <img src={tierEmblem} alt="" className={classes.teamTierEmblemMini} />}
+						팀 평균 {tierShort}
+					</div>
+				)}
+				{(team.members || []).map(m => {
+					const info = memberMap.get(m.puuid);
+					const url = info && info.profileIconId ? getProfileIconUrl(info.profileIconId) : null;
+					const name = info ? info.name : `${m.puuid.slice(0, 8)}…`;
+					const memberShort = info ? getTierShortLabel(info.rating) : null;
+					const isCaptain = team.captainPuuid === m.puuid;
+					return (
+						<div key={m.puuid} className={classes.memberLine}>
+							<PositionIcon
+								position={m.position}
+								className={classes.memberLinePosIcon}
+								fallbackClassName={classes.memberLinePosFallback}
+							/>
+							{url ? (
+								<img src={url} alt="" className={classes.memberLineAvatar} />
+							) : (
+								<div className={classes.memberLinePlaceholder} />
+							)}
+							<span className={classes.memberLineName}>{name}</span>
+							{isCaptain && <StarIcon className={classes.memberLineCaptain} />}
+							{memberShort && <span className={classes.memberLineTier}>{memberShort}</span>}
+						</div>
+					);
+				})}
+				{r && r.played > 0 && (
+					<div className={classes.teamScrimSummary}>
+						누적 스크림{' '}
 						<span className="win">{r.won}</span>
 						<span className="sep">-</span>
 						<span className="loss">{r.lost}</span>
-					</span>
+					</div>
 				)}
 			</div>
 		);
 	}
 
-	function renderTeamRow(teamId, score, winnerTeamId, isFinishedMatch, emptyLabel, winProbPct) {
+	function renderExpectedSection(team1, team2, prob1, prob2) {
+		if (prob1 == null || prob2 == null) return null;
+		const tier1 = getTierShortLabel(team1 && team1.avgRating);
+		const tier2 = getTierShortLabel(team2 && team2.avgRating);
+		return (
+			<div className={classes.detailSection}>
+				<div className={classes.detailSectionLabel}>예상 승률 (내전 티어 기준)</div>
+				<div className={classes.detailSectionRow}>
+					<span className={classes.detailTeamLeft}>{team1 ? team1.name : '?'}</span>
+					<span className={classes.detailScore}>
+						<span className="cyan">{prob1}%</span>
+						<span className="sep">:</span>
+						<span className="cyan">{prob2}%</span>
+					</span>
+					<span className={classes.detailTeamRight}>{team2 ? team2.name : '?'}</span>
+				</div>
+				{(tier1 || tier2) && (
+					<div className={classes.detailSubRow}>팀 평균 {tier1 || '?'} vs {tier2 || '?'}</div>
+				)}
+			</div>
+		);
+	}
+
+	function renderH2HSection(team1, team2, h2h) {
+		if (!team1 || !team2) return null;
+		if (!h2h || h2h.played === 0) {
+			return (
+				<div className={classes.detailSection}>
+					<div className={classes.detailSectionLabel}>스크림 H2H</div>
+					<div className={classes.detailEmpty}>아직 두 팀의 스크림 기록이 없습니다</div>
+				</div>
+			);
+		}
+		return (
+			<div className={classes.detailSection}>
+				<div className={classes.detailSectionLabel}>스크림 H2H</div>
+				<div className={classes.detailSectionRow}>
+					<span className={classes.detailTeamLeft}>{team1.name}</span>
+					<span className={classes.detailScore}>
+						<span className="win">{h2h.team1.won}</span>
+						<span className="sep">:</span>
+						<span className="loss">{h2h.team1.lost}</span>
+					</span>
+					<span className={classes.detailTeamRight}>{team2.name}</span>
+				</div>
+				<div className={classes.detailSubRow}>{h2h.played}매치</div>
+			</div>
+		);
+	}
+
+	function renderTeamRow(teamId, score, winnerTeamId, isFinishedMatch, emptyLabel) {
 		const team = teamId ? teamMap.get(teamId) : null;
 		const isWinner = winnerTeamId && winnerTeamId === teamId;
 		const isLoser = winnerTeamId && winnerTeamId !== teamId && teamId;
@@ -326,9 +492,6 @@ function TournamentBracket({
 					{isChampion && <EmojiEventsIcon className={classes.championBadge} />}
 				</span>
 				{showScore && <span className={classes.score}>{score}</span>}
-				{!isFinishedMatch && winProbPct != null && team && (
-					<span className={classes.winProb}>{winProbPct}%</span>
-				)}
 			</div>
 		);
 	}
@@ -358,7 +521,7 @@ function TournamentBracket({
 					const emptyLabel = round === 1 ? 'TBD' : '이전 라운드 승자 대기';
 
 					return (
-						<div key={round} className={classes.column}>
+						<div key={round} className={cx(classes.column, verbose && classes.columnVerbose)}>
 							<div className={classes.columnTitle}>{label}</div>
 							<div className={classes.matchList}>
 								{visibleMatches.length === 0 ? (
@@ -370,16 +533,15 @@ function TournamentBracket({
 										const editable = canEdit && !empty && !finished
 											&& m.team1Id != null && m.team2Id != null;
 
+										const team1 = m.team1Id ? teamMap.get(m.team1Id) : null;
+										const team2 = m.team2Id ? teamMap.get(m.team2Id) : null;
+
 										let prob1 = null;
 										let prob2 = null;
-										if (!finished && m.team1WinProb != null && m.team2WinProb != null) {
+										if (verbose && !finished && m.team1WinProb != null && m.team2WinProb != null) {
 											prob1 = Math.round(m.team1WinProb * 100);
 											prob2 = Math.round(m.team2WinProb * 100);
 										}
-
-										const team1 = m.team1Id ? teamMap.get(m.team1Id) : null;
-										const team2 = m.team2Id ? teamMap.get(m.team2Id) : null;
-										const h2h = verbose ? m.headToHeadScrim : null;
 
 										return (
 											<div
@@ -396,17 +558,15 @@ function TournamentBracket({
 													<span className={classes.matchHeaderBO}>BO{m.bestOf}</span>
 													{editable && <EditIcon className={classes.editIcon} />}
 												</div>
-												{renderTeamRow(m.team1Id, m.team1Score, m.winnerTeamId, finished, emptyLabel, prob1)}
-												{verbose && renderTeamDetails(team1)}
-												{renderTeamRow(m.team2Id, m.team2Score, m.winnerTeamId, finished, emptyLabel, prob2)}
-												{verbose && renderTeamDetails(team2)}
-												{h2h && h2h.played > 0 && (
-													<div className={classes.h2hRow}>
-														<span className={classes.h2hLabel}>상대 전적</span>
-														<span className={classes.h2hScore}>
-															{h2h.team1.won} : {h2h.team1.lost}
-														</span>
-													</div>
+												{renderTeamRow(m.team1Id, m.team1Score, m.winnerTeamId, finished, emptyLabel)}
+												{verbose && renderTeamFullDetails(team1)}
+												{renderTeamRow(m.team2Id, m.team2Score, m.winnerTeamId, finished, emptyLabel)}
+												{verbose && renderTeamFullDetails(team2)}
+												{verbose && team1 && team2 && (
+													<>
+														{renderExpectedSection(team1, team2, prob1, prob2)}
+														{renderH2HSection(team1, team2, m.headToHeadScrim)}
+													</>
 												)}
 											</div>
 										);
