@@ -58,7 +58,7 @@ const navigationConfig = [
 				id: 'tournament-component',
 				title: 'Tournament',
 				type: 'item',
-				icon: 'account_tree',
+				icon: 'emoji_events',
 				url: '/tournament'
 			},
 			{

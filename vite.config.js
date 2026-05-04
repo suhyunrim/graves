@@ -1,8 +1,18 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
+import { execSync } from 'child_process';
 import { transformSync } from 'esbuild';
 import { readFileSync } from 'fs';
+
+const commitHash = (() => {
+	if (process.env.VERCEL_GIT_COMMIT_SHA) return process.env.VERCEL_GIT_COMMIT_SHA.slice(0, 7);
+	try {
+		return execSync('git rev-parse --short HEAD').toString().trim();
+	} catch (e) {
+		return 'unknown';
+	}
+})();
 
 const jsxInJsPlugin = {
 	name: 'jsx-in-js',
@@ -24,6 +34,9 @@ const jsxInJsPlugin = {
 
 export default defineConfig({
 	plugins: [jsxInJsPlugin, react()],
+	define: {
+		__COMMIT_HASH__: JSON.stringify(commitHash)
+	},
 	optimizeDeps: {
 		esbuildOptions: {
 			loader: {
