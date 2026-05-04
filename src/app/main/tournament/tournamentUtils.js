@@ -151,77 +151,68 @@ export function checkIsAdmin(user) {
 	return Boolean(user && user.reprGroup && user.reprGroup.isAdmin);
 }
 
-// 스크림 리더보드 — 팀별 W/L/D, 골득실, 승점(W*3+D*1).
-// 정렬: 승점 → 골득실 → 득점.
+// 스크림 리더보드 — 세트 단위 합산. 무승부/매치 카운트 개념 없음.
+// 정렬: 승률 → 총 승 세트 → 패 세트 적은 순.
 export function computeScrimLeaderboard(scrims, teams) {
 	const stats = new Map();
 	teams.forEach(t => stats.set(t.id, {
 		teamId: t.id,
 		wins: 0,
-		losses: 0,
-		draws: 0,
-		goalsFor: 0,
-		goalsAgainst: 0,
-		games: 0
+		losses: 0
 	}));
 	(scrims || []).forEach(s => {
 		const a = stats.get(s.team1Id);
 		const b = stats.get(s.team2Id);
 		if (!a || !b) return;
-		a.goalsFor += s.team1Score;
-		a.goalsAgainst += s.team2Score;
-		b.goalsFor += s.team2Score;
-		b.goalsAgainst += s.team1Score;
-		a.games += 1;
-		b.games += 1;
-		if (s.winnerTeamId == null) {
-			a.draws += 1;
-			b.draws += 1;
-		} else if (s.winnerTeamId === s.team1Id) {
-			a.wins += 1;
-			b.losses += 1;
-		} else {
-			a.losses += 1;
-			b.wins += 1;
-		}
+		a.wins += s.team1Score;
+		a.losses += s.team2Score;
+		b.wins += s.team2Score;
+		b.losses += s.team1Score;
 	});
 	return [...stats.values()]
-		.map(s => ({
-			...s,
-			points: s.wins * 3 + s.draws,
-			diff: s.goalsFor - s.goalsAgainst,
-			winRate: s.games ? s.wins / s.games : 0
-		}))
+		.map(s => {
+			const total = s.wins + s.losses;
+			return { ...s, winRate: total ? s.wins / total : 0 };
+		})
 		.sort((a, b) => (
-			b.points - a.points
-			|| b.diff - a.diff
-			|| b.goalsFor - a.goalsFor
+			b.winRate - a.winRate
+			|| b.wins - a.wins
+			|| a.losses - b.losses
 		));
 }
 
-// 특정 팀이 참여한 scrim 들을 상대팀별로 묶고 W/L/D 집계
+// 특정 팀이 본 상대팀별 누적 세트 점수 (mySets:oppSets) + 매치 수
 export function computeVsRecords(teamId, scrims, teams) {
 	const records = new Map();
 	teams.forEach(t => {
 		if (t.id !== teamId) {
-			records.set(t.id, { opponentId: t.id, wins: 0, losses: 0, draws: 0, scrims: [] });
+			records.set(t.id, { opponentId: t.id, mySets: 0, oppSets: 0, matches: 0 });
 		}
 	});
 	(scrims || []).forEach(s => {
+		let mine = 0;
+		let opp = 0;
 		let oppId = null;
-		if (s.team1Id === teamId) oppId = s.team2Id;
-		else if (s.team2Id === teamId) oppId = s.team1Id;
-		else return;
+		if (s.team1Id === teamId) {
+			mine = s.team1Score;
+			opp = s.team2Score;
+			oppId = s.team2Id;
+		} else if (s.team2Id === teamId) {
+			mine = s.team2Score;
+			opp = s.team1Score;
+			oppId = s.team1Id;
+		} else {
+			return;
+		}
 		const r = records.get(oppId);
 		if (!r) return;
-		r.scrims.push(s);
-		if (s.winnerTeamId == null) r.draws += 1;
-		else if (s.winnerTeamId === teamId) r.wins += 1;
-		else r.losses += 1;
+		r.mySets += mine;
+		r.oppSets += opp;
+		r.matches += 1;
 	});
 	return [...records.values()]
-		.filter(r => r.scrims.length > 0)
-		.sort((a, b) => (b.wins - b.losses) - (a.wins - a.losses));
+		.filter(r => r.matches > 0)
+		.sort((a, b) => (b.mySets - b.oppSets) - (a.mySets - a.oppSets));
 }
 
 export function canEditScrim(scrim, user, isAdmin) {

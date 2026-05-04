@@ -156,15 +156,9 @@ const useStyles = makeStyles()((theme) => ({
 		transform: 'rotate(180deg)',
 		color: '#00d4ff'
 	},
-	pointsCell: {
+	winRateCell: {
 		fontSize: '1.5rem',
 		color: '#00d4ff'
-	},
-	diffPositive: {
-		color: '#00ff7f'
-	},
-	diffNegative: {
-		color: '#ff6b6b'
 	},
 	vsRow: {
 		background: 'rgba(0, 0, 0, 0.25)'
@@ -199,9 +193,15 @@ const useStyles = makeStyles()((theme) => ({
 		whiteSpace: 'nowrap'
 	},
 	vsRecord: {
+		display: 'inline-flex',
+		alignItems: 'baseline',
+		gap: 4,
 		fontFamily: '"Rajdhani", sans-serif',
 		fontWeight: 700,
-		color: '#fff'
+		fontSize: '1.45rem',
+		color: '#fff',
+		minWidth: 64,
+		justifyContent: 'flex-end'
 	},
 	vsRecordWin: {
 		color: '#00ff7f'
@@ -209,10 +209,13 @@ const useStyles = makeStyles()((theme) => ({
 	vsRecordLoss: {
 		color: '#ff6b6b'
 	},
-	vsRate: {
-		fontFamily: '"Rajdhani", sans-serif',
-		fontSize: '1.15rem',
-		color: 'rgba(0, 212, 255, 0.7)',
+	vsRecordSep: {
+		color: 'rgba(255, 255, 255, 0.4)'
+	},
+	vsMatches: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.05rem',
+		color: 'rgba(255, 255, 255, 0.4)',
 		minWidth: 48,
 		textAlign: 'right'
 	},
@@ -270,15 +273,6 @@ const useStyles = makeStyles()((theme) => ({
 		color: 'rgba(255, 255, 255, 0.4)',
 		minWidth: 110,
 		textAlign: 'right'
-	},
-	scrimDrawBadge: {
-		fontFamily: '"Noto Sans KR", sans-serif',
-		fontSize: '1.05rem',
-		fontWeight: 600,
-		padding: '2px 8px',
-		borderRadius: 8,
-		background: 'rgba(255, 255, 255, 0.08)',
-		color: 'rgba(255, 255, 255, 0.7)'
 	},
 	scrimActions: {
 		display: 'flex',
@@ -421,22 +415,16 @@ function ScrimContent({ tournamentId, teams, scrims, onMutated }) {
 								<tr className={classes.headerRow}>
 									<th className={classes.headerCell}>#</th>
 									<th className={classes.headerCell}>팀</th>
-									<th className={cx(classes.headerCell, classes.headerCellNum)}>경기</th>
 									<th className={cx(classes.headerCell, classes.headerCellNum)}>승</th>
-									<th className={cx(classes.headerCell, classes.headerCellNum)}>무</th>
 									<th className={cx(classes.headerCell, classes.headerCellNum)}>패</th>
-									<th className={cx(classes.headerCell, classes.headerCellNum)}>득실</th>
-									<th className={cx(classes.headerCell, classes.headerCellNum)}>승점</th>
+									<th className={cx(classes.headerCell, classes.headerCellNum)}>승률</th>
 									<th className={classes.headerCell} aria-label="expand" />
 								</tr>
 							</thead>
 							<tbody>
 								{leaderboard.map((row, idx) => {
 									const expanded = expandedTeamId === row.teamId;
-									const diffSign = row.diff > 0 ? '+' : '';
-									const diffCls = row.diff > 0
-										? classes.diffPositive
-										: row.diff < 0 ? classes.diffNegative : null;
+									const ratePct = Math.round(row.winRate * 100);
 									return (
 										<React.Fragment key={row.teamId}>
 											<tr
@@ -449,15 +437,10 @@ function ScrimContent({ tournamentId, teams, scrims, onMutated }) {
 												<td className={classes.cell}>
 													<span className={classes.teamCell}>{teamName(row.teamId)}</span>
 												</td>
-												<td className={cx(classes.cell, classes.cellNum)}>{row.games}</td>
 												<td className={cx(classes.cell, classes.cellNum)}>{row.wins}</td>
-												<td className={cx(classes.cell, classes.cellNum)}>{row.draws}</td>
 												<td className={cx(classes.cell, classes.cellNum)}>{row.losses}</td>
-												<td className={cx(classes.cell, classes.cellNum, diffCls)}>
-													{diffSign}{row.diff}
-												</td>
-												<td className={cx(classes.cell, classes.cellNum, classes.pointsCell)}>
-													{row.points}
+												<td className={cx(classes.cell, classes.cellNum, classes.winRateCell)}>
+													{row.wins + row.losses === 0 ? '—' : `${ratePct}%`}
 												</td>
 												<td className={cx(classes.cell, classes.cellNum)}>
 													<ExpandMoreIcon
@@ -467,29 +450,24 @@ function ScrimContent({ tournamentId, teams, scrims, onMutated }) {
 											</tr>
 											{expanded && (
 												<tr className={classes.vsRow}>
-													<td className={classes.vsCell} colSpan={9}>
+													<td className={classes.vsCell} colSpan={6}>
 														{vsRecordsForExpanded.length === 0 ? (
 															<div className={classes.vsTitle}>아직 기록된 상대 전적이 없습니다.</div>
 														) : (
 															<>
 																<div className={classes.vsTitle}>상대팀별 전적</div>
 																<div className={classes.vsList}>
-																	{vsRecordsForExpanded.map(r => {
-																		const total = r.wins + r.losses + r.draws;
-																		const rate = total ? Math.round((r.wins / total) * 100) : 0;
-																		return (
-																			<div key={r.opponentId} className={classes.vsItem}>
-																				<span className={classes.vsOpponent}>vs {teamName(r.opponentId)}</span>
-																				<span className={classes.vsRecord}>
-																					<span className={classes.vsRecordWin}>{r.wins}승</span>
-																					{r.draws > 0 && ` ${r.draws}무`}
-																					{' '}
-																					<span className={classes.vsRecordLoss}>{r.losses}패</span>
-																				</span>
-																				<span className={classes.vsRate}>{rate}%</span>
-																			</div>
-																		);
-																	})}
+																	{vsRecordsForExpanded.map(r => (
+																		<div key={r.opponentId} className={classes.vsItem}>
+																			<span className={classes.vsOpponent}>vs {teamName(r.opponentId)}</span>
+																			<span className={classes.vsRecord}>
+																				<span className={classes.vsRecordWin}>{r.mySets}</span>
+																				<span className={classes.vsRecordSep}>:</span>
+																				<span className={classes.vsRecordLoss}>{r.oppSets}</span>
+																			</span>
+																			<span className={classes.vsMatches}>{r.matches}매치</span>
+																		</div>
+																	))}
 																</div>
 															</>
 														)}
@@ -514,9 +492,8 @@ function ScrimContent({ tournamentId, teams, scrims, onMutated }) {
 				) : (
 					<div className={classes.scrimList}>
 						{scrims.map(s => {
-							const t1Wins = s.winnerTeamId === s.team1Id;
-							const t2Wins = s.winnerTeamId === s.team2Id;
-							const isDraw = s.winnerTeamId == null;
+							const t1Wins = s.team1Score > s.team2Score;
+							const t2Wins = s.team2Score > s.team1Score;
 							const editable = canEditScrim(s, user, isAdmin);
 							return (
 								<div key={s.id} className={classes.scrimItem}>
@@ -544,7 +521,6 @@ function ScrimContent({ tournamentId, teams, scrims, onMutated }) {
 											{teamName(s.team2Id)}
 										</span>
 									</div>
-									{isDraw && <span className={classes.scrimDrawBadge}>무승부</span>}
 									<span className={classes.scrimMeta}>{formatDate(s.createdAt)}</span>
 									{editable && (
 										<div className={classes.scrimActions}>

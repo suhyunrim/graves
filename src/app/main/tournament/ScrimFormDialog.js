@@ -133,7 +133,7 @@ function ScrimFormDialog({ open, onClose, onSuccess, tournamentId, teams, scrim 
 			slotProps={{ paper: { className: cx(dialogClasses.paperCyan, classes.paperWidth) } }}
 		>
 			<DialogTitle className={dialogClasses.titleCyan}>{isEdit ? '스크림 수정' : '스크림 결과 기록'}</DialogTitle>
-			<div className={dialogClasses.subtitle}>두 팀과 점수를 입력하세요. 동점은 무승부로 처리됩니다.</div>
+			<div className={dialogClasses.subtitle}>두 팀이 가져간 세트 수를 입력하세요.</div>
 			<DialogContent className={dialogClasses.contentPad}>
 				<div className={classes.teamRow}>
 					<TextField
