@@ -6,12 +6,15 @@ import useToast from 'app/utility/useToast';
 import AddIcon from '@mui/icons-material/Add';
 import GroupIcon from '@mui/icons-material/Group';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
-import React, { useEffect, useState } from 'react';
+import StarIcon from '@mui/icons-material/Star';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
+import { getProfileIconUrl } from 'app/main/challenge/ddragonUtils';
 import reducer from './store/reducers';
 import * as Actions from './store/actions';
 import TournamentCreateDialog from './TournamentCreateDialog';
+import PositionIcon from './PositionIcon';
 import { STATUS_LABELS, STATUS_COLORS, checkIsAdmin } from './tournamentUtils';
 
 const useStyles = makeStyles()((theme) => ({
@@ -140,12 +143,72 @@ const useStyles = makeStyles()((theme) => ({
 	cardChampion: {
 		marginTop: 12,
 		paddingTop: 12,
-		borderTop: '1px solid rgba(255, 255, 255, 0.08)',
+		borderTop: '1px solid rgba(255, 255, 255, 0.08)'
+	},
+	championHead: {
+		display: 'flex',
+		alignItems: 'center',
+		gap: 8,
+		fontFamily: '"Rajdhani", "Noto Sans KR", sans-serif',
+		fontSize: '1.4rem',
+		fontWeight: 700,
+		color: '#ffd700',
+		letterSpacing: '0.02em',
+		marginBottom: 8
+	},
+	championMembers: {
+		display: 'flex',
+		flexDirection: 'column',
+		gap: 4
+	},
+	championMemberRow: {
 		display: 'flex',
 		alignItems: 'center',
 		gap: 8,
 		fontFamily: '"Noto Sans KR", sans-serif',
-		fontSize: '1.25rem',
+		fontSize: '1.15rem',
+		color: 'rgba(255, 255, 255, 0.85)'
+	},
+	championPositionCell: {
+		width: 18,
+		display: 'flex',
+		alignItems: 'center',
+		justifyContent: 'center',
+		flexShrink: 0
+	},
+	championPositionIcon: {
+		width: 16,
+		height: 16,
+		filter: 'invert(70%) sepia(80%) saturate(500%) hue-rotate(160deg) brightness(105%) contrast(95%)'
+	},
+	championPositionFallback: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '0.9rem',
+		color: 'rgba(0, 212, 255, 0.7)',
+		fontWeight: 600
+	},
+	championAvatar: {
+		width: 20,
+		height: 20,
+		borderRadius: 4,
+		flexShrink: 0
+	},
+	championAvatarPlaceholder: {
+		width: 20,
+		height: 20,
+		borderRadius: 4,
+		background: 'rgba(0, 212, 255, 0.15)',
+		flexShrink: 0
+	},
+	championMemberName: {
+		flex: 1,
+		minWidth: 0,
+		overflow: 'hidden',
+		textOverflow: 'ellipsis',
+		whiteSpace: 'nowrap'
+	},
+	championCaptainStar: {
+		fontSize: '1rem',
 		color: '#ffd700'
 	},
 	emptyState: {
@@ -175,6 +238,7 @@ function TournamentList() {
 	const dispatch = useDispatch();
 	const list = useSelector(({ Tournament }) => Tournament.tournament.list);
 	const loadingList = useSelector(({ Tournament }) => Tournament.tournament.loadingList);
+	const activeMembers = useSelector(({ Tournament }) => Tournament.tournament.activeMembers);
 	const user = useSelector(state => state.auth.user);
 	const groupId = user && user.reprGroup ? user.reprGroup.groupId : null;
 	const isAdmin = checkIsAdmin(user);
@@ -184,8 +248,16 @@ function TournamentList() {
 	useEffect(() => {
 		if (groupId) {
 			dispatch(Actions.getTournamentList(groupId));
+			// 우승팀 멤버 닉네임/아이콘 매핑용
+			dispatch(Actions.getActiveMembers(groupId));
 		}
 	}, [dispatch, groupId]);
+
+	const memberMap = useMemo(() => {
+		const m = new Map();
+		(activeMembers || []).forEach(am => m.set(am.puuid, am));
+		return m;
+	}, [activeMembers]);
 
 	function handleCreateSuccess() {
 		setCreateOpen(false);
@@ -249,10 +321,38 @@ function TournamentList() {
 										<div className={classes.cardMeta}>
 											BO{t.defaultBestOf} (결승 BO{t.finalBestOf})
 										</div>
-										{t.championTeamId && (
+										{t.championTeam && (
 											<div className={classes.cardChampion}>
-												<EmojiEventsIcon style={{ fontSize: '1.5rem' }} />
-												우승팀 결정됨
+												<div className={classes.championHead}>
+													<EmojiEventsIcon style={{ fontSize: '1.6rem' }} />
+													우승 — {t.championTeam.name}
+												</div>
+												<div className={classes.championMembers}>
+													{(t.championTeam.members || []).map(m => {
+														const info = memberMap.get(m.puuid);
+														const displayName = info ? info.name : `${m.puuid.slice(0, 8)}…`;
+														const avatarUrl = info ? getProfileIconUrl(info.profileIconId) : null;
+														const isCaptain = t.championTeam.captainPuuid === m.puuid;
+														return (
+															<div key={m.puuid} className={classes.championMemberRow}>
+																<div className={classes.championPositionCell}>
+																	<PositionIcon
+																		position={m.position}
+																		className={classes.championPositionIcon}
+																		fallbackClassName={classes.championPositionFallback}
+																	/>
+																</div>
+																{avatarUrl ? (
+																	<img src={avatarUrl} alt="" className={classes.championAvatar} />
+																) : (
+																	<div className={classes.championAvatarPlaceholder} />
+																)}
+																<span className={classes.championMemberName}>{displayName}</span>
+																{isCaptain && <StarIcon className={classes.championCaptainStar} />}
+															</div>
+														);
+													})}
+												</div>
 											</div>
 										)}
 									</Link>

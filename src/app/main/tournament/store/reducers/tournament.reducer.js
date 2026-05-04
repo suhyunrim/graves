@@ -8,9 +8,7 @@ const initialState = {
 	matches: [],
 	roundLabels: {},
 	loadingDetail: false,
-	activeMembers: [],
-	// puuid → rating (그룹 ranking API 결과)
-	ratingMap: {}
+	activeMembers: []
 };
 
 const tournamentReducer = (state = initialState, action) => {
@@ -41,15 +39,11 @@ const tournamentReducer = (state = initialState, action) => {
 				teams: [],
 				matches: [],
 				roundLabels: {},
-				activeMembers: [],
-				ratingMap: {}
+				activeMembers: []
 			};
 		}
 		case Actions.SET_ACTIVE_MEMBERS: {
 			return { ...state, activeMembers: action.payload };
-		}
-		case Actions.SET_RATING_MAP: {
-			return { ...state, ratingMap: action.payload };
 		}
 		default: {
 			return state;

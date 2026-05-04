@@ -2,13 +2,7 @@ import React from 'react';
 import { makeStyles } from 'tss-react/mui';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import EditIcon from '@mui/icons-material/Edit';
-import {
-	groupMatchesByRound,
-	isByeMatch,
-	isEmptyMatch,
-	teamAverageRating,
-	calcWinProbability
-} from './tournamentUtils';
+import { groupMatchesByRound, isByeMatch, isEmptyMatch } from './tournamentUtils';
 import useBracketLines, { buildLinePath } from './useBracketLines';
 
 const LINE_COLOR = 'rgba(0, 212, 255, 0.3)';
@@ -165,7 +159,7 @@ const useStyles = makeStyles()((theme) => ({
 	}
 }));
 
-function TournamentBracket({ matches, teams, roundLabels, championTeamId, canEdit, onEditMatch, ratingMap }) {
+function TournamentBracket({ matches, teams, roundLabels, championTeamId, canEdit, onEditMatch }) {
 	const { classes, cx } = useStyles();
 
 	const teamMap = React.useMemo(() => {
@@ -273,19 +267,12 @@ function TournamentBracket({ matches, teams, roundLabels, championTeamId, canEdi
 										const editable = canEdit && !empty && !finished
 											&& m.team1Id != null && m.team2Id != null;
 
-										// 양 팀 모두 채워졌고 미완료일 때만 ELO 승률 계산
-										const team1 = m.team1Id ? teamMap.get(m.team1Id) : null;
-										const team2 = m.team2Id ? teamMap.get(m.team2Id) : null;
+										// 백엔드 산출 승률 사용. 미완료 매치 + 양쪽 다 채워졌을 때만 노출.
 										let prob1 = null;
 										let prob2 = null;
-										if (!finished && team1 && team2 && ratingMap) {
-											const r1 = teamAverageRating(team1, ratingMap);
-											const r2 = teamAverageRating(team2, ratingMap);
-											const p = calcWinProbability(r1, r2);
-											if (p != null) {
-												prob1 = Math.round(p * 100);
-												prob2 = 100 - prob1;
-											}
+										if (!finished && m.team1WinProb != null && m.team2WinProb != null) {
+											prob1 = Math.round(m.team1WinProb * 100);
+											prob2 = Math.round(m.team2WinProb * 100);
 										}
 
 										return (

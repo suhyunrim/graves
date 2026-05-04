@@ -79,22 +79,6 @@ export function getTierEmblemUrl(tierName) {
 	return `/assets/images/ranked-emblems/Emblem_${tierName}.webp`;
 }
 
-// 팀 멤버 평균 rating. ratingMap: Map<puuid, rating>. 매칭되는 멤버가 없으면 null.
-export function teamAverageRating(team, ratingMap) {
-	if (!team || !ratingMap) return null;
-	const ratings = (team.members || [])
-		.map(m => ratingMap.get(m.puuid))
-		.filter(r => typeof r === 'number');
-	if (ratings.length === 0) return null;
-	return ratings.reduce((s, r) => s + r, 0) / ratings.length;
-}
-
-// ELO 승률: P(A 승리) = 1 / (1 + 10^((B - A) / 400))
-export function calcWinProbability(ratingA, ratingB) {
-	if (ratingA == null || ratingB == null) return null;
-	return 1 / (1 + 10 ** ((ratingB - ratingA) / 400));
-}
-
 // 등록된 팀 수 → 브래킷 사이즈 (다음 2의 거듭제곱, 최소 2)
 // 백엔드 nextPow2 산정 로직과 일치시켜 slotMapping 길이를 맞춘다.
 export function bracketSizeForTeamCount(teamCount) {

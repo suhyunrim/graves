@@ -32,7 +32,6 @@ import {
 	STATUS_COLORS,
 	checkIsAdmin,
 	bracketSizeForTeamCount,
-	teamAverageRating,
 	getTierName,
 	getTierLabel,
 	getTierEmblemUrl
@@ -311,6 +310,12 @@ const useStyles = makeStyles()((theme) => ({
 		fontSize: '1.2rem',
 		color: '#ffd700'
 	},
+	memberTierEmblem: {
+		width: 18,
+		height: 18,
+		flexShrink: 0,
+		opacity: 0.9
+	},
 	teamTierBadge: {
 		display: 'inline-flex',
 		alignItems: 'center',
@@ -373,11 +378,8 @@ function TournamentDetail() {
 	const roundLabels = useSelector(({ Tournament }) => Tournament.tournament.roundLabels);
 	const loadingDetail = useSelector(({ Tournament }) => Tournament.tournament.loadingDetail);
 	const activeMembers = useSelector(({ Tournament }) => Tournament.tournament.activeMembers);
-	const ratingMap = useSelector(({ Tournament }) => Tournament.tournament.ratingMap);
 	const user = useSelector(state => state.auth.user);
 	const isAdmin = checkIsAdmin(user);
-	const userGroupName = user && user.reprGroup ? user.reprGroup.groupName : null;
-	const userGroupId = user && user.reprGroup ? user.reprGroup.groupId : null;
 
 	const [teamFormOpen, setTeamFormOpen] = useState(false);
 	const [editingTeam, setEditingTeam] = useState(null);
@@ -406,21 +408,11 @@ function TournamentDetail() {
 	}, [dispatch, tournamentId]);
 
 	useEffect(() => {
-		// 어드민이고 토너먼트가 그룹에 묶여 있을 때만 멤버 풀 미리 받아둔다 (팀 등록 모달용)
-		if (isAdmin && detail && detail.groupId) {
+		// 멤버 닉네임/아이콘/티어 매핑용. 권한 없는 사용자는 silentError 로 흡수.
+		if (detail && detail.groupId) {
 			dispatch(Actions.getActiveMembers(detail.groupId));
 		}
-	}, [dispatch, isAdmin, detail]);
-
-	useEffect(() => {
-		// 같은 그룹 사용자에 한해 ranking 을 받아 puuid→rating 맵을 채운다.
-		// 매치 승률, 팀 평균 티어 표시용.
-		if (!detail || !userGroupName || !userGroupId) return;
-		if (detail.groupId !== userGroupId) return;
-		dispatch(Actions.getGroupRatings(userGroupName));
-	}, [dispatch, detail, userGroupName, userGroupId]);
-
-	const ratingMapObj = useMemo(() => new Map(Object.entries(ratingMap || {})), [ratingMap]);
+	}, [dispatch, detail]);
 
 	function handleTeamCreate() {
 		setEditingTeam(null);
@@ -584,7 +576,6 @@ function TournamentDetail() {
 								championTeamId={detail.championTeamId}
 								canEdit={isAdmin && isInProgress}
 								onEditMatch={(m) => setMatchEditTarget(m)}
-								ratingMap={ratingMapObj}
 							/>
 						</div>
 					)}
@@ -610,7 +601,7 @@ function TournamentDetail() {
 						) : (
 							<div className={classes.teamGrid}>
 								{teams.map(t => {
-									const avgRating = teamAverageRating(t, ratingMapObj);
+									const avgRating = t.avgRating;
 									const tierName = getTierName(avgRating);
 									const tierLabel = getTierLabel(avgRating);
 									const tierEmblem = getTierEmblemUrl(tierName);
@@ -652,6 +643,10 @@ function TournamentDetail() {
 													const avatarUrl = memberInfo
 														? getProfileIconUrl(memberInfo.profileIconId)
 														: null;
+													const memberRating = memberInfo ? memberInfo.rating : null;
+													const memberTierName = getTierName(memberRating);
+													const memberTierLabel = getTierLabel(memberRating);
+													const memberTierEmblem = getTierEmblemUrl(memberTierName);
 													const isCaptain = t.captainPuuid === m.puuid;
 													return (
 														<div key={m.puuid} className={classes.memberRow}>
@@ -669,6 +664,14 @@ function TournamentDetail() {
 															)}
 															<span className={classes.memberName}>{displayName}</span>
 															{isCaptain && <StarIcon className={classes.captainStar} />}
+															{memberTierEmblem && (
+																<img
+																	src={memberTierEmblem}
+																	alt={memberTierLabel}
+																	title={memberTierLabel}
+																	className={classes.memberTierEmblem}
+																/>
+															)}
 														</div>
 													);
 												})}
