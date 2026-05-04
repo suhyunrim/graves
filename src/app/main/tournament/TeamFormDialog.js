@@ -7,19 +7,19 @@ import {
 	Button,
 	TextField,
 	Autocomplete,
-	Radio,
-	MenuItem
+	Radio
 } from '@mui/material';
 import { makeStyles } from 'tss-react/mui';
 import { getProfileIconUrl } from 'app/main/challenge/ddragonUtils';
 import useDialogStyles from '../components/dialogStyles';
 import * as Actions from './store/actions';
 import { POSITIONS, POSITION_LABELS } from './tournamentUtils';
+import PositionIcon from './PositionIcon';
 
 const useStyles = makeStyles()((theme) => ({
 	paperWidth: {
-		minWidth: 560,
-		maxWidth: 640,
+		minWidth: 540,
+		maxWidth: 620,
 		[theme.breakpoints.down('sm')]: {
 			minWidth: 'auto',
 			margin: 12
@@ -46,18 +46,15 @@ const useStyles = makeStyles()((theme) => ({
 		},
 		'& .MuiInputLabel-root.Mui-focused': {
 			color: '#00d4ff'
-		},
-		'& .MuiSelect-icon': {
-			color: 'rgba(255, 255, 255, 0.5)'
 		}
 	},
 	memberRow: {
 		display: 'flex',
 		alignItems: 'center',
-		gap: 8,
+		gap: 10,
 		marginBottom: 12,
 		[theme.breakpoints.down('sm')]: {
-			flexWrap: 'wrap'
+			gap: 6
 		}
 	},
 	captainRadio: {
@@ -67,29 +64,31 @@ const useStyles = makeStyles()((theme) => ({
 			color: '#ffd700'
 		}
 	},
-	memberAutocomplete: {
-		flex: 1,
-		minWidth: 200,
-		'& .MuiInputBase-root': {
-			color: '#fff',
-			fontFamily: '"Noto Sans KR", sans-serif'
-		},
-		'& .MuiInputLabel-root': {
-			color: 'rgba(255, 255, 255, 0.6)',
-			fontFamily: '"Noto Sans KR", sans-serif'
-		},
-		'& .MuiOutlinedInput-notchedOutline': {
-			borderColor: 'rgba(255, 255, 255, 0.2)'
-		},
-		'& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline': {
-			borderColor: 'rgba(0, 212, 255, 0.5)'
-		},
-		'& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline': {
-			borderColor: '#00d4ff'
+	positionCell: {
+		display: 'flex',
+		alignItems: 'center',
+		justifyContent: 'center',
+		width: 64,
+		flexShrink: 0,
+		gap: 6,
+		[theme.breakpoints.down('sm')]: {
+			width: 48
 		}
 	},
-	positionSelect: {
-		minWidth: 110,
+	positionIcon: {
+		width: 26,
+		height: 26,
+		filter: 'invert(70%) sepia(80%) saturate(500%) hue-rotate(160deg) brightness(105%) contrast(95%)'
+	},
+	positionFallback: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.2rem',
+		color: '#00d4ff',
+		fontWeight: 600
+	},
+	memberAutocomplete: {
+		flex: 1,
+		minWidth: 0,
 		'& .MuiInputBase-root': {
 			color: '#fff',
 			fontFamily: '"Noto Sans KR", sans-serif'
@@ -106,9 +105,6 @@ const useStyles = makeStyles()((theme) => ({
 		},
 		'& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline': {
 			borderColor: '#00d4ff'
-		},
-		'& .MuiSelect-icon': {
-			color: 'rgba(255, 255, 255, 0.5)'
 		}
 	},
 	memberOption: {
@@ -146,6 +142,7 @@ const useStyles = makeStyles()((theme) => ({
 	}
 }));
 
+// 5개 슬롯은 무조건 [탑, 정글, 미드, 원딜, 서폿] 순서로 고정.
 function makeEmptySlots() {
 	return POSITIONS.map(p => ({ puuid: null, position: p }));
 }
@@ -158,19 +155,18 @@ function TeamFormDialog({ open, onClose, onSuccess, tournamentId, team, allTeams
 	const [name, setName] = useState(team ? team.name : '');
 	const [members, setMembers] = useState(() => {
 		if (!team) return makeEmptySlots();
-		// 기존 팀 멤버를 포지션 순서대로 정렬해서 채움
+		// 기존 팀 멤버를 포지션 슬롯 순서대로 채워넣는다 — 해당 포지션이 없으면 빈 슬롯에 폴백.
 		const slots = makeEmptySlots();
 		(team.members || []).forEach(m => {
 			const idx = POSITIONS.indexOf(m.position);
 			if (idx >= 0 && !slots[idx].puuid) {
-				slots[idx] = { puuid: m.puuid, position: m.position };
+				slots[idx] = { puuid: m.puuid, position: POSITIONS[idx] };
 			}
 		});
-		// 포지션이 매핑 안된 멤버는 빈 슬롯에 배치
 		(team.members || []).forEach(m => {
-			if (POSITIONS.indexOf(m.position) < 0 || slots.some(s => s.puuid === m.puuid)) return;
+			if (slots.some(s => s.puuid === m.puuid)) return;
 			const empty = slots.findIndex(s => !s.puuid);
-			if (empty >= 0) slots[empty] = { puuid: m.puuid, position: m.position };
+			if (empty >= 0) slots[empty] = { puuid: m.puuid, position: POSITIONS[empty] };
 		});
 		return slots;
 	});
@@ -178,7 +174,7 @@ function TeamFormDialog({ open, onClose, onSuccess, tournamentId, team, allTeams
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState('');
 
-	// 다른 팀에 등록된 puuid 집합 (현재 편집중인 팀은 제외)
+	// 다른 팀에 등록된 puuid 집합 (현재 편집 중인 팀은 제외) — 아예 옵션에서 제외한다.
 	const otherTeamPuuids = useMemo(() => {
 		const s = new Set();
 		(allTeams || []).forEach(t => {
@@ -194,11 +190,17 @@ function TeamFormDialog({ open, onClose, onSuccess, tournamentId, team, allTeams
 		return m;
 	}, [activeMembers]);
 
+	// 드롭다운 옵션: 다른 팀 멤버는 아예 제외
+	const availableMembers = useMemo(
+		() => (activeMembers || []).filter(m => !otherTeamPuuids.has(m.puuid)),
+		[activeMembers, otherTeamPuuids]
+	);
+
 	function handleMemberChange(idx, member) {
 		setMembers(prev => {
 			const next = prev.slice();
 			next[idx] = { puuid: member ? member.puuid : null, position: next[idx].position };
-			// 같은 puuid가 다른 슬롯에 있으면 비움
+			// 같은 puuid가 다른 슬롯에 있으면 비움 (한 사람이 한 포지션만)
 			if (member) {
 				next.forEach((s, i) => {
 					if (i !== idx && s.puuid === member.puuid) {
@@ -208,20 +210,12 @@ function TeamFormDialog({ open, onClose, onSuccess, tournamentId, team, allTeams
 			}
 			return next;
 		});
-		// 팀장이 빠지면 해제
+		// 팀장 puuid 가 비워졌으면 해제
 		if (captainPuuid && (!member || member.puuid !== captainPuuid)) {
 			const stillIn = members.some((s, i) => i !== idx && s.puuid === captainPuuid);
 			const becomingCaptain = member && member.puuid === captainPuuid;
 			if (!stillIn && !becomingCaptain) setCaptainPuuid(null);
 		}
-	}
-
-	function handlePositionChange(idx, value) {
-		setMembers(prev => {
-			const next = prev.slice();
-			next[idx] = { ...next[idx], position: value };
-			return next;
-		});
 	}
 
 	function validate() {
@@ -231,16 +225,8 @@ function TeamFormDialog({ open, onClose, onSuccess, tournamentId, team, allTeams
 		const puuidSet = new Set(filled.map(m => m.puuid));
 		if (puuidSet.size !== 5) return '팀원이 중복됩니다.';
 		if (!captainPuuid || !puuidSet.has(captainPuuid)) return '팀장을 선택하세요.';
-		// 모든 puuid가 활성 멤버에 있는지 (드롭다운에서만 골랐으면 자동 통과)
 		for (const m of filled) {
 			if (!memberMap.has(m.puuid)) return '그룹에 등록되지 않은 유저가 포함되어 있습니다.';
-		}
-		// 다른 팀에 이미 등록된 puuid 검사
-		for (const m of filled) {
-			if (otherTeamPuuids.has(m.puuid)) {
-				const u = memberMap.get(m.puuid);
-				return `${u ? u.name : m.puuid} 님은 이미 다른 팀에 있습니다.`;
-			}
 		}
 		return null;
 	}
@@ -276,6 +262,14 @@ function TeamFormDialog({ open, onClose, onSuccess, tournamentId, team, allTeams
 			});
 	}
 
+	function renderPositionCell(position) {
+		return (
+			<div className={classes.positionCell}>
+				<PositionIcon position={position} className={classes.positionIcon} fallbackClassName={classes.positionFallback} />
+			</div>
+		);
+	}
+
 	return (
 		<Dialog
 			open={open}
@@ -283,7 +277,7 @@ function TeamFormDialog({ open, onClose, onSuccess, tournamentId, team, allTeams
 			slotProps={{ paper: { className: cx(dialogClasses.paperCyan, classes.paperWidth) } }}
 		>
 			<DialogTitle className={dialogClasses.titleCyan}>{isEdit ? '팀 수정' : '팀 등록'}</DialogTitle>
-			<div className={dialogClasses.subtitle}>팀원 5명 + 팀장 지정</div>
+			<div className={dialogClasses.subtitle}>탑/정글/미드/원딜/서폿 — 팀장은 ★ 라디오로 지정</div>
 			<DialogContent className={dialogClasses.contentPad}>
 				<TextField
 					className={classes.field}
@@ -301,28 +295,22 @@ function TeamFormDialog({ open, onClose, onSuccess, tournamentId, team, allTeams
 				{members.map((slot, idx) => {
 					const selectedMember = slot.puuid ? memberMap.get(slot.puuid) : null;
 					return (
-						<div key={idx} className={classes.memberRow}>
+						<div key={slot.position} className={classes.memberRow}>
 							<Radio
 								className={classes.captainRadio}
 								checked={captainPuuid != null && captainPuuid === slot.puuid}
 								disabled={!slot.puuid}
 								onChange={() => slot.puuid && setCaptainPuuid(slot.puuid)}
 							/>
+							{renderPositionCell(slot.position)}
 							<Autocomplete
 								className={classes.memberAutocomplete}
-								options={activeMembers || []}
+								options={availableMembers}
 								value={selectedMember || null}
 								getOptionLabel={(o) => (o && o.name) || ''}
 								isOptionEqualToValue={(o, v) => o.puuid === v.puuid}
-								getOptionDisabled={(o) => {
-									if (otherTeamPuuids.has(o.puuid)) return true;
-									// 같은 팀에서 다른 슬롯에 이미 선택된 멤버 — disable 안하고
-									// 선택 시 자동으로 해당 슬롯을 비우는 방식으로 처리
-									return false;
-								}}
 								onChange={(_, value) => handleMemberChange(idx, value)}
 								renderOption={(props, option) => {
-									// MUI v9: key는 props에서 분리해서 직접 전달해야 함
 									const { key, ...rest } = props;
 									return (
 										<li key={key} {...rest} className={classes.memberOption}>
@@ -341,23 +329,10 @@ function TeamFormDialog({ open, onClose, onSuccess, tournamentId, team, allTeams
 									<TextField
 										{...params}
 										variant="outlined"
-										label={`멤버 ${idx + 1}`}
+										label={POSITION_LABELS[slot.position]}
 									/>
 								)}
 							/>
-							<TextField
-								className={classes.positionSelect}
-								label="포지션"
-								value={slot.position}
-								onChange={e => handlePositionChange(idx, e.target.value)}
-								variant="outlined"
-								select
-								size="small"
-							>
-								{POSITIONS.map(p => (
-									<MenuItem key={p} value={p}>{POSITION_LABELS[p]}</MenuItem>
-								))}
-							</TextField>
 						</div>
 					);
 				})}

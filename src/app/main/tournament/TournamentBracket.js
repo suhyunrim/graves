@@ -2,7 +2,17 @@ import React from 'react';
 import { makeStyles } from 'tss-react/mui';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import EditIcon from '@mui/icons-material/Edit';
-import { groupMatchesByRound, isByeMatch, isEmptyMatch } from './tournamentUtils';
+import {
+	groupMatchesByRound,
+	isByeMatch,
+	isEmptyMatch,
+	teamAverageRating,
+	calcWinProbability
+} from './tournamentUtils';
+import useBracketLines, { buildLinePath } from './useBracketLines';
+
+const LINE_COLOR = 'rgba(0, 212, 255, 0.3)';
+const LINE_COLOR_FINISHED = 'rgba(0, 255, 127, 0.6)';
 
 const useStyles = makeStyles()((theme) => ({
 	root: {
@@ -11,16 +21,29 @@ const useStyles = makeStyles()((theme) => ({
 	},
 	scroll: {
 		display: 'flex',
-		gap: 24,
+		gap: 56,
 		minWidth: 'min-content',
-		padding: '4px 4px 8px'
+		padding: '4px 4px 8px',
+		position: 'relative'
+	},
+	linesSvg: {
+		position: 'absolute',
+		top: 0,
+		left: 0,
+		right: 0,
+		bottom: 0,
+		pointerEvents: 'none',
+		zIndex: 0,
+		overflow: 'visible'
 	},
 	column: {
 		display: 'flex',
 		flexDirection: 'column',
 		gap: 16,
 		minWidth: 240,
-		flexShrink: 0
+		flexShrink: 0,
+		position: 'relative',
+		zIndex: 1
 	},
 	columnTitle: {
 		fontFamily: '"Rajdhani", "Noto Sans KR", sans-serif',
@@ -120,6 +143,15 @@ const useStyles = makeStyles()((theme) => ({
 		minWidth: 24,
 		textAlign: 'right'
 	},
+	winProb: {
+		fontFamily: '"Rajdhani", sans-serif',
+		fontSize: '1.1rem',
+		color: 'rgba(0, 212, 255, 0.85)',
+		marginLeft: 12,
+		minWidth: 42,
+		textAlign: 'right',
+		fontWeight: 600
+	},
 	championBadge: {
 		fontSize: '1.4rem',
 		color: '#ffd700'
@@ -133,7 +165,7 @@ const useStyles = makeStyles()((theme) => ({
 	}
 }));
 
-function TournamentBracket({ matches, teams, roundLabels, championTeamId, canEdit, onEditMatch }) {
+function TournamentBracket({ matches, teams, roundLabels, championTeamId, canEdit, onEditMatch, ratingMap }) {
 	const { classes, cx } = useStyles();
 
 	const teamMap = React.useMemo(() => {
@@ -144,11 +176,41 @@ function TournamentBracket({ matches, teams, roundLabels, championTeamId, canEdi
 
 	const grouped = React.useMemo(() => groupMatchesByRound(matches), [matches]);
 
+	// 매치 → 다음 라운드 매치(승자 진출처) 라인 좌표 계산.
+	// 한쪽이 BYE 인 R1 매치는 visibleMatches 에 없어 ref 가 없으므로 자동으로 라인이 안 그려진다
+	// (다음 라운드 매치엔 한쪽 라인만 들어가는 게 자연스럽다).
+	const buildLines = React.useCallback((containerEl, itemRefs) => {
+		const result = [];
+		const cr = containerEl.getBoundingClientRect();
+		matches.forEach(m => {
+			const next = matches.find(
+				x => x.round === m.round + 1 && x.bracketSlot === Math.floor(m.bracketSlot / 2)
+			);
+			if (!next) return;
+			const fromEl = itemRefs[m.id];
+			const toEl = itemRefs[next.id];
+			if (!fromEl || !toEl) return;
+			const fr = fromEl.getBoundingClientRect();
+			const tr = toEl.getBoundingClientRect();
+			result.push({
+				key: `${m.id}-${next.id}`,
+				x1: fr.right - cr.left,
+				y1: fr.top + fr.height / 2 - cr.top,
+				x2: tr.left - cr.left,
+				y2: tr.top + tr.height / 2 - cr.top,
+				finished: m.winnerTeamId != null
+			});
+		});
+		return result;
+	}, [matches]);
+
+	const { containerRef, itemRefs, lines } = useBracketLines(buildLines, [matches]);
+
 	if (grouped.length === 0) {
 		return <div className={classes.emptyText}>매치 정보가 없습니다.</div>;
 	}
 
-	function renderTeamRow(teamId, score, winnerTeamId, isFinishedMatch, emptyLabel) {
+	function renderTeamRow(teamId, score, winnerTeamId, isFinishedMatch, emptyLabel, winProbPct) {
 		const team = teamId ? teamMap.get(teamId) : null;
 		const isWinner = winnerTeamId && winnerTeamId === teamId;
 		const isLoser = winnerTeamId && winnerTeamId !== teamId && teamId;
@@ -167,13 +229,27 @@ function TournamentBracket({ matches, teams, roundLabels, championTeamId, canEdi
 					{isChampion && <EmojiEventsIcon className={classes.championBadge} />}
 				</span>
 				{showScore && <span className={classes.score}>{score}</span>}
+				{!isFinishedMatch && winProbPct != null && team && (
+					<span className={classes.winProb}>{winProbPct}%</span>
+				)}
 			</div>
 		);
 	}
 
 	return (
 		<div className={classes.root}>
-			<div className={classes.scroll}>
+			<div className={classes.scroll} ref={containerRef}>
+				<svg className={classes.linesSvg}>
+					{lines.map(l => (
+						<path
+							key={l.key}
+							d={buildLinePath(l.x1, l.y1, l.x2, l.y2)}
+							stroke={l.finished ? LINE_COLOR_FINISHED : LINE_COLOR}
+							strokeWidth={l.finished ? 2 : 1.5}
+							fill="none"
+						/>
+					))}
+				</svg>
 				{grouped.map(([round, roundMatches]) => {
 					// R1 의 BYE(한쪽만 null) 는 숨겨서 부전승팀이 다음 라운드로 자연스럽게 진출한 듯
 					// 보이게 한다. R2 이상에선 한쪽이 비어 있어도 매치 자체는 표시 — 빈 자리는
@@ -197,9 +273,25 @@ function TournamentBracket({ matches, teams, roundLabels, championTeamId, canEdi
 										const editable = canEdit && !empty && !finished
 											&& m.team1Id != null && m.team2Id != null;
 
+										// 양 팀 모두 채워졌고 미완료일 때만 ELO 승률 계산
+										const team1 = m.team1Id ? teamMap.get(m.team1Id) : null;
+										const team2 = m.team2Id ? teamMap.get(m.team2Id) : null;
+										let prob1 = null;
+										let prob2 = null;
+										if (!finished && team1 && team2 && ratingMap) {
+											const r1 = teamAverageRating(team1, ratingMap);
+											const r2 = teamAverageRating(team2, ratingMap);
+											const p = calcWinProbability(r1, r2);
+											if (p != null) {
+												prob1 = Math.round(p * 100);
+												prob2 = 100 - prob1;
+											}
+										}
+
 										return (
 											<div
 												key={m.id}
+												ref={el => { itemRefs.current[m.id] = el; }}
 												className={cx(classes.match, editable && classes.matchClickable)}
 												onClick={editable ? () => onEditMatch(m) : undefined}
 												role={editable ? 'button' : undefined}
@@ -211,8 +303,8 @@ function TournamentBracket({ matches, teams, roundLabels, championTeamId, canEdi
 													<span className={classes.matchHeaderBO}>BO{m.bestOf}</span>
 													{editable && <EditIcon className={classes.editIcon} />}
 												</div>
-												{renderTeamRow(m.team1Id, m.team1Score, m.winnerTeamId, finished, emptyLabel)}
-												{renderTeamRow(m.team2Id, m.team2Score, m.winnerTeamId, finished, emptyLabel)}
+												{renderTeamRow(m.team1Id, m.team1Score, m.winnerTeamId, finished, emptyLabel, prob1)}
+												{renderTeamRow(m.team2Id, m.team2Score, m.winnerTeamId, finished, emptyLabel, prob2)}
 											</div>
 										);
 									})

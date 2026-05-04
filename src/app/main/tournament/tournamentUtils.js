@@ -20,6 +20,81 @@ export const POSITION_LABELS = {
 	support: '서폿'
 };
 
+// CommunityDragon 의 포지션 SVG 아이콘. (DDragon 엔 포지션 아이콘이 없다)
+const POSITION_CDN_KEY = {
+	top: 'top',
+	jungle: 'jungle',
+	mid: 'middle',
+	adc: 'bottom',
+	support: 'utility'
+};
+
+export function getPositionIconUrl(position) {
+	const key = POSITION_CDN_KEY[position];
+	if (!key) return null;
+	return `https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-static-assets/global/default/images/lol-positions/position-${key}.svg`;
+}
+
+// 내전 티어 환산 — RankingTable.js 의 tierNames 와 동기.
+// rating(=ELO 환산값) 을 받아 티어/스텝/엠블럼 URL 을 돌려준다.
+const TIER_BASES = [
+	['CHALLENGER', 1150],
+	['GRANDMASTER', 1000],
+	['MASTER', 900],
+	['DIAMOND', 800],
+	['EMERALD', 700],
+	['PLATINUM', 600],
+	['GOLD', 500],
+	['SILVER', 400],
+	['BRONZE', 300],
+	['IRON', 200]
+];
+const TIER_STEPS = ['IV', 'III', 'II', 'I'];
+
+function isNonStepTier(name) {
+	return name === 'MASTER' || name === 'GRANDMASTER' || name === 'CHALLENGER';
+}
+
+export function getTierName(rating) {
+	if (rating == null) return null;
+	for (const [name, base] of TIER_BASES) {
+		if (rating >= base) return name;
+	}
+	return 'IRON';
+}
+
+export function getTierLabel(rating) {
+	if (rating == null) return null;
+	for (const [name, base] of TIER_BASES) {
+		if (rating >= base) {
+			if (isNonStepTier(name)) return name;
+			return `${name} ${TIER_STEPS[Math.min(3, Math.floor((rating - base) / 25))]}`;
+		}
+	}
+	return 'IRON IV';
+}
+
+export function getTierEmblemUrl(tierName) {
+	if (!tierName) return null;
+	return `/assets/images/ranked-emblems/Emblem_${tierName}.webp`;
+}
+
+// 팀 멤버 평균 rating. ratingMap: Map<puuid, rating>. 매칭되는 멤버가 없으면 null.
+export function teamAverageRating(team, ratingMap) {
+	if (!team || !ratingMap) return null;
+	const ratings = (team.members || [])
+		.map(m => ratingMap.get(m.puuid))
+		.filter(r => typeof r === 'number');
+	if (ratings.length === 0) return null;
+	return ratings.reduce((s, r) => s + r, 0) / ratings.length;
+}
+
+// ELO 승률: P(A 승리) = 1 / (1 + 10^((B - A) / 400))
+export function calcWinProbability(ratingA, ratingB) {
+	if (ratingA == null || ratingB == null) return null;
+	return 1 / (1 + 10 ** ((ratingB - ratingA) / 400));
+}
+
 // 등록된 팀 수 → 브래킷 사이즈 (다음 2의 거듭제곱, 최소 2)
 // 백엔드 nextPow2 산정 로직과 일치시켜 slotMapping 길이를 맞춘다.
 export function bracketSizeForTeamCount(teamCount) {

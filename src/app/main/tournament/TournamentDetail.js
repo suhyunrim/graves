@@ -30,10 +30,14 @@ import * as Actions from './store/actions';
 import {
 	STATUS_LABELS,
 	STATUS_COLORS,
-	POSITION_LABELS,
 	checkIsAdmin,
-	bracketSizeForTeamCount
+	bracketSizeForTeamCount,
+	teamAverageRating,
+	getTierName,
+	getTierLabel,
+	getTierEmblemUrl
 } from './tournamentUtils';
+import PositionIcon from './PositionIcon';
 import TournamentBracket from './TournamentBracket';
 import TeamFormDialog from './TeamFormDialog';
 import SlotMappingDialog from './SlotMappingDialog';
@@ -265,6 +269,24 @@ const useStyles = makeStyles()((theme) => ({
 		fontSize: '1.2rem',
 		color: 'rgba(255, 255, 255, 0.85)'
 	},
+	memberPositionCell: {
+		width: 22,
+		display: 'flex',
+		alignItems: 'center',
+		justifyContent: 'center',
+		flexShrink: 0
+	},
+	memberPositionIcon: {
+		width: 20,
+		height: 20,
+		filter: 'invert(70%) sepia(80%) saturate(500%) hue-rotate(160deg) brightness(105%) contrast(95%)'
+	},
+	memberPositionFallback: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '0.95rem',
+		color: 'rgba(0, 212, 255, 0.7)',
+		fontWeight: 600
+	},
 	memberAvatar: {
 		width: 24,
 		height: 24,
@@ -289,13 +311,25 @@ const useStyles = makeStyles()((theme) => ({
 		fontSize: '1.2rem',
 		color: '#ffd700'
 	},
-	memberPosition: {
-		fontFamily: '"Noto Sans KR", sans-serif',
-		fontSize: '1rem',
-		color: 'rgba(255, 255, 255, 0.4)',
-		background: 'rgba(255, 255, 255, 0.05)',
-		padding: '2px 8px',
-		borderRadius: 8
+	teamTierBadge: {
+		display: 'inline-flex',
+		alignItems: 'center',
+		gap: 6,
+		marginTop: 2,
+		marginBottom: 10,
+		padding: '4px 10px',
+		borderRadius: 20,
+		background: 'rgba(0, 0, 0, 0.3)',
+		border: '1px solid rgba(0, 212, 255, 0.2)',
+		fontFamily: '"Rajdhani", "Noto Sans KR", sans-serif',
+		fontSize: '1.15rem',
+		fontWeight: 600,
+		letterSpacing: '0.02em',
+		color: 'rgba(255, 255, 255, 0.85)'
+	},
+	teamTierEmblem: {
+		width: 22,
+		height: 22
 	},
 	emptyText: {
 		fontFamily: '"Noto Sans KR", sans-serif',
@@ -339,8 +373,11 @@ function TournamentDetail() {
 	const roundLabels = useSelector(({ Tournament }) => Tournament.tournament.roundLabels);
 	const loadingDetail = useSelector(({ Tournament }) => Tournament.tournament.loadingDetail);
 	const activeMembers = useSelector(({ Tournament }) => Tournament.tournament.activeMembers);
+	const ratingMap = useSelector(({ Tournament }) => Tournament.tournament.ratingMap);
 	const user = useSelector(state => state.auth.user);
 	const isAdmin = checkIsAdmin(user);
+	const userGroupName = user && user.reprGroup ? user.reprGroup.groupName : null;
+	const userGroupId = user && user.reprGroup ? user.reprGroup.groupId : null;
 
 	const [teamFormOpen, setTeamFormOpen] = useState(false);
 	const [editingTeam, setEditingTeam] = useState(null);
@@ -374,6 +411,16 @@ function TournamentDetail() {
 			dispatch(Actions.getActiveMembers(detail.groupId));
 		}
 	}, [dispatch, isAdmin, detail]);
+
+	useEffect(() => {
+		// 같은 그룹 사용자에 한해 ranking 을 받아 puuid→rating 맵을 채운다.
+		// 매치 승률, 팀 평균 티어 표시용.
+		if (!detail || !userGroupName || !userGroupId) return;
+		if (detail.groupId !== userGroupId) return;
+		dispatch(Actions.getGroupRatings(userGroupName));
+	}, [dispatch, detail, userGroupName, userGroupId]);
+
+	const ratingMapObj = useMemo(() => new Map(Object.entries(ratingMap || {})), [ratingMap]);
 
 	function handleTeamCreate() {
 		setEditingTeam(null);
@@ -537,6 +584,7 @@ function TournamentDetail() {
 								championTeamId={detail.championTeamId}
 								canEdit={isAdmin && isInProgress}
 								onEditMatch={(m) => setMatchEditTarget(m)}
+								ratingMap={ratingMapObj}
 							/>
 						</div>
 					)}
@@ -561,55 +609,73 @@ function TournamentDetail() {
 							<div className={classes.emptyText}>등록된 팀이 없습니다</div>
 						) : (
 							<div className={classes.teamGrid}>
-								{teams.map(t => (
-									<div key={t.id} className={classes.teamCard}>
-										<div className={classes.teamCardHeader}>
-											<span className={classes.teamName}>{t.name}</span>
-											{isAdmin && isPreparing && (
-												<div className={classes.teamActions}>
-													<IconButton
-														className={classes.teamActionBtn}
-														onClick={() => handleTeamEdit(t)}
-														size="small"
-													>
-														<EditIcon fontSize="small" />
-													</IconButton>
-													<IconButton
-														className={classes.teamActionBtnDanger}
-														onClick={() => setDeleteTeamTarget(t)}
-														size="small"
-													>
-														<DeleteIcon fontSize="small" />
-													</IconButton>
+								{teams.map(t => {
+									const avgRating = teamAverageRating(t, ratingMapObj);
+									const tierName = getTierName(avgRating);
+									const tierLabel = getTierLabel(avgRating);
+									const tierEmblem = getTierEmblemUrl(tierName);
+									return (
+										<div key={t.id} className={classes.teamCard}>
+											<div className={classes.teamCardHeader}>
+												<span className={classes.teamName}>{t.name}</span>
+												{isAdmin && isPreparing && (
+													<div className={classes.teamActions}>
+														<IconButton
+															className={classes.teamActionBtn}
+															onClick={() => handleTeamEdit(t)}
+															size="small"
+														>
+															<EditIcon fontSize="small" />
+														</IconButton>
+														<IconButton
+															className={classes.teamActionBtnDanger}
+															onClick={() => setDeleteTeamTarget(t)}
+															size="small"
+														>
+															<DeleteIcon fontSize="small" />
+														</IconButton>
+													</div>
+												)}
+											</div>
+											{tierLabel && (
+												<div className={classes.teamTierBadge}>
+													{tierEmblem && (
+														<img src={tierEmblem} alt={tierName} className={classes.teamTierEmblem} />
+													)}
+													팀 평균 {tierLabel}
 												</div>
 											)}
+											<div className={classes.memberList}>
+												{(t.members || []).map(m => {
+													const memberInfo = activeMembers.find(am => am.puuid === m.puuid);
+													const displayName = memberInfo ? memberInfo.name : `${m.puuid.slice(0, 8)}…`;
+													const avatarUrl = memberInfo
+														? getProfileIconUrl(memberInfo.profileIconId)
+														: null;
+													const isCaptain = t.captainPuuid === m.puuid;
+													return (
+														<div key={m.puuid} className={classes.memberRow}>
+															<div className={classes.memberPositionCell}>
+																<PositionIcon
+																	position={m.position}
+																	className={classes.memberPositionIcon}
+																	fallbackClassName={classes.memberPositionFallback}
+																/>
+															</div>
+															{avatarUrl ? (
+																<img src={avatarUrl} alt="" className={classes.memberAvatar} />
+															) : (
+																<div className={classes.memberAvatarPlaceholder} />
+															)}
+															<span className={classes.memberName}>{displayName}</span>
+															{isCaptain && <StarIcon className={classes.captainStar} />}
+														</div>
+													);
+												})}
+											</div>
 										</div>
-										<div className={classes.memberList}>
-											{(t.members || []).map(m => {
-												const memberInfo = activeMembers.find(am => am.puuid === m.puuid);
-												const displayName = memberInfo ? memberInfo.name : `${m.puuid.slice(0, 8)}…`;
-												const avatarUrl = memberInfo
-													? getProfileIconUrl(memberInfo.profileIconId)
-													: null;
-												const isCaptain = t.captainPuuid === m.puuid;
-												return (
-													<div key={m.puuid} className={classes.memberRow}>
-														{avatarUrl ? (
-															<img src={avatarUrl} alt="" className={classes.memberAvatar} />
-														) : (
-															<div className={classes.memberAvatarPlaceholder} />
-														)}
-														<span className={classes.memberName}>{displayName}</span>
-														{isCaptain && <StarIcon className={classes.captainStar} />}
-														<span className={classes.memberPosition}>
-															{POSITION_LABELS[m.position] || m.position}
-														</span>
-													</div>
-												);
-											})}
-										</div>
-									</div>
-								))}
+									);
+								})}
 							</div>
 						)}
 					</div>

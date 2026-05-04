@@ -14,6 +14,9 @@ import ClearIcon from '@mui/icons-material/Clear';
 import useDialogStyles from '../components/dialogStyles';
 import * as Actions from './store/actions';
 import { roundLabelFor } from './tournamentUtils';
+import useBracketLines, { buildLinePath } from './useBracketLines';
+
+const LINE_COLOR = 'rgba(0, 212, 255, 0.3)';
 
 const useStyles = makeStyles()((theme) => ({
 	paperWidth: {
@@ -58,15 +61,28 @@ const useStyles = makeStyles()((theme) => ({
 	},
 	bracket: {
 		display: 'flex',
-		gap: 24,
+		gap: 56,
 		minWidth: 'min-content',
-		padding: '4px 4px 8px'
+		padding: '4px 4px 8px',
+		position: 'relative'
+	},
+	linesSvg: {
+		position: 'absolute',
+		top: 0,
+		left: 0,
+		right: 0,
+		bottom: 0,
+		pointerEvents: 'none',
+		zIndex: 0,
+		overflow: 'visible'
 	},
 	column: {
 		display: 'flex',
 		flexDirection: 'column',
 		minWidth: 240,
-		flexShrink: 0
+		flexShrink: 0,
+		position: 'relative',
+		zIndex: 1
 	},
 	columnTitle: {
 		fontFamily: '"Rajdhani", "Noto Sans KR", sans-serif',
@@ -239,22 +255,56 @@ function SlotMappingDialog({ open, onClose, onSuccess, tournamentId, teams, brac
 	// 라운드별 매치 메타데이터 계산
 	// R1 매치 m 의 두 슬롯: 2m, 2m+1
 	// R(r) 매치 m 은 R(r-1) 매치 (2m), (2m+1) 의 승자가 만난다.
-	const roundColumns = [];
-	for (let r = 1; r <= totalRounds; r += 1) {
-		const matchCount = bracketSize / 2 ** r;
-		const matches = [];
-		for (let i = 0; i < matchCount; i += 1) {
-			matches.push(i);
+	const roundColumns = useMemo(() => {
+		const cols = [];
+		for (let r = 1; r <= totalRounds; r += 1) {
+			const matchCount = bracketSize / 2 ** r;
+			const matches = [];
+			for (let i = 0; i < matchCount; i += 1) matches.push(i);
+			cols.push({ round: r, matches });
 		}
-		roundColumns.push({ round: r, matches });
-	}
+		return cols;
+	}, [totalRounds, bracketSize]);
+
+	const matchKey = (round, matchIdx) => `r${round}m${matchIdx}`;
+
+	const buildLines = React.useCallback((containerEl, itemRefs) => {
+		const result = [];
+		const cr = containerEl.getBoundingClientRect();
+		roundColumns.forEach(({ round, matches }) => {
+			if (round === totalRounds) return;
+			matches.forEach(matchIdx => {
+				const fromKey = matchKey(round, matchIdx);
+				const toKey = matchKey(round + 1, Math.floor(matchIdx / 2));
+				const fromEl = itemRefs[fromKey];
+				const toEl = itemRefs[toKey];
+				if (!fromEl || !toEl) return;
+				const fr = fromEl.getBoundingClientRect();
+				const tr = toEl.getBoundingClientRect();
+				result.push({
+					key: `${fromKey}-${toKey}`,
+					x1: fr.right - cr.left,
+					y1: fr.top + fr.height / 2 - cr.top,
+					x2: tr.left - cr.left,
+					y2: tr.top + tr.height / 2 - cr.top
+				});
+			});
+		});
+		return result;
+	}, [roundColumns, totalRounds]);
+
+	const { containerRef, itemRefs, lines } = useBracketLines(buildLines, [roundColumns]);
 
 	function renderR1Match(matchIdx) {
 		const slotA = matchIdx * 2;
 		const slotB = matchIdx * 2 + 1;
 		const bothEmpty = slots[slotA] == null && slots[slotB] == null;
 		return (
-			<div key={matchIdx} className={cx(classes.matchBox, bothEmpty && classes.matchInvalid)}>
+			<div
+				key={matchIdx}
+				ref={el => { itemRefs.current[matchKey(1, matchIdx)] = el; }}
+				className={cx(classes.matchBox, bothEmpty && classes.matchInvalid)}
+			>
 				<div className={classes.matchTitle}>매치 {matchIdx + 1}</div>
 				{[slotA, slotB].map((slotIdx) => (
 					<div key={slotIdx}>
@@ -293,7 +343,11 @@ function SlotMappingDialog({ open, onClose, onSuccess, tournamentId, teams, brac
 		const fromB = matchIdx * 2 + 1;
 		const prevLabel = roundLabelFor(round - 1, totalRounds);
 		return (
-			<div key={matchIdx} className={classes.matchBox}>
+			<div
+				key={matchIdx}
+				ref={el => { itemRefs.current[matchKey(round, matchIdx)] = el; }}
+				className={classes.matchBox}
+			>
 				<div className={classes.matchTitle}>매치 {matchIdx + 1}</div>
 				<div className={classes.upcomingRow}>{prevLabel} 매치 {fromA + 1} 승자</div>
 				<div className={classes.upcomingRow}>{prevLabel} 매치 {fromB + 1} 승자</div>
@@ -336,7 +390,18 @@ function SlotMappingDialog({ open, onClose, onSuccess, tournamentId, teams, brac
 					</div>
 				</div>
 				<div className={classes.bracketScroll}>
-					<div className={classes.bracket}>
+					<div className={classes.bracket} ref={containerRef}>
+						<svg className={classes.linesSvg}>
+							{lines.map(l => (
+								<path
+									key={l.key}
+									d={buildLinePath(l.x1, l.y1, l.x2, l.y2)}
+									stroke={LINE_COLOR}
+									strokeWidth={1.5}
+									fill="none"
+								/>
+							))}
+						</svg>
 						{roundColumns.map(({ round, matches }) => (
 							<div key={round} className={classes.column}>
 								<div className={classes.columnTitle}>{roundLabelFor(round, totalRounds)}</div>

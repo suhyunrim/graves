@@ -6,6 +6,7 @@ export const LOADING_DETAIL = '[TOURNAMENT] LOADING DETAIL';
 export const GET_TOURNAMENT_DETAIL = '[TOURNAMENT] GET TOURNAMENT DETAIL';
 export const CLEAR_TOURNAMENT_DETAIL = '[TOURNAMENT] CLEAR TOURNAMENT DETAIL';
 export const SET_ACTIVE_MEMBERS = '[TOURNAMENT] SET ACTIVE MEMBERS';
+export const SET_RATING_MAP = '[TOURNAMENT] SET RATING MAP';
 
 export function getTournamentList(groupId) {
 	const request = createCamilleAxios().get(`/api/tournament/group/${groupId}`);
@@ -49,6 +50,30 @@ export function getActiveMembers(groupId) {
 				dispatch({ type: SET_ACTIVE_MEMBERS, payload: [] });
 				return [];
 			});
+}
+
+// puuid → rating 맵을 채워둔다. 토너먼트 detail 의 매치 승률/팀 평균 티어 계산용.
+// 비로그인이거나 다른 그룹 사용자는 401/권한이 다를 수 있으니 silentError 로 흡수.
+export function getGroupRatings(groupName) {
+	return dispatch => {
+		if (!groupName) {
+			dispatch({ type: SET_RATING_MAP, payload: {} });
+			return;
+		}
+		createCamilleAxios()
+			.get('/api/group/ranking', { params: { groupName }, silentError: true })
+			.then(response => {
+				const list = response.data.result || [];
+				const map = {};
+				list.forEach(r => {
+					if (r.puuid != null && typeof r.rating === 'number') map[r.puuid] = r.rating;
+				});
+				dispatch({ type: SET_RATING_MAP, payload: map });
+			})
+			.catch(() => {
+				dispatch({ type: SET_RATING_MAP, payload: {} });
+			});
+	};
 }
 
 // === Mutations (return promise; caller handles success/error) ===
