@@ -2,6 +2,7 @@ import React from 'react';
 import { makeStyles } from 'tss-react/mui';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import EditIcon from '@mui/icons-material/Edit';
+import { getProfileIconUrl } from 'app/main/challenge/ddragonUtils';
 import {
 	groupMatchesByRound,
 	isByeMatch,
@@ -159,10 +160,75 @@ const useStyles = makeStyles()((theme) => ({
 		color: 'rgba(255, 255, 255, 0.4)',
 		textAlign: 'center',
 		padding: 40
+	},
+	teamDetails: {
+		display: 'flex',
+		alignItems: 'center',
+		gap: 8,
+		padding: '6px 14px 8px',
+		borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
+		'&:last-child': { borderBottom: 'none' }
+	},
+	teamMembers: {
+		display: 'flex',
+		gap: 3,
+		flex: 1,
+		minWidth: 0
+	},
+	teamMemberAvatar: {
+		width: 18,
+		height: 18,
+		borderRadius: 4,
+		flexShrink: 0
+	},
+	teamMemberPlaceholder: {
+		width: 18,
+		height: 18,
+		borderRadius: 4,
+		background: 'rgba(0, 212, 255, 0.15)',
+		flexShrink: 0
+	},
+	teamScrimRecord: {
+		fontFamily: '"Rajdhani", sans-serif',
+		fontSize: '1.1rem',
+		fontWeight: 700,
+		color: 'rgba(255, 255, 255, 0.6)',
+		whiteSpace: 'nowrap',
+		'& > .win': { color: '#00ff7f' },
+		'& > .loss': { color: '#ff6b6b' },
+		'& > .sep': { color: 'rgba(255, 255, 255, 0.3)', margin: '0 2px' }
+	},
+	h2hRow: {
+		display: 'flex',
+		alignItems: 'center',
+		justifyContent: 'space-between',
+		padding: '8px 14px',
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.1rem',
+		color: 'rgba(255, 255, 255, 0.55)',
+		background: 'rgba(0, 0, 0, 0.25)'
+	},
+	h2hLabel: {
+		letterSpacing: '0.03em'
+	},
+	h2hScore: {
+		fontFamily: '"Rajdhani", sans-serif',
+		fontSize: '1.3rem',
+		fontWeight: 700,
+		color: '#fff'
 	}
 }));
 
-function TournamentBracket({ matches, teams, roundLabels, championTeamId, canEdit, onEditMatch }) {
+function TournamentBracket({
+	matches,
+	teams,
+	roundLabels,
+	championTeamId,
+	canEdit,
+	onEditMatch,
+	verbose,
+	activeMembers
+}) {
 	const { classes, cx } = useStyles();
 
 	const teamMap = React.useMemo(() => {
@@ -170,6 +236,12 @@ function TournamentBracket({ matches, teams, roundLabels, championTeamId, canEdi
 		teams.forEach(t => m.set(t.id, t));
 		return m;
 	}, [teams]);
+
+	const memberMap = React.useMemo(() => {
+		const m = new Map();
+		(activeMembers || []).forEach(am => m.set(am.puuid, am));
+		return m;
+	}, [activeMembers]);
 
 	const grouped = React.useMemo(() => groupMatchesByRound(matches), [matches]);
 
@@ -205,6 +277,34 @@ function TournamentBracket({ matches, teams, roundLabels, championTeamId, canEdi
 
 	if (grouped.length === 0) {
 		return <div className={classes.emptyText}>매치 정보가 없습니다.</div>;
+	}
+
+	function renderTeamDetails(team) {
+		if (!team) return null;
+		const r = team.scrimRecord || { won: 0, lost: 0, played: 0 };
+		return (
+			<div className={classes.teamDetails}>
+				<div className={classes.teamMembers}>
+					{(team.members || []).map(m => {
+						const info = memberMap.get(m.puuid);
+						const url = info && info.profileIconId ? getProfileIconUrl(info.profileIconId) : null;
+						const name = info ? info.name : m.puuid;
+						return url ? (
+							<img key={m.puuid} src={url} alt={name} title={name} className={classes.teamMemberAvatar} />
+						) : (
+							<div key={m.puuid} className={classes.teamMemberPlaceholder} title={name} />
+						);
+					})}
+				</div>
+				{r.played > 0 && (
+					<span className={classes.teamScrimRecord}>
+						<span className="win">{r.won}</span>
+						<span className="sep">-</span>
+						<span className="loss">{r.lost}</span>
+					</span>
+				)}
+			</div>
+		);
 	}
 
 	function renderTeamRow(teamId, score, winnerTeamId, isFinishedMatch, emptyLabel, winProbPct) {
@@ -277,6 +377,10 @@ function TournamentBracket({ matches, teams, roundLabels, championTeamId, canEdi
 											prob2 = Math.round(m.team2WinProb * 100);
 										}
 
+										const team1 = m.team1Id ? teamMap.get(m.team1Id) : null;
+										const team2 = m.team2Id ? teamMap.get(m.team2Id) : null;
+										const h2h = verbose ? m.headToHeadScrim : null;
+
 										return (
 											<div
 												key={m.id}
@@ -293,7 +397,17 @@ function TournamentBracket({ matches, teams, roundLabels, championTeamId, canEdi
 													{editable && <EditIcon className={classes.editIcon} />}
 												</div>
 												{renderTeamRow(m.team1Id, m.team1Score, m.winnerTeamId, finished, emptyLabel, prob1)}
+												{verbose && renderTeamDetails(team1)}
 												{renderTeamRow(m.team2Id, m.team2Score, m.winnerTeamId, finished, emptyLabel, prob2)}
+												{verbose && renderTeamDetails(team2)}
+												{h2h && h2h.played > 0 && (
+													<div className={classes.h2hRow}>
+														<span className={classes.h2hLabel}>상대 전적</span>
+														<span className={classes.h2hScore}>
+															{h2h.team1.won} : {h2h.team1.lost}
+														</span>
+													</div>
+												)}
 											</div>
 										);
 									})

@@ -12,7 +12,9 @@ import {
 	DialogActions,
 	Tooltip,
 	Tabs,
-	Tab
+	Tab,
+	FormControlLabel,
+	Switch
 } from '@mui/material';
 import useToast from 'app/utility/useToast';
 import { getProfileIconUrl } from 'app/main/challenge/ddragonUtils';
@@ -386,6 +388,20 @@ const useStyles = makeStyles()((theme) => ({
 			color: '#00d4ff'
 		}
 	},
+	verboseToggle: {
+		marginRight: 0,
+		'& .MuiFormControlLabel-label': {
+			fontFamily: '"Noto Sans KR", sans-serif',
+			fontSize: '1.15rem',
+			color: 'rgba(255, 255, 255, 0.6)'
+		},
+		'& .MuiSwitch-switchBase.Mui-checked': {
+			color: '#00d4ff'
+		},
+		'& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
+			backgroundColor: '#00d4ff'
+		}
+	},
 	headerActions: {
 		marginTop: 14,
 		display: 'flex',
@@ -425,6 +441,7 @@ function TournamentDetail() {
 	const [matchEditTarget, setMatchEditTarget] = useState(null);
 	const [deleteTournamentOpen, setDeleteTournamentOpen] = useState(false);
 	const [activeTab, setActiveTab] = useState(0);
+	const [bracketVerbose, setBracketVerbose] = useState(false);
 
 	const teamMap = useMemo(() => {
 		const m = new Map();
@@ -624,6 +641,17 @@ function TournamentDetail() {
 						<div className={classes.section}>
 							<div className={classes.sectionHeader}>
 								<div className={classes.sectionTitle}>대진표</div>
+								<FormControlLabel
+									className={classes.verboseToggle}
+									control={
+										<Switch
+											size="small"
+											checked={bracketVerbose}
+											onChange={e => setBracketVerbose(e.target.checked)}
+										/>
+									}
+									label="자세히 보기"
+								/>
 							</div>
 							<TournamentBracket
 								matches={matches}
@@ -632,6 +660,8 @@ function TournamentDetail() {
 								championTeamId={detail.championTeamId}
 								canEdit={isAdmin && isInProgress}
 								onEditMatch={(m) => setMatchEditTarget(m)}
+								verbose={bracketVerbose}
+								activeMembers={activeMembers}
 							/>
 						</div>
 					)}

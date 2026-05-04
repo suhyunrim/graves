@@ -151,28 +151,20 @@ export function checkIsAdmin(user) {
 	return Boolean(user && user.reprGroup && user.reprGroup.isAdmin);
 }
 
-// 스크림 리더보드 — 세트 단위 합산. 무승부/매치 카운트 개념 없음.
-// 정렬: 승률 → 총 승 세트 → 패 세트 적은 순.
-export function computeScrimLeaderboard(scrims, teams) {
-	const stats = new Map();
-	teams.forEach(t => stats.set(t.id, {
-		teamId: t.id,
-		wins: 0,
-		losses: 0
-	}));
-	(scrims || []).forEach(s => {
-		const a = stats.get(s.team1Id);
-		const b = stats.get(s.team2Id);
-		if (!a || !b) return;
-		a.wins += s.team1Score;
-		a.losses += s.team2Score;
-		b.wins += s.team2Score;
-		b.losses += s.team1Score;
-	});
-	return [...stats.values()]
-		.map(s => {
-			const total = s.wins + s.losses;
-			return { ...s, winRate: total ? s.wins / total : 0 };
+// 백엔드가 team.scrimRecord 로 누적 세트(won/lost) 와 played 를 내려준다.
+// 정렬: 승률 → 승 → 패 적은 순.
+export function computeScrimLeaderboard(teams) {
+	return (teams || [])
+		.map(t => {
+			const r = t.scrimRecord || { won: 0, lost: 0, played: 0 };
+			const total = r.won + r.lost;
+			return {
+				teamId: t.id,
+				wins: r.won,
+				losses: r.lost,
+				played: r.played,
+				winRate: total ? r.won / total : 0
+			};
 		})
 		.sort((a, b) => (
 			b.winRate - a.winRate

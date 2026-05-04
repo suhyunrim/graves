@@ -337,8 +337,8 @@ function ScrimContent({ tournamentId, teams, scrims, onMutated }) {
 	}, [teams]);
 
 	const leaderboard = useMemo(
-		() => computeScrimLeaderboard(scrims, teams),
-		[scrims, teams]
+		() => computeScrimLeaderboard(teams),
+		[teams]
 	);
 
 	const vsRecordsForExpanded = useMemo(() => {
