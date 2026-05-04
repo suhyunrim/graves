@@ -7,22 +7,30 @@ import {
 	DialogTitle,
 	DialogContent,
 	DialogContentText,
-	DialogActions
+	DialogActions,
+	useMediaQuery
 } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
+import StarIcon from '@mui/icons-material/Star';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import useToast from 'app/utility/useToast';
 import { useSelector } from 'react-redux';
+import { getProfileIconUrl } from 'app/main/challenge/ddragonUtils';
 import useDialogStyles from '../components/dialogStyles';
 import * as Actions from './store/actions';
 import {
 	computeScrimLeaderboard,
 	computeVsRecords,
 	canEditScrim,
-	checkIsAdmin
+	checkIsAdmin,
+	getTierName,
+	getTierShortLabel,
+	getTierEmblemUrl
 } from './tournamentUtils';
+import PositionIcon from './PositionIcon';
 import ScrimFormDialog from './ScrimFormDialog';
 
 const useStyles = makeStyles()((theme) => ({
@@ -329,6 +337,182 @@ const useStyles = makeStyles()((theme) => ({
 		fontFamily: '"Noto Sans KR", sans-serif',
 		fontSize: '1.15rem',
 		color: 'rgba(255, 255, 255, 0.4)'
+	},
+	mobileList: {
+		display: 'flex',
+		flexDirection: 'column',
+		gap: 12
+	},
+	mobileCard: {
+		background: 'linear-gradient(135deg, #1a1a2e 0%, #0f0f1a 100%)',
+		border: '1px solid rgba(0, 212, 255, 0.2)',
+		borderRadius: 14,
+		padding: '14px 16px',
+		cursor: 'pointer',
+		transition: 'all 0.2s ease',
+		'&:hover': {
+			borderColor: 'rgba(0, 212, 255, 0.4)'
+		}
+	},
+	mobileCardExpanded: {
+		borderColor: 'rgba(0, 212, 255, 0.5)'
+	},
+	mobileCardTop: {
+		display: 'grid',
+		gridTemplateColumns: 'auto 1fr auto',
+		alignItems: 'center',
+		gap: 12
+	},
+	mobileRankBadge: {
+		width: 36,
+		height: 36,
+		borderRadius: '50%',
+		display: 'flex',
+		alignItems: 'center',
+		justifyContent: 'center',
+		fontFamily: '"Rajdhani", sans-serif',
+		fontSize: '1.5rem',
+		fontWeight: 700,
+		background: 'rgba(255, 255, 255, 0.06)',
+		color: 'rgba(255, 255, 255, 0.7)',
+		border: '1px solid rgba(255, 255, 255, 0.1)',
+		flexShrink: 0
+	},
+	mobileRankBadgeTop1: {
+		background: 'rgba(255, 215, 0, 0.15)',
+		color: '#FFD700',
+		border: '1px solid rgba(255, 215, 0, 0.5)',
+		boxShadow: '0 0 12px rgba(255, 215, 0, 0.25)'
+	},
+	mobileRankBadgeTop2: {
+		background: 'rgba(192, 192, 192, 0.15)',
+		color: '#C0C0C0',
+		border: '1px solid rgba(192, 192, 192, 0.5)'
+	},
+	mobileRankBadgeTop3: {
+		background: 'rgba(205, 127, 50, 0.15)',
+		color: '#CD7F32',
+		border: '1px solid rgba(205, 127, 50, 0.5)'
+	},
+	mobileTeamMain: {
+		minWidth: 0,
+		display: 'flex',
+		flexDirection: 'column',
+		gap: 2
+	},
+	mobileTeamName: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.5rem',
+		fontWeight: 700,
+		color: '#00d4ff',
+		overflow: 'hidden',
+		textOverflow: 'ellipsis',
+		whiteSpace: 'nowrap'
+	},
+	mobileTeamSub: {
+		display: 'inline-flex',
+		alignItems: 'center',
+		gap: 5,
+		fontFamily: '"Rajdhani", "Noto Sans KR", sans-serif',
+		fontSize: '1.05rem',
+		color: 'rgba(255, 255, 255, 0.55)'
+	},
+	mobileTeamSubEmblem: {
+		width: 14,
+		height: 14
+	},
+	mobileWinRate: {
+		display: 'flex',
+		flexDirection: 'column',
+		alignItems: 'flex-end',
+		gap: 2
+	},
+	mobileWinRateValue: {
+		fontFamily: '"Rajdhani", sans-serif',
+		fontSize: '1.8rem',
+		fontWeight: 700,
+		color: '#00d4ff',
+		lineHeight: 1
+	},
+	mobileWinRateRecord: {
+		fontFamily: '"Rajdhani", sans-serif',
+		fontSize: '1.05rem',
+		color: 'rgba(255, 255, 255, 0.5)',
+		'& > .win': { color: '#00ff7f', fontWeight: 700 },
+		'& > .loss': { color: '#ff6b6b', fontWeight: 700 },
+		'& > .sep': { margin: '0 2px' }
+	},
+	mobileMembers: {
+		marginTop: 12,
+		paddingTop: 10,
+		borderTop: '1px solid rgba(255, 255, 255, 0.06)',
+		display: 'flex',
+		flexDirection: 'column',
+		gap: 5
+	},
+	mobileMemberRow: {
+		display: 'flex',
+		alignItems: 'center',
+		gap: 8,
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.1rem',
+		color: 'rgba(255, 255, 255, 0.85)'
+	},
+	mobileMemberPosIcon: {
+		width: 14,
+		height: 14,
+		color: '#00d4ff',
+		flexShrink: 0
+	},
+	mobileMemberPosFallback: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '0.85rem',
+		color: 'rgba(0, 212, 255, 0.7)',
+		fontWeight: 600
+	},
+	mobileMemberAvatar: {
+		width: 18,
+		height: 18,
+		borderRadius: 4,
+		flexShrink: 0
+	},
+	mobileMemberPlaceholder: {
+		width: 18,
+		height: 18,
+		borderRadius: 4,
+		background: 'rgba(0, 212, 255, 0.15)',
+		flexShrink: 0
+	},
+	mobileMemberName: {
+		flex: 1,
+		minWidth: 0,
+		overflow: 'hidden',
+		textOverflow: 'ellipsis',
+		whiteSpace: 'nowrap'
+	},
+	mobileMemberCaptain: {
+		fontSize: '1rem',
+		color: '#ffd700'
+	},
+	mobileMemberTier: {
+		fontFamily: '"Rajdhani", sans-serif',
+		fontSize: '0.95rem',
+		fontWeight: 700,
+		color: 'rgba(255, 255, 255, 0.55)'
+	},
+	mobileVsBlock: {
+		marginTop: 12,
+		paddingTop: 10,
+		borderTop: '1px solid rgba(0, 212, 255, 0.15)'
+	},
+	mobileVsLabel: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '0.95rem',
+		color: 'rgba(0, 212, 255, 0.6)',
+		fontWeight: 600,
+		letterSpacing: '0.05em',
+		textTransform: 'uppercase',
+		marginBottom: 6
 	}
 }));
 
@@ -351,10 +535,18 @@ function formatDate(iso) {
 function ScrimContent({ tournamentId, teams, scrims, onMutated }) {
 	const { classes, cx } = useStyles();
 	const { classes: dialogClasses } = useDialogStyles();
+	const theme = useTheme();
+	const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 	const toast = useToast();
 	const user = useSelector(state => state.auth.user);
 	const isAdmin = checkIsAdmin(user);
 	const isLoggedIn = Boolean(user && user.reprGroup);
+	const activeMembers = useSelector(({ Tournament }) => Tournament.tournament.activeMembers);
+	const memberMap = useMemo(() => {
+		const m = new Map();
+		(activeMembers || []).forEach(am => m.set(am.puuid, am));
+		return m;
+	}, [activeMembers]);
 
 	const [formOpen, setFormOpen] = useState(false);
 	const [editingScrim, setEditingScrim] = useState(null);
@@ -432,6 +624,106 @@ function ScrimContent({ tournamentId, teams, scrims, onMutated }) {
 				</div>
 				{leaderboard.length === 0 ? (
 					<div className={classes.emptyText}>참가팀이 없습니다</div>
+				) : isMobile ? (
+					<div className={classes.mobileList}>
+						{leaderboard.map((row, idx) => {
+							const expanded = expandedTeamId === row.teamId;
+							const team = teamMap.get(row.teamId);
+							const ratePct = Math.round(row.winRate * 100);
+							const tierName = team && getTierName(team.avgRating);
+							const tierShort = team && getTierShortLabel(team.avgRating);
+							const tierEmblem = tierName && getTierEmblemUrl(tierName);
+							let badgeCls = classes.mobileRankBadge;
+							if (idx === 0) badgeCls = cx(badgeCls, classes.mobileRankBadgeTop1);
+							else if (idx === 1) badgeCls = cx(badgeCls, classes.mobileRankBadgeTop2);
+							else if (idx === 2) badgeCls = cx(badgeCls, classes.mobileRankBadgeTop3);
+							const totalSets = row.wins + row.losses;
+							const vsRecords = expanded ? vsRecordsForExpanded : [];
+							return (
+								<div
+									key={row.teamId}
+									className={cx(classes.mobileCard, expanded && classes.mobileCardExpanded)}
+									onClick={() => setExpandedTeamId(prev => prev === row.teamId ? null : row.teamId)}
+									role="button"
+									tabIndex={0}
+								>
+									<div className={classes.mobileCardTop}>
+										<div className={badgeCls}>{idx + 1}</div>
+										<div className={classes.mobileTeamMain}>
+											<span className={classes.mobileTeamName}>{teamName(row.teamId)}</span>
+											{tierShort && (
+												<span className={classes.mobileTeamSub}>
+													{tierEmblem && <img src={tierEmblem} alt="" className={classes.mobileTeamSubEmblem} />}
+													팀 평균 {tierShort}
+												</span>
+											)}
+										</div>
+										<div className={classes.mobileWinRate}>
+											<span className={classes.mobileWinRateValue}>
+												{totalSets === 0 ? '—' : `${ratePct}%`}
+											</span>
+											{totalSets > 0 && (
+												<span className={classes.mobileWinRateRecord}>
+													<span className="win">{row.wins}</span>
+													<span className="sep">-</span>
+													<span className="loss">{row.losses}</span>
+												</span>
+											)}
+										</div>
+									</div>
+									{team && (team.members || []).length > 0 && (
+										<div className={classes.mobileMembers}>
+											{(team.members || []).map(m => {
+												const info = memberMap.get(m.puuid);
+												const url = info && info.profileIconId ? getProfileIconUrl(info.profileIconId) : null;
+												const name = info ? info.name : `${m.puuid.slice(0, 8)}…`;
+												const memberShort = info ? getTierShortLabel(info.rating) : null;
+												const isCaptain = team.captainPuuid === m.puuid;
+												return (
+													<div key={m.puuid} className={classes.mobileMemberRow}>
+														<PositionIcon
+															position={m.position}
+															className={classes.mobileMemberPosIcon}
+															fallbackClassName={classes.mobileMemberPosFallback}
+														/>
+														{url ? (
+															<img src={url} alt="" className={classes.mobileMemberAvatar} />
+														) : (
+															<div className={classes.mobileMemberPlaceholder} />
+														)}
+														<span className={classes.mobileMemberName}>{name}</span>
+														{isCaptain && <StarIcon className={classes.mobileMemberCaptain} />}
+														{memberShort && <span className={classes.mobileMemberTier}>{memberShort}</span>}
+													</div>
+												);
+											})}
+										</div>
+									)}
+									{expanded && (
+										<div className={classes.mobileVsBlock}>
+											<div className={classes.mobileVsLabel}>상대팀별 전적</div>
+											{vsRecords.length === 0 ? (
+												<div className={classes.vsTitle}>아직 기록된 상대 전적이 없습니다.</div>
+											) : (
+												<div className={classes.vsList}>
+													{vsRecords.map(r => (
+														<div key={r.opponentId} className={classes.vsItem}>
+															<span className={classes.vsOpponent}>vs {teamName(r.opponentId)}</span>
+															<span className={classes.vsRecord}>
+																<span className={classes.vsRecordWin}>{r.mySets}</span>
+																<span className={classes.vsRecordSep}>:</span>
+																<span className={classes.vsRecordLoss}>{r.oppSets}</span>
+															</span>
+														</div>
+													))}
+												</div>
+											)}
+										</div>
+									)}
+								</div>
+							);
+						})}
+					</div>
 				) : (
 					<div className={classes.tableWrapper}>
 						<table className={classes.table}>
