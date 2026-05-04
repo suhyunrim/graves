@@ -240,10 +240,12 @@ function TournamentList() {
 												{STATUS_LABELS[t.status] || t.status}
 											</span>
 										</div>
-										<div className={classes.cardMeta}>
-											<GroupIcon style={{ fontSize: '1.4rem' }} />
-											{t.teamCount}팀 / {t.bracketSize}강 브래킷
-										</div>
+										{t.teamCount != null && t.bracketSize != null && (
+											<div className={classes.cardMeta}>
+												<GroupIcon style={{ fontSize: '1.4rem' }} />
+												{t.teamCount}팀 / {t.bracketSize}강 브래킷
+											</div>
+										)}
 										<div className={classes.cardMeta}>
 											BO{t.defaultBestOf} (결승 BO{t.finalBestOf})
 										</div>

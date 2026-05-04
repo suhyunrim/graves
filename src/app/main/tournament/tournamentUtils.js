@@ -20,6 +20,13 @@ export const POSITION_LABELS = {
 	support: '서폿'
 };
 
+// 등록된 팀 수 → 브래킷 사이즈 (다음 2의 거듭제곱, 최소 2)
+// 백엔드 nextPow2 산정 로직과 일치시켜 slotMapping 길이를 맞춘다.
+export function bracketSizeForTeamCount(teamCount) {
+	if (!teamCount || teamCount < 2) return 2;
+	return 2 ** Math.ceil(Math.log2(teamCount));
+}
+
 // 매치 그룹핑: round 별로 매치 정렬
 export function groupMatchesByRound(matches) {
 	const map = new Map();

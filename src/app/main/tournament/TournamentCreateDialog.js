@@ -57,7 +57,6 @@ function TournamentCreateDialog({ open, onClose, onSuccess, groupId }) {
 
 	const [form, setForm] = useState({
 		name: '',
-		teamCount: 8,
 		defaultBestOf: 3,
 		finalBestOf: 5
 	});
@@ -71,8 +70,6 @@ function TournamentCreateDialog({ open, onClose, onSuccess, groupId }) {
 
 	function validate() {
 		if (!form.name.trim()) return '토너먼트 이름을 입력하세요.';
-		if (!Number.isInteger(form.teamCount) || form.teamCount < 2) return '팀 수는 2 이상이어야 합니다.';
-		if (form.teamCount > 64) return '팀 수는 64 이하로 설정해주세요.';
 		return null;
 	}
 
@@ -88,7 +85,6 @@ function TournamentCreateDialog({ open, onClose, onSuccess, groupId }) {
 		Actions.createTournament({
 			groupId,
 			name: form.name.trim(),
-			teamCount: form.teamCount,
 			defaultBestOf: form.defaultBestOf,
 			finalBestOf: form.finalBestOf
 		})
@@ -127,19 +123,7 @@ function TournamentCreateDialog({ open, onClose, onSuccess, groupId }) {
 					required
 					autoFocus
 					inputProps={{ maxLength: 60 }}
-				/>
-				<TextField
-					className={classes.field}
-					label="팀 수"
-					name="teamCount"
-					value={form.teamCount}
-					onChange={handleChange}
-					variant="outlined"
-					fullWidth
-					required
-					type="number"
-					inputProps={{ min: 2, max: 64 }}
-					helperText="실제 팀 수. 다음 2의 거듭제곱이 브래킷 사이즈가 됩니다."
+					helperText="팀 수는 시작 시점에 등록된 팀 수로 자동 결정됩니다."
 				/>
 				<TextField
 					className={classes.field}

@@ -27,7 +27,13 @@ import { useParams, useNavigate } from 'react-router-dom';
 import useDialogStyles from '../components/dialogStyles';
 import reducer from './store/reducers';
 import * as Actions from './store/actions';
-import { STATUS_LABELS, STATUS_COLORS, POSITION_LABELS, checkIsAdmin } from './tournamentUtils';
+import {
+	STATUS_LABELS,
+	STATUS_COLORS,
+	POSITION_LABELS,
+	checkIsAdmin,
+	bracketSizeForTeamCount
+} from './tournamentUtils';
 import TournamentBracket from './TournamentBracket';
 import TeamFormDialog from './TeamFormDialog';
 import SlotMappingDialog from './SlotMappingDialog';
@@ -448,8 +454,9 @@ function TournamentDetail() {
 	const isPreparing = detail.status === 'preparing';
 	const isInProgress = detail.status === 'in_progress';
 	const teamCount = teams.length;
-	const teamFull = teamCount >= detail.teamCount;
 	const canStart = isAdmin && isPreparing && teamCount >= 2;
+	// preparation 단계에선 detail.bracketSize/teamCount 가 null. 시작 시점에 등록된 팀 수로 산출한다.
+	const computedBracketSize = bracketSizeForTeamCount(teamCount);
 
 	return (
 		<FusePageSimple
@@ -476,7 +483,9 @@ function TournamentDetail() {
 					</div>
 					<div className={classes.metaRow}>
 						<span className={classes.metaPill}>
-							{teamCount}/{detail.teamCount}팀 · {detail.bracketSize}강
+							{detail.bracketSize != null
+								? `${detail.teamCount}팀 · ${detail.bracketSize}강`
+								: `${teamCount}팀 등록됨`}
 						</span>
 						<span className={classes.metaPill}>BO{detail.defaultBestOf}</span>
 						<span className={classes.metaPill}>결승 BO{detail.finalBestOf}</span>
@@ -536,21 +545,16 @@ function TournamentDetail() {
 						<div className={classes.sectionHeader}>
 							<div className={classes.sectionTitle}>
 								참가팀
-								<span className={classes.teamCount}>({teamCount}/{detail.teamCount})</span>
+								<span className={classes.teamCount}>({teamCount})</span>
 							</div>
 							{isAdmin && isPreparing && (
-								<Tooltip title={teamFull ? '정원이 가득 찼습니다.' : ''} arrow>
-									<span>
-										<Button
-											className={classes.primaryBtn}
-											startIcon={<AddIcon />}
-											onClick={handleTeamCreate}
-											disabled={teamFull}
-										>
-											팀 등록
-										</Button>
-									</span>
-								</Tooltip>
+								<Button
+									className={classes.primaryBtn}
+									startIcon={<AddIcon />}
+									onClick={handleTeamCreate}
+								>
+									팀 등록
+								</Button>
 							)}
 						</div>
 						{teams.length === 0 ? (
@@ -631,7 +635,7 @@ function TournamentDetail() {
 							onSuccess={handleStartSuccess}
 							tournamentId={tournamentId}
 							teams={teams}
-							bracketSize={detail.bracketSize}
+							bracketSize={computedBracketSize}
 						/>
 					)}
 					{matchEditTarget && (
