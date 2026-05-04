@@ -212,13 +212,6 @@ const useStyles = makeStyles()((theme) => ({
 	vsRecordSep: {
 		color: 'rgba(255, 255, 255, 0.4)'
 	},
-	vsMatches: {
-		fontFamily: '"Noto Sans KR", sans-serif',
-		fontSize: '1.05rem',
-		color: 'rgba(255, 255, 255, 0.4)',
-		minWidth: 48,
-		textAlign: 'right'
-	},
 	scrimList: {
 		display: 'flex',
 		flexDirection: 'column',
@@ -465,7 +458,6 @@ function ScrimContent({ tournamentId, teams, scrims, onMutated }) {
 																				<span className={classes.vsRecordSep}>:</span>
 																				<span className={classes.vsRecordLoss}>{r.oppSets}</span>
 																			</span>
-																			<span className={classes.vsMatches}>{r.matches}매치</span>
 																		</div>
 																	))}
 																</div>
