@@ -55,6 +55,13 @@ const navigationConfig = [
 				url: '/challenge'
 			},
 			{
+				id: 'tournament-component',
+				title: 'Tournament',
+				type: 'item',
+				icon: 'military_tech',
+				url: '/tournament'
+			},
+			{
 				id: 'balance-report-component',
 				title: 'Balancing Report',
 				type: 'item',
