@@ -164,6 +164,7 @@ const useStyles = makeStyles()((theme) => ({
 		maxWidth: 1400,
 		margin: '0 auto',
 		width: '100%',
+		minWidth: 0,
 		[theme.breakpoints.down('sm')]: {
 			padding: '16px'
 		}
@@ -174,6 +175,9 @@ const useStyles = makeStyles()((theme) => ({
 		border: '1px solid rgba(0, 212, 255, 0.15)',
 		padding: '24px 28px',
 		marginBottom: 24,
+		// 안의 가로 스크롤 영역(브래킷 등)이 페이지로 새지 않도록 격리
+		minWidth: 0,
+		overflow: 'hidden',
 		[theme.breakpoints.down('sm')]: {
 			padding: '18px 20px',
 			borderRadius: 14

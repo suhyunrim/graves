@@ -20,14 +20,21 @@ import useBracketLines, { buildLinePath } from './useBracketLines';
 const useStyles = makeStyles()((theme) => ({
 	root: {
 		overflowX: 'auto',
-		paddingBottom: 8
+		paddingBottom: 8,
+		// flex/grid 조상에서 자식 콘텐츠가 부모 폭을 밀어내지 않도록 격리
+		width: '100%',
+		minWidth: 0,
+		maxWidth: '100%'
 	},
 	scroll: {
 		display: 'flex',
 		gap: 56,
 		minWidth: 'min-content',
 		padding: '4px 4px 8px',
-		position: 'relative'
+		position: 'relative',
+		[theme.breakpoints.down('sm')]: {
+			gap: 32
+		}
 	},
 	linesSvg: {
 		position: 'absolute',
@@ -46,12 +53,16 @@ const useStyles = makeStyles()((theme) => ({
 		minWidth: 240,
 		flexShrink: 0,
 		position: 'relative',
-		zIndex: 1
+		zIndex: 1,
+		[theme.breakpoints.down('sm')]: {
+			minWidth: 200,
+			gap: 12
+		}
 	},
 	columnVerbose: {
 		minWidth: 320,
 		[theme.breakpoints.down('sm')]: {
-			minWidth: 280
+			minWidth: 260
 		}
 	},
 	columnTitle: {
@@ -65,7 +76,11 @@ const useStyles = makeStyles()((theme) => ({
 		marginBottom: 4,
 		paddingBottom: 8,
 		borderBottom: '1px solid rgba(0, 212, 255, 0.25)',
-		textAlign: 'center'
+		textAlign: 'center',
+		[theme.breakpoints.down('sm')]: {
+			fontSize: '1.3rem',
+			paddingBottom: 6
+		}
 	},
 	matchList: {
 		display: 'flex',
@@ -95,7 +110,11 @@ const useStyles = makeStyles()((theme) => ({
 		borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
 		display: 'flex',
 		alignItems: 'center',
-		justifyContent: 'space-between'
+		justifyContent: 'space-between',
+		[theme.breakpoints.down('sm')]: {
+			padding: '5px 10px',
+			fontSize: '0.95rem'
+		}
 	},
 	matchHeaderBO: {
 		color: 'rgba(0, 212, 255, 0.6)',
@@ -150,7 +169,11 @@ const useStyles = makeStyles()((theme) => ({
 		fontSize: '1.5rem',
 		marginLeft: 12,
 		minWidth: 24,
-		textAlign: 'right'
+		textAlign: 'right',
+		[theme.breakpoints.down('sm')]: {
+			fontSize: '1.3rem',
+			marginLeft: 8
+		}
 	},
 	championBadge: {
 		fontSize: '1.4rem',
@@ -197,7 +220,11 @@ const useStyles = makeStyles()((theme) => ({
 		gap: 6,
 		fontFamily: '"Noto Sans KR", sans-serif',
 		fontSize: '1.1rem',
-		color: 'rgba(255, 255, 255, 0.85)'
+		color: 'rgba(255, 255, 255, 0.85)',
+		[theme.breakpoints.down('sm')]: {
+			fontSize: '1rem',
+			gap: 5
+		}
 	},
 	memberLinePosIcon: {
 		width: 14,
@@ -282,7 +309,10 @@ const useStyles = makeStyles()((theme) => ({
 		textAlign: 'right',
 		overflow: 'hidden',
 		textOverflow: 'ellipsis',
-		whiteSpace: 'nowrap'
+		whiteSpace: 'nowrap',
+		[theme.breakpoints.down('sm')]: {
+			fontSize: '1.05rem'
+		}
 	},
 	detailTeamRight: {
 		fontFamily: '"Noto Sans KR", sans-serif',
@@ -291,7 +321,10 @@ const useStyles = makeStyles()((theme) => ({
 		textAlign: 'left',
 		overflow: 'hidden',
 		textOverflow: 'ellipsis',
-		whiteSpace: 'nowrap'
+		whiteSpace: 'nowrap',
+		[theme.breakpoints.down('sm')]: {
+			fontSize: '1.05rem'
+		}
 	},
 	detailScore: {
 		fontFamily: '"Rajdhani", sans-serif',
@@ -300,6 +333,9 @@ const useStyles = makeStyles()((theme) => ({
 		display: 'inline-flex',
 		alignItems: 'baseline',
 		gap: 4,
+		[theme.breakpoints.down('sm')]: {
+			fontSize: '1.3rem'
+		},
 		color: '#fff',
 		'& > .win': { color: '#00ff7f' },
 		'& > .loss': { color: '#ff6b6b' },
