@@ -20,7 +20,7 @@ import useToast from 'app/utility/useToast';
 import { getProfileIconUrl } from 'app/main/challenge/ddragonUtils';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import AddIcon from '@mui/icons-material/Add';
-import EditIcon from '@mui/icons-material/Edit';
+import SettingsIcon from '@mui/icons-material/Settings';
 import DeleteIcon from '@mui/icons-material/Delete';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
@@ -28,6 +28,7 @@ import StarIcon from '@mui/icons-material/Star';
 import React, { useEffect, useState, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams, useNavigate } from 'react-router-dom';
+import camilleRiotAuthService from 'app/services/camilleRiotAuthService/camilleRiotAuthService';
 import useDialogStyles from '../components/dialogStyles';
 import reducer from './store/reducers';
 import * as Actions from './store/actions';
@@ -511,6 +512,7 @@ function TournamentDetail() {
 	const activeMembers = useSelector(({ Tournament }) => Tournament.tournament.activeMembers);
 	const user = useSelector(state => state.auth.user);
 	const isAdmin = checkIsAdmin(user);
+	const myPuuid = camilleRiotAuthService.getPuuid();
 
 	const [teamFormOpen, setTeamFormOpen] = useState(false);
 	const [editingTeam, setEditingTeam] = useState(null);
@@ -780,26 +782,35 @@ function TournamentDetail() {
 									const tierName = getTierName(avgRating);
 									const tierLabel = getTierLabel(avgRating);
 									const tierEmblem = getTierEmblemUrl(tierName);
+									const isCaptain = Boolean(myPuuid) && t.captainPuuid === myPuuid;
+									const canEditTeam = (isAdmin || isCaptain) && isPreparing;
+									const canDeleteTeam = isAdmin && isPreparing;
 									return (
 										<div key={t.id} className={classes.teamCard}>
 											<div className={classes.teamCardHeader}>
 												<span className={classes.teamName}>{t.name}</span>
-												{isAdmin && isPreparing && (
+												{(canEditTeam || canDeleteTeam) && (
 													<div className={classes.teamActions}>
-														<IconButton
-															className={classes.teamActionBtn}
-															onClick={() => handleTeamEdit(t)}
-															size="small"
-														>
-															<EditIcon fontSize="small" />
-														</IconButton>
-														<IconButton
-															className={classes.teamActionBtnDanger}
-															onClick={() => setDeleteTeamTarget(t)}
-															size="small"
-														>
-															<DeleteIcon fontSize="small" />
-														</IconButton>
+														{canEditTeam && (
+															<Tooltip title="팀 수정" arrow>
+																<IconButton
+																	className={classes.teamActionBtn}
+																	onClick={() => handleTeamEdit(t)}
+																	size="small"
+																>
+																	<SettingsIcon fontSize="small" />
+																</IconButton>
+															</Tooltip>
+														)}
+														{canDeleteTeam && (
+															<IconButton
+																className={classes.teamActionBtnDanger}
+																onClick={() => setDeleteTeamTarget(t)}
+																size="small"
+															>
+																<DeleteIcon fontSize="small" />
+															</IconButton>
+														)}
 													</div>
 												)}
 											</div>
