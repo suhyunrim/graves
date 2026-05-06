@@ -783,7 +783,9 @@ function TournamentDetail() {
 									const tierLabel = getTierLabel(avgRating);
 									const tierEmblem = getTierEmblemUrl(tierName);
 									const isCaptain = Boolean(myPuuid) && t.captainPuuid === myPuuid;
-									const canEditTeam = (isAdmin || isCaptain) && isPreparing;
+									// 종료된 토너먼트는 과거 결과 무결성 때문에 수정 불가. preparing/in_progress 둘 다 허용.
+									const canEditTeam = (isAdmin || isCaptain) && !isFinished;
+									// 삭제는 매치를 깨뜨리지 않도록 preparing 상태에서만 허용.
 									const canDeleteTeam = isAdmin && isPreparing;
 									return (
 										<div key={t.id} className={classes.teamCard}>
