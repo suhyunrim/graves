@@ -102,6 +102,35 @@ const useStyles = makeStyles()((theme) => ({
 			background: 'rgba(0, 212, 255, 0.08)'
 		}
 	},
+	titleBlock: {
+		display: 'flex',
+		alignItems: 'center',
+		gap: 16,
+		[theme.breakpoints.down('sm')]: {
+			gap: 10
+		}
+	},
+	titleTrophy: {
+		width: 88,
+		height: 88,
+		objectFit: 'contain',
+		flexShrink: 0,
+		filter: 'drop-shadow(0 4px 16px rgba(255, 215, 0, 0.35))',
+		[theme.breakpoints.down('md')]: {
+			width: 70,
+			height: 70
+		},
+		[theme.breakpoints.down('sm')]: {
+			width: 54,
+			height: 54
+		}
+	},
+	titleColumn: {
+		display: 'flex',
+		flexDirection: 'column',
+		minWidth: 0,
+		flex: 1
+	},
 	titleRow: {
 		display: 'flex',
 		alignItems: 'center',
@@ -199,16 +228,6 @@ const useStyles = makeStyles()((theme) => ({
 			width: 28,
 			height: 28
 		}
-	},
-	trophyPill: {
-		display: 'inline-flex',
-		alignItems: 'center',
-		gap: 6
-	},
-	trophyPillIcon: {
-		width: 14,
-		height: 14,
-		objectFit: 'contain'
 	},
 	predictionPerfectBanner: {
 		marginTop: 8,
@@ -719,32 +738,34 @@ function TournamentDetail() {
 							<ArrowBackIcon />
 						</IconButton>
 					</div>
-					<div className={classes.titleRow}>
-						<Typography className={classes.title} variant="h4">{detail.name}</Typography>
-						<span
-							className={classes.statusBadge}
-							style={{
-								background: `${statusColor}20`,
-								color: statusColor,
-								border: `1px solid ${statusColor}40`
-							}}
-						>
-							{STATUS_LABELS[detail.status] || detail.status}
-						</span>
-					</div>
-					<div className={classes.metaRow}>
-						<span className={classes.metaPill}>
-							{detail.bracketSize != null
-								? `${detail.teamCount}팀 · ${detail.bracketSize}강`
-								: `${teamCount}팀 등록됨`}
-						</span>
-						<span className={classes.metaPill}>{bestOfLabel(detail.defaultBestOf)}</span>
-						<span className={classes.metaPill}>결승 {bestOfLabel(detail.finalBestOf)}</span>
+					<div className={classes.titleBlock}>
 						{detail.trophyType && (
-							<span className={cx(classes.metaPill, classes.trophyPill)}>
-								<img className={classes.trophyPillIcon} src={getTrophyIcon(detail.trophyType)} alt="" />
-							</span>
+							<img className={classes.titleTrophy} src={getTrophyIcon(detail.trophyType)} alt="" />
 						)}
+						<div className={classes.titleColumn}>
+							<div className={classes.titleRow}>
+								<Typography className={classes.title} variant="h4">{detail.name}</Typography>
+								<span
+									className={classes.statusBadge}
+									style={{
+										background: `${statusColor}20`,
+										color: statusColor,
+										border: `1px solid ${statusColor}40`
+									}}
+								>
+									{STATUS_LABELS[detail.status] || detail.status}
+								</span>
+							</div>
+							<div className={classes.metaRow}>
+								<span className={classes.metaPill}>
+									{detail.bracketSize != null
+										? `${detail.teamCount}팀 · ${detail.bracketSize}강`
+										: `${teamCount}팀 등록됨`}
+								</span>
+								<span className={classes.metaPill}>{bestOfLabel(detail.defaultBestOf)}</span>
+								<span className={classes.metaPill}>결승 {bestOfLabel(detail.finalBestOf)}</span>
+							</div>
+						</div>
 					</div>
 					{championTeam && (
 						<div className={cx(classes.headerBanner, classes.championBanner)}>
