@@ -744,7 +744,8 @@ function TournamentDetail() {
 								teams={teams}
 								roundLabels={roundLabels}
 								championTeamId={detail.championTeamId}
-								canEdit={isAdmin && isInProgress}
+								isInProgress={isInProgress}
+								isAdmin={isAdmin}
 								onEditMatch={(m) => setMatchEditTarget(m)}
 								verbose={bracketVerbose}
 								activeMembers={activeMembers}

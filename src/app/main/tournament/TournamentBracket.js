@@ -124,6 +124,15 @@ const useStyles = makeStyles()((theme) => ({
 		fontSize: '1.2rem',
 		color: 'rgba(0, 212, 255, 0.7)'
 	},
+	editIconClickable: {
+		cursor: 'pointer',
+		padding: 2,
+		borderRadius: 4,
+		'&:hover': {
+			background: 'rgba(0, 212, 255, 0.15)',
+			color: '#00d4ff'
+		}
+	},
 	teamRow: {
 		display: 'flex',
 		alignItems: 'center',
@@ -453,7 +462,8 @@ function TournamentBracket({
 	teams,
 	roundLabels,
 	championTeamId,
-	canEdit,
+	isInProgress,
+	isAdmin,
 	onEditMatch,
 	verbose,
 	activeMembers,
@@ -710,16 +720,23 @@ function TournamentBracket({
 									visibleMatches.map(m => {
 										const finished = m.winnerTeamId != null;
 										const empty = isEmptyMatch(m);
-										const editable = canEdit && !empty && !finished
-											&& m.team1Id != null && m.team2Id != null;
-										const predictionClickable = !editable && !!onMatchClick && !empty;
-										const cardClickable = editable || predictionClickable;
-										const handleCardClick = editable
-											? () => onEditMatch(m)
-											: (predictionClickable ? () => onMatchClick(m) : undefined);
 
 										const team1 = m.team1Id ? teamMap.get(m.team1Id) : null;
 										const team2 = m.team2Id ? teamMap.get(m.team2Id) : null;
+
+										// 매치별 스코어 수정 권한: 진행 중 + 미완료 + 두 팀 정해진 매치 + (어드민 또는 양 팀 중 본인이 팀장)
+										const isMatchCaptain = Boolean(myPuuid) && (
+											(team1 && team1.captainPuuid === myPuuid)
+											|| (team2 && team2.captainPuuid === myPuuid)
+										);
+										const canScoreEdit = isInProgress && !empty && !finished
+											&& m.team1Id != null && m.team2Id != null
+											&& (isAdmin || isMatchCaptain);
+
+										const predictionClickable = !!onMatchClick && !empty;
+										const handleCardClick = predictionClickable
+											? () => onMatchClick(m)
+											: undefined;
 
 										let prob1 = null;
 										let prob2 = null;
@@ -739,16 +756,29 @@ function TournamentBracket({
 											<div
 												key={m.id}
 												ref={el => { itemRefs.current[m.id] = el; }}
-												className={cx(classes.match, cardClickable && classes.matchClickable)}
+												className={cx(classes.match, predictionClickable && classes.matchClickable)}
 												onClick={handleCardClick}
-												role={cardClickable ? 'button' : undefined}
-												tabIndex={cardClickable ? 0 : undefined}
-												onKeyDown={cardClickable ? (e) => e.key === 'Enter' && handleCardClick() : undefined}
+												role={predictionClickable ? 'button' : undefined}
+												tabIndex={predictionClickable ? 0 : undefined}
+												onKeyDown={predictionClickable ? (e) => e.key === 'Enter' && handleCardClick() : undefined}
 											>
 												<div className={classes.matchHeader}>
 													<span>매치 {m.bracketSlot + 1}</span>
 													<span className={classes.matchHeaderBO}>BO{m.bestOf}</span>
-													{editable && <EditIcon className={classes.editIcon} />}
+													{canScoreEdit && (
+														<EditIcon
+															className={cx(classes.editIcon, classes.editIconClickable)}
+															onClick={(e) => { e.stopPropagation(); onEditMatch(m); }}
+															role="button"
+															tabIndex={0}
+															onKeyDown={(e) => {
+																if (e.key === 'Enter') {
+																	e.stopPropagation();
+																	onEditMatch(m);
+																}
+															}}
+														/>
+													)}
 												</div>
 												{renderTeamRow(m.team1Id, m.team1Score, m.winnerTeamId, finished, emptyLabel, isMyPickT1, 'blue')}
 												{verbose && renderTeamFullDetails(team1)}
