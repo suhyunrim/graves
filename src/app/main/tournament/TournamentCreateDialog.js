@@ -3,6 +3,7 @@ import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, M
 import { makeStyles } from 'tss-react/mui';
 import useDialogStyles from '../components/dialogStyles';
 import * as Actions from './store/actions';
+import { bestOfLabel } from './tournamentUtils';
 
 const useStyles = makeStyles()((theme) => ({
 	paperWidth: {
@@ -127,7 +128,7 @@ function TournamentCreateDialog({ open, onClose, onSuccess, groupId }) {
 				/>
 				<TextField
 					className={classes.field}
-					label="일반 매치 BO"
+					label="일반 매치 형식"
 					name="defaultBestOf"
 					value={form.defaultBestOf}
 					onChange={handleChange}
@@ -137,12 +138,12 @@ function TournamentCreateDialog({ open, onClose, onSuccess, groupId }) {
 					required
 				>
 					{BEST_OF_OPTIONS.map(n => (
-						<MenuItem key={n} value={n}>BO{n}</MenuItem>
+						<MenuItem key={n} value={n}>{bestOfLabel(n)}</MenuItem>
 					))}
 				</TextField>
 				<TextField
 					className={classes.field}
-					label="결승 BO"
+					label="결승 형식"
 					name="finalBestOf"
 					value={form.finalBestOf}
 					onChange={handleChange}
@@ -152,7 +153,7 @@ function TournamentCreateDialog({ open, onClose, onSuccess, groupId }) {
 					required
 				>
 					{BEST_OF_OPTIONS.map(n => (
-						<MenuItem key={n} value={n}>BO{n}</MenuItem>
+						<MenuItem key={n} value={n}>{bestOfLabel(n)}</MenuItem>
 					))}
 				</TextField>
 				{error && <div className={classes.errorText}>{error}</div>}

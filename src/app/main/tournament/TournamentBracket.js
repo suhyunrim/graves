@@ -11,6 +11,7 @@ import {
 	getTierName,
 	getTierShortLabel,
 	getTierEmblemUrl,
+	bestOfLabel,
 	BRACKET_LINE_COLOR,
 	BRACKET_LINE_COLOR_FINISHED
 } from './tournamentUtils';
@@ -119,6 +120,11 @@ const useStyles = makeStyles()((theme) => ({
 	matchHeaderBO: {
 		color: 'rgba(0, 212, 255, 0.6)',
 		fontWeight: 600
+	},
+	matchHeaderActions: {
+		display: 'flex',
+		alignItems: 'center',
+		gap: 6
 	},
 	editIcon: {
 		fontSize: '1.2rem',
@@ -764,21 +770,23 @@ function TournamentBracket({
 											>
 												<div className={classes.matchHeader}>
 													<span>매치 {m.bracketSlot + 1}</span>
-													<span className={classes.matchHeaderBO}>BO{m.bestOf}</span>
-													{canScoreEdit && (
-														<EditIcon
-															className={cx(classes.editIcon, classes.editIconClickable)}
-															onClick={(e) => { e.stopPropagation(); onEditMatch(m); }}
-															role="button"
-															tabIndex={0}
-															onKeyDown={(e) => {
-																if (e.key === 'Enter') {
-																	e.stopPropagation();
-																	onEditMatch(m);
-																}
-															}}
-														/>
-													)}
+													<div className={classes.matchHeaderActions}>
+														<span className={classes.matchHeaderBO}>{bestOfLabel(m.bestOf)}</span>
+														{canScoreEdit && (
+															<EditIcon
+																className={cx(classes.editIcon, classes.editIconClickable)}
+																onClick={(e) => { e.stopPropagation(); onEditMatch(m); }}
+																role="button"
+																tabIndex={0}
+																onKeyDown={(e) => {
+																	if (e.key === 'Enter') {
+																		e.stopPropagation();
+																		onEditMatch(m);
+																	}
+																}}
+															/>
+														)}
+													</div>
 												</div>
 												{renderTeamRow(m.team1Id, m.team1Score, m.winnerTeamId, finished, emptyLabel, isMyPickT1, 'blue')}
 												{verbose && renderTeamFullDetails(team1)}
