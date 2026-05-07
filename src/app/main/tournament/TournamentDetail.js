@@ -541,7 +541,7 @@ function TournamentDetail() {
 	const activeMembers = useSelector(({ Tournament }) => Tournament.tournament.activeMembers);
 	const user = useSelector(state => state.auth.user);
 	const isAdmin = checkIsAdmin(user);
-	const myPuuid = camilleRiotAuthService.getPuuid();
+	const myPuuid = camilleRiotAuthService.getAuthenticatedPuuid();
 
 	const [teamFormOpen, setTeamFormOpen] = useState(false);
 	const [editingTeam, setEditingTeam] = useState(null);

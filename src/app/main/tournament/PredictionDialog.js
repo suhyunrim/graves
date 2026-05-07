@@ -240,7 +240,7 @@ const useStyles = makeStyles()((theme) => ({
 function PredictionDialog({ open, onClose, onSuccess, tournamentId, matches, teams }) {
 	const { classes, cx } = useStyles();
 	const { classes: dialogClasses } = useDialogStyles();
-	const myPuuid = useMemo(() => camilleRiotAuthService.getPuuid(), []);
+	const myPuuid = useMemo(() => camilleRiotAuthService.getAuthenticatedPuuid(), []);
 
 	const teamMap = useMemo(() => {
 		const m = new Map();
