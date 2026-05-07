@@ -1,58 +1,87 @@
 <svg viewBox="0 0 140 160" xmlns="http://www.w3.org/2000/svg">
 	<defs>
-		<radialGradient id="m-halo" cx="0.5" cy="0.5" r="0.55">
-			<stop offset="0%" stop-color="rgba(186,230,253,0.6)"/>
-			<stop offset="55%" stop-color="rgba(186,230,253,0.15)"/>
-			<stop offset="100%" stop-color="rgba(186,230,253,0)"/>
+		<radialGradient id="t5-halo" cx="0.5" cy="0.5" r="0.6">
+			<stop offset="0%" stop-color="rgba(125,211,252,0.6)"/>
+			<stop offset="55%" stop-color="rgba(125,211,252,0.18)"/>
+			<stop offset="100%" stop-color="rgba(125,211,252,0)"/>
 		</radialGradient>
-		<linearGradient id="m-cup" x1="0" y1="0" x2="0" y2="1">
-			<stop offset="0%" stop-color="#FFFFFF"/>
-			<stop offset="35%" stop-color="#D9DEE5"/>
-			<stop offset="100%" stop-color="#525B6B"/>
+		<linearGradient id="t5-cup" x1="0" y1="0" x2="0" y2="1">
+			<stop offset="0%" stop-color="#F0F9FF"/>
+			<stop offset="35%" stop-color="#7DD3FC"/>
+			<stop offset="100%" stop-color="#0C4A6E"/>
 		</linearGradient>
-		<linearGradient id="m-base" x1="0" y1="0" x2="0" y2="1">
-			<stop offset="0%" stop-color="#9CA3AF"/>
-			<stop offset="100%" stop-color="#1F2937"/>
+		<linearGradient id="t5-base" x1="0" y1="0" x2="0" y2="1">
+			<stop offset="0%" stop-color="#0369A1"/>
+			<stop offset="100%" stop-color="#082F49"/>
 		</linearGradient>
-		<radialGradient id="m-shine" cx="0.3" cy="0.2" r="0.6">
+		<radialGradient id="t5-shine" cx="0.3" cy="0.2" r="0.6">
 			<stop offset="0%" stop-color="rgba(255,255,255,0.95)"/>
 			<stop offset="100%" stop-color="rgba(255,255,255,0)"/>
 		</radialGradient>
-		<radialGradient id="m-gem" cx="0.4" cy="0.3" r="0.7">
+		<linearGradient id="t5-diamond" x1="0" y1="0" x2="1" y2="1">
+			<stop offset="0%" stop-color="#FFFFFF"/>
+			<stop offset="50%" stop-color="#7DD3FC"/>
+			<stop offset="100%" stop-color="#0284C7"/>
+		</linearGradient>
+		<radialGradient id="t5-gem" cx="0.4" cy="0.3" r="0.7">
 			<stop offset="0%" stop-color="#DBEAFE"/>
 			<stop offset="50%" stop-color="#3B82F6"/>
 			<stop offset="100%" stop-color="#1E3A8A"/>
 		</radialGradient>
 	</defs>
-	<!-- Halo -->
-	<circle cx="70" cy="72" r="68" fill="url(#m-halo)"/>
-	<!-- Crown on top -->
-	<g transform="translate(70, 24)">
-		<path d="M-22,12 L-22,-2 L-12,8 L-6,-12 L0,4 L6,-12 L12,8 L22,-2 L22,12 Z" fill="#E5E7EB" stroke="#374151" stroke-width="1.2"/>
-		<rect x="-22" y="12" width="44" height="4" fill="#9CA3AF" stroke="#374151" stroke-width="0.8"/>
-		<circle cx="-12" cy="8" r="3" fill="url(#m-gem)" stroke="#1E3A8A" stroke-width="0.5"/>
-		<circle cx="0" cy="4" r="3.5" fill="#EF4444" stroke="#7F1D1D" stroke-width="0.5"/>
-		<circle cx="12" cy="8" r="3" fill="url(#m-gem)" stroke="#1E3A8A" stroke-width="0.5"/>
+	<!-- Tier 5: Diamond Crown — strong halo, ornate crown w/ diamond, multiple gems -->
+	<circle cx="70" cy="76" r="68" fill="url(#t5-halo)"/>
+	<!-- Sparkle accents -->
+	<g fill="#FFFFFF" opacity="0.9">
+		<polygon points="14,40 17,32 20,40 17,48"/>
+		<polygon points="14,40 6,37 14,40 22,37"/>
+		<polygon points="120,52 123,44 126,52 123,60"/>
+		<polygon points="120,52 112,49 120,52 128,49"/>
+		<polygon points="20,98 22,93 24,98 22,103"/>
+		<polygon points="116,100 118,95 120,100 118,105"/>
+	</g>
+	<!-- Big crown w/ central diamond -->
+	<g transform="translate(70, 26)">
+		<!-- Crown spires -->
+		<path d="M-22,10 L-22,-4 L-13,5 L-7,-12 L0,4 L7,-12 L13,5 L22,-4 L22,10 Z" fill="#FFFFFF" stroke="#0C4A6E" stroke-width="1.2"/>
+		<rect x="-22" y="10" width="44" height="4" fill="#7DD3FC" stroke="#0C4A6E" stroke-width="0.6"/>
+		<!-- Crown gems -->
+		<circle cx="-13" cy="5" r="2.6" fill="url(#t5-gem)" stroke="#1E3A8A" stroke-width="0.5"/>
+		<circle cx="13" cy="5" r="2.6" fill="url(#t5-gem)" stroke="#1E3A8A" stroke-width="0.5"/>
+		<!-- Big central diamond -->
+		<polygon points="0,-22 10,-8 0,8 -10,-8" fill="url(#t5-diamond)" stroke="#0C4A6E" stroke-width="1"/>
+		<line x1="-10" y1="-8" x2="10" y2="-8" stroke="#0C4A6E" stroke-width="0.5"/>
+		<polygon points="-2,-15 0,-22 2,-15 0,-12" fill="rgba(255,255,255,0.7)"/>
 	</g>
 	<!-- Cup body -->
-	<path d="M38,46 L102,46 Q104,76 90,96 L50,96 Q36,76 38,46 Z" fill="url(#m-cup)" stroke="#374151" stroke-width="0.8"/>
-	<rect x="38" y="58" width="64" height="3" fill="#FFFFFF" opacity="0.5"/>
-	<rect x="42" y="86" width="56" height="2" fill="#FFFFFF" opacity="0.4"/>
-	<!-- Handles -->
-	<path d="M38,54 Q18,54 18,72 Q18,88 38,88" stroke="url(#m-cup)" stroke-width="6.5" fill="none" stroke-linecap="round"/>
-	<path d="M102,54 Q122,54 122,72 Q122,88 102,88" stroke="url(#m-cup)" stroke-width="6.5" fill="none" stroke-linecap="round"/>
+	<path d="M38,48 L102,48 Q104,76 90,96 L50,96 Q36,76 38,48 Z" fill="url(#t5-cup)" stroke="#0C4A6E" stroke-width="0.8"/>
+	<!-- Gold trim with small accents -->
+	<rect x="38" y="60" width="64" height="3" fill="#FFD700" opacity="0.6"/>
+	<rect x="42" y="86" width="56" height="2" fill="#FFD700" opacity="0.55"/>
+	<!-- Side gems -->
+	<circle cx="46" cy="78" r="2.8" fill="url(#t5-gem)" stroke="#0C4A6E" stroke-width="0.5"/>
+	<circle cx="94" cy="78" r="2.8" fill="url(#t5-gem)" stroke="#0C4A6E" stroke-width="0.5"/>
+	<!-- Handles ornate -->
+	<path d="M38,55 Q18,55 18,74 Q18,90 38,90" stroke="url(#t5-cup)" stroke-width="6.5" fill="none" stroke-linecap="round"/>
+	<path d="M102,55 Q122,55 122,74 Q122,90 102,90" stroke="url(#t5-cup)" stroke-width="6.5" fill="none" stroke-linecap="round"/>
+	<!-- Handle curl details -->
+	<circle cx="18" cy="74" r="3" fill="none" stroke="#FFD700" stroke-width="1" opacity="0.6"/>
+	<circle cx="122" cy="74" r="3" fill="none" stroke="#FFD700" stroke-width="1" opacity="0.6"/>
 	<!-- Highlight -->
-	<ellipse cx="54" cy="64" rx="9" ry="22" fill="url(#m-shine)"/>
-	<!-- Center medallion -->
-	<circle cx="70" cy="72" r="13" fill="#F3F4F6" stroke="#374151" stroke-width="1.6"/>
-	<circle cx="70" cy="72" r="9" fill="url(#m-gem)" stroke="#374151" stroke-width="0.6"/>
-	<polygon points="68,68 72,68 70,76" fill="rgba(255,255,255,0.55)"/>
-	<!-- Stem -->
-	<rect x="58" y="96" width="24" height="16" fill="url(#m-base)"/>
+	<ellipse cx="54" cy="66" rx="9" ry="22" fill="url(#t5-shine)"/>
+	<!-- Center medallion w/ diamond -->
+	<circle cx="70" cy="72" r="13" fill="#FFD700" stroke="#0C4A6E" stroke-width="1.6"/>
+	<circle cx="70" cy="72" r="9.5" fill="#FFFFFF" stroke="#0C4A6E" stroke-width="0.5"/>
+	<polygon points="70,64 78,72 70,80 62,72" fill="url(#t5-diamond)" stroke="#0C4A6E" stroke-width="0.5"/>
+	<line x1="62" y1="72" x2="78" y2="72" stroke="#0C4A6E" stroke-width="0.4"/>
+	<!-- Stem ornate -->
+	<rect x="58" y="96" width="24" height="16" fill="url(#t5-base)"/>
+	<rect x="56" y="96" width="28" height="3" fill="#FFD700" opacity="0.7"/>
 	<!-- Base -->
-	<rect x="42" y="112" width="56" height="11" rx="2" fill="url(#m-base)"/>
-	<rect x="32" y="123" width="76" height="14" rx="3" fill="url(#m-base)"/>
-	<rect x="26" y="137" width="88" height="6" rx="2" fill="#111827"/>
+	<rect x="42" y="112" width="56" height="11" rx="2" fill="url(#t5-base)"/>
+	<rect x="32" y="123" width="76" height="14" rx="3" fill="url(#t5-base)"/>
+	<rect x="26" y="137" width="88" height="6" rx="2" fill="#082F49"/>
+	<rect x="44" y="113" width="52" height="2" fill="#FFD700" opacity="0.5"/>
 	<!-- Floor shadow -->
-	<ellipse cx="70" cy="148" rx="40" ry="3" fill="rgba(0,0,0,0.25)"/>
+	<ellipse cx="70" cy="148" rx="44" ry="3.5" fill="rgba(0,0,0,0.3)"/>
 </svg>
