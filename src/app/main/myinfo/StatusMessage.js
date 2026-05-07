@@ -19,6 +19,7 @@ import { makeStyles } from 'tss-react/mui';
 import { keyframes } from '@emotion/react';
 import useToast from 'app/utility/useToast';
 import getApiErrorMessage from 'app/utility/getApiErrorMessage';
+import useDiscordLoginGate from '../components/useDiscordLoginGate';
 import * as Actions from './store/actions';
 
 const MAX_LEN = 50;
@@ -216,6 +217,7 @@ function StatusMessage({ groupId, puuid, editable }) {
 	const [saving, setSaving] = useState(false);
 	const [confirmDelete, setConfirmDelete] = useState(false);
 	const toast = useToast();
+	const { requireLogin: requireDiscordLogin, gate: discordLoginGate } = useDiscordLoginGate();
 
 	useEffect(() => {
 		if (editOpen) {
@@ -227,6 +229,7 @@ function StatusMessage({ groupId, puuid, editable }) {
 		const trimmed = draft.trim();
 		if (!trimmed || saving) return;
 		if (trimmed.length > MAX_LEN) return;
+		if (!requireDiscordLogin('한마디 작성')) return;
 
 		setSaving(true);
 		const isUpdate = Boolean(statusMessage);
@@ -379,6 +382,7 @@ function StatusMessage({ groupId, puuid, editable }) {
 				</DialogActions>
 			</Dialog>
 
+			{discordLoginGate}
 		</>
 	);
 }

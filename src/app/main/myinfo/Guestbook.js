@@ -30,6 +30,7 @@ import camilleRiotAuthService from 'app/services/camilleRiotAuthService';
 import getApiErrorMessage from 'app/utility/getApiErrorMessage';
 import startDiscordLogin from 'app/utility/discordAuth';
 import { getProfileIconUrl } from 'app/main/challenge/ddragonUtils';
+import useDiscordLoginGate from '../components/useDiscordLoginGate';
 import {
 	fetchProfileComments,
 	createProfileComment,
@@ -871,6 +872,7 @@ function Guestbook({ groupId, puuid }) {
 	const [highlightId, setHighlightId] = useState(null);
 	const [members, setMembers] = useState([]);
 	const toast = useToast();
+	const { requireLogin: requireDiscordLogin, gate: discordLoginGate } = useDiscordLoginGate();
 
 	const mentionsData = useMemo(
 		() => (members || []).map(m => ({ id: m.puuid, display: m.name })),
@@ -928,6 +930,7 @@ function Guestbook({ groupId, puuid }) {
 			toast.error(`최대 ${MAX_LEN}자까지 입력 가능합니다.`);
 			return;
 		}
+		if (!requireDiscordLogin('방명록 작성')) return;
 		setSubmitting(true);
 		const backendContent = toBackendMentionFormat(trimmed);
 		createProfileComment(groupId, puuid, backendContent, isSecret, null)
@@ -946,6 +949,7 @@ function Guestbook({ groupId, puuid }) {
 
 	function handleSubmitReply(target, payload, resetForm) {
 		if (replySubmittingId) return;
+		if (!requireDiscordLogin('답글 작성')) return;
 		setReplySubmittingId(target.id);
 		createProfileComment(groupId, puuid, payload.content, payload.isSecret, target.id)
 			.then(newReply => {
@@ -1023,10 +1027,7 @@ function Guestbook({ groupId, puuid }) {
 	}
 
 	function handleToggleLike(comment) {
-		if (!isLoggedIn) {
-			toast.error('로그인이 필요합니다.');
-			return;
-		}
+		if (!requireDiscordLogin('좋아요')) return;
 		const commentId = comment.id;
 		if (pendingLikeIds[commentId]) return;
 
@@ -1291,6 +1292,7 @@ function Guestbook({ groupId, puuid }) {
 				</DialogActions>
 			</Dialog>
 
+			{discordLoginGate}
 		</div>
 	);
 }

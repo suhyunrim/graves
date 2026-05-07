@@ -21,6 +21,7 @@ import withReducer from 'app/store/withReducer';
 import getLatesetRiotDataVersion from 'app/utility/getLatesetRiotDataVersion';
 import getApiErrorMessage from 'app/utility/getApiErrorMessage';
 import { MyInfoSkeleton } from '../components/SkeletonLoaders';
+import useDiscordLoginGate from '../components/useDiscordLoginGate';
 import AchievementContent from '../achievement/AchievementContent';
 import achievementReducer from '../achievement/store/reducers';
 import MyInfoHeader from './MyInfoHeader';
@@ -777,12 +778,14 @@ function MyInfoPage(props) {
 	const [removeDialogOpen, setRemoveDialogOpen] = useState(false);
 	const toast = useToast();
 	const [listDialog, setListDialog] = useState({ open: false, title: '', data: [], type: '' });
+	const { requireLogin: requireDiscordLogin, gate: discordLoginGate } = useDiscordLoginGate();
 
 	const isMyPage = !puuid || puuid === myPuuid;
 	const isLoggedIn = Boolean(myPuuid);
 
 	function handleRegisterSubAccount() {
 		if (!subAccountInput.trim()) return;
+		if (!requireDiscordLogin('부캐 등록')) return;
 		setSubAccountLoading(true);
 		dispatch(Actions.registerSubAccount(subAccountInput.trim(), user.reprGroup.groupId))
 			.then(result => {
@@ -1380,6 +1383,7 @@ function MyInfoPage(props) {
 						</DialogActions>
 					</Dialog>
 
+					{discordLoginGate}
 				</div>
 			}
 		/>
