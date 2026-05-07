@@ -42,8 +42,11 @@ import {
 	getTierLabel,
 	getTierShortLabel,
 	getTierEmblemUrl,
-	bestOfLabel
+	bestOfLabel,
+	displayNameForPuuid,
+	isValidMatch
 } from './tournamentUtils';
+import { CATEGORY_LABELS } from '../achievementDashboard/constants';
 import PositionIcon from './PositionIcon';
 import TournamentBracket from './TournamentBracket';
 import TeamFormDialog from './TeamFormDialog';
@@ -151,33 +154,55 @@ const useStyles = makeStyles()((theme) => ({
 			borderRadius: 12
 		}
 	},
-	championBanner: {
-		marginTop: 14,
-		padding: '14px 18px',
-		background: 'linear-gradient(135deg, rgba(255, 215, 0, 0.18) 0%, rgba(255, 215, 0, 0.06) 100%)',
-		border: '1px solid rgba(255, 215, 0, 0.4)',
+	headerBanner: {
 		borderRadius: 14,
 		display: 'flex',
 		alignItems: 'center',
 		gap: 12,
 		fontFamily: '"Rajdhani", "Noto Sans KR", sans-serif',
-		fontSize: '1.6rem',
-		color: '#ffd700',
 		fontWeight: 700,
-		letterSpacing: '0.03em',
 		minWidth: 0,
 		wordBreak: 'break-word',
 		[theme.breakpoints.down('sm')]: {
 			padding: '10px 14px',
-			fontSize: '1.35rem',
 			gap: 8,
 			borderRadius: 12
+		}
+	},
+	championBanner: {
+		marginTop: 14,
+		padding: '14px 18px',
+		background: 'linear-gradient(135deg, rgba(255, 215, 0, 0.18) 0%, rgba(255, 215, 0, 0.06) 100%)',
+		border: '1px solid rgba(255, 215, 0, 0.4)',
+		fontSize: '1.6rem',
+		color: '#ffd700',
+		letterSpacing: '0.03em',
+		[theme.breakpoints.down('sm')]: {
+			fontSize: '1.35rem'
 		}
 	},
 	championIcon: {
 		fontSize: '2.4rem',
 		[theme.breakpoints.down('sm')]: {
 			fontSize: '1.8rem'
+		}
+	},
+	predictionPerfectBanner: {
+		marginTop: 8,
+		padding: '12px 16px',
+		background: 'linear-gradient(135deg, rgba(0, 212, 255, 0.15) 0%, rgba(0, 212, 255, 0.05) 100%)',
+		border: '1px solid rgba(0, 212, 255, 0.35)',
+		fontSize: '1.45rem',
+		color: '#00d4ff',
+		letterSpacing: '0.02em',
+		[theme.breakpoints.down('sm')]: {
+			fontSize: '1.25rem'
+		}
+	},
+	predictionPerfectIcon: {
+		fontSize: '2rem',
+		[theme.breakpoints.down('sm')]: {
+			fontSize: '1.6rem'
 		}
 	},
 	container: {
@@ -499,7 +524,7 @@ const useStyles = makeStyles()((theme) => ({
 }));
 
 function TournamentDetail() {
-	const { classes } = useStyles();
+	const { classes, cx } = useStyles();
 	const { classes: dialogClasses } = useDialogStyles();
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
@@ -541,6 +566,16 @@ function TournamentDetail() {
 	}, [activeMembers]);
 
 	const championTeam = detail && detail.championTeamId ? teamMap.get(detail.championTeamId) : null;
+
+	// 정상 매치(BYE 제외) 모두 적중한 사용자 = "이번 토너먼트 승부의신".
+	// 진행 중엔 settledCount < validMatchCount 라 자연스럽게 빈 배열.
+	const perfectUsers = useMemo(() => {
+		const validMatchCount = matches.filter(isValidMatch).length;
+		if (validMatchCount === 0) return [];
+		return (leaderboard || []).filter(
+			u => u.settledCount === validMatchCount && u.correctCount === validMatchCount
+		);
+	}, [matches, leaderboard]);
 
 	function reload() {
 		dispatch(Actions.getTournamentDetail(tournamentId));
@@ -677,9 +712,17 @@ function TournamentDetail() {
 						<span className={classes.metaPill}>결승 {bestOfLabel(detail.finalBestOf)}</span>
 					</div>
 					{championTeam && (
-						<div className={classes.championBanner}>
+						<div className={cx(classes.headerBanner, classes.championBanner)}>
 							<EmojiEventsIcon className={classes.championIcon} />
 							우승 — {championTeam.name}
+						</div>
+					)}
+					{isFinished && perfectUsers.length > 0 && (
+						<div className={cx(classes.headerBanner, classes.predictionPerfectBanner)}>
+							<span className={classes.predictionPerfectIcon} role="img" aria-label="crystal-ball">
+								{CATEGORY_LABELS.prediction_perfect.icon}
+							</span>
+							{CATEGORY_LABELS.prediction_perfect.label} — {perfectUsers.map(u => displayNameForPuuid(u.summonerName, u.userPuuid)).join(', ')}
 						</div>
 					)}
 					{isAdmin && (

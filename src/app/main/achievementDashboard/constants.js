@@ -47,7 +47,8 @@ export const CATEGORY_LABELS = {
 	night_owl: { label: '밤새기', icon: '🦉', description: '새벽 시간대에 플레이하세요' },
 	channel_creator: { label: '채널 개척자', icon: '🔊', description: '디스코드 보이스 채널을 생성하세요' },
 	late_night: { label: '야식', icon: '🌙', description: '늦은 밤 시간대에 플레이하세요' },
-	challenge: { label: '챌린지 메달', icon: '🏅', description: '챌린지에서 메달을 획득하세요' }
+	challenge: { label: '챌린지 메달', icon: '🏅', description: '챌린지에서 메달을 획득하세요' },
+	prediction_perfect: { label: '승부의신', icon: '🔮', description: '토너먼트의 모든 매치 결과를 맞히세요' }
 };
 
 export const CATEGORY_ORDER = [
@@ -75,5 +76,6 @@ export const CATEGORY_ORDER = [
 	'night_owl',
 	'channel_creator',
 	'late_night',
-	'challenge'
+	'challenge',
+	'prediction_perfect'
 ];
