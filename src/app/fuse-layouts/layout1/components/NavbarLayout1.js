@@ -1,7 +1,6 @@
 import FuseScrollbars from '@fuse/core/FuseScrollbars';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
 import Icon from '@mui/material/Icon';
 import { useTheme } from '@mui/material/styles';
 import { makeStyles } from 'tss-react/mui';
@@ -11,7 +10,6 @@ import NavbarMobileToggleButton from 'app/fuse-layouts/shared-components/NavbarM
 import Navigation from 'app/fuse-layouts/shared-components/Navigation';
 import UserNavbarHeader from 'app/fuse-layouts/shared-components/UserNavbarHeader';
 import NotificationBell from 'app/fuse-layouts/shared-components/notifications/NotificationBell';
-import startDiscordLogin from 'app/utility/discordAuth';
 import clsx from 'clsx';
 import React from 'react';
 import { useSelector } from 'react-redux';
@@ -60,22 +58,6 @@ const useStyles = makeStyles()({
 		textAlign: 'center',
 		letterSpacing: '0.05em',
 		userSelect: 'all'
-	},
-	discordLoginBtn: {
-		background: 'linear-gradient(135deg, #5865F2 0%, #4752c4 100%)',
-		color: '#fff',
-		fontFamily: '"Noto Sans KR", sans-serif',
-		fontWeight: 700,
-		fontSize: '1.1rem',
-		padding: '4px 14px',
-		borderRadius: 8,
-		textTransform: 'none',
-		marginRight: 8,
-		whiteSpace: 'nowrap',
-		boxShadow: '0 2px 10px rgba(88, 101, 242, 0.3)',
-		'&:hover': {
-			background: 'linear-gradient(135deg, #4752c4 0%, #3942a8 100%)'
-		}
 	}
 });
 
@@ -99,18 +81,6 @@ function NavbarLayout1(props) {
 				<div className="flex flex-1 mx-8">
 					<Logo />
 				</div>
-
-				{!isDiscordLoggedIn && (
-					<Button
-						className={classes.discordLoginBtn}
-						onClick={() => {
-							const returnTo = window.location.pathname + window.location.search + window.location.hash;
-							startDiscordLogin(returnTo);
-						}}
-					>
-						디스코드 로그인
-					</Button>
-				)}
 
 				{isAuthenticated && isDiscordLoggedIn && <NotificationBell />}
 

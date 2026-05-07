@@ -10,6 +10,7 @@ import Divider from '@mui/material/Divider';
 import { makeStyles } from 'tss-react/mui';
 import Typography from '@mui/material/Typography';
 import * as authActions from 'app/auth/store/actions';
+import startDiscordLogin from 'app/utility/discordAuth';
 import clsx from 'clsx';
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -121,6 +122,23 @@ const useStyles = makeStyles()((theme) => ({
 	divider: {
 		background: 'rgba(0, 212, 255, 0.2)',
 		margin: '8px 16px'
+	},
+	discordLoginBtn: {
+		background: 'linear-gradient(135deg, #5865F2 0%, #4752c4 100%)',
+		color: '#fff',
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontWeight: 700,
+		fontSize: '1.15rem',
+		padding: '6px 16px',
+		borderRadius: 8,
+		textTransform: 'none',
+		display: 'flex',
+		alignItems: 'center',
+		gap: 6,
+		boxShadow: '0 2px 10px rgba(88, 101, 242, 0.3)',
+		'&:hover': {
+			background: 'linear-gradient(135deg, #4752c4 0%, #3942a8 100%)'
+		}
 	}
 }));
 
@@ -243,12 +261,25 @@ function UserNavbarHeader(props) {
 					}
 				/>
 			</AppBar>
-			{user.data.discordUser && (
-				<div className={classes.discordInfo}>
-					<img className={classes.discordIcon} src="/assets/images/logos/discord-mark-white.svg" alt="Discord" />
-					<span className={classes.discordName}>{user.data.discordUser.globalName || user.data.discordUser.username}</span>
-				</div>
-			)}
+			<div className={classes.discordInfo}>
+				{user.data.discordUser ? (
+					<>
+						<img className={classes.discordIcon} src="/assets/images/logos/discord-mark-white.svg" alt="Discord" />
+						<span className={classes.discordName}>{user.data.discordUser.globalName || user.data.discordUser.username}</span>
+					</>
+				) : (
+					<Button
+						className={classes.discordLoginBtn}
+						onClick={() => {
+							const returnTo = window.location.pathname + window.location.search + window.location.hash;
+							startDiscordLogin(returnTo);
+						}}
+					>
+						<img className={classes.discordIcon} src="/assets/images/logos/discord-mark-white.svg" alt="Discord" />
+						디스코드 로그인
+					</Button>
+				)}
+			</div>
 		</>
 	);
 }

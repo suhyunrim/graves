@@ -34,11 +34,18 @@ const useStyles = makeStyles()((theme) => ({
 		padding: '8px 22px',
 		borderRadius: 10,
 		textTransform: 'none',
+		display: 'flex',
+		alignItems: 'center',
+		gap: 8,
 		boxShadow: '0 4px 18px rgba(88, 101, 242, 0.35)',
 		'&:hover': {
 			background: 'linear-gradient(135deg, #4752c4 0%, #3942a8 100%)',
 			boxShadow: '0 6px 22px rgba(88, 101, 242, 0.5)'
 		}
+	},
+	discordIcon: {
+		width: 18,
+		height: 18
 	}
 }));
 
@@ -75,6 +82,7 @@ function LoginRequiredDialog({ open, onClose, actionLabel }) {
 					취소
 				</Button>
 				<Button className={classes.discordBtn} onClick={handleLogin}>
+					<img className={classes.discordIcon} src="/assets/images/logos/discord-mark-white.svg" alt="Discord" />
 					디스코드 로그인
 				</Button>
 			</DialogActions>
