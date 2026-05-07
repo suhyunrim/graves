@@ -7,6 +7,7 @@ import {
 	Button
 } from '@mui/material';
 import { makeStyles } from 'tss-react/mui';
+import { keyframes } from '@emotion/react';
 import StarIcon from '@mui/icons-material/Star';
 import camilleRiotAuthService from 'app/services/camilleRiotAuthService/camilleRiotAuthService';
 import useDialogStyles from '../components/dialogStyles';
@@ -61,6 +62,12 @@ function resetDescendants(map, parentMatchId, matches) {
 	}
 	return next;
 }
+
+const shakeAnim = keyframes`
+	0%, 100% { transform: translateX(0); }
+	20%, 60% { transform: translateX(-5px); }
+	40%, 80% { transform: translateX(5px); }
+`;
 
 const useStyles = makeStyles()((theme) => ({
 	paperWidth: {
@@ -154,6 +161,13 @@ const useStyles = makeStyles()((theme) => ({
 		borderColor: 'rgba(255, 215, 0, 0.5)',
 		boxShadow: '0 0 12px rgba(255, 215, 0, 0.15)'
 	},
+	matchCardError: {
+		borderColor: '#ff6b6b',
+		boxShadow: '0 0 14px rgba(255, 107, 107, 0.35)'
+	},
+	matchCardShake: {
+		animation: `${shakeAnim} 0.5s ease-in-out`
+	},
 	matchHeader: {
 		fontFamily: '"Noto Sans KR", sans-serif',
 		fontSize: '1rem',
@@ -241,15 +255,21 @@ function PredictionDialog({ open, onClose, onSuccess, tournamentId, matches, tea
 	const [predictionMap, setPredictionMap] = useState(initialMap);
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState('');
+	// 제출 시도 카운터 — 매치 카드 key 에 섞어서 매 시도마다 shake 애니메이션 재실행 트리거.
+	const [submitAttempts, setSubmitAttempts] = useState(0);
 
 	const groupedRounds = useMemo(() => groupMatchesByRound(matches || []), [matches]);
 	const totalRounds = groupedRounds.length;
 
-	// BYE 매치는 자동 진출이라 예측 대상 X. 그 외는 1라운드 정상 매치 + 다음 라운드 매치 모두 픽 필수.
-	const requiredMatchCount = useMemo(
-		() => (matches || []).filter(m => !isByeMatch(m)).length,
-		[matches]
-	);
+	// 픽 필수 매치 = visibleMatches 의 합 (1라운드 BYE 만 제외, 그 외 라운드는 BYE 도 트리상 effective 표시되어 픽 가능).
+	const requiredMatchCount = useMemo(() => {
+		let count = 0;
+		groupedRounds.forEach(([round, roundMatches]) => {
+			const visible = round === 1 ? roundMatches.filter(m => !isByeMatch(m)) : roundMatches;
+			count += visible.length;
+		});
+		return count;
+	}, [groupedRounds]);
 	const pickedCount = Object.keys(predictionMap).length;
 	const allPicked = requiredMatchCount > 0 && pickedCount >= requiredMatchCount;
 	const remainingCount = Math.max(0, requiredMatchCount - pickedCount);
@@ -269,9 +289,9 @@ function PredictionDialog({ open, onClose, onSuccess, tournamentId, matches, tea
 	}
 
 	function handleSubmit() {
-		// 모든 매치 다 찍어야 제출 가능 — 일부만 보내면 leaderboard 정확도 우선 정렬에서 손해
-		// 보는 사용자가 생기지 않도록 프론트에서 차단.
+		// 모든 매치 다 찍어야 제출 — 미완료면 카운터 +1 해서 미완료 카드 shake 재실행.
 		if (!allPicked) {
+			setSubmitAttempts(prev => prev + 1);
 			setError(`아직 ${remainingCount}매치 더 예측해야 합니다.`);
 			return;
 		}
@@ -370,12 +390,15 @@ function PredictionDialog({ open, onClose, onSuccess, tournamentId, matches, tea
 													);
 												};
 												const isPicked = pick != null;
+												const errored = !isPicked && submitAttempts > 0;
 												return (
 													<div
-														key={m.id}
+														// 미완료 매치는 submitAttempts 가 바뀔 때마다 remount 되어 shake 재실행.
+														key={!isPicked ? `${m.id}-${submitAttempts}` : m.id}
 														className={cx(
 															classes.matchCard,
-															!isPicked && classes.matchCardIncomplete
+															!isPicked && (errored ? classes.matchCardError : classes.matchCardIncomplete),
+															errored && classes.matchCardShake
 														)}
 													>
 														<div className={classes.matchHeader}>매치 {m.bracketSlot + 1}</div>
@@ -400,7 +423,7 @@ function PredictionDialog({ open, onClose, onSuccess, tournamentId, matches, tea
 				<Button
 					className={dialogClasses.saveBtn}
 					onClick={handleSubmit}
-					disabled={loading || noMatches || !allPicked}
+					disabled={loading || noMatches}
 				>
 					{loading ? '저장 중...' : '제출'}
 				</Button>
