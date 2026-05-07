@@ -6,6 +6,7 @@ import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import camilleRiotAuthService from 'app/services/camilleRiotAuthService/camilleRiotAuthService';
 import PredictionDialog from './PredictionDialog';
 import { STATUS, displayNameForPuuid } from './tournamentUtils';
+import useDiscordLoginGate from '../components/useDiscordLoginGate';
 
 const LEADER_GRID_DESKTOP = '60px 1fr 100px 120px';
 const LEADER_GRID_MOBILE = '40px 1fr 70px 90px';
@@ -157,6 +158,12 @@ function PredictionContent({ tournamentId, status, predictionsLocked, matches, t
 	const { classes, cx } = useStyles();
 	const myPuuid = useMemo(() => camilleRiotAuthService.getPuuid(), []);
 	const [dialogOpen, setDialogOpen] = useState(false);
+	const { requireLogin: requireDiscordLogin, gate: discordLoginGate } = useDiscordLoginGate();
+
+	function handleOpenDialog() {
+		if (!requireDiscordLogin('승부예측')) return;
+		setDialogOpen(true);
+	}
 
 	const isPreparing = status === STATUS.PREPARING;
 	const isFinished = status === STATUS.FINISHED;
@@ -188,7 +195,7 @@ function PredictionContent({ tournamentId, status, predictionsLocked, matches, t
 					className={classes.primaryBtn}
 					startIcon={<EditNoteIcon />}
 					disabled={!canPredict}
-					onClick={() => setDialogOpen(true)}
+					onClick={handleOpenDialog}
 				>
 					내 예측 입력
 				</Button>
@@ -240,6 +247,7 @@ function PredictionContent({ tournamentId, status, predictionsLocked, matches, t
 					teams={teams}
 				/>
 			)}
+			{discordLoginGate}
 		</div>
 	);
 }
