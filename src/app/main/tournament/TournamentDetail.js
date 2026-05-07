@@ -41,7 +41,8 @@ import {
 	getTierName,
 	getTierLabel,
 	getTierShortLabel,
-	getTierEmblemUrl
+	getTierEmblemUrl,
+	bestOfLabel
 } from './tournamentUtils';
 import PositionIcon from './PositionIcon';
 import TournamentBracket from './TournamentBracket';
@@ -672,8 +673,8 @@ function TournamentDetail() {
 								? `${detail.teamCount}팀 · ${detail.bracketSize}강`
 								: `${teamCount}팀 등록됨`}
 						</span>
-						<span className={classes.metaPill}>BO{detail.defaultBestOf}</span>
-						<span className={classes.metaPill}>결승 BO{detail.finalBestOf}</span>
+						<span className={classes.metaPill}>{bestOfLabel(detail.defaultBestOf)}</span>
+						<span className={classes.metaPill}>결승 {bestOfLabel(detail.finalBestOf)}</span>
 					</div>
 					{championTeam && (
 						<div className={classes.championBanner}>
@@ -744,7 +745,8 @@ function TournamentDetail() {
 								teams={teams}
 								roundLabels={roundLabels}
 								championTeamId={detail.championTeamId}
-								canEdit={isAdmin && isInProgress}
+								isInProgress={isInProgress}
+								isAdmin={isAdmin}
 								onEditMatch={(m) => setMatchEditTarget(m)}
 								verbose={bracketVerbose}
 								activeMembers={activeMembers}

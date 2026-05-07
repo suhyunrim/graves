@@ -117,6 +117,13 @@ export function roundLabelFor(round, totalRounds) {
 	return `${teamsThisRound}강`;
 }
 
+// "BO5" → "5판 3선" 같은 한글 표기. BO1 은 단판으로 분기.
+export function bestOfLabel(n) {
+	if (!n) return '';
+	if (n === 1) return '단판';
+	return `${n}판 ${Math.ceil(n / 2)}선`;
+}
+
 export function groupMatchesByRound(matches) {
 	const map = new Map();
 	matches.forEach(m => {
@@ -142,8 +149,8 @@ export function validateMatchScore(team1Score, team2Score, bestOf) {
 	const winScore = Math.ceil(bestOf / 2);
 	const winner = team1Score > team2Score ? team1Score : team2Score;
 	const loser = team1Score > team2Score ? team2Score : team1Score;
-	if (winner !== winScore) return `BO${bestOf}는 승자 ${winScore}점이어야 합니다.`;
-	if (loser >= winScore) return `BO${bestOf}는 패자 ${winScore - 1}점 이하여야 합니다.`;
+	if (winner !== winScore) return `${bestOfLabel(bestOf)}는 승자 ${winScore}점이어야 합니다.`;
+	if (loser >= winScore) return `${bestOfLabel(bestOf)}는 패자 ${winScore - 1}점 이하여야 합니다.`;
 	return null;
 }
 

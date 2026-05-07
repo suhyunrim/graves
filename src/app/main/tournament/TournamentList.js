@@ -15,7 +15,7 @@ import reducer from './store/reducers';
 import * as Actions from './store/actions';
 import TournamentCreateDialog from './TournamentCreateDialog';
 import PositionIcon from './PositionIcon';
-import { STATUS_LABELS, STATUS_COLORS, checkIsAdmin } from './tournamentUtils';
+import { STATUS_LABELS, STATUS_COLORS, checkIsAdmin, bestOfLabel } from './tournamentUtils';
 
 const useStyles = makeStyles()((theme) => ({
 	layoutRoot: {
@@ -349,7 +349,7 @@ function TournamentList() {
 											</div>
 										)}
 										<div className={classes.cardMeta}>
-											BO{t.defaultBestOf} (결승 BO{t.finalBestOf})
+											{bestOfLabel(t.defaultBestOf)} (결승 {bestOfLabel(t.finalBestOf)})
 										</div>
 										{t.championTeam && (
 											<div className={classes.cardChampion}>

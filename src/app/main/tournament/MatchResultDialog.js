@@ -3,7 +3,7 @@ import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField } 
 import { makeStyles } from 'tss-react/mui';
 import useDialogStyles from '../components/dialogStyles';
 import * as Actions from './store/actions';
-import { validateMatchScore } from './tournamentUtils';
+import { validateMatchScore, bestOfLabel } from './tournamentUtils';
 
 const useStyles = makeStyles()((theme) => ({
 	paperWidth: {
@@ -112,7 +112,7 @@ function MatchResultDialog({ open, onClose, onSuccess, match, team1, team2 }) {
 			slotProps={{ paper: { className: cx(dialogClasses.paperCyan, classes.paperWidth) } }}
 		>
 			<DialogTitle className={dialogClasses.titleCyan}>매치 결과 입력</DialogTitle>
-			<div className={dialogClasses.subtitle}>BO{match.bestOf} · 승자 {winScore}점</div>
+			<div className={dialogClasses.subtitle}>{bestOfLabel(match.bestOf)} · 승자 {winScore}점</div>
 			<DialogContent className={dialogClasses.contentPad}>
 				<div className={classes.scoreRow}>
 					<div className={classes.teamLabel}>{team1 ? team1.name : 'TBD'}</div>
