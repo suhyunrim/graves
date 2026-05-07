@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, MenuItem } from '@mui/material';
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField } from '@mui/material';
 import { makeStyles } from 'tss-react/mui';
 import useDialogStyles from '../components/dialogStyles';
 import * as Actions from './store/actions';
-import { TROPHY_TYPES, TROPHY_TYPE_ORDER } from './tournamentUtils';
+import TrophyTypeGrid from './TrophyTypeGrid';
 
 const useStyles = makeStyles()((theme) => ({
 	paperWidth: {
@@ -110,21 +110,12 @@ function TournamentEditDialog({ open, onClose, onSuccess, tournament }) {
 					autoFocus
 					inputProps={{ maxLength: 60 }}
 				/>
-				<TextField
-					className={classes.field}
+				<TrophyTypeGrid
 					label="트로피 종류"
 					value={trophyType}
-					onChange={e => setTrophyType(e.target.value)}
-					variant="outlined"
-					fullWidth
-					select
+					onChange={setTrophyType}
 					helperText="우승 시 표시되는 트로피. 미지정도 가능."
-				>
-					<MenuItem value="">미지정</MenuItem>
-					{TROPHY_TYPE_ORDER.map(t => (
-						<MenuItem key={t} value={t}>{TROPHY_TYPES[t].ko}</MenuItem>
-					))}
-				</TextField>
+				/>
 				{error && <div className={classes.errorText}>{error}</div>}
 			</DialogContent>
 			<DialogActions className={dialogClasses.actionsPad}>

@@ -2,7 +2,7 @@ import React from 'react';
 import { makeStyles } from 'tss-react/mui';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import { Link } from 'react-router-dom';
-import { TROPHY_TYPES, getTrophyLabel, getTrophyIcon } from 'app/main/tournament/tournamentUtils';
+import { getTrophyIcon } from 'app/main/tournament/tournamentUtils';
 
 const useStyles = makeStyles()((theme) => ({
 	root: {
@@ -88,13 +88,6 @@ const useStyles = makeStyles()((theme) => ({
 			fontSize: '2.6rem'
 		}
 	},
-	trophyLabel: {
-		fontFamily: '"Rajdhani", "Noto Sans KR", sans-serif',
-		fontSize: '1.2rem',
-		fontWeight: 700,
-		color: '#ffd700',
-		letterSpacing: '0.02em'
-	},
 	tournamentName: {
 		fontFamily: '"Noto Sans KR", sans-serif',
 		fontSize: '1.15rem',
@@ -140,7 +133,6 @@ function TrophyCabinet({ championships }) {
 			) : (
 				<div className={classes.grid}>
 					{list.map(t => {
-						const trophyLabel = getTrophyLabel(t.trophyType) || '우승';
 						const trophyIcon = getTrophyIcon(t.trophyType);
 						return (
 							<Link
@@ -149,11 +141,10 @@ function TrophyCabinet({ championships }) {
 								className={classes.card}
 							>
 								{trophyIcon ? (
-									<img className={classes.trophyImg} src={trophyIcon} alt={trophyLabel} />
+									<img className={classes.trophyImg} src={trophyIcon} alt="" />
 								) : (
 									<EmojiEventsIcon className={classes.trophyFallback} />
 								)}
-								<div className={classes.trophyLabel}>{trophyLabel}</div>
 								<div className={classes.tournamentName} title={t.tournamentName}>
 									{t.tournamentName}
 								</div>

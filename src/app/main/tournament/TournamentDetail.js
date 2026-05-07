@@ -46,7 +46,6 @@ import {
 	bestOfLabel,
 	displayNameForPuuid,
 	isValidMatch,
-	getTrophyLabel,
 	getTrophyIcon
 } from './tournamentUtils';
 import { CATEGORY_LABELS } from '../achievementDashboard/constants';
@@ -744,18 +743,17 @@ function TournamentDetail() {
 						{detail.trophyType && (
 							<span className={cx(classes.metaPill, classes.trophyPill)}>
 								<img className={classes.trophyPillIcon} src={getTrophyIcon(detail.trophyType)} alt="" />
-								{getTrophyLabel(detail.trophyType)}
 							</span>
 						)}
 					</div>
 					{championTeam && (
 						<div className={cx(classes.headerBanner, classes.championBanner)}>
 							{detail.trophyType ? (
-								<img className={classes.championTrophyImg} src={getTrophyIcon(detail.trophyType)} alt={getTrophyLabel(detail.trophyType)} />
+								<img className={classes.championTrophyImg} src={getTrophyIcon(detail.trophyType)} alt="" />
 							) : (
 								<EmojiEventsIcon className={classes.championIcon} />
 							)}
-							{detail.trophyType ? `${getTrophyLabel(detail.trophyType)} 우승 — ${championTeam.name}` : `우승 — ${championTeam.name}`}
+							{`우승 — ${championTeam.name}`}
 						</div>
 					)}
 					{isFinished && perfectUsers.length > 0 && (

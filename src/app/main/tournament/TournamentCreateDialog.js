@@ -3,7 +3,8 @@ import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, M
 import { makeStyles } from 'tss-react/mui';
 import useDialogStyles from '../components/dialogStyles';
 import * as Actions from './store/actions';
-import { bestOfLabel, TROPHY_TYPES, TROPHY_TYPE_ORDER } from './tournamentUtils';
+import { bestOfLabel } from './tournamentUtils';
+import TrophyTypeGrid from './TrophyTypeGrid';
 
 const useStyles = makeStyles()((theme) => ({
 	paperWidth: {
@@ -159,22 +160,12 @@ function TournamentCreateDialog({ open, onClose, onSuccess, groupId }) {
 						<MenuItem key={n} value={n}>{bestOfLabel(n)}</MenuItem>
 					))}
 				</TextField>
-				<TextField
-					className={classes.field}
+				<TrophyTypeGrid
 					label="트로피 종류 (선택)"
-					name="trophyType"
 					value={form.trophyType}
-					onChange={handleChange}
-					variant="outlined"
-					fullWidth
-					select
+					onChange={v => setForm(prev => ({ ...prev, trophyType: v }))}
 					helperText="우승 시 표시되는 트로피. 미지정도 가능."
-				>
-					<MenuItem value="">미지정</MenuItem>
-					{TROPHY_TYPE_ORDER.map(t => (
-						<MenuItem key={t} value={t}>{TROPHY_TYPES[t].ko}</MenuItem>
-					))}
-				</TextField>
+				/>
 				{error && <div className={classes.errorText}>{error}</div>}
 			</DialogContent>
 			<DialogActions className={dialogClasses.actionsPad}>
