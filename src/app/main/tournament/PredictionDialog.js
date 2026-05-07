@@ -75,11 +75,27 @@ const useStyles = makeStyles()((theme) => ({
 		fontFamily: '"Noto Sans KR", sans-serif',
 		fontSize: '1.15rem',
 		color: 'rgba(255, 255, 255, 0.5)',
+		padding: '0 28px 6px',
+		[theme.breakpoints.down('sm')]: {
+			padding: '0 16px 4px',
+			fontSize: '1.05rem'
+		}
+	},
+	progressHint: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.15rem',
+		fontWeight: 600,
 		padding: '0 28px 12px',
 		[theme.breakpoints.down('sm')]: {
 			padding: '0 16px 10px',
 			fontSize: '1.05rem'
 		}
+	},
+	progressHintIncomplete: {
+		color: '#ffd700'
+	},
+	progressHintComplete: {
+		color: '#00ff7f'
 	},
 	treeWrap: {
 		overflowX: 'auto',
@@ -131,7 +147,12 @@ const useStyles = makeStyles()((theme) => ({
 		background: 'rgba(0, 0, 0, 0.3)',
 		border: '1px solid rgba(0, 212, 255, 0.2)',
 		borderRadius: 10,
-		overflow: 'hidden'
+		overflow: 'hidden',
+		transition: 'border-color 0.2s ease, box-shadow 0.2s ease'
+	},
+	matchCardIncomplete: {
+		borderColor: 'rgba(255, 215, 0, 0.5)',
+		boxShadow: '0 0 12px rgba(255, 215, 0, 0.15)'
 	},
 	matchHeader: {
 		fontFamily: '"Noto Sans KR", sans-serif',
@@ -224,6 +245,15 @@ function PredictionDialog({ open, onClose, onSuccess, tournamentId, matches, tea
 	const groupedRounds = useMemo(() => groupMatchesByRound(matches || []), [matches]);
 	const totalRounds = groupedRounds.length;
 
+	// BYE 매치는 자동 진출이라 예측 대상 X. 그 외는 1라운드 정상 매치 + 다음 라운드 매치 모두 픽 필수.
+	const requiredMatchCount = useMemo(
+		() => (matches || []).filter(m => !isByeMatch(m)).length,
+		[matches]
+	);
+	const pickedCount = Object.keys(predictionMap).length;
+	const allPicked = requiredMatchCount > 0 && pickedCount >= requiredMatchCount;
+	const remainingCount = Math.max(0, requiredMatchCount - pickedCount);
+
 	function handleSelect(matchId, teamId) {
 		setPredictionMap(prev => {
 			let nextMap;
@@ -239,6 +269,12 @@ function PredictionDialog({ open, onClose, onSuccess, tournamentId, matches, tea
 	}
 
 	function handleSubmit() {
+		// 모든 매치 다 찍어야 제출 가능 — 일부만 보내면 leaderboard 정확도 우선 정렬에서 손해
+		// 보는 사용자가 생기지 않도록 프론트에서 차단.
+		if (!allPicked) {
+			setError(`아직 ${remainingCount}매치 더 예측해야 합니다.`);
+			return;
+		}
 		const changes = [];
 		(matches || []).forEach(m => {
 			const oldVal = initialMap[m.id] != null ? initialMap[m.id] : null;
@@ -278,6 +314,16 @@ function PredictionDialog({ open, onClose, onSuccess, tournamentId, matches, tea
 			<div className={classes.hint}>
 				라운드별 승자를 골라 트리를 채워주세요. 같은 팀을 다시 누르면 해제됩니다. 부모 매치를 바꾸면 그 아래 픽은 초기화됩니다.
 			</div>
+			{!noMatches && (
+				<div className={cx(
+					classes.progressHint,
+					allPicked ? classes.progressHintComplete : classes.progressHintIncomplete
+				)}>
+					{allPicked
+						? `모든 매치 예측 완료 (${pickedCount}/${requiredMatchCount})`
+						: `아직 ${remainingCount}매치 남음 (${pickedCount}/${requiredMatchCount})`}
+				</div>
+			)}
 			<DialogContent className={dialogClasses.contentPad}>
 				{noMatches ? (
 					<div className={classes.emptyHint}>
@@ -323,8 +369,15 @@ function PredictionDialog({ open, onClose, onSuccess, tournamentId, matches, tea
 														</div>
 													);
 												};
+												const isPicked = pick != null;
 												return (
-													<div key={m.id} className={classes.matchCard}>
+													<div
+														key={m.id}
+														className={cx(
+															classes.matchCard,
+															!isPicked && classes.matchCardIncomplete
+														)}
+													>
 														<div className={classes.matchHeader}>매치 {m.bracketSlot + 1}</div>
 														{renderSlot('L', t1Id, t1)}
 														{renderSlot('R', t2Id, t2)}
@@ -347,7 +400,7 @@ function PredictionDialog({ open, onClose, onSuccess, tournamentId, matches, tea
 				<Button
 					className={dialogClasses.saveBtn}
 					onClick={handleSubmit}
-					disabled={loading || noMatches}
+					disabled={loading || noMatches || !allPicked}
 				>
 					{loading ? '저장 중...' : '제출'}
 				</Button>
