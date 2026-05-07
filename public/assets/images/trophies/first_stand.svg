@@ -1,0 +1,42 @@
+<svg viewBox="0 0 140 160" xmlns="http://www.w3.org/2000/svg">
+	<defs>
+		<radialGradient id="t2-halo" cx="0.5" cy="0.5" r="0.45">
+			<stop offset="0%" stop-color="rgba(220,220,225,0.35)"/>
+			<stop offset="60%" stop-color="rgba(220,220,225,0.08)"/>
+			<stop offset="100%" stop-color="rgba(220,220,225,0)"/>
+		</radialGradient>
+		<linearGradient id="t2-cup" x1="0" y1="0" x2="0" y2="1">
+			<stop offset="0%" stop-color="#FFFFFF"/>
+			<stop offset="40%" stop-color="#C7CCD4"/>
+			<stop offset="100%" stop-color="#5A6271"/>
+		</linearGradient>
+		<linearGradient id="t2-base" x1="0" y1="0" x2="0" y2="1">
+			<stop offset="0%" stop-color="#9CA3AF"/>
+			<stop offset="100%" stop-color="#374151"/>
+		</linearGradient>
+		<radialGradient id="t2-shine" cx="0.3" cy="0.2" r="0.6">
+			<stop offset="0%" stop-color="rgba(255,255,255,0.85)"/>
+			<stop offset="100%" stop-color="rgba(255,255,255,0)"/>
+		</radialGradient>
+	</defs>
+	<!-- Tier 2: Silver — slight halo, small star -->
+	<circle cx="70" cy="76" r="50" fill="url(#t2-halo)"/>
+	<!-- Small star on top -->
+	<g transform="translate(70, 44)">
+		<polygon points="0,-9 3,-3 9,-3 4,1 6,8 0,4 -6,8 -4,1 -9,-3 -3,-3" fill="#E5E7EB" stroke="#374151" stroke-width="0.8"/>
+	</g>
+	<!-- Cup body -->
+	<path d="M46,58 L94,58 Q95,84 84,100 L56,100 Q45,84 46,58 Z" fill="url(#t2-cup)" stroke="#374151" stroke-width="0.7"/>
+	<!-- Handles -->
+	<path d="M46,64 Q30,64 30,80 Q30,94 46,94" stroke="url(#t2-cup)" stroke-width="5" fill="none" stroke-linecap="round"/>
+	<path d="M94,64 Q110,64 110,80 Q110,94 94,94" stroke="url(#t2-cup)" stroke-width="5" fill="none" stroke-linecap="round"/>
+	<!-- Highlight -->
+	<ellipse cx="58" cy="72" rx="7" ry="18" fill="url(#t2-shine)"/>
+	<!-- Stem -->
+	<rect x="60" y="100" width="20" height="12" fill="url(#t2-base)"/>
+	<!-- Base -->
+	<rect x="48" y="112" width="44" height="9" rx="2" fill="url(#t2-base)"/>
+	<rect x="40" y="121" width="60" height="10" rx="2" fill="#1F2937"/>
+	<!-- Floor shadow -->
+	<ellipse cx="70" cy="135" rx="32" ry="2.6" fill="rgba(0,0,0,0.22)"/>
+</svg>

@@ -1,0 +1,69 @@
+<svg viewBox="0 0 140 160" xmlns="http://www.w3.org/2000/svg">
+	<defs>
+		<radialGradient id="t4-halo" cx="0.5" cy="0.5" r="0.55">
+			<stop offset="0%" stop-color="rgba(239,68,68,0.55)"/>
+			<stop offset="55%" stop-color="rgba(239,68,68,0.15)"/>
+			<stop offset="100%" stop-color="rgba(239,68,68,0)"/>
+		</radialGradient>
+		<linearGradient id="t4-cup" x1="0" y1="0" x2="0" y2="1">
+			<stop offset="0%" stop-color="#FECACA"/>
+			<stop offset="35%" stop-color="#EF4444"/>
+			<stop offset="100%" stop-color="#7F1D1D"/>
+		</linearGradient>
+		<linearGradient id="t4-base" x1="0" y1="0" x2="0" y2="1">
+			<stop offset="0%" stop-color="#B91C1C"/>
+			<stop offset="100%" stop-color="#450A0A"/>
+		</linearGradient>
+		<radialGradient id="t4-shine" cx="0.3" cy="0.2" r="0.6">
+			<stop offset="0%" stop-color="rgba(255,255,255,0.95)"/>
+			<stop offset="100%" stop-color="rgba(255,255,255,0)"/>
+		</radialGradient>
+		<radialGradient id="t4-flame" cx="0.5" cy="0.7" r="0.7">
+			<stop offset="0%" stop-color="#FEF08A"/>
+			<stop offset="55%" stop-color="#F97316"/>
+			<stop offset="100%" stop-color="#7F1D1D"/>
+		</radialGradient>
+		<radialGradient id="t4-gem" cx="0.4" cy="0.3" r="0.7">
+			<stop offset="0%" stop-color="#FFFFFF"/>
+			<stop offset="60%" stop-color="#FFD700"/>
+			<stop offset="100%" stop-color="#92400E"/>
+		</radialGradient>
+	</defs>
+	<!-- Tier 4: Royal — halo, crown + flame, gold trim, medallion + side gems -->
+	<circle cx="70" cy="74" r="64" fill="url(#t4-halo)"/>
+	<!-- Crown base + flame -->
+	<g transform="translate(70, 28)">
+		<!-- Crown band -->
+		<path d="M-18,8 L-18,-2 L-10,4 L-5,-8 L0,2 L5,-8 L10,4 L18,-2 L18,8 Z" fill="#FFD700" stroke="#7F1D1D" stroke-width="1"/>
+		<rect x="-18" y="8" width="36" height="3" fill="#B45309"/>
+		<circle cx="-10" cy="4" r="2" fill="#EF4444"/>
+		<circle cx="0" cy="2" r="2.4" fill="#EF4444"/>
+		<circle cx="10" cy="4" r="2" fill="#EF4444"/>
+		<!-- Flame above -->
+		<path d="M0,-8 Q-6,-16 -7,-22 Q-7,-28 0,-30 Q7,-28 7,-22 Q6,-16 0,-8 Z" fill="url(#t4-flame)" stroke="#7F1D1D" stroke-width="0.8"/>
+	</g>
+	<!-- Cup body -->
+	<path d="M40,48 L100,48 Q102,76 88,96 L52,96 Q38,76 40,48 Z" fill="url(#t4-cup)" stroke="#7F1D1D" stroke-width="0.8"/>
+	<!-- Gold trim -->
+	<rect x="40" y="60" width="60" height="3" fill="#FFD700" opacity="0.7"/>
+	<rect x="44" y="86" width="52" height="2" fill="#FFD700" opacity="0.6"/>
+	<!-- Side gems -->
+	<circle cx="48" cy="80" r="2.6" fill="#FFD700" stroke="#7F1D1D" stroke-width="0.5"/>
+	<circle cx="92" cy="80" r="2.6" fill="#FFD700" stroke="#7F1D1D" stroke-width="0.5"/>
+	<!-- Handles -->
+	<path d="M40,55 Q20,55 20,74 Q20,90 40,90" stroke="url(#t4-cup)" stroke-width="6" fill="none" stroke-linecap="round"/>
+	<path d="M100,55 Q120,55 120,74 Q120,90 100,90" stroke="url(#t4-cup)" stroke-width="6" fill="none" stroke-linecap="round"/>
+	<!-- Highlight -->
+	<ellipse cx="55" cy="66" rx="9" ry="22" fill="url(#t4-shine)"/>
+	<!-- Center medallion -->
+	<circle cx="70" cy="72" r="11" fill="#FFD700" stroke="#7F1D1D" stroke-width="1.4"/>
+	<circle cx="70" cy="72" r="7.5" fill="url(#t4-gem)" stroke="#92400E" stroke-width="0.5"/>
+	<!-- Stem -->
+	<rect x="58" y="96" width="24" height="14" fill="url(#t4-base)"/>
+	<!-- Base -->
+	<rect x="44" y="110" width="52" height="10" rx="2" fill="url(#t4-base)"/>
+	<rect x="34" y="120" width="72" height="13" rx="3" fill="url(#t4-base)"/>
+	<rect x="28" y="133" width="84" height="6" rx="2" fill="#450A0A"/>
+	<!-- Floor shadow -->
+	<ellipse cx="70" cy="145" rx="40" ry="3" fill="rgba(0,0,0,0.28)"/>
+</svg>

@@ -16,6 +16,35 @@ export const STATUS_COLORS = {
 	[STATUS.FINISHED]: '#868e96'
 };
 
+// 토너먼트 트로피 종류. 백엔드 enum 그대로 id 사용. 한국어 라벨/아이콘은 프론트 매핑.
+// trophyType 이 null 이면 일반 우승 표시 (트로피 미지정).
+export const TROPHY_TYPES = {
+	worlds: { ko: '롤드컵', icon: '/assets/images/trophies/worlds.svg' },
+	msi: { ko: 'MSI', icon: '/assets/images/trophies/msi.svg' },
+	first_stand: { ko: 'First Stand', icon: '/assets/images/trophies/first_stand.svg' },
+	ewc: { ko: 'EWC', icon: '/assets/images/trophies/ewc.svg' },
+	lck: { ko: 'LCK', icon: '/assets/images/trophies/lck.svg' },
+	kespa: { ko: 'KeSPA Cup', icon: '/assets/images/trophies/kespa.svg' }
+};
+
+// 트로피 등급. 인덱스가 곧 등급 (낮을수록 낮은 등급).
+// T1 kespa(이벤트급) → T6 worlds(최상위/Summoner's Cup급).
+// 토너먼트 생성/수정 그리드는 이 순서(낮음→높음) 그대로, 내정보 캐비닛은 역순(높음→낮음) 정렬.
+export const TROPHY_TYPE_ORDER = ['kespa', 'first_stand', 'lck', 'ewc', 'msi', 'worlds'];
+
+export function getTrophyLabel(type) {
+	return type && TROPHY_TYPES[type] ? TROPHY_TYPES[type].ko : null;
+}
+
+export function getTrophyIcon(type) {
+	return type && TROPHY_TYPES[type] ? TROPHY_TYPES[type].icon : null;
+}
+
+// 트로피 미지정(null) 은 -1 로 떨어져 정렬에서 가장 낮은 등급으로 처리됨.
+export function getTrophyTier(type) {
+	return type ? TROPHY_TYPE_ORDER.indexOf(type) : -1;
+}
+
 export const POSITIONS = ['top', 'jungle', 'mid', 'adc', 'support'];
 
 export const POSITION_LABELS = {

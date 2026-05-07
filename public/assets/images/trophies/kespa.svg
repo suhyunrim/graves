@@ -1,0 +1,32 @@
+<svg viewBox="0 0 140 160" xmlns="http://www.w3.org/2000/svg">
+	<defs>
+		<linearGradient id="t1-cup" x1="0" y1="0" x2="0" y2="1">
+			<stop offset="0%" stop-color="#E8B68A"/>
+			<stop offset="50%" stop-color="#A0522D"/>
+			<stop offset="100%" stop-color="#5C2C0E"/>
+		</linearGradient>
+		<linearGradient id="t1-base" x1="0" y1="0" x2="0" y2="1">
+			<stop offset="0%" stop-color="#7B4523"/>
+			<stop offset="100%" stop-color="#3D2010"/>
+		</linearGradient>
+		<radialGradient id="t1-shine" cx="0.3" cy="0.2" r="0.6">
+			<stop offset="0%" stop-color="rgba(255,255,255,0.6)"/>
+			<stop offset="100%" stop-color="rgba(255,255,255,0)"/>
+		</radialGradient>
+	</defs>
+	<!-- Tier 1: Basic Bronze — small, no halo, plain -->
+	<!-- Cup body -->
+	<path d="M52,68 L88,68 Q89,90 80,104 L60,104 Q51,90 52,68 Z" fill="url(#t1-cup)" stroke="#3D2010" stroke-width="0.6"/>
+	<!-- Stubby handles -->
+	<path d="M52,74 Q42,74 42,86 Q42,96 52,96" stroke="url(#t1-cup)" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+	<path d="M88,74 Q98,74 98,86 Q98,96 88,96" stroke="url(#t1-cup)" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+	<!-- Highlight -->
+	<ellipse cx="62" cy="80" rx="5" ry="14" fill="url(#t1-shine)"/>
+	<!-- Stem -->
+	<rect x="64" y="104" width="12" height="10" fill="url(#t1-base)"/>
+	<!-- Simple 2-tier base -->
+	<rect x="54" y="114" width="32" height="7" rx="1" fill="url(#t1-base)"/>
+	<rect x="48" y="121" width="44" height="6" rx="1" fill="#3D2010"/>
+	<!-- Floor shadow -->
+	<ellipse cx="70" cy="131" rx="24" ry="2.5" fill="rgba(0,0,0,0.22)"/>
+</svg>

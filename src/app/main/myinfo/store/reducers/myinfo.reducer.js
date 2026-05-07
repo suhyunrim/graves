@@ -28,7 +28,8 @@ const myInfoReducer = (state = initialState, action) => {
 				ratingHistory: stats.ratingHistory || [],
 				honorStats: action.payload.honorStats || null,
 				subAccount: action.payload.subAccount || null,
-				statusMessage: action.payload.statusMessage || null
+				statusMessage: action.payload.statusMessage || null,
+				tournamentChampionships: action.payload.tournamentChampionships || []
 			};
 		}
 		case Actions.SET_SUB_ACCOUNT: {

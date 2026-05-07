@@ -21,6 +21,7 @@ import { getProfileIconUrl } from 'app/main/challenge/ddragonUtils';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import AddIcon from '@mui/icons-material/Add';
 import SettingsIcon from '@mui/icons-material/Settings';
+import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
@@ -44,7 +45,8 @@ import {
 	getTierEmblemUrl,
 	bestOfLabel,
 	displayNameForPuuid,
-	isValidMatch
+	isValidMatch,
+	getTrophyIcon
 } from './tournamentUtils';
 import { CATEGORY_LABELS } from '../achievementDashboard/constants';
 import PositionIcon from './PositionIcon';
@@ -55,6 +57,7 @@ import MatchResultDialog from './MatchResultDialog';
 import ScrimContent from './ScrimContent';
 import PredictionContent from './PredictionContent';
 import MatchPredictionDialog from './MatchPredictionDialog';
+import TournamentEditDialog from './TournamentEditDialog';
 
 const useStyles = makeStyles()((theme) => ({
 	layoutRoot: {
@@ -98,6 +101,35 @@ const useStyles = makeStyles()((theme) => ({
 			color: '#00d4ff',
 			background: 'rgba(0, 212, 255, 0.08)'
 		}
+	},
+	titleBlock: {
+		display: 'flex',
+		alignItems: 'center',
+		gap: 16,
+		[theme.breakpoints.down('sm')]: {
+			gap: 10
+		}
+	},
+	titleTrophy: {
+		width: 88,
+		height: 88,
+		objectFit: 'contain',
+		flexShrink: 0,
+		filter: 'drop-shadow(0 4px 16px rgba(255, 215, 0, 0.35))',
+		[theme.breakpoints.down('md')]: {
+			width: 70,
+			height: 70
+		},
+		[theme.breakpoints.down('sm')]: {
+			width: 54,
+			height: 54
+		}
+	},
+	titleColumn: {
+		display: 'flex',
+		flexDirection: 'column',
+		minWidth: 0,
+		flex: 1
 	},
 	titleRow: {
 		display: 'flex',
@@ -185,6 +217,16 @@ const useStyles = makeStyles()((theme) => ({
 		fontSize: '2.4rem',
 		[theme.breakpoints.down('sm')]: {
 			fontSize: '1.8rem'
+		}
+	},
+	championTrophyImg: {
+		width: 36,
+		height: 36,
+		objectFit: 'contain',
+		flexShrink: 0,
+		[theme.breakpoints.down('sm')]: {
+			width: 28,
+			height: 28
 		}
 	},
 	predictionPerfectBanner: {
@@ -552,6 +594,7 @@ function TournamentDetail() {
 	const [activeTab, setActiveTab] = useState(0);
 	const [bracketVerbose, setBracketVerbose] = useState(false);
 	const [matchPredictionTarget, setMatchPredictionTarget] = useState(null);
+	const [editTournamentOpen, setEditTournamentOpen] = useState(false);
 
 	const teamMap = useMemo(() => {
 		const m = new Map();
@@ -609,6 +652,12 @@ function TournamentDetail() {
 		setTeamFormOpen(false);
 		setEditingTeam(null);
 		toast.success('팀이 저장되었습니다.');
+		reload();
+	}
+
+	function handleTournamentEditSuccess() {
+		setEditTournamentOpen(false);
+		toast.success('토너먼트가 수정되었습니다.');
 		reload();
 	}
 
@@ -689,32 +738,43 @@ function TournamentDetail() {
 							<ArrowBackIcon />
 						</IconButton>
 					</div>
-					<div className={classes.titleRow}>
-						<Typography className={classes.title} variant="h4">{detail.name}</Typography>
-						<span
-							className={classes.statusBadge}
-							style={{
-								background: `${statusColor}20`,
-								color: statusColor,
-								border: `1px solid ${statusColor}40`
-							}}
-						>
-							{STATUS_LABELS[detail.status] || detail.status}
-						</span>
-					</div>
-					<div className={classes.metaRow}>
-						<span className={classes.metaPill}>
-							{detail.bracketSize != null
-								? `${detail.teamCount}팀 · ${detail.bracketSize}강`
-								: `${teamCount}팀 등록됨`}
-						</span>
-						<span className={classes.metaPill}>{bestOfLabel(detail.defaultBestOf)}</span>
-						<span className={classes.metaPill}>결승 {bestOfLabel(detail.finalBestOf)}</span>
+					<div className={classes.titleBlock}>
+						{detail.trophyType && (
+							<img className={classes.titleTrophy} src={getTrophyIcon(detail.trophyType)} alt="" />
+						)}
+						<div className={classes.titleColumn}>
+							<div className={classes.titleRow}>
+								<Typography className={classes.title} variant="h4">{detail.name}</Typography>
+								<span
+									className={classes.statusBadge}
+									style={{
+										background: `${statusColor}20`,
+										color: statusColor,
+										border: `1px solid ${statusColor}40`
+									}}
+								>
+									{STATUS_LABELS[detail.status] || detail.status}
+								</span>
+							</div>
+							<div className={classes.metaRow}>
+								<span className={classes.metaPill}>
+									{detail.bracketSize != null
+										? `${detail.teamCount}팀 · ${detail.bracketSize}강`
+										: `${teamCount}팀 등록됨`}
+								</span>
+								<span className={classes.metaPill}>{bestOfLabel(detail.defaultBestOf)}</span>
+								<span className={classes.metaPill}>결승 {bestOfLabel(detail.finalBestOf)}</span>
+							</div>
+						</div>
 					</div>
 					{championTeam && (
 						<div className={cx(classes.headerBanner, classes.championBanner)}>
-							<EmojiEventsIcon className={classes.championIcon} />
-							우승 — {championTeam.name}
+							{detail.trophyType ? (
+								<img className={classes.championTrophyImg} src={getTrophyIcon(detail.trophyType)} alt="" />
+							) : (
+								<EmojiEventsIcon className={classes.championIcon} />
+							)}
+							{`우승 — ${championTeam.name}`}
 						</div>
 					)}
 					{isFinished && perfectUsers.length > 0 && (
@@ -741,6 +801,13 @@ function TournamentDetail() {
 									</span>
 								</Tooltip>
 							)}
+							<Button
+								className={classes.primaryBtn}
+								startIcon={<EditIcon />}
+								onClick={() => setEditTournamentOpen(true)}
+							>
+								토너먼트 수정
+							</Button>
 							<Button
 								className={classes.dangerBtn}
 								startIcon={<DeleteIcon />}
@@ -984,6 +1051,14 @@ function TournamentDetail() {
 							match={matchPredictionTarget}
 							team1={teamMap.get(matchPredictionTarget.team1Id)}
 							team2={teamMap.get(matchPredictionTarget.team2Id)}
+						/>
+					)}
+					{editTournamentOpen && (
+						<TournamentEditDialog
+							open
+							onClose={() => setEditTournamentOpen(false)}
+							onSuccess={handleTournamentEditSuccess}
+							tournament={detail}
 						/>
 					)}
 					{slotMappingOpen && (

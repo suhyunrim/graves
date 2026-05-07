@@ -1,0 +1,52 @@
+<svg viewBox="0 0 140 160" xmlns="http://www.w3.org/2000/svg">
+	<defs>
+		<radialGradient id="t3-halo" cx="0.5" cy="0.5" r="0.5">
+			<stop offset="0%" stop-color="rgba(255,215,0,0.45)"/>
+			<stop offset="60%" stop-color="rgba(255,215,0,0.12)"/>
+			<stop offset="100%" stop-color="rgba(255,215,0,0)"/>
+		</radialGradient>
+		<linearGradient id="t3-cup" x1="0" y1="0" x2="0" y2="1">
+			<stop offset="0%" stop-color="#FFEFB0"/>
+			<stop offset="40%" stop-color="#F5C518"/>
+			<stop offset="100%" stop-color="#8C5A00"/>
+		</linearGradient>
+		<linearGradient id="t3-base" x1="0" y1="0" x2="0" y2="1">
+			<stop offset="0%" stop-color="#B8860B"/>
+			<stop offset="100%" stop-color="#5C3A00"/>
+		</linearGradient>
+		<radialGradient id="t3-shine" cx="0.3" cy="0.2" r="0.6">
+			<stop offset="0%" stop-color="rgba(255,255,255,0.95)"/>
+			<stop offset="100%" stop-color="rgba(255,255,255,0)"/>
+		</radialGradient>
+		<radialGradient id="t3-gem" cx="0.4" cy="0.3" r="0.7">
+			<stop offset="0%" stop-color="#FFFFFF"/>
+			<stop offset="55%" stop-color="#10B981"/>
+			<stop offset="100%" stop-color="#064E3B"/>
+		</radialGradient>
+	</defs>
+	<!-- Tier 3: Gold — modest halo, star + medallion -->
+	<circle cx="70" cy="74" r="58" fill="url(#t3-halo)"/>
+	<!-- Star on top -->
+	<g transform="translate(70, 36)">
+		<polygon points="0,-14 4,-4 14,-4 6,2 9,12 0,7 -9,12 -6,2 -14,-4 -4,-4" fill="#FFE066" stroke="#7A5000" stroke-width="1"/>
+	</g>
+	<!-- Cup body -->
+	<path d="M42,52 L98,52 Q100,80 86,98 L54,98 Q40,80 42,52 Z" fill="url(#t3-cup)" stroke="#7A5000" stroke-width="0.7"/>
+	<rect x="42" y="64" width="56" height="2.5" fill="#FFE066" opacity="0.6"/>
+	<!-- Handles -->
+	<path d="M42,60 Q24,60 24,76 Q24,92 42,92" stroke="url(#t3-cup)" stroke-width="5.5" fill="none" stroke-linecap="round"/>
+	<path d="M98,60 Q116,60 116,76 Q116,92 98,92" stroke="url(#t3-cup)" stroke-width="5.5" fill="none" stroke-linecap="round"/>
+	<!-- Highlight -->
+	<ellipse cx="56" cy="70" rx="8" ry="20" fill="url(#t3-shine)"/>
+	<!-- Center medallion -->
+	<circle cx="70" cy="76" r="10" fill="#FFE066" stroke="#7A5000" stroke-width="1.4"/>
+	<circle cx="70" cy="76" r="6.5" fill="url(#t3-gem)" stroke="#7A5000" stroke-width="0.5"/>
+	<!-- Stem -->
+	<rect x="60" y="98" width="20" height="14" fill="url(#t3-base)"/>
+	<!-- Base -->
+	<rect x="46" y="112" width="48" height="10" rx="2" fill="url(#t3-base)"/>
+	<rect x="38" y="122" width="64" height="12" rx="2" fill="url(#t3-base)"/>
+	<rect x="32" y="134" width="76" height="5" rx="1" fill="#3D2600"/>
+	<!-- Floor shadow -->
+	<ellipse cx="70" cy="143" rx="36" ry="3" fill="rgba(0,0,0,0.25)"/>
+</svg>
