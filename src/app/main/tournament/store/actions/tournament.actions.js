@@ -89,6 +89,14 @@ export function updateMatchResult(matchId, team1Score, team2Score) {
 	);
 }
 
+export function updateMatchSchedule(matchId, scheduledAt) {
+	return createCamilleAxios().patch(
+		`/api/tournament/matches/${matchId}/schedule`,
+		{ scheduledAt },
+		{ silentError: true }
+	);
+}
+
 export function createScrim(tournamentId, body) {
 	return createCamilleAxios().post(`/api/tournament/${tournamentId}/scrims`, body, { silentError: true });
 }

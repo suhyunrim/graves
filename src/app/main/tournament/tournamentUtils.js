@@ -117,6 +117,28 @@ export function roundLabelFor(round, totalRounds) {
 	return `${teamsThisRound}강`;
 }
 
+// scheduledAt(UTC ISO) → "5/10 (토) 19:00" 형태 (KST 기준).
+// 백엔드는 UTC 저장, 사용자는 KST 로 보는 게 일관됨.
+export function formatScheduledAt(iso) {
+	if (!iso) return null;
+	const d = new Date(iso);
+	if (Number.isNaN(d.getTime())) return null;
+	const parts = new Intl.DateTimeFormat('ko-KR', {
+		timeZone: 'Asia/Seoul',
+		month: 'numeric',
+		day: 'numeric',
+		weekday: 'short',
+		hour: '2-digit',
+		minute: '2-digit',
+		hour12: false
+	}).formatToParts(d);
+	const get = (type) => {
+		const p = parts.find(x => x.type === type);
+		return p ? p.value : '';
+	};
+	return `${get('month')}/${get('day')} (${get('weekday')}) ${get('hour')}:${get('minute')}`;
+}
+
 // "BO5" → "5판 3선" 같은 한글 표기. BO1 은 단판으로 분기.
 export function bestOfLabel(n) {
 	if (!n) return '';

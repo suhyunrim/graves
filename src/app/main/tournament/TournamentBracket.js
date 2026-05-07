@@ -12,6 +12,7 @@ import {
 	getTierShortLabel,
 	getTierEmblemUrl,
 	bestOfLabel,
+	formatScheduledAt,
 	BRACKET_LINE_COLOR,
 	BRACKET_LINE_COLOR_FINISHED
 } from './tournamentUtils';
@@ -125,6 +126,18 @@ const useStyles = makeStyles()((theme) => ({
 		display: 'flex',
 		alignItems: 'center',
 		gap: 6
+	},
+	matchSchedule: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '0.95rem',
+		color: 'rgba(0, 212, 255, 0.7)',
+		padding: '3px 12px 5px',
+		textAlign: 'center',
+		borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
+		[theme.breakpoints.down('sm')]: {
+			padding: '2px 10px 4px',
+			fontSize: '0.9rem'
+		}
 	},
 	editIcon: {
 		fontSize: '1.2rem',
@@ -788,6 +801,11 @@ function TournamentBracket({
 														)}
 													</div>
 												</div>
+												{m.scheduledAt && (
+													<div className={classes.matchSchedule}>
+														{formatScheduledAt(m.scheduledAt)}
+													</div>
+												)}
 												{renderTeamRow(m.team1Id, m.team1Score, m.winnerTeamId, finished, emptyLabel, isMyPickT1, 'blue')}
 												{verbose && renderTeamFullDetails(team1)}
 												{renderTeamRow(m.team2Id, m.team2Score, m.winnerTeamId, finished, emptyLabel, isMyPickT2, 'red')}
