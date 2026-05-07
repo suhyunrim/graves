@@ -1,35 +1,58 @@
-<svg viewBox="0 0 120 140" xmlns="http://www.w3.org/2000/svg">
+<svg viewBox="0 0 140 160" xmlns="http://www.w3.org/2000/svg">
 	<defs>
-		<linearGradient id="silver-cup" x1="0" y1="0" x2="0" y2="1">
+		<radialGradient id="m-halo" cx="0.5" cy="0.5" r="0.55">
+			<stop offset="0%" stop-color="rgba(186,230,253,0.6)"/>
+			<stop offset="55%" stop-color="rgba(186,230,253,0.15)"/>
+			<stop offset="100%" stop-color="rgba(186,230,253,0)"/>
+		</radialGradient>
+		<linearGradient id="m-cup" x1="0" y1="0" x2="0" y2="1">
 			<stop offset="0%" stop-color="#FFFFFF"/>
 			<stop offset="35%" stop-color="#D9DEE5"/>
-			<stop offset="100%" stop-color="#6B7280"/>
+			<stop offset="100%" stop-color="#525B6B"/>
 		</linearGradient>
-		<linearGradient id="silver-base" x1="0" y1="0" x2="0" y2="1">
+		<linearGradient id="m-base" x1="0" y1="0" x2="0" y2="1">
 			<stop offset="0%" stop-color="#9CA3AF"/>
-			<stop offset="100%" stop-color="#374151"/>
+			<stop offset="100%" stop-color="#1F2937"/>
 		</linearGradient>
-		<radialGradient id="silver-shine" cx="0.3" cy="0.2" r="0.6">
+		<radialGradient id="m-shine" cx="0.3" cy="0.2" r="0.6">
 			<stop offset="0%" stop-color="rgba(255,255,255,0.95)"/>
 			<stop offset="100%" stop-color="rgba(255,255,255,0)"/>
 		</radialGradient>
+		<radialGradient id="m-gem" cx="0.4" cy="0.3" r="0.7">
+			<stop offset="0%" stop-color="#DBEAFE"/>
+			<stop offset="50%" stop-color="#3B82F6"/>
+			<stop offset="100%" stop-color="#1E3A8A"/>
+		</radialGradient>
 	</defs>
+	<!-- Halo -->
+	<circle cx="70" cy="72" r="68" fill="url(#m-halo)"/>
 	<!-- Crown on top -->
-	<path d="M44,20 L52,8 L60,18 L68,8 L76,20 L74,30 L46,30 Z" fill="#E5E7EB" stroke="#4B5563" stroke-width="1"/>
-	<circle cx="52" cy="8" r="2" fill="#60A5FA"/>
-	<circle cx="60" cy="18" r="2" fill="#60A5FA"/>
-	<circle cx="68" cy="8" r="2" fill="#60A5FA"/>
-	<!-- Cup body (chalice shape) -->
-	<path d="M32,32 L88,32 Q92,60 76,82 L44,82 Q28,60 32,32 Z" fill="url(#silver-cup)" stroke="#4B5563" stroke-width="0.6"/>
+	<g transform="translate(70, 24)">
+		<path d="M-22,12 L-22,-2 L-12,8 L-6,-12 L0,4 L6,-12 L12,8 L22,-2 L22,12 Z" fill="#E5E7EB" stroke="#374151" stroke-width="1.2"/>
+		<rect x="-22" y="12" width="44" height="4" fill="#9CA3AF" stroke="#374151" stroke-width="0.8"/>
+		<circle cx="-12" cy="8" r="3" fill="url(#m-gem)" stroke="#1E3A8A" stroke-width="0.5"/>
+		<circle cx="0" cy="4" r="3.5" fill="#EF4444" stroke="#7F1D1D" stroke-width="0.5"/>
+		<circle cx="12" cy="8" r="3" fill="url(#m-gem)" stroke="#1E3A8A" stroke-width="0.5"/>
+	</g>
+	<!-- Cup body -->
+	<path d="M38,46 L102,46 Q104,76 90,96 L50,96 Q36,76 38,46 Z" fill="url(#m-cup)" stroke="#374151" stroke-width="0.8"/>
+	<rect x="38" y="58" width="64" height="3" fill="#FFFFFF" opacity="0.5"/>
+	<rect x="42" y="86" width="56" height="2" fill="#FFFFFF" opacity="0.4"/>
 	<!-- Handles -->
-	<path d="M32,40 Q14,40 14,58 Q14,74 32,74" stroke="url(#silver-cup)" stroke-width="6" fill="none" stroke-linecap="round"/>
-	<path d="M88,40 Q106,40 106,58 Q106,74 88,74" stroke="url(#silver-cup)" stroke-width="6" fill="none" stroke-linecap="round"/>
+	<path d="M38,54 Q18,54 18,72 Q18,88 38,88" stroke="url(#m-cup)" stroke-width="6.5" fill="none" stroke-linecap="round"/>
+	<path d="M102,54 Q122,54 122,72 Q122,88 102,88" stroke="url(#m-cup)" stroke-width="6.5" fill="none" stroke-linecap="round"/>
 	<!-- Highlight -->
-	<ellipse cx="46" cy="50" rx="8" ry="22" fill="url(#silver-shine)"/>
+	<ellipse cx="54" cy="64" rx="9" ry="22" fill="url(#m-shine)"/>
+	<!-- Center medallion -->
+	<circle cx="70" cy="72" r="13" fill="#F3F4F6" stroke="#374151" stroke-width="1.6"/>
+	<circle cx="70" cy="72" r="9" fill="url(#m-gem)" stroke="#374151" stroke-width="0.6"/>
+	<polygon points="68,68 72,68 70,76" fill="rgba(255,255,255,0.55)"/>
 	<!-- Stem -->
-	<rect x="50" y="82" width="20" height="16" fill="url(#silver-base)"/>
-	<!-- Base tiers -->
-	<rect x="35" y="98" width="50" height="10" rx="2" fill="url(#silver-base)"/>
-	<rect x="25" y="108" width="70" height="14" rx="3" fill="url(#silver-base)"/>
-	<rect x="20" y="122" width="80" height="6" rx="2" fill="#1F2937"/>
+	<rect x="58" y="96" width="24" height="16" fill="url(#m-base)"/>
+	<!-- Base -->
+	<rect x="42" y="112" width="56" height="11" rx="2" fill="url(#m-base)"/>
+	<rect x="32" y="123" width="76" height="14" rx="3" fill="url(#m-base)"/>
+	<rect x="26" y="137" width="88" height="6" rx="2" fill="#111827"/>
+	<!-- Floor shadow -->
+	<ellipse cx="70" cy="148" rx="40" ry="3" fill="rgba(0,0,0,0.25)"/>
 </svg>

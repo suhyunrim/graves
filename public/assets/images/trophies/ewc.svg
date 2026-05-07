@@ -1,37 +1,64 @@
-<svg viewBox="0 0 120 140" xmlns="http://www.w3.org/2000/svg">
+<svg viewBox="0 0 140 160" xmlns="http://www.w3.org/2000/svg">
 	<defs>
-		<linearGradient id="ruby-cup" x1="0" y1="0" x2="0" y2="1">
+		<radialGradient id="ew-halo" cx="0.5" cy="0.5" r="0.55">
+			<stop offset="0%" stop-color="rgba(239,68,68,0.65)"/>
+			<stop offset="55%" stop-color="rgba(239,68,68,0.18)"/>
+			<stop offset="100%" stop-color="rgba(239,68,68,0)"/>
+		</radialGradient>
+		<linearGradient id="ew-cup" x1="0" y1="0" x2="0" y2="1">
 			<stop offset="0%" stop-color="#FECACA"/>
 			<stop offset="35%" stop-color="#EF4444"/>
 			<stop offset="100%" stop-color="#7F1D1D"/>
 		</linearGradient>
-		<linearGradient id="ruby-base" x1="0" y1="0" x2="0" y2="1">
+		<linearGradient id="ew-base" x1="0" y1="0" x2="0" y2="1">
 			<stop offset="0%" stop-color="#B91C1C"/>
 			<stop offset="100%" stop-color="#450A0A"/>
 		</linearGradient>
-		<radialGradient id="ruby-shine" cx="0.3" cy="0.2" r="0.6">
-			<stop offset="0%" stop-color="rgba(255,255,255,0.85)"/>
+		<radialGradient id="ew-shine" cx="0.3" cy="0.2" r="0.6">
+			<stop offset="0%" stop-color="rgba(255,255,255,0.95)"/>
 			<stop offset="100%" stop-color="rgba(255,255,255,0)"/>
 		</radialGradient>
-		<radialGradient id="flame-grad" cx="0.5" cy="0.7" r="0.7">
+		<radialGradient id="ew-flame" cx="0.5" cy="0.7" r="0.7">
 			<stop offset="0%" stop-color="#FEF08A"/>
-			<stop offset="60%" stop-color="#F97316"/>
-			<stop offset="100%" stop-color="#B91C1C"/>
+			<stop offset="55%" stop-color="#F97316"/>
+			<stop offset="100%" stop-color="#7F1D1D"/>
+		</radialGradient>
+		<radialGradient id="ew-gem" cx="0.4" cy="0.3" r="0.7">
+			<stop offset="0%" stop-color="#FFFFFF"/>
+			<stop offset="60%" stop-color="#FFD700"/>
+			<stop offset="100%" stop-color="#92400E"/>
 		</radialGradient>
 	</defs>
-	<!-- Flame on top -->
-	<path d="M60,4 Q52,16 50,24 Q50,32 60,34 Q70,32 70,24 Q68,16 60,4 Z" fill="url(#flame-grad)" stroke="#7F1D1D" stroke-width="0.8"/>
+	<!-- Halo -->
+	<circle cx="70" cy="72" r="68" fill="url(#ew-halo)"/>
+	<!-- Phoenix flame on top -->
+	<g transform="translate(70, 26)">
+		<path d="M0,-22 Q-12,-8 -14,4 Q-14,18 0,22 Q14,18 14,4 Q12,-8 0,-22 Z" fill="url(#ew-flame)" stroke="#7F1D1D" stroke-width="1"/>
+		<path d="M0,-12 Q-6,-2 -7,6 Q-7,14 0,16 Q7,14 7,6 Q6,-2 0,-12 Z" fill="#FEF08A" opacity="0.7"/>
+		<!-- Wings -->
+		<path d="M-14,4 Q-22,2 -22,-6 Q-18,0 -14,2" fill="#F97316" stroke="#7F1D1D" stroke-width="0.6"/>
+		<path d="M14,4 Q22,2 22,-6 Q18,0 14,2" fill="#F97316" stroke="#7F1D1D" stroke-width="0.6"/>
+	</g>
 	<!-- Cup body -->
-	<path d="M30,32 L90,32 Q92,62 78,82 L42,82 Q28,62 30,32 Z" fill="url(#ruby-cup)" stroke="#7F1D1D" stroke-width="0.6"/>
+	<path d="M38,46 L102,46 Q104,76 90,96 L50,96 Q36,76 38,46 Z" fill="url(#ew-cup)" stroke="#7F1D1D" stroke-width="0.8"/>
+	<!-- Gold trim band -->
+	<rect x="38" y="58" width="64" height="3" fill="#FFD700" opacity="0.7"/>
+	<rect x="42" y="86" width="56" height="2" fill="#FFD700" opacity="0.6"/>
 	<!-- Handles -->
-	<path d="M30,40 Q12,40 12,58 Q12,74 30,74" stroke="url(#ruby-cup)" stroke-width="6" fill="none" stroke-linecap="round"/>
-	<path d="M90,40 Q108,40 108,58 Q108,74 90,74" stroke="url(#ruby-cup)" stroke-width="6" fill="none" stroke-linecap="round"/>
+	<path d="M38,54 Q18,54 18,72 Q18,88 38,88" stroke="url(#ew-cup)" stroke-width="6.5" fill="none" stroke-linecap="round"/>
+	<path d="M102,54 Q122,54 122,72 Q122,88 102,88" stroke="url(#ew-cup)" stroke-width="6.5" fill="none" stroke-linecap="round"/>
 	<!-- Highlight -->
-	<ellipse cx="45" cy="50" rx="8" ry="22" fill="url(#ruby-shine)"/>
+	<ellipse cx="54" cy="64" rx="9" ry="22" fill="url(#ew-shine)"/>
+	<!-- Center medallion (gold) -->
+	<circle cx="70" cy="72" r="13" fill="#FFD700" stroke="#7F1D1D" stroke-width="1.6"/>
+	<circle cx="70" cy="72" r="9" fill="url(#ew-gem)" stroke="#92400E" stroke-width="0.6"/>
+	<polygon points="68,68 72,68 70,76" fill="rgba(255,255,255,0.55)"/>
 	<!-- Stem -->
-	<rect x="50" y="82" width="20" height="16" fill="url(#ruby-base)"/>
-	<!-- Base tiers -->
-	<rect x="35" y="98" width="50" height="10" rx="2" fill="url(#ruby-base)"/>
-	<rect x="25" y="108" width="70" height="14" rx="3" fill="url(#ruby-base)"/>
-	<rect x="20" y="122" width="80" height="6" rx="2" fill="#450A0A"/>
+	<rect x="58" y="96" width="24" height="16" fill="url(#ew-base)"/>
+	<!-- Base -->
+	<rect x="42" y="112" width="56" height="11" rx="2" fill="url(#ew-base)"/>
+	<rect x="32" y="123" width="76" height="14" rx="3" fill="url(#ew-base)"/>
+	<rect x="26" y="137" width="88" height="6" rx="2" fill="#450A0A"/>
+	<!-- Floor shadow -->
+	<ellipse cx="70" cy="148" rx="40" ry="3" fill="rgba(0,0,0,0.25)"/>
 </svg>
