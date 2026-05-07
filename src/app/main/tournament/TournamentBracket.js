@@ -128,7 +128,8 @@ const useStyles = makeStyles()((theme) => ({
 		display: 'flex',
 		alignItems: 'center',
 		justifyContent: 'space-between',
-		padding: '10px 14px',
+		padding: '10px 14px 10px 10px',
+		borderLeft: '4px solid transparent',
 		fontFamily: '"Noto Sans KR", sans-serif',
 		fontSize: '1.3rem',
 		color: 'rgba(255, 255, 255, 0.85)',
@@ -138,8 +139,15 @@ const useStyles = makeStyles()((theme) => ({
 		},
 		[theme.breakpoints.down('sm')]: {
 			fontSize: '1.2rem',
-			padding: '8px 12px'
+			padding: '8px 12px 8px 8px'
 		}
+	},
+	// Plan C 색 단서 — LoL 블루팀/레드팀 컨벤션. destructive #ff6b6b 와 톤 차별을 위해 #e84057 사용.
+	teamRowBlueSide: {
+		borderLeftColor: '#4287f5'
+	},
+	teamRowRedSide: {
+		borderLeftColor: '#e84057'
 	},
 	teamRowWinner: {
 		color: '#00ff7f',
@@ -212,7 +220,7 @@ const useStyles = makeStyles()((theme) => ({
 		fontFamily: '"Rajdhani", sans-serif',
 		fontWeight: 700,
 		fontSize: '1.05rem',
-		color: '#00d4ff',
+		color: '#4287f5',
 		flexShrink: 0,
 		minWidth: 26,
 		textAlign: 'left'
@@ -221,7 +229,7 @@ const useStyles = makeStyles()((theme) => ({
 		fontFamily: '"Rajdhani", sans-serif',
 		fontWeight: 700,
 		fontSize: '1.05rem',
-		color: 'rgba(0, 102, 255, 0.85)',
+		color: '#e84057',
 		flexShrink: 0,
 		minWidth: 26,
 		textAlign: 'right'
@@ -235,11 +243,11 @@ const useStyles = makeStyles()((theme) => ({
 		background: 'rgba(255, 255, 255, 0.05)'
 	},
 	predictionGaugeFillT1: {
-		background: 'linear-gradient(90deg, #00d4ff, #0099cc)',
+		background: 'linear-gradient(90deg, #4287f5, #1976d2)',
 		height: '100%'
 	},
 	predictionGaugeFillT2: {
-		background: 'linear-gradient(90deg, #0066ff, #002a99)',
+		background: 'linear-gradient(90deg, #e84057, #c2384a)',
 		height: '100%'
 	},
 	predictionMetaRow: {
@@ -602,14 +610,17 @@ function TournamentBracket({
 		);
 	}
 
-	function renderTeamRow(teamId, score, winnerTeamId, isFinishedMatch, emptyLabel, isMyPick) {
+	function renderTeamRow(teamId, score, winnerTeamId, isFinishedMatch, emptyLabel, isMyPick, sideKey) {
 		const team = teamId ? teamMap.get(teamId) : null;
 		const isWinner = winnerTeamId && winnerTeamId === teamId;
 		const isLoser = winnerTeamId && winnerTeamId !== teamId && teamId;
 		const isChampion = championTeamId && championTeamId === teamId;
 		const showScore = isFinishedMatch && team;
 
-		let rowCls = classes.teamRow;
+		const sideCls = sideKey === 'blue' ? classes.teamRowBlueSide
+			: sideKey === 'red' ? classes.teamRowRedSide
+				: null;
+		let rowCls = cx(classes.teamRow, sideCls);
 		if (isWinner) rowCls = cx(rowCls, classes.teamRowWinner);
 		else if (isLoser) rowCls = cx(rowCls, classes.teamRowLoser);
 		else if (!team) rowCls = cx(rowCls, classes.teamRowTBD);
@@ -739,9 +750,9 @@ function TournamentBracket({
 													<span className={classes.matchHeaderBO}>BO{m.bestOf}</span>
 													{editable && <EditIcon className={classes.editIcon} />}
 												</div>
-												{renderTeamRow(m.team1Id, m.team1Score, m.winnerTeamId, finished, emptyLabel, isMyPickT1)}
+												{renderTeamRow(m.team1Id, m.team1Score, m.winnerTeamId, finished, emptyLabel, isMyPickT1, 'blue')}
 												{verbose && renderTeamFullDetails(team1)}
-												{renderTeamRow(m.team2Id, m.team2Score, m.winnerTeamId, finished, emptyLabel, isMyPickT2)}
+												{renderTeamRow(m.team2Id, m.team2Score, m.winnerTeamId, finished, emptyLabel, isMyPickT2, 'red')}
 												{verbose && renderTeamFullDetails(team2)}
 												{verbose && team1 && team2 && (
 													<>
