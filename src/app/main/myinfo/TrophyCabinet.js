@@ -2,7 +2,7 @@ import React from 'react';
 import { makeStyles } from 'tss-react/mui';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import { Link } from 'react-router-dom';
-import { getTrophyIcon } from 'app/main/tournament/tournamentUtils';
+import { getTrophyIcon, getTrophyTier } from 'app/main/tournament/tournamentUtils';
 
 const useStyles = makeStyles()((theme) => ({
 	root: {
@@ -119,7 +119,8 @@ const useStyles = makeStyles()((theme) => ({
 
 function TrophyCabinet({ championships }) {
 	const { classes } = useStyles();
-	const list = championships || [];
+	// 등급 높은 순 → 낮은 순. 미지정 트로피는 가장 뒤.
+	const list = [...(championships || [])].sort((a, b) => getTrophyTier(b.trophyType) - getTrophyTier(a.trophyType));
 
 	return (
 		<div className={classes.root}>

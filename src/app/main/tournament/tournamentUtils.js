@@ -27,8 +27,10 @@ export const TROPHY_TYPES = {
 	kespa: { ko: 'KeSPA Cup', icon: '/assets/images/trophies/kespa.svg' }
 };
 
-// 토너먼트 생성/수정 dropdown 의 표시 순서. 국제(worlds → ewc) → 한국(lck, kespa).
-export const TROPHY_TYPE_ORDER = ['worlds', 'msi', 'first_stand', 'ewc', 'lck', 'kespa'];
+// 트로피 등급. 인덱스가 곧 등급 (낮을수록 낮은 등급).
+// T1 kespa(이벤트급) → T6 worlds(최상위/Summoner's Cup급).
+// 토너먼트 생성/수정 그리드는 이 순서(낮음→높음) 그대로, 내정보 캐비닛은 역순(높음→낮음) 정렬.
+export const TROPHY_TYPE_ORDER = ['kespa', 'first_stand', 'lck', 'ewc', 'msi', 'worlds'];
 
 export function getTrophyLabel(type) {
 	return type && TROPHY_TYPES[type] ? TROPHY_TYPES[type].ko : null;
@@ -36,6 +38,11 @@ export function getTrophyLabel(type) {
 
 export function getTrophyIcon(type) {
 	return type && TROPHY_TYPES[type] ? TROPHY_TYPES[type].icon : null;
+}
+
+// 트로피 미지정(null) 은 -1 로 떨어져 정렬에서 가장 낮은 등급으로 처리됨.
+export function getTrophyTier(type) {
+	return type ? TROPHY_TYPE_ORDER.indexOf(type) : -1;
 }
 
 export const POSITIONS = ['top', 'jungle', 'mid', 'adc', 'support'];
