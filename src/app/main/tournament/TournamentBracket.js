@@ -194,15 +194,62 @@ const useStyles = makeStyles()((theme) => ({
 	},
 	predictionFooter: {
 		display: 'flex',
+		flexDirection: 'column',
+		gap: 5,
+		padding: '6px 12px 8px',
+		borderTop: '1px solid rgba(0, 212, 255, 0.08)',
+		[theme.breakpoints.down('sm')]: {
+			padding: '5px 10px 7px',
+			gap: 4
+		}
+	},
+	predictionGaugeRow: {
+		display: 'flex',
+		alignItems: 'center',
+		gap: 8
+	},
+	predictionGaugePctLeft: {
+		fontFamily: '"Rajdhani", sans-serif',
+		fontWeight: 700,
+		fontSize: '1.05rem',
+		color: '#00d4ff',
+		flexShrink: 0,
+		minWidth: 26,
+		textAlign: 'left'
+	},
+	predictionGaugePctRight: {
+		fontFamily: '"Rajdhani", sans-serif',
+		fontWeight: 700,
+		fontSize: '1.05rem',
+		color: 'rgba(0, 102, 255, 0.85)',
+		flexShrink: 0,
+		minWidth: 26,
+		textAlign: 'right'
+	},
+	predictionGauge: {
+		flex: 1,
+		display: 'flex',
+		height: 5,
+		borderRadius: 3,
+		overflow: 'hidden',
+		background: 'rgba(255, 255, 255, 0.05)'
+	},
+	predictionGaugeFillT1: {
+		background: 'linear-gradient(90deg, #00d4ff, #0099cc)',
+		height: '100%'
+	},
+	predictionGaugeFillT2: {
+		background: 'linear-gradient(90deg, #0066ff, #002a99)',
+		height: '100%'
+	},
+	predictionMetaRow: {
+		display: 'flex',
 		alignItems: 'center',
 		gap: 4,
-		padding: '4px 12px 6px',
-		borderTop: '1px solid rgba(0, 212, 255, 0.08)',
 		fontFamily: '"Noto Sans KR", sans-serif',
 		fontSize: '1rem',
 		color: 'rgba(255, 255, 255, 0.45)',
 		[theme.breakpoints.down('sm')]: {
-			padding: '3px 10px 5px',
 			fontSize: '0.95rem'
 		}
 	},
@@ -587,16 +634,33 @@ function TournamentBracket({
 			: null;
 		// 예측이 0표면서 본인도 안 찍었으면 푸터 자체를 숨겨 카드를 깔끔히 유지
 		if (total === 0 && !myPickedLabel) return null;
+		// 백엔드 pct 합계가 반올림으로 100% 가 안 맞을 수 있어 좌측을 round, 우측을 100-좌측으로 강제.
+		const pct1 = total > 0 && m.team1PredictionPct != null
+			? Math.round(m.team1PredictionPct * 100)
+			: 0;
+		const pct2 = total > 0 ? 100 - pct1 : 0;
 		return (
 			<div className={classes.predictionFooter}>
-				<span>예측 {total}표</span>
-				{myPickedLabel && (
-					<>
-						<span className={classes.predictionFooterDot}>·</span>
-						<StarIcon className={classes.predictionFooterStar} />
-						<span className={classes.predictionFooterTeam}>{myPickedLabel}</span>
-					</>
+				{total > 0 && (
+					<div className={classes.predictionGaugeRow}>
+						<span className={classes.predictionGaugePctLeft}>{pct1}%</span>
+						<div className={classes.predictionGauge}>
+							<div className={classes.predictionGaugeFillT1} style={{ flexBasis: `${pct1}%` }} />
+							<div className={classes.predictionGaugeFillT2} style={{ flexBasis: `${pct2}%` }} />
+						</div>
+						<span className={classes.predictionGaugePctRight}>{pct2}%</span>
+					</div>
 				)}
+				<div className={classes.predictionMetaRow}>
+					<span>예측 {total}표</span>
+					{myPickedLabel && (
+						<>
+							<span className={classes.predictionFooterDot}>·</span>
+							<StarIcon className={classes.predictionFooterStar} />
+							<span className={classes.predictionFooterTeam}>{myPickedLabel}</span>
+						</>
+					)}
+				</div>
 			</div>
 		);
 	}
