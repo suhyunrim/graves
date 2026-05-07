@@ -643,7 +643,7 @@ function TournamentDetail() {
 		Actions.deleteTournament(tournamentId)
 			.then(() => {
 				toast.success('토너먼트가 삭제되었습니다.');
-				navigate('/tournament');
+				navigate('/tournament?all=1');
 			})
 			.catch(err => {
 				setDeleteTournamentOpen(false);
@@ -685,7 +685,7 @@ function TournamentDetail() {
 			header={
 				<div className={classes.headerRoot}>
 					<div className={classes.backRow}>
-						<IconButton className={classes.backBtn} onClick={() => navigate('/tournament')} size="small">
+						<IconButton className={classes.backBtn} onClick={() => navigate('/tournament?all=1')} size="small">
 							<ArrowBackIcon />
 						</IconButton>
 					</div>

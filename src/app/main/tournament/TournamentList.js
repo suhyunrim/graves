@@ -7,9 +7,9 @@ import AddIcon from '@mui/icons-material/Add';
 import GroupIcon from '@mui/icons-material/Group';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import StarIcon from '@mui/icons-material/Star';
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { getProfileIconUrl } from 'app/main/challenge/ddragonUtils';
 import reducer from './store/reducers';
 import * as Actions from './store/actions';
@@ -265,6 +265,8 @@ const useStyles = makeStyles()((theme) => ({
 function TournamentList() {
 	const { classes } = useStyles();
 	const dispatch = useDispatch();
+	const navigate = useNavigate();
+	const location = useLocation();
 	const list = useSelector(({ Tournament }) => Tournament.tournament.list);
 	const loadingList = useSelector(({ Tournament }) => Tournament.tournament.loadingList);
 	const activeMembers = useSelector(({ Tournament }) => Tournament.tournament.activeMembers);
@@ -273,6 +275,8 @@ function TournamentList() {
 	const isAdmin = checkIsAdmin(user);
 	const [createOpen, setCreateOpen] = useState(false);
 	const toast = useToast();
+	// 자동 입장은 첫 응답에 한 번만. 이후 list 가 갱신돼도 (e.g. 새 토너먼트 생성 후) 다시 튕기지 않게.
+	const autoEnteredRef = useRef(false);
 
 	useEffect(() => {
 		if (groupId) {
@@ -281,6 +285,21 @@ function TournamentList() {
 			dispatch(Actions.getActiveMembers(groupId));
 		}
 	}, [dispatch, groupId]);
+
+	// 진행 중 토너먼트가 있으면 list 페이지를 거치지 않고 바로 detail 로 자동 입장.
+	// 사용자가 'list 전체 보기' 의도로 직접 들어오면 ?all=1 로 우회 (detail 의 backBtn 이 그 url 사용).
+	useEffect(() => {
+		if (autoEnteredRef.current) return;
+		if (loadingList) return;
+		if (!list || list.length === 0) return;
+		const params = new URLSearchParams(location.search);
+		if (params.has('all')) return;
+		const active = list.find(t => t.status === 'in_progress');
+		if (active) {
+			autoEnteredRef.current = true;
+			navigate(`/tournament/${active.id}`, { replace: true });
+		}
+	}, [loadingList, list, location.search, navigate]);
 
 	const memberMap = useMemo(() => {
 		const m = new Map();
