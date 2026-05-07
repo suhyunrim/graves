@@ -160,6 +160,12 @@ export function isByeMatch(match) {
 	return (match.team1Id == null) !== (match.team2Id == null);
 }
 
+// 1라운드의 BYE 매치는 자동 진출이라 트리에서 숨기고, 그 외 라운드는 BYE 도 effective propagate 로 픽 가능.
+export function getVisibleMatches(round, roundMatches) {
+	if (round === 1) return roundMatches.filter(m => !isByeMatch(m));
+	return roundMatches;
+}
+
 export function isEmptyMatch(match) {
 	return match.team1Id == null && match.team2Id == null;
 }

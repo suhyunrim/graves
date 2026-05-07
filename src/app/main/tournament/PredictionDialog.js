@@ -14,10 +14,10 @@ import useDialogStyles from '../components/dialogStyles';
 import * as Actions from './store/actions';
 import {
 	groupMatchesByRound,
-	isByeMatch,
 	roundLabelFor,
 	getParentMatches,
-	getChildMatch
+	getChildMatch,
+	getVisibleMatches
 } from './tournamentUtils';
 
 // 백엔드가 채워준 team1Id/team2Id 우선, 없으면 부모 매치에서 사용자 예측을 propagate.
@@ -261,15 +261,10 @@ function PredictionDialog({ open, onClose, onSuccess, tournamentId, matches, tea
 	const groupedRounds = useMemo(() => groupMatchesByRound(matches || []), [matches]);
 	const totalRounds = groupedRounds.length;
 
-	// 픽 필수 매치 = visibleMatches 의 합 (1라운드 BYE 만 제외, 그 외 라운드는 BYE 도 트리상 effective 표시되어 픽 가능).
-	const requiredMatchCount = useMemo(() => {
-		let count = 0;
-		groupedRounds.forEach(([round, roundMatches]) => {
-			const visible = round === 1 ? roundMatches.filter(m => !isByeMatch(m)) : roundMatches;
-			count += visible.length;
-		});
-		return count;
-	}, [groupedRounds]);
+	const requiredMatchCount = useMemo(
+		() => groupedRounds.reduce((acc, [round, rs]) => acc + getVisibleMatches(round, rs).length, 0),
+		[groupedRounds]
+	);
 	const pickedCount = Object.keys(predictionMap).length;
 	const allPicked = requiredMatchCount > 0 && pickedCount >= requiredMatchCount;
 	const remainingCount = Math.max(0, requiredMatchCount - pickedCount);
@@ -353,9 +348,7 @@ function PredictionDialog({ open, onClose, onSuccess, tournamentId, matches, tea
 					<div className={classes.treeWrap}>
 						<div className={classes.tree}>
 							{groupedRounds.map(([round, roundMatches]) => {
-								const visibleMatches = round === 1
-									? roundMatches.filter(m => !isByeMatch(m))
-									: roundMatches;
+								const visibleMatches = getVisibleMatches(round, roundMatches);
 								const label = roundLabelFor(round, totalRounds);
 								return (
 									<div key={round} className={classes.column}>
