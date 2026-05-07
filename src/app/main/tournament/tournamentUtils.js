@@ -142,6 +142,11 @@ export function isEmptyMatch(match) {
 	return match.team1Id == null && match.team2Id == null;
 }
 
+// 두 팀이 모두 정해진 매치 (BYE/empty 제외). 승부의신 적중 카운트의 분모로 사용.
+export function isValidMatch(match) {
+	return Boolean(match && match.team1Id != null && match.team2Id != null);
+}
+
 export function validateMatchScore(team1Score, team2Score, bestOf) {
 	if (typeof team1Score !== 'number' || typeof team2Score !== 'number') return '점수를 입력하세요.';
 	if (team1Score < 0 || team2Score < 0) return '점수는 0 이상이어야 합니다.';
