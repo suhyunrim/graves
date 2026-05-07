@@ -1,0 +1,35 @@
+<svg viewBox="0 0 120 140" xmlns="http://www.w3.org/2000/svg">
+	<defs>
+		<linearGradient id="silver-cup" x1="0" y1="0" x2="0" y2="1">
+			<stop offset="0%" stop-color="#FFFFFF"/>
+			<stop offset="35%" stop-color="#D9DEE5"/>
+			<stop offset="100%" stop-color="#6B7280"/>
+		</linearGradient>
+		<linearGradient id="silver-base" x1="0" y1="0" x2="0" y2="1">
+			<stop offset="0%" stop-color="#9CA3AF"/>
+			<stop offset="100%" stop-color="#374151"/>
+		</linearGradient>
+		<radialGradient id="silver-shine" cx="0.3" cy="0.2" r="0.6">
+			<stop offset="0%" stop-color="rgba(255,255,255,0.95)"/>
+			<stop offset="100%" stop-color="rgba(255,255,255,0)"/>
+		</radialGradient>
+	</defs>
+	<!-- Crown on top -->
+	<path d="M44,20 L52,8 L60,18 L68,8 L76,20 L74,30 L46,30 Z" fill="#E5E7EB" stroke="#4B5563" stroke-width="1"/>
+	<circle cx="52" cy="8" r="2" fill="#60A5FA"/>
+	<circle cx="60" cy="18" r="2" fill="#60A5FA"/>
+	<circle cx="68" cy="8" r="2" fill="#60A5FA"/>
+	<!-- Cup body (chalice shape) -->
+	<path d="M32,32 L88,32 Q92,60 76,82 L44,82 Q28,60 32,32 Z" fill="url(#silver-cup)" stroke="#4B5563" stroke-width="0.6"/>
+	<!-- Handles -->
+	<path d="M32,40 Q14,40 14,58 Q14,74 32,74" stroke="url(#silver-cup)" stroke-width="6" fill="none" stroke-linecap="round"/>
+	<path d="M88,40 Q106,40 106,58 Q106,74 88,74" stroke="url(#silver-cup)" stroke-width="6" fill="none" stroke-linecap="round"/>
+	<!-- Highlight -->
+	<ellipse cx="46" cy="50" rx="8" ry="22" fill="url(#silver-shine)"/>
+	<!-- Stem -->
+	<rect x="50" y="82" width="20" height="16" fill="url(#silver-base)"/>
+	<!-- Base tiers -->
+	<rect x="35" y="98" width="50" height="10" rx="2" fill="url(#silver-base)"/>
+	<rect x="25" y="108" width="70" height="14" rx="3" fill="url(#silver-base)"/>
+	<rect x="20" y="122" width="80" height="6" rx="2" fill="#1F2937"/>
+</svg>

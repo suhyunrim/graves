@@ -1,0 +1,37 @@
+<svg viewBox="0 0 120 140" xmlns="http://www.w3.org/2000/svg">
+	<defs>
+		<linearGradient id="ruby-cup" x1="0" y1="0" x2="0" y2="1">
+			<stop offset="0%" stop-color="#FECACA"/>
+			<stop offset="35%" stop-color="#EF4444"/>
+			<stop offset="100%" stop-color="#7F1D1D"/>
+		</linearGradient>
+		<linearGradient id="ruby-base" x1="0" y1="0" x2="0" y2="1">
+			<stop offset="0%" stop-color="#B91C1C"/>
+			<stop offset="100%" stop-color="#450A0A"/>
+		</linearGradient>
+		<radialGradient id="ruby-shine" cx="0.3" cy="0.2" r="0.6">
+			<stop offset="0%" stop-color="rgba(255,255,255,0.85)"/>
+			<stop offset="100%" stop-color="rgba(255,255,255,0)"/>
+		</radialGradient>
+		<radialGradient id="flame-grad" cx="0.5" cy="0.7" r="0.7">
+			<stop offset="0%" stop-color="#FEF08A"/>
+			<stop offset="60%" stop-color="#F97316"/>
+			<stop offset="100%" stop-color="#B91C1C"/>
+		</radialGradient>
+	</defs>
+	<!-- Flame on top -->
+	<path d="M60,4 Q52,16 50,24 Q50,32 60,34 Q70,32 70,24 Q68,16 60,4 Z" fill="url(#flame-grad)" stroke="#7F1D1D" stroke-width="0.8"/>
+	<!-- Cup body -->
+	<path d="M30,32 L90,32 Q92,62 78,82 L42,82 Q28,62 30,32 Z" fill="url(#ruby-cup)" stroke="#7F1D1D" stroke-width="0.6"/>
+	<!-- Handles -->
+	<path d="M30,40 Q12,40 12,58 Q12,74 30,74" stroke="url(#ruby-cup)" stroke-width="6" fill="none" stroke-linecap="round"/>
+	<path d="M90,40 Q108,40 108,58 Q108,74 90,74" stroke="url(#ruby-cup)" stroke-width="6" fill="none" stroke-linecap="round"/>
+	<!-- Highlight -->
+	<ellipse cx="45" cy="50" rx="8" ry="22" fill="url(#ruby-shine)"/>
+	<!-- Stem -->
+	<rect x="50" y="82" width="20" height="16" fill="url(#ruby-base)"/>
+	<!-- Base tiers -->
+	<rect x="35" y="98" width="50" height="10" rx="2" fill="url(#ruby-base)"/>
+	<rect x="25" y="108" width="70" height="14" rx="3" fill="url(#ruby-base)"/>
+	<rect x="20" y="122" width="80" height="6" rx="2" fill="#450A0A"/>
+</svg>

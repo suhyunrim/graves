@@ -1,0 +1,36 @@
+<svg viewBox="0 0 120 140" xmlns="http://www.w3.org/2000/svg">
+	<defs>
+		<linearGradient id="emerald-cup" x1="0" y1="0" x2="0" y2="1">
+			<stop offset="0%" stop-color="#A7F3D0"/>
+			<stop offset="35%" stop-color="#10B981"/>
+			<stop offset="100%" stop-color="#064E3B"/>
+		</linearGradient>
+		<linearGradient id="emerald-base" x1="0" y1="0" x2="0" y2="1">
+			<stop offset="0%" stop-color="#047857"/>
+			<stop offset="100%" stop-color="#022C22"/>
+		</linearGradient>
+		<radialGradient id="emerald-shine" cx="0.3" cy="0.2" r="0.6">
+			<stop offset="0%" stop-color="rgba(255,255,255,0.85)"/>
+			<stop offset="100%" stop-color="rgba(255,255,255,0)"/>
+		</radialGradient>
+	</defs>
+	<!-- Laurel wreath on top -->
+	<path d="M48,18 Q40,12 36,20 Q40,28 48,26" fill="#34D399" stroke="#064E3B" stroke-width="0.8"/>
+	<path d="M50,12 Q44,6 40,14 Q44,22 52,20" fill="#34D399" stroke="#064E3B" stroke-width="0.8"/>
+	<path d="M72,18 Q80,12 84,20 Q80,28 72,26" fill="#34D399" stroke="#064E3B" stroke-width="0.8"/>
+	<path d="M70,12 Q76,6 80,14 Q76,22 68,20" fill="#34D399" stroke="#064E3B" stroke-width="0.8"/>
+	<circle cx="60" cy="22" r="6" fill="#FCD34D" stroke="#064E3B" stroke-width="0.8"/>
+	<!-- Cup body -->
+	<path d="M30,32 L90,32 Q92,62 78,82 L42,82 Q28,62 30,32 Z" fill="url(#emerald-cup)" stroke="#064E3B" stroke-width="0.6"/>
+	<!-- Handles -->
+	<path d="M30,40 Q12,40 12,58 Q12,74 30,74" stroke="url(#emerald-cup)" stroke-width="6" fill="none" stroke-linecap="round"/>
+	<path d="M90,40 Q108,40 108,58 Q108,74 90,74" stroke="url(#emerald-cup)" stroke-width="6" fill="none" stroke-linecap="round"/>
+	<!-- Highlight -->
+	<ellipse cx="45" cy="50" rx="8" ry="22" fill="url(#emerald-shine)"/>
+	<!-- Stem -->
+	<rect x="50" y="82" width="20" height="16" fill="url(#emerald-base)"/>
+	<!-- Base tiers -->
+	<rect x="35" y="98" width="50" height="10" rx="2" fill="url(#emerald-base)"/>
+	<rect x="25" y="108" width="70" height="14" rx="3" fill="url(#emerald-base)"/>
+	<rect x="20" y="122" width="80" height="6" rx="2" fill="#022C22"/>
+</svg>

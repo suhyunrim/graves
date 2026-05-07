@@ -1,0 +1,35 @@
+<svg viewBox="0 0 120 140" xmlns="http://www.w3.org/2000/svg">
+	<defs>
+		<linearGradient id="amethyst-cup" x1="0" y1="0" x2="0" y2="1">
+			<stop offset="0%" stop-color="#E9D5FF"/>
+			<stop offset="35%" stop-color="#A855F7"/>
+			<stop offset="100%" stop-color="#4C1D95"/>
+		</linearGradient>
+		<linearGradient id="amethyst-base" x1="0" y1="0" x2="0" y2="1">
+			<stop offset="0%" stop-color="#7C3AED"/>
+			<stop offset="100%" stop-color="#2E1065"/>
+		</linearGradient>
+		<radialGradient id="amethyst-shine" cx="0.3" cy="0.2" r="0.6">
+			<stop offset="0%" stop-color="rgba(255,255,255,0.85)"/>
+			<stop offset="100%" stop-color="rgba(255,255,255,0)"/>
+		</radialGradient>
+	</defs>
+	<!-- Sparkle ornament on top -->
+	<g transform="translate(60, 20)">
+		<polygon points="0,-16 3,-3 16,0 3,3 0,16 -3,3 -16,0 -3,-3" fill="#F0ABFC" stroke="#4C1D95" stroke-width="1"/>
+		<circle cx="0" cy="0" r="3" fill="#FFFFFF"/>
+	</g>
+	<!-- Cup body -->
+	<path d="M30,38 L90,38 Q92,64 78,82 L42,82 Q28,64 30,38 Z" fill="url(#amethyst-cup)" stroke="#4C1D95" stroke-width="0.6"/>
+	<!-- Handles -->
+	<path d="M30,46 Q12,46 12,60 Q12,74 30,74" stroke="url(#amethyst-cup)" stroke-width="6" fill="none" stroke-linecap="round"/>
+	<path d="M90,46 Q108,46 108,60 Q108,74 90,74" stroke="url(#amethyst-cup)" stroke-width="6" fill="none" stroke-linecap="round"/>
+	<!-- Highlight -->
+	<ellipse cx="45" cy="54" rx="8" ry="20" fill="url(#amethyst-shine)"/>
+	<!-- Stem -->
+	<rect x="50" y="82" width="20" height="16" fill="url(#amethyst-base)"/>
+	<!-- Base tiers -->
+	<rect x="35" y="98" width="50" height="10" rx="2" fill="url(#amethyst-base)"/>
+	<rect x="25" y="108" width="70" height="14" rx="3" fill="url(#amethyst-base)"/>
+	<rect x="20" y="122" width="80" height="6" rx="2" fill="#2E1065"/>
+</svg>

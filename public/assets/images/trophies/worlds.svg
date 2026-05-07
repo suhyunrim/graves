@@ -1,0 +1,32 @@
+<svg viewBox="0 0 120 140" xmlns="http://www.w3.org/2000/svg">
+	<defs>
+		<linearGradient id="gold-cup" x1="0" y1="0" x2="0" y2="1">
+			<stop offset="0%" stop-color="#FFF6BF"/>
+			<stop offset="35%" stop-color="#FFD700"/>
+			<stop offset="100%" stop-color="#A06A00"/>
+		</linearGradient>
+		<linearGradient id="gold-base" x1="0" y1="0" x2="0" y2="1">
+			<stop offset="0%" stop-color="#C8941A"/>
+			<stop offset="100%" stop-color="#5C3A00"/>
+		</linearGradient>
+		<radialGradient id="gold-shine" cx="0.3" cy="0.2" r="0.6">
+			<stop offset="0%" stop-color="rgba(255,255,255,0.85)"/>
+			<stop offset="100%" stop-color="rgba(255,255,255,0)"/>
+		</radialGradient>
+	</defs>
+	<!-- Star on top -->
+	<polygon points="60,4 64,18 79,18 67,27 71,42 60,33 49,42 53,27 41,18 56,18" fill="#FFE066" stroke="#A06A00" stroke-width="1"/>
+	<!-- Cup body -->
+	<path d="M30,30 L90,30 Q92,62 78,82 L42,82 Q28,62 30,30 Z" fill="url(#gold-cup)" stroke="#7A5000" stroke-width="0.6"/>
+	<!-- Handles -->
+	<path d="M30,38 Q12,38 12,56 Q12,72 30,72" stroke="url(#gold-cup)" stroke-width="6" fill="none" stroke-linecap="round"/>
+	<path d="M90,38 Q108,38 108,56 Q108,72 90,72" stroke="url(#gold-cup)" stroke-width="6" fill="none" stroke-linecap="round"/>
+	<!-- Highlight -->
+	<ellipse cx="45" cy="48" rx="8" ry="22" fill="url(#gold-shine)"/>
+	<!-- Stem -->
+	<rect x="50" y="82" width="20" height="16" fill="url(#gold-base)"/>
+	<!-- Base tiers -->
+	<rect x="35" y="98" width="50" height="10" rx="2" fill="url(#gold-base)"/>
+	<rect x="25" y="108" width="70" height="14" rx="3" fill="url(#gold-base)"/>
+	<rect x="20" y="122" width="80" height="6" rx="2" fill="#3D2600"/>
+</svg>
