@@ -186,6 +186,41 @@ const useStyles = makeStyles()((theme) => ({
 		textAlign: 'center',
 		padding: 40
 	},
+	pickStar: {
+		fontSize: '1.1rem',
+		color: '#ffd700',
+		marginLeft: 4,
+		flexShrink: 0
+	},
+	predictionFooter: {
+		display: 'flex',
+		alignItems: 'center',
+		gap: 4,
+		padding: '4px 12px 6px',
+		borderTop: '1px solid rgba(0, 212, 255, 0.08)',
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1rem',
+		color: 'rgba(255, 255, 255, 0.45)',
+		[theme.breakpoints.down('sm')]: {
+			padding: '3px 10px 5px',
+			fontSize: '0.95rem'
+		}
+	},
+	predictionFooterDot: {
+		color: 'rgba(255, 255, 255, 0.2)',
+		margin: '0 2px'
+	},
+	predictionFooterStar: {
+		fontSize: '0.95rem',
+		color: '#ffd700'
+	},
+	predictionFooterTeam: {
+		color: 'rgba(255, 215, 0, 0.85)',
+		minWidth: 0,
+		overflow: 'hidden',
+		textOverflow: 'ellipsis',
+		whiteSpace: 'nowrap'
+	},
 	teamFullDetails: {
 		padding: '8px 14px 10px',
 		borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
@@ -366,7 +401,9 @@ function TournamentBracket({
 	canEdit,
 	onEditMatch,
 	verbose,
-	activeMembers
+	activeMembers,
+	myPuuid,
+	onMatchClick
 }) {
 	const { classes, cx } = useStyles();
 
@@ -518,7 +555,7 @@ function TournamentBracket({
 		);
 	}
 
-	function renderTeamRow(teamId, score, winnerTeamId, isFinishedMatch, emptyLabel) {
+	function renderTeamRow(teamId, score, winnerTeamId, isFinishedMatch, emptyLabel, isMyPick) {
 		const team = teamId ? teamMap.get(teamId) : null;
 		const isWinner = winnerTeamId && winnerTeamId === teamId;
 		const isLoser = winnerTeamId && winnerTeamId !== teamId && teamId;
@@ -535,8 +572,31 @@ function TournamentBracket({
 				<span className={classes.teamName}>
 					{team ? team.name : emptyLabel}
 					{isChampion && <EmojiEventsIcon className={classes.championBadge} />}
+					{isMyPick && <StarIcon className={classes.pickStar} />}
 				</span>
 				{showScore && <span className={classes.score}>{score}</span>}
+			</div>
+		);
+	}
+
+	function renderPredictionFooter(m, myPickedTeamId) {
+		const total = (m.team1PredictionCount || 0) + (m.team2PredictionCount || 0);
+		const myPickedTeam = myPickedTeamId != null ? teamMap.get(myPickedTeamId) : null;
+		const myPickedLabel = myPickedTeamId != null
+			? (myPickedTeam ? myPickedTeam.name : `팀#${myPickedTeamId}`)
+			: null;
+		// 예측이 0표면서 본인도 안 찍었으면 푸터 자체를 숨겨 카드를 깔끔히 유지
+		if (total === 0 && !myPickedLabel) return null;
+		return (
+			<div className={classes.predictionFooter}>
+				<span>예측 {total}표</span>
+				{myPickedLabel && (
+					<>
+						<span className={classes.predictionFooterDot}>·</span>
+						<StarIcon className={classes.predictionFooterStar} />
+						<span className={classes.predictionFooterTeam}>{myPickedLabel}</span>
+					</>
+				)}
 			</div>
 		);
 	}
@@ -577,6 +637,11 @@ function TournamentBracket({
 										const empty = isEmptyMatch(m);
 										const editable = canEdit && !empty && !finished
 											&& m.team1Id != null && m.team2Id != null;
+										const predictionClickable = !editable && !!onMatchClick && !empty;
+										const cardClickable = editable || predictionClickable;
+										const handleCardClick = editable
+											? () => onEditMatch(m)
+											: (predictionClickable ? () => onMatchClick(m) : undefined);
 
 										const team1 = m.team1Id ? teamMap.get(m.team1Id) : null;
 										const team2 = m.team2Id ? teamMap.get(m.team2Id) : null;
@@ -588,24 +653,31 @@ function TournamentBracket({
 											prob2 = Math.round(m.team2WinProb * 100);
 										}
 
+										const myPick = myPuuid
+											? (m.predictions || []).find(p => p.userPuuid === myPuuid)
+											: null;
+										const myPickedTeamId = myPick ? myPick.predictedTeamId : null;
+										const isMyPickT1 = myPickedTeamId != null && myPickedTeamId === m.team1Id;
+										const isMyPickT2 = myPickedTeamId != null && myPickedTeamId === m.team2Id;
+
 										return (
 											<div
 												key={m.id}
 												ref={el => { itemRefs.current[m.id] = el; }}
-												className={cx(classes.match, editable && classes.matchClickable)}
-												onClick={editable ? () => onEditMatch(m) : undefined}
-												role={editable ? 'button' : undefined}
-												tabIndex={editable ? 0 : undefined}
-												onKeyDown={editable ? (e) => e.key === 'Enter' && onEditMatch(m) : undefined}
+												className={cx(classes.match, cardClickable && classes.matchClickable)}
+												onClick={handleCardClick}
+												role={cardClickable ? 'button' : undefined}
+												tabIndex={cardClickable ? 0 : undefined}
+												onKeyDown={cardClickable ? (e) => e.key === 'Enter' && handleCardClick() : undefined}
 											>
 												<div className={classes.matchHeader}>
 													<span>매치 {m.bracketSlot + 1}</span>
 													<span className={classes.matchHeaderBO}>BO{m.bestOf}</span>
 													{editable && <EditIcon className={classes.editIcon} />}
 												</div>
-												{renderTeamRow(m.team1Id, m.team1Score, m.winnerTeamId, finished, emptyLabel)}
+												{renderTeamRow(m.team1Id, m.team1Score, m.winnerTeamId, finished, emptyLabel, isMyPickT1)}
 												{verbose && renderTeamFullDetails(team1)}
-												{renderTeamRow(m.team2Id, m.team2Score, m.winnerTeamId, finished, emptyLabel)}
+												{renderTeamRow(m.team2Id, m.team2Score, m.winnerTeamId, finished, emptyLabel, isMyPickT2)}
 												{verbose && renderTeamFullDetails(team2)}
 												{verbose && team1 && team2 && (
 													<>
@@ -613,6 +685,7 @@ function TournamentBracket({
 														{renderH2HSection(team1, team2, m.headToHeadScrim)}
 													</>
 												)}
+												{!empty && renderPredictionFooter(m, myPickedTeamId)}
 											</div>
 										);
 									})

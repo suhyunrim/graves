@@ -1,0 +1,359 @@
+import React, { useState, useMemo } from 'react';
+import {
+	Dialog,
+	DialogTitle,
+	DialogContent,
+	DialogActions,
+	Button
+} from '@mui/material';
+import { makeStyles } from 'tss-react/mui';
+import StarIcon from '@mui/icons-material/Star';
+import camilleRiotAuthService from 'app/services/camilleRiotAuthService/camilleRiotAuthService';
+import useDialogStyles from '../components/dialogStyles';
+import * as Actions from './store/actions';
+import {
+	groupMatchesByRound,
+	isByeMatch,
+	roundLabelFor,
+	getParentMatches,
+	getChildMatch
+} from './tournamentUtils';
+
+// 백엔드가 채워준 team1Id/team2Id 우선, 없으면 부모 매치에서 사용자 예측을 propagate.
+function getEffectiveTeams(m, matches, predictionMap) {
+	let team1Id = m.team1Id != null ? m.team1Id : null;
+	let team2Id = m.team2Id != null ? m.team2Id : null;
+	if (team1Id != null && team2Id != null) return [team1Id, team2Id];
+	const [left, right] = getParentMatches(matches, m);
+	if (team1Id == null && left) {
+		team1Id = predictionMap[left.id] != null ? predictionMap[left.id] : null;
+	}
+	if (team2Id == null && right) {
+		team2Id = predictionMap[right.id] != null ? predictionMap[right.id] : null;
+	}
+	return [team1Id, team2Id];
+}
+
+function buildInitialPredictionMap(matches, myPuuid) {
+	const map = {};
+	if (!myPuuid) return map;
+	matches.forEach(m => {
+		const mine = (m.predictions || []).find(p => p.userPuuid === myPuuid);
+		if (mine && mine.predictedTeamId != null) {
+			map[m.id] = mine.predictedTeamId;
+		}
+	});
+	return map;
+}
+
+// 부모 픽이 바뀌면 자식 픽이 새 effective team1/2 둘 다와 달라질 수 있어 그땐 reset 한다.
+function resetDescendants(map, parentMatchId, matches) {
+	const next = { ...map };
+	const parent = matches.find(m => m.id === parentMatchId);
+	if (!parent) return next;
+	const child = getChildMatch(matches, parent);
+	if (!child) return next;
+	const [t1Id, t2Id] = getEffectiveTeams(child, matches, next);
+	const childPick = next[child.id];
+	if (childPick != null && childPick !== t1Id && childPick !== t2Id) {
+		delete next[child.id];
+		return resetDescendants(next, child.id, matches);
+	}
+	return next;
+}
+
+const useStyles = makeStyles()((theme) => ({
+	paperWidth: {
+		minWidth: '90vw',
+		maxWidth: '95vw',
+		[theme.breakpoints.down('sm')]: {
+			minWidth: 'auto',
+			margin: 8,
+			width: 'calc(100% - 16px)'
+		}
+	},
+	hint: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.15rem',
+		color: 'rgba(255, 255, 255, 0.5)',
+		padding: '0 28px 12px',
+		[theme.breakpoints.down('sm')]: {
+			padding: '0 16px 10px',
+			fontSize: '1.05rem'
+		}
+	},
+	treeWrap: {
+		overflowX: 'auto',
+		paddingBottom: 8,
+		minWidth: 0
+	},
+	tree: {
+		display: 'flex',
+		gap: 40,
+		minWidth: 'min-content',
+		padding: '4px 4px 8px',
+		[theme.breakpoints.down('sm')]: {
+			gap: 24
+		}
+	},
+	column: {
+		display: 'flex',
+		flexDirection: 'column',
+		gap: 12,
+		minWidth: 220,
+		flexShrink: 0,
+		[theme.breakpoints.down('sm')]: {
+			minWidth: 170
+		}
+	},
+	columnTitle: {
+		fontFamily: '"Rajdhani", "Noto Sans KR", sans-serif',
+		fontSize: '1.4rem',
+		fontWeight: 700,
+		color: '#00d4ff',
+		letterSpacing: '0.04em',
+		textTransform: 'uppercase',
+		textAlign: 'center',
+		paddingBottom: 6,
+		borderBottom: '1px solid rgba(0, 212, 255, 0.25)',
+		marginBottom: 4,
+		[theme.breakpoints.down('sm')]: {
+			fontSize: '1.2rem'
+		}
+	},
+	matchList: {
+		display: 'flex',
+		flexDirection: 'column',
+		gap: 12,
+		justifyContent: 'space-around',
+		flex: 1
+	},
+	matchCard: {
+		background: 'rgba(0, 0, 0, 0.3)',
+		border: '1px solid rgba(0, 212, 255, 0.2)',
+		borderRadius: 10,
+		overflow: 'hidden'
+	},
+	matchHeader: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1rem',
+		color: 'rgba(255, 255, 255, 0.4)',
+		padding: '4px 10px',
+		borderBottom: '1px solid rgba(0, 212, 255, 0.1)',
+		textAlign: 'center',
+		letterSpacing: '0.02em'
+	},
+	teamSlot: {
+		padding: '10px 12px',
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.25rem',
+		color: 'rgba(255, 255, 255, 0.85)',
+		cursor: 'pointer',
+		transition: 'background 0.15s ease',
+		borderTop: '1px solid rgba(0, 212, 255, 0.08)',
+		display: 'flex',
+		alignItems: 'center',
+		gap: 8,
+		minHeight: 42,
+		'&:first-of-type': { borderTop: 'none' },
+		'&:hover': { background: 'rgba(0, 212, 255, 0.1)' },
+		[theme.breakpoints.down('sm')]: {
+			fontSize: '1.15rem',
+			padding: '8px 10px',
+			minHeight: 38
+		}
+	},
+	teamSlotSelected: {
+		background: 'rgba(0, 212, 255, 0.18)',
+		color: '#00d4ff',
+		fontWeight: 700,
+		'&:hover': { background: 'rgba(0, 212, 255, 0.24)' }
+	},
+	teamSlotEmpty: {
+		color: 'rgba(255, 255, 255, 0.3)',
+		cursor: 'not-allowed',
+		fontStyle: 'italic',
+		'&:hover': { background: 'transparent' }
+	},
+	teamName: {
+		flex: 1,
+		minWidth: 0,
+		overflow: 'hidden',
+		textOverflow: 'ellipsis',
+		whiteSpace: 'nowrap'
+	},
+	pickStar: {
+		fontSize: '1.3rem',
+		color: '#ffd700',
+		flexShrink: 0
+	},
+	errorText: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.15rem',
+		color: '#ff6b6b',
+		marginTop: 12,
+		padding: '0 4px'
+	},
+	emptyHint: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.3rem',
+		color: 'rgba(255, 255, 255, 0.4)',
+		textAlign: 'center',
+		padding: 40
+	}
+}));
+
+function PredictionDialog({ open, onClose, onSuccess, tournamentId, matches, teams }) {
+	const { classes, cx } = useStyles();
+	const { classes: dialogClasses } = useDialogStyles();
+	const myPuuid = useMemo(() => camilleRiotAuthService.getPuuid(), []);
+
+	const teamMap = useMemo(() => {
+		const m = new Map();
+		(teams || []).forEach(t => m.set(t.id, t));
+		return m;
+	}, [teams]);
+
+	const initialMap = useMemo(
+		() => buildInitialPredictionMap(matches || [], myPuuid),
+		[matches, myPuuid]
+	);
+	const [predictionMap, setPredictionMap] = useState(initialMap);
+	const [loading, setLoading] = useState(false);
+	const [error, setError] = useState('');
+
+	const groupedRounds = useMemo(() => groupMatchesByRound(matches || []), [matches]);
+	const totalRounds = groupedRounds.length;
+
+	function handleSelect(matchId, teamId) {
+		setPredictionMap(prev => {
+			let nextMap;
+			if (prev[matchId] === teamId) {
+				const copy = { ...prev };
+				delete copy[matchId];
+				nextMap = copy;
+			} else {
+				nextMap = { ...prev, [matchId]: teamId };
+			}
+			return resetDescendants(nextMap, matchId, matches);
+		});
+	}
+
+	function handleSubmit() {
+		const changes = [];
+		(matches || []).forEach(m => {
+			const oldVal = initialMap[m.id] != null ? initialMap[m.id] : null;
+			const newVal = predictionMap[m.id] != null ? predictionMap[m.id] : null;
+			if (oldVal !== newVal) {
+				changes.push({ matchId: m.id, predictedTeamId: newVal });
+			}
+		});
+		if (changes.length === 0) {
+			onClose();
+			return;
+		}
+		setError('');
+		setLoading(true);
+		Actions.putPredictions(tournamentId, changes)
+			.then(() => {
+				setLoading(false);
+				onSuccess();
+			})
+			.catch(err => {
+				setLoading(false);
+				const msg = err.response && err.response.data ? err.response.data.result : '예측 저장 실패';
+				setError(msg);
+			});
+	}
+
+	const noMatches = !matches || matches.length === 0;
+
+	return (
+		<Dialog
+			open={open}
+			onClose={loading ? undefined : onClose}
+			slotProps={{ paper: { className: cx(dialogClasses.paperCyan, classes.paperWidth) } }}
+		>
+			<DialogTitle className={dialogClasses.titleCyan}>승부예측</DialogTitle>
+			<div className={classes.hint}>
+				라운드별 승자를 골라 트리를 채워주세요. 같은 팀을 다시 누르면 해제됩니다. 부모 매치를 바꾸면 그 아래 픽은 초기화됩니다.
+			</div>
+			<DialogContent className={dialogClasses.contentPad}>
+				{noMatches ? (
+					<div className={classes.emptyHint}>
+						아직 매치가 생성되지 않았습니다.
+					</div>
+				) : (
+					<div className={classes.treeWrap}>
+						<div className={classes.tree}>
+							{groupedRounds.map(([round, roundMatches]) => {
+								const visibleMatches = round === 1
+									? roundMatches.filter(m => !isByeMatch(m))
+									: roundMatches;
+								const label = roundLabelFor(round, totalRounds);
+								return (
+									<div key={round} className={classes.column}>
+										<div className={classes.columnTitle}>{label}</div>
+										<div className={classes.matchList}>
+											{visibleMatches.map(m => {
+												const [t1Id, t2Id] = getEffectiveTeams(m, matches, predictionMap);
+												const t1 = t1Id != null ? teamMap.get(t1Id) : null;
+												const t2 = t2Id != null ? teamMap.get(t2Id) : null;
+												const pick = predictionMap[m.id];
+												const renderSlot = (slotKey, teamId, team) => {
+													const isEmpty = teamId == null;
+													const isSelected = !isEmpty && pick === teamId;
+													return (
+														<div
+															key={teamId == null ? `empty-${m.id}-${slotKey}` : `${m.id}-${teamId}`}
+															className={cx(
+																classes.teamSlot,
+																isSelected && classes.teamSlotSelected,
+																isEmpty && classes.teamSlotEmpty
+															)}
+															onClick={() => {
+																if (isEmpty) return;
+																handleSelect(m.id, teamId);
+															}}
+														>
+															<span className={classes.teamName}>
+																{isEmpty ? 'TBD' : (team ? team.name : `팀#${teamId}`)}
+															</span>
+															{isSelected && <StarIcon className={classes.pickStar} />}
+														</div>
+													);
+												};
+												return (
+													<div key={m.id} className={classes.matchCard}>
+														<div className={classes.matchHeader}>매치 {m.bracketSlot + 1}</div>
+														{renderSlot('L', t1Id, t1)}
+														{renderSlot('R', t2Id, t2)}
+													</div>
+												);
+											})}
+										</div>
+									</div>
+								);
+							})}
+						</div>
+					</div>
+				)}
+				{error && <div className={classes.errorText}>{error}</div>}
+			</DialogContent>
+			<DialogActions className={dialogClasses.actionsPad}>
+				<Button className={dialogClasses.cancelBtn} onClick={onClose} disabled={loading}>
+					취소
+				</Button>
+				<Button
+					className={dialogClasses.saveBtn}
+					onClick={handleSubmit}
+					disabled={loading || noMatches}
+				>
+					{loading ? '저장 중...' : '제출'}
+				</Button>
+			</DialogActions>
+		</Dialog>
+	);
+}
+
+export default PredictionDialog;

@@ -49,6 +49,8 @@ import TeamFormDialog from './TeamFormDialog';
 import SlotMappingDialog from './SlotMappingDialog';
 import MatchResultDialog from './MatchResultDialog';
 import ScrimContent from './ScrimContent';
+import PredictionContent from './PredictionContent';
+import MatchPredictionDialog from './MatchPredictionDialog';
 
 const useStyles = makeStyles()((theme) => ({
 	layoutRoot: {
@@ -508,6 +510,7 @@ function TournamentDetail() {
 	const matches = useSelector(({ Tournament }) => Tournament.tournament.matches);
 	const scrims = useSelector(({ Tournament }) => Tournament.tournament.scrims);
 	const roundLabels = useSelector(({ Tournament }) => Tournament.tournament.roundLabels);
+	const leaderboard = useSelector(({ Tournament }) => Tournament.tournament.leaderboard);
 	const loadingDetail = useSelector(({ Tournament }) => Tournament.tournament.loadingDetail);
 	const activeMembers = useSelector(({ Tournament }) => Tournament.tournament.activeMembers);
 	const user = useSelector(state => state.auth.user);
@@ -522,6 +525,7 @@ function TournamentDetail() {
 	const [deleteTournamentOpen, setDeleteTournamentOpen] = useState(false);
 	const [activeTab, setActiveTab] = useState(0);
 	const [bracketVerbose, setBracketVerbose] = useState(false);
+	const [matchPredictionTarget, setMatchPredictionTarget] = useState(null);
 
 	const teamMap = useMemo(() => {
 		const m = new Map();
@@ -715,6 +719,7 @@ function TournamentDetail() {
 						>
 							<Tab label="대진표" className={classes.tab} />
 							<Tab label="스크림" className={classes.tab} />
+							<Tab label="승부의신" className={classes.tab} />
 						</Tabs>
 					)}
 
@@ -743,6 +748,8 @@ function TournamentDetail() {
 								onEditMatch={(m) => setMatchEditTarget(m)}
 								verbose={bracketVerbose}
 								activeMembers={activeMembers}
+								myPuuid={myPuuid}
+								onMatchClick={(m) => setMatchPredictionTarget(m)}
 							/>
 						</div>
 					)}
@@ -754,6 +761,23 @@ function TournamentDetail() {
 							scrims={scrims}
 							onMutated={reload}
 						/>
+					)}
+
+					{(isInProgress || isFinished) && activeTab === 2 && (
+						<div className={classes.section}>
+							<div className={classes.sectionHeader}>
+								<div className={classes.sectionTitle}>승부의신</div>
+							</div>
+							<PredictionContent
+								tournamentId={tournamentId}
+								status={detail.status}
+								predictionsLocked={detail.predictionsLocked}
+								matches={matches}
+								teams={teams}
+								leaderboard={leaderboard}
+								onMutated={reload}
+							/>
+						</div>
 					)}
 
 					{(isPreparing || activeTab === 0) && (
@@ -877,6 +901,23 @@ function TournamentDetail() {
 					</div>
 					)}
 
+					{isPreparing && (
+						<div className={classes.section}>
+							<div className={classes.sectionHeader}>
+								<div className={classes.sectionTitle}>승부의신</div>
+							</div>
+							<PredictionContent
+								tournamentId={tournamentId}
+								status={detail.status}
+								predictionsLocked={detail.predictionsLocked}
+								matches={matches}
+								teams={teams}
+								leaderboard={leaderboard}
+								onMutated={reload}
+							/>
+						</div>
+					)}
+
 					{teamFormOpen && (
 						<TeamFormDialog
 							open={teamFormOpen}
@@ -889,6 +930,15 @@ function TournamentDetail() {
 							team={editingTeam}
 							allTeams={teams}
 							activeMembers={activeMembers}
+						/>
+					)}
+					{matchPredictionTarget && (
+						<MatchPredictionDialog
+							open={Boolean(matchPredictionTarget)}
+							onClose={() => setMatchPredictionTarget(null)}
+							match={matchPredictionTarget}
+							team1={teamMap.get(matchPredictionTarget.team1Id)}
+							team2={teamMap.get(matchPredictionTarget.team2Id)}
 						/>
 					)}
 					{slotMappingOpen && (

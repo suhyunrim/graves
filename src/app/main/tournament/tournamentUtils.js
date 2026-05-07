@@ -151,6 +151,26 @@ export function checkIsAdmin(user) {
 	return Boolean(user && user.reprGroup && user.reprGroup.isAdmin);
 }
 
+// 브래킷 트리 부모/자식 매치. 한 군데서만 라운드/슬롯 매핑을 정의해 다른 callsite 와 어긋나지 않게 한다.
+export function getParentMatches(matches, m) {
+	if (!m || m.round <= 1) return [null, null];
+	const left = matches.find(x => x.round === m.round - 1 && x.bracketSlot === m.bracketSlot * 2) || null;
+	const right = matches.find(x => x.round === m.round - 1 && x.bracketSlot === m.bracketSlot * 2 + 1) || null;
+	return [left, right];
+}
+
+export function getChildMatch(matches, m) {
+	if (!m) return null;
+	return matches.find(x => x.round === m.round + 1 && x.bracketSlot === Math.floor(m.bracketSlot / 2)) || null;
+}
+
+// summonerName 폴백 — 정보가 비면 puuid 앞 8자만 잘라 보여준다.
+export function displayNameForPuuid(name, puuid) {
+	if (name) return name;
+	if (puuid) return `${puuid.slice(0, 8)}…`;
+	return '';
+}
+
 // 백엔드가 team.scrimRecord 로 누적 세트(won/lost) 와 played 를 내려준다.
 // 정렬: 승률 → 승 → 패 적은 순.
 export function computeScrimLeaderboard(teams) {
