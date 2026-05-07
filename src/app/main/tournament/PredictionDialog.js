@@ -64,10 +64,9 @@ function resetDescendants(map, parentMatchId, matches) {
 
 const useStyles = makeStyles()((theme) => ({
 	paperWidth: {
-		minWidth: '90vw',
+		// 컨텐츠(트리) 폭 만큼만 차지하되 화면을 넘지 않도록 95vw 로 cap.
 		maxWidth: '95vw',
 		[theme.breakpoints.down('sm')]: {
-			minWidth: 'auto',
 			margin: 8,
 			width: 'calc(100% - 16px)'
 		}
@@ -272,6 +271,7 @@ function PredictionDialog({ open, onClose, onSuccess, tournamentId, matches, tea
 		<Dialog
 			open={open}
 			onClose={loading ? undefined : onClose}
+			maxWidth={false}
 			slotProps={{ paper: { className: cx(dialogClasses.paperCyan, classes.paperWidth) } }}
 		>
 			<DialogTitle className={dialogClasses.titleCyan}>승부예측</DialogTitle>
