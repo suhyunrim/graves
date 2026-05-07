@@ -15,7 +15,7 @@ import reducer from './store/reducers';
 import * as Actions from './store/actions';
 import TournamentCreateDialog from './TournamentCreateDialog';
 import PositionIcon from './PositionIcon';
-import { STATUS, STATUS_LABELS, STATUS_COLORS, checkIsAdmin, bestOfLabel } from './tournamentUtils';
+import { STATUS, STATUS_LABELS, STATUS_COLORS, checkIsAdmin, bestOfLabel, getTrophyIcon } from './tournamentUtils';
 
 const useStyles = makeStyles()((theme) => ({
 	layoutRoot: {
@@ -131,11 +131,36 @@ const useStyles = makeStyles()((theme) => ({
 			borderRadius: 16
 		}
 	},
+	cardTopRow: {
+		display: 'flex',
+		alignItems: 'center',
+		gap: 14,
+		[theme.breakpoints.down('sm')]: {
+			gap: 10
+		}
+	},
+	cardTrophy: {
+		width: 72,
+		height: 72,
+		objectFit: 'contain',
+		flexShrink: 0,
+		filter: 'drop-shadow(0 4px 14px rgba(255, 215, 0, 0.3))',
+		[theme.breakpoints.down('sm')]: {
+			width: 56,
+			height: 56
+		}
+	},
+	cardTopText: {
+		display: 'flex',
+		flexDirection: 'column',
+		minWidth: 0,
+		flex: 1
+	},
 	cardHeader: {
 		display: 'flex',
 		alignItems: 'flex-start',
 		justifyContent: 'space-between',
-		marginBottom: 12,
+		marginBottom: 8,
 		gap: 12
 	},
 	cardTitle: {
@@ -348,27 +373,34 @@ function TournamentList() {
 								const statusColor = STATUS_COLORS[t.status] || '#868e96';
 								return (
 									<Link key={t.id} to={`/tournament/${t.id}`} className={classes.card}>
-										<div className={classes.cardHeader}>
-											<span className={classes.cardTitle}>{t.name}</span>
-											<span
-												className={classes.statusBadge}
-												style={{
-													background: `${statusColor}20`,
-													color: statusColor,
-													border: `1px solid ${statusColor}40`
-												}}
-											>
-												{STATUS_LABELS[t.status] || t.status}
-											</span>
-										</div>
-										{t.teamCount != null && t.bracketSize != null && (
-											<div className={classes.cardMeta}>
-												<GroupIcon style={{ fontSize: '1.4rem' }} />
-												{t.teamCount}팀 / {t.bracketSize}강 브래킷
+										<div className={classes.cardTopRow}>
+											{t.trophyType && (
+												<img className={classes.cardTrophy} src={getTrophyIcon(t.trophyType)} alt="" />
+											)}
+											<div className={classes.cardTopText}>
+												<div className={classes.cardHeader}>
+													<span className={classes.cardTitle}>{t.name}</span>
+													<span
+														className={classes.statusBadge}
+														style={{
+															background: `${statusColor}20`,
+															color: statusColor,
+															border: `1px solid ${statusColor}40`
+														}}
+													>
+														{STATUS_LABELS[t.status] || t.status}
+													</span>
+												</div>
+												{t.teamCount != null && t.bracketSize != null && (
+													<div className={classes.cardMeta}>
+														<GroupIcon style={{ fontSize: '1.4rem' }} />
+														{t.teamCount}팀 / {t.bracketSize}강 브래킷
+													</div>
+												)}
+												<div className={classes.cardMeta}>
+													{bestOfLabel(t.defaultBestOf)} (결승 {bestOfLabel(t.finalBestOf)})
+												</div>
 											</div>
-										)}
-										<div className={classes.cardMeta}>
-											{bestOfLabel(t.defaultBestOf)} (결승 {bestOfLabel(t.finalBestOf)})
 										</div>
 										{t.championTeam && (
 											<div className={classes.cardChampion}>
