@@ -6,13 +6,13 @@ import StarIcon from '@mui/icons-material/Star';
 import { getProfileIconUrl } from 'app/main/challenge/ddragonUtils';
 import {
 	groupMatchesByRound,
-	isByeMatch,
 	isEmptyMatch,
 	getTierName,
 	getTierShortLabel,
 	getTierEmblemUrl,
 	bestOfLabel,
 	formatScheduledAt,
+	getVisibleMatches,
 	BRACKET_LINE_COLOR,
 	BRACKET_LINE_COLOR_FINISHED
 } from './tournamentUtils';
@@ -723,9 +723,7 @@ function TournamentBracket({
 					// R1 의 BYE(한쪽만 null) 는 숨겨서 부전승팀이 다음 라운드로 자연스럽게 진출한 듯
 					// 보이게 한다. R2 이상에선 한쪽이 비어 있어도 매치 자체는 표시 — 빈 자리는
 					// "이전 라운드 승자 대기" 로 안내.
-					const visibleMatches = round === 1
-						? roundMatches.filter(m => !isByeMatch(m))
-						: roundMatches;
+					const visibleMatches = getVisibleMatches(round, roundMatches);
 					const label = roundLabels[round] || `${round}라운드`;
 					const emptyLabel = round === 1 ? 'TBD' : '이전 라운드 승자 대기';
 

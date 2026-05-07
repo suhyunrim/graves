@@ -7,16 +7,17 @@ import {
 	Button
 } from '@mui/material';
 import { makeStyles } from 'tss-react/mui';
+import { keyframes } from '@emotion/react';
 import StarIcon from '@mui/icons-material/Star';
 import camilleRiotAuthService from 'app/services/camilleRiotAuthService/camilleRiotAuthService';
 import useDialogStyles from '../components/dialogStyles';
 import * as Actions from './store/actions';
 import {
 	groupMatchesByRound,
-	isByeMatch,
 	roundLabelFor,
 	getParentMatches,
-	getChildMatch
+	getChildMatch,
+	getVisibleMatches
 } from './tournamentUtils';
 
 // 백엔드가 채워준 team1Id/team2Id 우선, 없으면 부모 매치에서 사용자 예측을 propagate.
@@ -62,6 +63,12 @@ function resetDescendants(map, parentMatchId, matches) {
 	return next;
 }
 
+const shakeAnim = keyframes`
+	0%, 100% { transform: translateX(0); }
+	20%, 60% { transform: translateX(-5px); }
+	40%, 80% { transform: translateX(5px); }
+`;
+
 const useStyles = makeStyles()((theme) => ({
 	paperWidth: {
 		// 컨텐츠(트리) 폭 만큼만 차지하되 화면을 넘지 않도록 95vw 로 cap.
@@ -75,11 +82,27 @@ const useStyles = makeStyles()((theme) => ({
 		fontFamily: '"Noto Sans KR", sans-serif',
 		fontSize: '1.15rem',
 		color: 'rgba(255, 255, 255, 0.5)',
+		padding: '0 28px 6px',
+		[theme.breakpoints.down('sm')]: {
+			padding: '0 16px 4px',
+			fontSize: '1.05rem'
+		}
+	},
+	progressHint: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.15rem',
+		fontWeight: 600,
 		padding: '0 28px 12px',
 		[theme.breakpoints.down('sm')]: {
 			padding: '0 16px 10px',
 			fontSize: '1.05rem'
 		}
+	},
+	progressHintIncomplete: {
+		color: '#ffd700'
+	},
+	progressHintComplete: {
+		color: '#00ff7f'
 	},
 	treeWrap: {
 		overflowX: 'auto',
@@ -131,7 +154,19 @@ const useStyles = makeStyles()((theme) => ({
 		background: 'rgba(0, 0, 0, 0.3)',
 		border: '1px solid rgba(0, 212, 255, 0.2)',
 		borderRadius: 10,
-		overflow: 'hidden'
+		overflow: 'hidden',
+		transition: 'border-color 0.2s ease, box-shadow 0.2s ease'
+	},
+	matchCardIncomplete: {
+		borderColor: 'rgba(255, 215, 0, 0.5)',
+		boxShadow: '0 0 12px rgba(255, 215, 0, 0.15)'
+	},
+	matchCardError: {
+		borderColor: '#ff6b6b',
+		boxShadow: '0 0 14px rgba(255, 107, 107, 0.35)'
+	},
+	matchCardShake: {
+		animation: `${shakeAnim} 0.5s ease-in-out`
 	},
 	matchHeader: {
 		fontFamily: '"Noto Sans KR", sans-serif',
@@ -220,9 +255,19 @@ function PredictionDialog({ open, onClose, onSuccess, tournamentId, matches, tea
 	const [predictionMap, setPredictionMap] = useState(initialMap);
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState('');
+	// 제출 시도 카운터 — 매치 카드 key 에 섞어서 매 시도마다 shake 애니메이션 재실행 트리거.
+	const [submitAttempts, setSubmitAttempts] = useState(0);
 
 	const groupedRounds = useMemo(() => groupMatchesByRound(matches || []), [matches]);
 	const totalRounds = groupedRounds.length;
+
+	const requiredMatchCount = useMemo(
+		() => groupedRounds.reduce((acc, [round, rs]) => acc + getVisibleMatches(round, rs).length, 0),
+		[groupedRounds]
+	);
+	const pickedCount = Object.keys(predictionMap).length;
+	const allPicked = requiredMatchCount > 0 && pickedCount >= requiredMatchCount;
+	const remainingCount = Math.max(0, requiredMatchCount - pickedCount);
 
 	function handleSelect(matchId, teamId) {
 		setPredictionMap(prev => {
@@ -239,6 +284,12 @@ function PredictionDialog({ open, onClose, onSuccess, tournamentId, matches, tea
 	}
 
 	function handleSubmit() {
+		// 모든 매치 다 찍어야 제출 — 미완료면 카운터 +1 해서 미완료 카드 shake 재실행.
+		if (!allPicked) {
+			setSubmitAttempts(prev => prev + 1);
+			setError(`아직 ${remainingCount}매치 더 예측해야 합니다.`);
+			return;
+		}
 		const changes = [];
 		(matches || []).forEach(m => {
 			const oldVal = initialMap[m.id] != null ? initialMap[m.id] : null;
@@ -278,6 +329,16 @@ function PredictionDialog({ open, onClose, onSuccess, tournamentId, matches, tea
 			<div className={classes.hint}>
 				라운드별 승자를 골라 트리를 채워주세요. 같은 팀을 다시 누르면 해제됩니다. 부모 매치를 바꾸면 그 아래 픽은 초기화됩니다.
 			</div>
+			{!noMatches && (
+				<div className={cx(
+					classes.progressHint,
+					allPicked ? classes.progressHintComplete : classes.progressHintIncomplete
+				)}>
+					{allPicked
+						? `모든 매치 예측 완료 (${pickedCount}/${requiredMatchCount})`
+						: `아직 ${remainingCount}매치 남음 (${pickedCount}/${requiredMatchCount})`}
+				</div>
+			)}
 			<DialogContent className={dialogClasses.contentPad}>
 				{noMatches ? (
 					<div className={classes.emptyHint}>
@@ -287,9 +348,7 @@ function PredictionDialog({ open, onClose, onSuccess, tournamentId, matches, tea
 					<div className={classes.treeWrap}>
 						<div className={classes.tree}>
 							{groupedRounds.map(([round, roundMatches]) => {
-								const visibleMatches = round === 1
-									? roundMatches.filter(m => !isByeMatch(m))
-									: roundMatches;
+								const visibleMatches = getVisibleMatches(round, roundMatches);
 								const label = roundLabelFor(round, totalRounds);
 								return (
 									<div key={round} className={classes.column}>
@@ -323,8 +382,18 @@ function PredictionDialog({ open, onClose, onSuccess, tournamentId, matches, tea
 														</div>
 													);
 												};
+												const isPicked = pick != null;
+												const errored = !isPicked && submitAttempts > 0;
 												return (
-													<div key={m.id} className={classes.matchCard}>
+													<div
+														// 미완료 매치는 submitAttempts 가 바뀔 때마다 remount 되어 shake 재실행.
+														key={!isPicked ? `${m.id}-${submitAttempts}` : m.id}
+														className={cx(
+															classes.matchCard,
+															!isPicked && (errored ? classes.matchCardError : classes.matchCardIncomplete),
+															errored && classes.matchCardShake
+														)}
+													>
 														<div className={classes.matchHeader}>매치 {m.bracketSlot + 1}</div>
 														{renderSlot('L', t1Id, t1)}
 														{renderSlot('R', t2Id, t2)}
