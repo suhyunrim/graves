@@ -21,6 +21,7 @@ import { getProfileIconUrl } from 'app/main/challenge/ddragonUtils';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import AddIcon from '@mui/icons-material/Add';
 import SettingsIcon from '@mui/icons-material/Settings';
+import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
@@ -44,7 +45,9 @@ import {
 	getTierEmblemUrl,
 	bestOfLabel,
 	displayNameForPuuid,
-	isValidMatch
+	isValidMatch,
+	getTrophyLabel,
+	getTrophyIcon
 } from './tournamentUtils';
 import { CATEGORY_LABELS } from '../achievementDashboard/constants';
 import PositionIcon from './PositionIcon';
@@ -55,6 +58,7 @@ import MatchResultDialog from './MatchResultDialog';
 import ScrimContent from './ScrimContent';
 import PredictionContent from './PredictionContent';
 import MatchPredictionDialog from './MatchPredictionDialog';
+import TournamentEditDialog from './TournamentEditDialog';
 
 const useStyles = makeStyles()((theme) => ({
 	layoutRoot: {
@@ -186,6 +190,26 @@ const useStyles = makeStyles()((theme) => ({
 		[theme.breakpoints.down('sm')]: {
 			fontSize: '1.8rem'
 		}
+	},
+	championTrophyImg: {
+		width: 36,
+		height: 36,
+		objectFit: 'contain',
+		flexShrink: 0,
+		[theme.breakpoints.down('sm')]: {
+			width: 28,
+			height: 28
+		}
+	},
+	trophyPill: {
+		display: 'inline-flex',
+		alignItems: 'center',
+		gap: 6
+	},
+	trophyPillIcon: {
+		width: 14,
+		height: 14,
+		objectFit: 'contain'
 	},
 	predictionPerfectBanner: {
 		marginTop: 8,
@@ -552,6 +576,7 @@ function TournamentDetail() {
 	const [activeTab, setActiveTab] = useState(0);
 	const [bracketVerbose, setBracketVerbose] = useState(false);
 	const [matchPredictionTarget, setMatchPredictionTarget] = useState(null);
+	const [editTournamentOpen, setEditTournamentOpen] = useState(false);
 
 	const teamMap = useMemo(() => {
 		const m = new Map();
@@ -609,6 +634,12 @@ function TournamentDetail() {
 		setTeamFormOpen(false);
 		setEditingTeam(null);
 		toast.success('팀이 저장되었습니다.');
+		reload();
+	}
+
+	function handleTournamentEditSuccess() {
+		setEditTournamentOpen(false);
+		toast.success('토너먼트가 수정되었습니다.');
 		reload();
 	}
 
@@ -710,11 +741,21 @@ function TournamentDetail() {
 						</span>
 						<span className={classes.metaPill}>{bestOfLabel(detail.defaultBestOf)}</span>
 						<span className={classes.metaPill}>결승 {bestOfLabel(detail.finalBestOf)}</span>
+						{detail.trophyType && (
+							<span className={cx(classes.metaPill, classes.trophyPill)}>
+								<img className={classes.trophyPillIcon} src={getTrophyIcon(detail.trophyType)} alt="" />
+								{getTrophyLabel(detail.trophyType)}
+							</span>
+						)}
 					</div>
 					{championTeam && (
 						<div className={cx(classes.headerBanner, classes.championBanner)}>
-							<EmojiEventsIcon className={classes.championIcon} />
-							우승 — {championTeam.name}
+							{detail.trophyType ? (
+								<img className={classes.championTrophyImg} src={getTrophyIcon(detail.trophyType)} alt={getTrophyLabel(detail.trophyType)} />
+							) : (
+								<EmojiEventsIcon className={classes.championIcon} />
+							)}
+							{detail.trophyType ? `${getTrophyLabel(detail.trophyType)} 우승 — ${championTeam.name}` : `우승 — ${championTeam.name}`}
 						</div>
 					)}
 					{isFinished && perfectUsers.length > 0 && (
@@ -741,6 +782,13 @@ function TournamentDetail() {
 									</span>
 								</Tooltip>
 							)}
+							<Button
+								className={classes.primaryBtn}
+								startIcon={<EditIcon />}
+								onClick={() => setEditTournamentOpen(true)}
+							>
+								토너먼트 수정
+							</Button>
 							<Button
 								className={classes.dangerBtn}
 								startIcon={<DeleteIcon />}
@@ -984,6 +1032,14 @@ function TournamentDetail() {
 							match={matchPredictionTarget}
 							team1={teamMap.get(matchPredictionTarget.team1Id)}
 							team2={teamMap.get(matchPredictionTarget.team2Id)}
+						/>
+					)}
+					{editTournamentOpen && (
+						<TournamentEditDialog
+							open
+							onClose={() => setEditTournamentOpen(false)}
+							onSuccess={handleTournamentEditSuccess}
+							tournament={detail}
 						/>
 					)}
 					{slotMappingOpen && (

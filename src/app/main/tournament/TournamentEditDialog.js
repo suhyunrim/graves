@@ -3,7 +3,7 @@ import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, M
 import { makeStyles } from 'tss-react/mui';
 import useDialogStyles from '../components/dialogStyles';
 import * as Actions from './store/actions';
-import { bestOfLabel, TROPHY_TYPES, TROPHY_TYPE_ORDER } from './tournamentUtils';
+import { TROPHY_TYPES, TROPHY_TYPE_ORDER } from './tournamentUtils';
 
 const useStyles = makeStyles()((theme) => ({
 	paperWidth: {
@@ -50,63 +50,46 @@ const useStyles = makeStyles()((theme) => ({
 	}
 }));
 
-const BEST_OF_OPTIONS = [1, 3, 5, 7];
-
-function TournamentCreateDialog({ open, onClose, onSuccess, groupId }) {
+function TournamentEditDialog({ open, onClose, onSuccess, tournament }) {
 	const { classes, cx } = useStyles();
 	const { classes: dialogClasses } = useDialogStyles();
 
-	const [form, setForm] = useState({
-		name: '',
-		defaultBestOf: 3,
-		finalBestOf: 5,
-		trophyType: ''
-	});
+	const [name, setName] = useState(tournament ? tournament.name : '');
+	const [trophyType, setTrophyType] = useState(tournament && tournament.trophyType ? tournament.trophyType : '');
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState('');
 
-	function handleChange(e) {
-		const { name, value } = e.target;
-		const isNumberField = name === 'defaultBestOf' || name === 'finalBestOf';
-		setForm(prev => ({ ...prev, [name]: isNumberField ? Number(value) : value }));
-	}
-
-	function validate() {
-		if (!form.name.trim()) return '토너먼트 이름을 입력하세요.';
-		return null;
-	}
-
 	function handleSubmit() {
-		const validationError = validate();
-		if (validationError) {
-			setError(validationError);
+		if (!tournament) return;
+		const trimmed = name.trim();
+		const body = {};
+		// 변경된 필드만 보냄. 둘 다 동일하면 백엔드에서 400 떨어지니 클라에서 미리 차단.
+		if (trimmed && trimmed !== tournament.name) body.name = trimmed;
+		const newTrophy = trophyType || null;
+		if (newTrophy !== (tournament.trophyType || null)) body.trophyType = newTrophy;
+		if (Object.keys(body).length === 0) {
+			onClose();
+			return;
+		}
+		if (body.name === '') {
+			setError('이름을 입력하세요.');
 			return;
 		}
 		setError('');
 		setLoading(true);
-
-		Actions.createTournament({
-			groupId,
-			name: form.name.trim(),
-			defaultBestOf: form.defaultBestOf,
-			finalBestOf: form.finalBestOf,
-			trophyType: form.trophyType || null
-		})
+		Actions.updateTournament(tournament.id, body)
 			.then(() => {
 				setLoading(false);
 				onSuccess();
 			})
 			.catch(err => {
 				setLoading(false);
-				const status = err.response && err.response.status;
-				const msg = err.response && err.response.data ? err.response.data.result : '오류가 발생했습니다.';
-				if (status === 409) {
-					setError(msg || '이미 진행 중인 토너먼트가 있습니다.');
-				} else {
-					setError(msg);
-				}
+				const msg = err.response && err.response.data ? err.response.data.result : '수정 실패';
+				setError(msg);
 			});
 	}
+
+	if (!tournament) return null;
 
 	return (
 		<Dialog
@@ -114,57 +97,24 @@ function TournamentCreateDialog({ open, onClose, onSuccess, groupId }) {
 			onClose={loading ? undefined : onClose}
 			slotProps={{ paper: { className: cx(dialogClasses.paperCyan, classes.paperWidth) } }}
 		>
-			<DialogTitle className={dialogClasses.titleCyan}>토너먼트 생성</DialogTitle>
+			<DialogTitle className={dialogClasses.titleCyan}>토너먼트 수정</DialogTitle>
 			<DialogContent className={dialogClasses.contentPad}>
 				<TextField
 					className={classes.field}
 					label="이름"
-					name="name"
-					value={form.name}
-					onChange={handleChange}
+					value={name}
+					onChange={e => setName(e.target.value)}
 					variant="outlined"
 					fullWidth
 					required
 					autoFocus
 					inputProps={{ maxLength: 60 }}
-					helperText="팀 수는 시작 시점에 등록된 팀 수로 자동 결정됩니다."
 				/>
 				<TextField
 					className={classes.field}
-					label="일반 매치 형식"
-					name="defaultBestOf"
-					value={form.defaultBestOf}
-					onChange={handleChange}
-					variant="outlined"
-					fullWidth
-					select
-					required
-				>
-					{BEST_OF_OPTIONS.map(n => (
-						<MenuItem key={n} value={n}>{bestOfLabel(n)}</MenuItem>
-					))}
-				</TextField>
-				<TextField
-					className={classes.field}
-					label="결승 형식"
-					name="finalBestOf"
-					value={form.finalBestOf}
-					onChange={handleChange}
-					variant="outlined"
-					fullWidth
-					select
-					required
-				>
-					{BEST_OF_OPTIONS.map(n => (
-						<MenuItem key={n} value={n}>{bestOfLabel(n)}</MenuItem>
-					))}
-				</TextField>
-				<TextField
-					className={classes.field}
-					label="트로피 종류 (선택)"
-					name="trophyType"
-					value={form.trophyType}
-					onChange={handleChange}
+					label="트로피 종류"
+					value={trophyType}
+					onChange={e => setTrophyType(e.target.value)}
 					variant="outlined"
 					fullWidth
 					select
@@ -182,11 +132,11 @@ function TournamentCreateDialog({ open, onClose, onSuccess, groupId }) {
 					취소
 				</Button>
 				<Button className={dialogClasses.saveBtn} onClick={handleSubmit} disabled={loading}>
-					{loading ? '생성 중...' : '생성'}
+					{loading ? '저장 중...' : '저장'}
 				</Button>
 			</DialogActions>
 		</Dialog>
 	);
 }
 
-export default TournamentCreateDialog;
+export default TournamentEditDialog;

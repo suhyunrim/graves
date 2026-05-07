@@ -16,6 +16,28 @@ export const STATUS_COLORS = {
 	[STATUS.FINISHED]: '#868e96'
 };
 
+// 토너먼트 트로피 종류. 백엔드 enum 그대로 id 사용. 한국어 라벨/아이콘은 프론트 매핑.
+// trophyType 이 null 이면 일반 우승 표시 (트로피 미지정).
+export const TROPHY_TYPES = {
+	worlds: { ko: '롤드컵', icon: '/assets/images/trophies/worlds.jpg' },
+	msi: { ko: 'MSI', icon: '/assets/images/trophies/msi.png' },
+	first_stand: { ko: 'First Stand', icon: '/assets/images/trophies/first_stand.png' },
+	ewc: { ko: 'EWC', icon: '/assets/images/trophies/ewc.png' },
+	lck: { ko: 'LCK', icon: '/assets/images/trophies/lck.png' },
+	kespa: { ko: 'KeSPA Cup', icon: '/assets/images/trophies/kespa.png' }
+};
+
+// 토너먼트 생성/수정 dropdown 의 표시 순서. 국제(worlds → ewc) → 한국(lck, kespa).
+export const TROPHY_TYPE_ORDER = ['worlds', 'msi', 'first_stand', 'ewc', 'lck', 'kespa'];
+
+export function getTrophyLabel(type) {
+	return type && TROPHY_TYPES[type] ? TROPHY_TYPES[type].ko : null;
+}
+
+export function getTrophyIcon(type) {
+	return type && TROPHY_TYPES[type] ? TROPHY_TYPES[type].icon : null;
+}
+
 export const POSITIONS = ['top', 'jungle', 'mid', 'adc', 'support'];
 
 export const POSITION_LABELS = {

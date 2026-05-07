@@ -61,6 +61,10 @@ export function deleteTournament(tournamentId) {
 	return createCamilleAxios().delete(`/api/tournament/${tournamentId}`, { silentError: true });
 }
 
+export function updateTournament(tournamentId, body) {
+	return createCamilleAxios().patch(`/api/tournament/${tournamentId}`, body, { silentError: true });
+}
+
 export function createTeam(tournamentId, body) {
 	return createCamilleAxios().post(`/api/tournament/${tournamentId}/teams`, body, { silentError: true });
 }

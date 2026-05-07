@@ -29,6 +29,7 @@ import RatingChart from './RatingChart';
 import VisitorCounter from './VisitorCounter';
 import Guestbook from './Guestbook';
 import StatusMessage from './StatusMessage';
+import TrophyCabinet from './TrophyCabinet';
 import reducer from './store/reducers';
 import * as Actions from './store/actions';
 
@@ -187,6 +188,9 @@ const useStyles = makeStyles()((theme) => ({
 			gridTemplateColumns: '1fr',
 			gap: 16
 		}
+	},
+	trophyCabinetWrap: {
+		marginBottom: 24
 	},
 	rankCard: {
 		position: 'relative',
@@ -771,6 +775,7 @@ function MyInfoPage(props) {
 	const worstOpponents = useSelector(({ MyInfo }) => MyInfo.myInfo.worstOpponents);
 	const honorStats = useSelector(({ MyInfo }) => MyInfo.myInfo.honorStats);
 	const subAccount = useSelector(({ MyInfo }) => MyInfo.myInfo.subAccount);
+	const tournamentChampionships = useSelector(({ MyInfo }) => MyInfo.myInfo.tournamentChampionships);
 
 	const [activeTab, setActiveTab] = useState(0);
 	const [subAccountInput, setSubAccountInput] = useState('');
@@ -997,6 +1002,12 @@ function MyInfoPage(props) {
 
 					{activeTab === 0 && (
 						<>
+							{/* 트로피 캐비닛: 우승 토너먼트가 있을 때만 (빈 캐비닛은 페이지 부피만 늘리니 숨김) */}
+							{tournamentChampionships && tournamentChampionships.length > 0 && (
+								<div className={classes.trophyCabinetWrap}>
+									<TrophyCabinet championships={tournamentChampionships} />
+								</div>
+							)}
 							{/* 랭크 카드들 */}
 							<div className={classes.cardsGrid}>
 								{/* 솔로 랭크 카드 */}
