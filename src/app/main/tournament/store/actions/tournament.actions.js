@@ -100,3 +100,11 @@ export function updateScrim(tournamentId, scrimId, body) {
 export function deleteScrim(tournamentId, scrimId) {
 	return createCamilleAxios().delete(`/api/tournament/${tournamentId}/scrims/${scrimId}`, { silentError: true });
 }
+
+export function putPredictions(tournamentId, predictions) {
+	return createCamilleAxios().put(
+		`/api/tournament/${tournamentId}/predictions`,
+		{ predictions },
+		{ silentError: true }
+	);
+}

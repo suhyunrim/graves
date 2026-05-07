@@ -20,7 +20,7 @@ import useToast from 'app/utility/useToast';
 import { getProfileIconUrl } from 'app/main/challenge/ddragonUtils';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import AddIcon from '@mui/icons-material/Add';
-import EditIcon from '@mui/icons-material/Edit';
+import SettingsIcon from '@mui/icons-material/Settings';
 import DeleteIcon from '@mui/icons-material/Delete';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
@@ -28,6 +28,7 @@ import StarIcon from '@mui/icons-material/Star';
 import React, { useEffect, useState, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams, useNavigate } from 'react-router-dom';
+import camilleRiotAuthService from 'app/services/camilleRiotAuthService/camilleRiotAuthService';
 import useDialogStyles from '../components/dialogStyles';
 import reducer from './store/reducers';
 import * as Actions from './store/actions';
@@ -48,6 +49,8 @@ import TeamFormDialog from './TeamFormDialog';
 import SlotMappingDialog from './SlotMappingDialog';
 import MatchResultDialog from './MatchResultDialog';
 import ScrimContent from './ScrimContent';
+import PredictionContent from './PredictionContent';
+import MatchPredictionDialog from './MatchPredictionDialog';
 
 const useStyles = makeStyles()((theme) => ({
 	layoutRoot: {
@@ -507,10 +510,12 @@ function TournamentDetail() {
 	const matches = useSelector(({ Tournament }) => Tournament.tournament.matches);
 	const scrims = useSelector(({ Tournament }) => Tournament.tournament.scrims);
 	const roundLabels = useSelector(({ Tournament }) => Tournament.tournament.roundLabels);
+	const leaderboard = useSelector(({ Tournament }) => Tournament.tournament.leaderboard);
 	const loadingDetail = useSelector(({ Tournament }) => Tournament.tournament.loadingDetail);
 	const activeMembers = useSelector(({ Tournament }) => Tournament.tournament.activeMembers);
 	const user = useSelector(state => state.auth.user);
 	const isAdmin = checkIsAdmin(user);
+	const myPuuid = camilleRiotAuthService.getPuuid();
 
 	const [teamFormOpen, setTeamFormOpen] = useState(false);
 	const [editingTeam, setEditingTeam] = useState(null);
@@ -520,6 +525,7 @@ function TournamentDetail() {
 	const [deleteTournamentOpen, setDeleteTournamentOpen] = useState(false);
 	const [activeTab, setActiveTab] = useState(0);
 	const [bracketVerbose, setBracketVerbose] = useState(false);
+	const [matchPredictionTarget, setMatchPredictionTarget] = useState(null);
 
 	const teamMap = useMemo(() => {
 		const m = new Map();
@@ -713,6 +719,7 @@ function TournamentDetail() {
 						>
 							<Tab label="대진표" className={classes.tab} />
 							<Tab label="스크림" className={classes.tab} />
+							<Tab label="승부의신" className={classes.tab} />
 						</Tabs>
 					)}
 
@@ -741,6 +748,8 @@ function TournamentDetail() {
 								onEditMatch={(m) => setMatchEditTarget(m)}
 								verbose={bracketVerbose}
 								activeMembers={activeMembers}
+								myPuuid={myPuuid}
+								onMatchClick={(m) => setMatchPredictionTarget(m)}
 							/>
 						</div>
 					)}
@@ -752,6 +761,23 @@ function TournamentDetail() {
 							scrims={scrims}
 							onMutated={reload}
 						/>
+					)}
+
+					{(isInProgress || isFinished) && activeTab === 2 && (
+						<div className={classes.section}>
+							<div className={classes.sectionHeader}>
+								<div className={classes.sectionTitle}>승부의신</div>
+							</div>
+							<PredictionContent
+								tournamentId={tournamentId}
+								status={detail.status}
+								predictionsLocked={detail.predictionsLocked}
+								matches={matches}
+								teams={teams}
+								leaderboard={leaderboard}
+								onMutated={reload}
+							/>
+						</div>
 					)}
 
 					{(isPreparing || activeTab === 0) && (
@@ -780,26 +806,37 @@ function TournamentDetail() {
 									const tierName = getTierName(avgRating);
 									const tierLabel = getTierLabel(avgRating);
 									const tierEmblem = getTierEmblemUrl(tierName);
+									const isCaptain = Boolean(myPuuid) && t.captainPuuid === myPuuid;
+									// 종료된 토너먼트는 과거 결과 무결성 때문에 수정 불가. preparing/in_progress 둘 다 허용.
+									const canEditTeam = (isAdmin || isCaptain) && !isFinished;
+									// 삭제는 매치를 깨뜨리지 않도록 preparing 상태에서만 허용.
+									const canDeleteTeam = isAdmin && isPreparing;
 									return (
 										<div key={t.id} className={classes.teamCard}>
 											<div className={classes.teamCardHeader}>
 												<span className={classes.teamName}>{t.name}</span>
-												{isAdmin && isPreparing && (
+												{(canEditTeam || canDeleteTeam) && (
 													<div className={classes.teamActions}>
-														<IconButton
-															className={classes.teamActionBtn}
-															onClick={() => handleTeamEdit(t)}
-															size="small"
-														>
-															<EditIcon fontSize="small" />
-														</IconButton>
-														<IconButton
-															className={classes.teamActionBtnDanger}
-															onClick={() => setDeleteTeamTarget(t)}
-															size="small"
-														>
-															<DeleteIcon fontSize="small" />
-														</IconButton>
+														{canEditTeam && (
+															<Tooltip title="팀 수정" arrow>
+																<IconButton
+																	className={classes.teamActionBtn}
+																	onClick={() => handleTeamEdit(t)}
+																	size="small"
+																>
+																	<SettingsIcon fontSize="small" />
+																</IconButton>
+															</Tooltip>
+														)}
+														{canDeleteTeam && (
+															<IconButton
+																className={classes.teamActionBtnDanger}
+																onClick={() => setDeleteTeamTarget(t)}
+																size="small"
+															>
+																<DeleteIcon fontSize="small" />
+															</IconButton>
+														)}
 													</div>
 												)}
 											</div>
@@ -864,6 +901,23 @@ function TournamentDetail() {
 					</div>
 					)}
 
+					{isPreparing && (
+						<div className={classes.section}>
+							<div className={classes.sectionHeader}>
+								<div className={classes.sectionTitle}>승부의신</div>
+							</div>
+							<PredictionContent
+								tournamentId={tournamentId}
+								status={detail.status}
+								predictionsLocked={detail.predictionsLocked}
+								matches={matches}
+								teams={teams}
+								leaderboard={leaderboard}
+								onMutated={reload}
+							/>
+						</div>
+					)}
+
 					{teamFormOpen && (
 						<TeamFormDialog
 							open={teamFormOpen}
@@ -876,6 +930,15 @@ function TournamentDetail() {
 							team={editingTeam}
 							allTeams={teams}
 							activeMembers={activeMembers}
+						/>
+					)}
+					{matchPredictionTarget && (
+						<MatchPredictionDialog
+							open={Boolean(matchPredictionTarget)}
+							onClose={() => setMatchPredictionTarget(null)}
+							match={matchPredictionTarget}
+							team1={teamMap.get(matchPredictionTarget.team1Id)}
+							team2={teamMap.get(matchPredictionTarget.team2Id)}
 						/>
 					)}
 					{slotMappingOpen && (
