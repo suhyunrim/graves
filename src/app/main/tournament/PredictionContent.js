@@ -156,7 +156,7 @@ function formatAccuracy(correct, settled) {
 
 function PredictionContent({ tournamentId, status, predictionsLocked, matches, teams, leaderboard, onMutated }) {
 	const { classes, cx } = useStyles();
-	const myPuuid = useMemo(() => camilleRiotAuthService.getPuuid(), []);
+	const myPuuid = useMemo(() => camilleRiotAuthService.getAuthenticatedPuuid(), []);
 	const [dialogOpen, setDialogOpen] = useState(false);
 	const { requireLogin: requireDiscordLogin, gate: discordLoginGate } = useDiscordLoginGate();
 

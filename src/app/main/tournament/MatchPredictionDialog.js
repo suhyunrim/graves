@@ -115,7 +115,7 @@ function formatPct(pct) {
 function MatchPredictionDialog({ open, onClose, match, team1, team2 }) {
 	const { classes, cx } = useStyles();
 	const { classes: dialogClasses } = useDialogStyles();
-	const myPuuid = useMemo(() => camilleRiotAuthService.getPuuid(), []);
+	const myPuuid = useMemo(() => camilleRiotAuthService.getAuthenticatedPuuid(), []);
 
 	const { team1Voters, team2Voters } = useMemo(() => {
 		const t1 = [];

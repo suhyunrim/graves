@@ -81,6 +81,13 @@ class CamilleRiotAuthService extends FuseUtils.EventEmitter {
 	getPuuid = () => {
 		return window.localStorage.getItem(CAMILLE_RIOT_PUUID_KEY);
 	};
+
+	// RiotID 로그인은 다른 사람이 동일 puuid 로 들어올 수 있어 'puuid 본인 인증' 으로 못 쓴다.
+	// 본인이 한 액션 (예: 투표 픽) 의 매핑 표시처럼 신뢰가 필요한 곳은 디스코드 토큰이 있을 때만 puuid 반환.
+	getAuthenticatedPuuid = () => {
+		if (!this.getDiscordToken()) return null;
+		return this.getPuuid();
+	};
 }
 
 const instance = new CamilleRiotAuthService();
