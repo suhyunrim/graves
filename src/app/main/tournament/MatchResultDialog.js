@@ -7,15 +7,21 @@ import {
 	Button,
 	TextField,
 	Tabs,
-	Tab
+	Tab,
+	Select,
+	MenuItem,
+	FormControl
 } from '@mui/material';
 import { makeStyles } from 'tss-react/mui';
-import { DateTimePicker, LocalizationProvider } from '@mui/x-date-pickers';
+import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import koLocale from 'date-fns/locale/ko';
 import useDialogStyles from '../components/dialogStyles';
 import * as Actions from './store/actions';
 import { validateMatchScore, bestOfLabel } from './tournamentUtils';
+
+const HOURS = Array.from({ length: 24 }, (_, i) => i);
+const MINUTES = [0, 30];
 
 const useStyles = makeStyles()((theme) => ({
 	paperWidth: {
@@ -92,7 +98,7 @@ const useStyles = makeStyles()((theme) => ({
 		marginTop: 8
 	},
 	scheduleField: {
-		marginTop: 12,
+		marginTop: 8,
 		width: '100%',
 		'& .MuiInputBase-root': {
 			color: '#fff',
@@ -102,6 +108,37 @@ const useStyles = makeStyles()((theme) => ({
 		'& .MuiInputLabel-root': {
 			color: 'rgba(255, 255, 255, 0.6)',
 			fontFamily: '"Noto Sans KR", sans-serif'
+		},
+		'& .MuiOutlinedInput-notchedOutline': {
+			borderColor: 'rgba(255, 255, 255, 0.2)'
+		},
+		'& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline': {
+			borderColor: 'rgba(0, 212, 255, 0.5)'
+		},
+		'& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline': {
+			borderColor: '#00d4ff'
+		},
+		'& .MuiSvgIcon-root': {
+			color: 'rgba(0, 212, 255, 0.7)'
+		}
+	},
+	scheduleLabel: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.15rem',
+		color: 'rgba(255, 255, 255, 0.6)',
+		marginTop: 12
+	},
+	timeRow: {
+		marginTop: 8,
+		display: 'flex',
+		gap: 10
+	},
+	timeSelect: {
+		flex: 1,
+		'& .MuiInputBase-root': {
+			color: '#fff',
+			fontFamily: '"Noto Sans KR", sans-serif',
+			fontSize: '1.3rem'
 		},
 		'& .MuiOutlinedInput-notchedOutline': {
 			borderColor: 'rgba(255, 255, 255, 0.2)'
@@ -155,8 +192,13 @@ function MatchResultDialog({ open, onClose, onSuccess, match, team1, team2 }) {
 
 	const [score1, setScore1] = useState('');
 	const [score2, setScore2] = useState('');
-	const [scheduledAt, setScheduledAt] = useState(
-		match && match.scheduledAt ? new Date(match.scheduledAt) : null
+	// 일정은 사용자 로컬(=KST 사이트라 KST) 기준으로 (date, hour, minute) 분리 보관.
+	// 저장 시 `date.setHours(hour, minute)` → toISOString() 으로 UTC 변환.
+	const initialDate = match && match.scheduledAt ? new Date(match.scheduledAt) : null;
+	const [date, setDate] = useState(initialDate);
+	const [hour, setHour] = useState(initialDate ? initialDate.getHours() : 19);
+	const [minute, setMinute] = useState(
+		initialDate ? (initialDate.getMinutes() < 30 ? 0 : 30) : 0
 	);
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState('');
@@ -186,16 +228,25 @@ function MatchResultDialog({ open, onClose, onSuccess, match, team1, team2 }) {
 			});
 	}
 
-	function handleScheduleSubmit(nextValue) {
-		// nextValue: undefined → setScheduledAt 값 사용 / null → 일정 취소
-		const value = nextValue === undefined ? scheduledAt : nextValue;
-		if (value && Number.isNaN(value.getTime ? value.getTime() : NaN)) {
-			setError('유효하지 않은 일정입니다.');
-			return;
+	function handleScheduleSubmit(forceClear) {
+		let isoOrNull;
+		if (forceClear) {
+			isoOrNull = null;
+		} else {
+			if (!date) {
+				setError('날짜를 선택하세요.');
+				return;
+			}
+			const local = new Date(date);
+			local.setHours(hour, minute, 0, 0);
+			if (Number.isNaN(local.getTime())) {
+				setError('유효하지 않은 일정입니다.');
+				return;
+			}
+			isoOrNull = local.toISOString();
 		}
 		setError('');
 		setLoading(true);
-		const isoOrNull = value ? value.toISOString() : null;
 		Actions.updateMatchSchedule(match.id, isoOrNull)
 			.then(() => {
 				setLoading(false);
@@ -243,23 +294,36 @@ function MatchResultDialog({ open, onClose, onSuccess, match, team1, team2 }) {
 				{activeTab === TAB_SCHEDULE && (
 					<div className={classes.scheduleBody}>
 						<LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={koLocale}>
-							<DateTimePicker
-								value={scheduledAt}
-								onChange={setScheduledAt}
-								format="yyyy-MM-dd HH:mm"
-								ampm={false}
+							<DatePicker
+								value={date}
+								onChange={setDate}
+								format="yyyy-MM-dd"
 								slotProps={{
-									textField: { className: classes.scheduleField, variant: 'outlined' }
+									textField: { className: classes.scheduleField, variant: 'outlined', label: '날짜' }
 								}}
 							/>
 						</LocalizationProvider>
+						<div className={classes.scheduleLabel}>시간</div>
+						<div className={classes.timeRow}>
+							<FormControl className={classes.timeSelect} variant="outlined">
+								<Select value={hour} onChange={(e) => setHour(Number(e.target.value))}>
+									{HOURS.map(h => (
+										<MenuItem key={h} value={h}>{String(h).padStart(2, '0')}시</MenuItem>
+									))}
+								</Select>
+							</FormControl>
+							<FormControl className={classes.timeSelect} variant="outlined">
+								<Select value={minute} onChange={(e) => setMinute(Number(e.target.value))}>
+									{MINUTES.map(m => (
+										<MenuItem key={m} value={m}>{String(m).padStart(2, '0')}분</MenuItem>
+									))}
+								</Select>
+							</FormControl>
+						</div>
 						{match.scheduledAt && (
 							<Button
 								className={classes.clearScheduleBtn}
-								onClick={() => {
-									setScheduledAt(null);
-									handleScheduleSubmit(null);
-								}}
+								onClick={() => handleScheduleSubmit(true)}
 								disabled={loading}
 							>
 								일정 취소
