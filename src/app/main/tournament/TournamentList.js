@@ -15,7 +15,7 @@ import reducer from './store/reducers';
 import * as Actions from './store/actions';
 import TournamentCreateDialog from './TournamentCreateDialog';
 import PositionIcon from './PositionIcon';
-import { STATUS_LABELS, STATUS_COLORS, checkIsAdmin, bestOfLabel } from './tournamentUtils';
+import { STATUS, STATUS_LABELS, STATUS_COLORS, checkIsAdmin, bestOfLabel } from './tournamentUtils';
 
 const useStyles = makeStyles()((theme) => ({
 	layoutRoot: {
@@ -294,7 +294,7 @@ function TournamentList() {
 		if (!list || list.length === 0) return;
 		const params = new URLSearchParams(location.search);
 		if (params.has('all')) return;
-		const active = list.find(t => t.status === 'in_progress');
+		const active = list.find(t => t.status === STATUS.IN_PROGRESS);
 		if (active) {
 			autoEnteredRef.current = true;
 			navigate(`/tournament/${active.id}`, { replace: true });
