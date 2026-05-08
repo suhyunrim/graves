@@ -7,6 +7,7 @@ import { getProfileIconUrl } from 'app/main/challenge/ddragonUtils';
 import {
 	groupMatchesByRound,
 	isEmptyMatch,
+	isByeMatch,
 	getTierName,
 	getTierShortLabel,
 	getTierEmblemUrl,
@@ -90,6 +91,18 @@ const useStyles = makeStyles()((theme) => ({
 		gap: 12,
 		justifyContent: 'space-around',
 		flex: 1
+	},
+	// R1 에 BYE 가 섞인 경우: 매치를 슬롯 기반으로 절대 위치 배치해서
+	// 다음 라운드 매치와 같은 선상에 오도록 한다 (가운데 정렬 어색함 해소).
+	matchListAbsolute: {
+		position: 'relative',
+		justifyContent: 'flex-start'
+	},
+	matchAbsolute: {
+		position: 'absolute',
+		left: 0,
+		right: 0,
+		transform: 'translateY(-50%)'
 	},
 	match: {
 		background: 'linear-gradient(135deg, #1a1a2e 0%, #0f0f1a 100%)',
@@ -725,10 +738,26 @@ function TournamentBracket({
 					const label = roundLabels[round] || `${round}라운드`;
 					const emptyLabel = round === 1 ? 'TBD' : '이전 라운드 승자 대기';
 
+					// R1 에 BYE 가 섞여 있으면 visible 매치를 슬롯 기반으로 절대 위치한다.
+					// - 짝(sibling) 이 BYE 면 → R2 자식과 같은 y (라인이 거의 수평)
+					// - 짝이 real 이면 → 자기 슬롯 (slot+0.5)/N (정상 fan-out)
+					const r1ByeCount = round === 1 ? roundMatches.filter(isByeMatch).length : 0;
+					const useAbsolute = round === 1 && r1ByeCount > 0;
+					const totalR1Slots = roundMatches.length;
+					const computeY = (m) => {
+						const sibling = roundMatches.find(x => x.bracketSlot === (m.bracketSlot ^ 1));
+						if (sibling && isByeMatch(sibling)) {
+							const childSlot = Math.floor(m.bracketSlot / 2);
+							const r2Count = totalR1Slots / 2;
+							return (childSlot + 0.5) / r2Count;
+						}
+						return (m.bracketSlot + 0.5) / totalR1Slots;
+					};
+
 					return (
 						<div key={round} className={cx(classes.column, verbose && classes.columnVerbose)}>
 							<div className={classes.columnTitle}>{label}</div>
-							<div className={classes.matchList}>
+							<div className={cx(classes.matchList, useAbsolute && classes.matchListAbsolute)}>
 								{visibleMatches.length === 0 ? (
 									<div className={classes.emptyText}>—</div>
 								) : (
@@ -767,11 +796,18 @@ function TournamentBracket({
 										const isMyPickT1 = myPickedTeamId != null && myPickedTeamId === m.team1Id;
 										const isMyPickT2 = myPickedTeamId != null && myPickedTeamId === m.team2Id;
 
+										const absStyle = useAbsolute ? { top: `${computeY(m) * 100}%` } : undefined;
+
 										return (
 											<div
 												key={m.id}
 												ref={el => { itemRefs.current[m.id] = el; }}
-												className={cx(classes.match, predictionClickable && classes.matchClickable)}
+												className={cx(
+													classes.match,
+													predictionClickable && classes.matchClickable,
+													useAbsolute && classes.matchAbsolute
+												)}
+												style={absStyle}
 												onClick={handleCardClick}
 												role={predictionClickable ? 'button' : undefined}
 												tabIndex={predictionClickable ? 0 : undefined}
