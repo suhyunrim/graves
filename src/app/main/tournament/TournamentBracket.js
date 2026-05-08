@@ -131,6 +131,12 @@ const useStyles = makeStyles()((theme) => ({
 		color: 'rgba(0, 212, 255, 0.7)',
 		fontWeight: 500
 	},
+	matchHeaderScheduleTbd: {
+		color: 'rgba(255, 255, 255, 0.3)',
+		fontFamily: '"Rajdhani", "Noto Sans KR", sans-serif',
+		fontWeight: 600,
+		letterSpacing: '0.08em'
+	},
 	editIcon: {
 		fontSize: '1.2rem',
 		color: 'rgba(0, 212, 255, 0.7)'
@@ -772,8 +778,13 @@ function TournamentBracket({
 												onKeyDown={predictionClickable ? (e) => e.key === 'Enter' && handleCardClick() : undefined}
 											>
 												<div className={classes.matchHeader}>
-													<span className={classes.matchHeaderSchedule}>
-														{m.scheduledAt ? formatScheduledAt(m.scheduledAt) : ''}
+													<span
+														className={cx(
+															classes.matchHeaderSchedule,
+															!m.scheduledAt && classes.matchHeaderScheduleTbd
+														)}
+													>
+														{m.scheduledAt ? formatScheduledAt(m.scheduledAt) : 'TBD'}
 													</span>
 													<div className={classes.matchHeaderActions}>
 														<span className={classes.matchHeaderBO}>{bestOfLabel(m.bestOf)}</span>
