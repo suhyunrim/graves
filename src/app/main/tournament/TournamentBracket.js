@@ -127,17 +127,15 @@ const useStyles = makeStyles()((theme) => ({
 		alignItems: 'center',
 		gap: 6
 	},
-	matchSchedule: {
-		fontFamily: '"Noto Sans KR", sans-serif',
-		fontSize: '0.95rem',
+	matchHeaderSchedule: {
 		color: 'rgba(0, 212, 255, 0.7)',
-		padding: '3px 12px 5px',
-		textAlign: 'center',
-		borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
-		[theme.breakpoints.down('sm')]: {
-			padding: '2px 10px 4px',
-			fontSize: '0.9rem'
-		}
+		fontWeight: 500
+	},
+	matchHeaderScheduleTbd: {
+		color: 'rgba(255, 255, 255, 0.3)',
+		fontFamily: '"Rajdhani", "Noto Sans KR", sans-serif',
+		fontWeight: 600,
+		letterSpacing: '0.08em'
 	},
 	editIcon: {
 		fontSize: '1.2rem',
@@ -780,7 +778,14 @@ function TournamentBracket({
 												onKeyDown={predictionClickable ? (e) => e.key === 'Enter' && handleCardClick() : undefined}
 											>
 												<div className={classes.matchHeader}>
-													<span>매치 {m.bracketSlot + 1}</span>
+													<span
+														className={cx(
+															classes.matchHeaderSchedule,
+															!m.scheduledAt && classes.matchHeaderScheduleTbd
+														)}
+													>
+														{m.scheduledAt ? formatScheduledAt(m.scheduledAt) : 'TBD'}
+													</span>
 													<div className={classes.matchHeaderActions}>
 														<span className={classes.matchHeaderBO}>{bestOfLabel(m.bestOf)}</span>
 														{canScoreEdit && (
@@ -799,11 +804,6 @@ function TournamentBracket({
 														)}
 													</div>
 												</div>
-												{m.scheduledAt && (
-													<div className={classes.matchSchedule}>
-														{formatScheduledAt(m.scheduledAt)}
-													</div>
-												)}
 												{renderTeamRow(m.team1Id, m.team1Score, m.winnerTeamId, finished, emptyLabel, isMyPickT1, 'blue')}
 												{verbose && renderTeamFullDetails(team1)}
 												{renderTeamRow(m.team2Id, m.team2Score, m.winnerTeamId, finished, emptyLabel, isMyPickT2, 'red')}
