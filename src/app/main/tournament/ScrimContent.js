@@ -28,7 +28,8 @@ import {
 	checkIsAdmin,
 	getTierName,
 	getTierShortLabel,
-	getTierEmblemUrl
+	getTierEmblemUrl,
+	displayNameForPuuid
 } from './tournamentUtils';
 import PositionIcon from './PositionIcon';
 import ScrimFormDialog from './ScrimFormDialog';
@@ -541,12 +542,6 @@ function ScrimContent({ tournamentId, teams, scrims, onMutated }) {
 	const user = useSelector(state => state.auth.user);
 	const isAdmin = checkIsAdmin(user);
 	const isLoggedIn = Boolean(user && user.reprGroup);
-	const activeMembers = useSelector(({ Tournament }) => Tournament.tournament.activeMembers);
-	const memberMap = useMemo(() => {
-		const m = new Map();
-		(activeMembers || []).forEach(am => m.set(am.puuid, am));
-		return m;
-	}, [activeMembers]);
 
 	const [formOpen, setFormOpen] = useState(false);
 	const [editingScrim, setEditingScrim] = useState(null);
@@ -674,10 +669,9 @@ function ScrimContent({ tournamentId, teams, scrims, onMutated }) {
 									{team && (team.members || []).length > 0 && (
 										<div className={classes.mobileMembers}>
 											{(team.members || []).map(m => {
-												const info = memberMap.get(m.puuid);
-												const url = info && info.profileIconId ? getProfileIconUrl(info.profileIconId) : null;
-												const name = info ? info.name : `${m.puuid.slice(0, 8)}…`;
-												const memberShort = info ? getTierShortLabel(info.rating) : null;
+												const url = m.profileIconId ? getProfileIconUrl(m.profileIconId) : null;
+												const name = displayNameForPuuid(m.name, m.puuid);
+												const memberShort = m.rating != null ? getTierShortLabel(m.rating) : null;
 												const isCaptain = team.captainPuuid === m.puuid;
 												return (
 													<div key={m.puuid} className={classes.mobileMemberRow}>

@@ -7,7 +7,7 @@ import AddIcon from '@mui/icons-material/Add';
 import GroupIcon from '@mui/icons-material/Group';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import StarIcon from '@mui/icons-material/Star';
-import React, { useEffect, useState, useMemo, useRef } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { getProfileIconUrl } from 'app/main/challenge/ddragonUtils';
@@ -15,7 +15,15 @@ import reducer from './store/reducers';
 import * as Actions from './store/actions';
 import TournamentCreateDialog from './TournamentCreateDialog';
 import PositionIcon from './PositionIcon';
-import { STATUS, STATUS_LABELS, STATUS_COLORS, checkIsAdmin, bestOfLabel, getTrophyIcon } from './tournamentUtils';
+import {
+	STATUS,
+	STATUS_LABELS,
+	STATUS_COLORS,
+	checkIsAdmin,
+	bestOfLabel,
+	getTrophyIcon,
+	displayNameForPuuid
+} from './tournamentUtils';
 
 const useStyles = makeStyles()((theme) => ({
 	layoutRoot: {
@@ -294,7 +302,6 @@ function TournamentList() {
 	const location = useLocation();
 	const list = useSelector(({ Tournament }) => Tournament.tournament.list);
 	const loadingList = useSelector(({ Tournament }) => Tournament.tournament.loadingList);
-	const activeMembers = useSelector(({ Tournament }) => Tournament.tournament.activeMembers);
 	const user = useSelector(state => state.auth.user);
 	const groupId = user && user.reprGroup ? user.reprGroup.groupId : null;
 	const isAdmin = checkIsAdmin(user);
@@ -306,8 +313,6 @@ function TournamentList() {
 	useEffect(() => {
 		if (groupId) {
 			dispatch(Actions.getTournamentList(groupId));
-			// 우승팀 멤버 닉네임/아이콘 매핑용
-			dispatch(Actions.getActiveMembers(groupId));
 		}
 	}, [dispatch, groupId]);
 
@@ -325,12 +330,6 @@ function TournamentList() {
 			navigate(`/tournament/${active.id}`, { replace: true });
 		}
 	}, [loadingList, list, location.search, navigate]);
-
-	const memberMap = useMemo(() => {
-		const m = new Map();
-		(activeMembers || []).forEach(am => m.set(am.puuid, am));
-		return m;
-	}, [activeMembers]);
 
 	function handleCreateSuccess() {
 		setCreateOpen(false);
@@ -410,9 +409,8 @@ function TournamentList() {
 												</div>
 												<div className={classes.championMembers}>
 													{(t.championTeam.members || []).map(m => {
-														const info = memberMap.get(m.puuid);
-														const displayName = info ? info.name : `${m.puuid.slice(0, 8)}…`;
-														const avatarUrl = info ? getProfileIconUrl(info.profileIconId) : null;
+														const displayName = displayNameForPuuid(m.name, m.puuid);
+														const avatarUrl = m.profileIconId ? getProfileIconUrl(m.profileIconId) : null;
 														const isCaptain = t.championTeam.captainPuuid === m.puuid;
 														return (
 															<div key={m.puuid} className={classes.championMemberRow}>
