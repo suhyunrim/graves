@@ -671,11 +671,27 @@ function TournamentBracket({
 	}
 
 	function renderPredictionFooter(m, myPickedTeamId) {
-		const total = (m.team1PredictionCount || 0) + (m.team2PredictionCount || 0);
 		const myPickedTeam = myPickedTeamId != null ? teamMap.get(myPickedTeamId) : null;
 		const myPickedLabel = myPickedTeamId != null
 			? (myPickedTeam ? myPickedTeam.name : `팀#${myPickedTeamId}`)
 			: null;
+
+		// 양쪽 진출팀이 결정되기 전엔 표가 어느 매치업에 떨어질지 확정되지 않아
+		// 카운트/게이지가 오해 소지. 내가 찍은 표시만 남기고 숨긴다.
+		if (!m.predictionsActive) {
+			if (!myPickedLabel) return null;
+			return (
+				<div className={classes.predictionFooter}>
+					<div className={classes.predictionMetaRow}>
+						<StarIcon className={classes.predictionFooterStar} />
+						<span className={classes.predictionFooterTeam}>{myPickedLabel}</span>
+					</div>
+				</div>
+			);
+		}
+
+		// 룰 변경: team1/2PredictionCount 는 이제 브래킷 일관성 통과한 유효 예측만 카운트.
+		const total = (m.team1PredictionCount || 0) + (m.team2PredictionCount || 0);
 		// 예측이 0표면서 본인도 안 찍었으면 푸터 자체를 숨겨 카드를 깔끔히 유지
 		if (total === 0 && !myPickedLabel) return null;
 		// 백엔드 pct 합계가 반올림으로 100% 가 안 맞을 수 있어 좌측을 round, 우측을 100-좌측으로 강제.
