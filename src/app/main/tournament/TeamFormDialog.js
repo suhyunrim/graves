@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
 	Dialog,
 	DialogTitle,
@@ -10,6 +10,7 @@ import {
 	Radio
 } from '@mui/material';
 import { makeStyles } from 'tss-react/mui';
+import { useDispatch, useSelector } from 'react-redux';
 import { getProfileIconUrl } from 'app/main/challenge/ddragonUtils';
 import useDialogStyles from '../components/dialogStyles';
 import * as Actions from './store/actions';
@@ -146,10 +147,20 @@ function makeEmptySlots() {
 	return POSITIONS.map(p => ({ puuid: null, position: p }));
 }
 
-function TeamFormDialog({ open, onClose, onSuccess, tournamentId, team, allTeams, activeMembers }) {
+function TeamFormDialog({ open, onClose, onSuccess, tournamentId, groupId, team, allTeams }) {
 	const { classes, cx } = useStyles();
 	const { classes: dialogClasses } = useDialogStyles();
+	const dispatch = useDispatch();
+	const activeMembers = useSelector(({ Tournament }) => Tournament.tournament.activeMembers);
 	const isEdit = Boolean(team);
+
+	useEffect(() => {
+		// 팀 후보 목록(active-members)은 다이얼로그 열릴 때만 필요.
+		// 페이지 진입 시 미리 부르지 않고 여기서 lazy 로 가져온다.
+		if (groupId) {
+			dispatch(Actions.getActiveMembers(groupId));
+		}
+	}, [dispatch, groupId]);
 
 	const [name, setName] = useState(team ? team.name : '');
 	const [members, setMembers] = useState(() => {

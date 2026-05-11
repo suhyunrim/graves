@@ -14,6 +14,7 @@ import {
 	bestOfLabel,
 	formatScheduledAt,
 	getVisibleMatches,
+	displayNameForPuuid,
 	BRACKET_LINE_COLOR,
 	BRACKET_LINE_COLOR_FINISHED
 } from './tournamentUtils';
@@ -496,7 +497,6 @@ function TournamentBracket({
 	isAdmin,
 	onEditMatch,
 	verbose,
-	activeMembers,
 	myPuuid,
 	onMatchClick
 }) {
@@ -507,12 +507,6 @@ function TournamentBracket({
 		teams.forEach(t => m.set(t.id, t));
 		return m;
 	}, [teams]);
-
-	const memberMap = React.useMemo(() => {
-		const m = new Map();
-		(activeMembers || []).forEach(am => m.set(am.puuid, am));
-		return m;
-	}, [activeMembers]);
 
 	const grouped = React.useMemo(() => groupMatchesByRound(matches), [matches]);
 
@@ -565,10 +559,9 @@ function TournamentBracket({
 					</div>
 				)}
 				{(team.members || []).map(m => {
-					const info = memberMap.get(m.puuid);
-					const url = info && info.profileIconId ? getProfileIconUrl(info.profileIconId) : null;
-					const name = info ? info.name : `${m.puuid.slice(0, 8)}…`;
-					const memberShort = info ? getTierShortLabel(info.rating) : null;
+					const url = m.profileIconId ? getProfileIconUrl(m.profileIconId) : null;
+					const name = displayNameForPuuid(m.name, m.puuid);
+					const memberShort = m.rating != null ? getTierShortLabel(m.rating) : null;
 					const isCaptain = team.captainPuuid === m.puuid;
 					return (
 						<div key={m.puuid} className={classes.memberLine}>

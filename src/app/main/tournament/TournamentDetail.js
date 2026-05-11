@@ -580,7 +580,6 @@ function TournamentDetail() {
 	const roundLabels = useSelector(({ Tournament }) => Tournament.tournament.roundLabels);
 	const leaderboard = useSelector(({ Tournament }) => Tournament.tournament.leaderboard);
 	const loadingDetail = useSelector(({ Tournament }) => Tournament.tournament.loadingDetail);
-	const activeMembers = useSelector(({ Tournament }) => Tournament.tournament.activeMembers);
 	const user = useSelector(state => state.auth.user);
 	const isAdmin = checkIsAdmin(user);
 	const myPuuid = camilleRiotAuthService.getAuthenticatedPuuid();
@@ -601,12 +600,6 @@ function TournamentDetail() {
 		teams.forEach(t => m.set(t.id, t));
 		return m;
 	}, [teams]);
-
-	const memberMap = useMemo(() => {
-		const m = new Map();
-		(activeMembers || []).forEach(am => m.set(am.puuid, am));
-		return m;
-	}, [activeMembers]);
 
 	const championTeam = detail && detail.championTeamId ? teamMap.get(detail.championTeamId) : null;
 
@@ -630,13 +623,6 @@ function TournamentDetail() {
 			dispatch(Actions.clearTournamentDetail());
 		};
 	}, [dispatch, tournamentId]);
-
-	useEffect(() => {
-		// 멤버 닉네임/아이콘/티어 매핑용. 권한 없는 사용자는 silentError 로 흡수.
-		if (detail && detail.groupId) {
-			dispatch(Actions.getActiveMembers(detail.groupId));
-		}
-	}, [dispatch, detail]);
 
 	function handleTeamCreate() {
 		setEditingTeam(null);
@@ -859,7 +845,6 @@ function TournamentDetail() {
 								isAdmin={isAdmin}
 								onEditMatch={(m) => setMatchEditTarget(m)}
 								verbose={bracketVerbose}
-								activeMembers={activeMembers}
 								myPuuid={myPuuid}
 								onMatchClick={(m) => setMatchPredictionTarget(m)}
 							/>
@@ -962,15 +947,11 @@ function TournamentDetail() {
 											)}
 											<div className={classes.memberList}>
 												{(t.members || []).map(m => {
-													const memberInfo = memberMap.get(m.puuid);
-													const displayName = memberInfo ? memberInfo.name : `${m.puuid.slice(0, 8)}…`;
-													const avatarUrl = memberInfo
-														? getProfileIconUrl(memberInfo.profileIconId)
-														: null;
-													const memberRating = memberInfo ? memberInfo.rating : null;
-													const memberTierName = getTierName(memberRating);
-													const memberTierLabel = getTierLabel(memberRating);
-													const memberTierShort = getTierShortLabel(memberRating);
+													const displayName = displayNameForPuuid(m.name, m.puuid);
+													const avatarUrl = m.profileIconId ? getProfileIconUrl(m.profileIconId) : null;
+													const memberTierName = getTierName(m.rating);
+													const memberTierLabel = getTierLabel(m.rating);
+													const memberTierShort = getTierShortLabel(m.rating);
 													const memberTierEmblem = getTierEmblemUrl(memberTierName);
 													const isCaptain = t.captainPuuid === m.puuid;
 													return (
@@ -1039,9 +1020,9 @@ function TournamentDetail() {
 							}}
 							onSuccess={handleTeamFormSuccess}
 							tournamentId={tournamentId}
+							groupId={detail.groupId}
 							team={editingTeam}
 							allTeams={teams}
-							activeMembers={activeMembers}
 						/>
 					)}
 					{matchPredictionTarget && (
