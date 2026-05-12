@@ -50,8 +50,7 @@ import {
 	getTotalRoundsFromMatches,
 	getTeamStanding,
 	getStandingBadgeLabel,
-	getStandingSortKey,
-	getStageLabel
+	getStandingSortKey
 } from './tournamentUtils';
 import { CATEGORY_LABELS } from '../achievementDashboard/constants';
 import PositionIcon from './PositionIcon';
@@ -632,67 +631,6 @@ const useStyles = makeStyles()((theme) => ({
 		fontSize: '1.1rem',
 		display: 'inline-flex',
 		alignItems: 'center'
-	},
-	standingStepRow: {
-		display: 'flex',
-		alignItems: 'flex-start',
-		gap: 10,
-		marginTop: -4,
-		marginBottom: 10,
-		flexWrap: 'wrap'
-	},
-	standingStepItem: {
-		display: 'flex',
-		flexDirection: 'column',
-		alignItems: 'center',
-		gap: 4,
-		flexShrink: 0
-	},
-	standingStepDot: {
-		width: 10,
-		height: 10,
-		borderRadius: '50%',
-		background: 'rgba(255, 255, 255, 0.08)',
-		border: '1px solid rgba(255, 255, 255, 0.18)',
-		display: 'inline-flex',
-		alignItems: 'center',
-		justifyContent: 'center'
-	},
-	standingStepDotWon: {
-		background: '#00d4ff',
-		borderColor: '#00d4ff',
-		boxShadow: '0 0 6px rgba(0, 212, 255, 0.5)'
-	},
-	standingStepDotLost: {
-		background: '#ff6b6b',
-		borderColor: '#ff6b6b'
-	},
-	standingStepDotChampion: {
-		background: '#ffd700',
-		borderColor: '#ffd700',
-		boxShadow: '0 0 10px rgba(255, 215, 0, 0.7)'
-	},
-	standingStepDotPending: {
-		background: 'transparent',
-		borderColor: 'rgba(0, 212, 255, 0.45)',
-		borderStyle: 'dashed'
-	},
-	standingStepDotMark: {
-		fontFamily: '"Rajdhani", sans-serif',
-		fontSize: '0.75rem',
-		fontWeight: 700,
-		color: '#fff',
-		lineHeight: 1
-	},
-	standingStepLabel: {
-		fontFamily: '"Rajdhani", "Noto Sans KR", sans-serif',
-		fontSize: '0.85rem',
-		fontWeight: 600,
-		color: 'rgba(255, 255, 255, 0.4)',
-		letterSpacing: '0.04em'
-	},
-	standingStepLabelActive: {
-		color: 'rgba(255, 255, 255, 0.7)'
 	}
 }));
 
@@ -1087,7 +1025,6 @@ function TournamentDetail() {
 										if (standing.status === 'eliminated') return classes.standingBadgeEliminated;
 										return null;
 									})();
-									const showSteps = Boolean(standing && standing.totalRounds && standing.status !== 'notStarted');
 
 									return (
 										<div key={t.id} className={cx(classes.teamCard, cardVariantCls)}>
@@ -1132,70 +1069,6 @@ function TournamentDetail() {
 														<img src={tierEmblem} alt={tierName} className={classes.teamTierEmblem} />
 													)}
 													팀 평균 {tierLabel}
-												</div>
-											)}
-											{showSteps && (
-												<div className={classes.standingStepRow}>
-													{Array.from({ length: standing.totalRounds }).map((_, i) => {
-														const round = i + 1;
-														const stageLbl = getStageLabel(round, standing.totalRounds, roundLabels);
-														const isFinalRound = round === standing.totalRounds;
-														let dotCls = classes.standingStepDot;
-														let mark = null;
-														let labelActive = false;
-
-														if (standing.status === 'champion') {
-															// 모든 라운드 승리
-															if (isFinalRound) {
-																dotCls = cx(dotCls, classes.standingStepDotChampion);
-															} else {
-																dotCls = cx(dotCls, classes.standingStepDotWon);
-															}
-															labelActive = true;
-														} else if (standing.status === 'runnerup') {
-															if (isFinalRound) {
-																dotCls = cx(dotCls, classes.standingStepDotLost);
-																mark = '✕';
-																labelActive = true;
-															} else {
-																dotCls = cx(dotCls, classes.standingStepDotWon);
-															}
-														} else if (standing.status === 'eliminated') {
-															if (round < standing.eliminatedRound) {
-																dotCls = cx(dotCls, classes.standingStepDotWon);
-															} else if (round === standing.eliminatedRound) {
-																dotCls = cx(dotCls, classes.standingStepDotLost);
-																mark = '✕';
-																labelActive = true;
-															}
-															// 그 이후 라운드는 dim default
-														} else if (standing.status === 'alive') {
-															if (round < standing.reachedRound) {
-																dotCls = cx(dotCls, classes.standingStepDotWon);
-															} else if (round === standing.reachedRound) {
-																dotCls = cx(dotCls, classes.standingStepDotPending);
-																labelActive = true;
-															}
-														}
-
-														return (
-															<div key={round} className={classes.standingStepItem}>
-																<div className={dotCls}>
-																	{mark && (
-																		<span className={classes.standingStepDotMark}>{mark}</span>
-																	)}
-																</div>
-																<div
-																	className={cx(
-																		classes.standingStepLabel,
-																		labelActive && classes.standingStepLabelActive
-																	)}
-																>
-																	{stageLbl}
-																</div>
-															</div>
-														);
-													})}
 												</div>
 											)}
 											<div className={classes.memberList}>
