@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { makeStyles } from 'tss-react/mui';
 import {
 	Button,
@@ -191,6 +192,38 @@ const useStyles = makeStyles()((theme) => ({
 		[theme.breakpoints.down('sm')]: {
 			padding: '10px 12px 14px 36px'
 		}
+	},
+	expandSplit: {
+		display: 'grid',
+		gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)',
+		gap: 32,
+		[theme.breakpoints.down('md')]: {
+			gridTemplateColumns: '1fr',
+			gap: 16
+		}
+	},
+	expandBlock: {
+		display: 'flex',
+		flexDirection: 'column',
+		gap: 8,
+		minWidth: 0
+	},
+	expandBlockTitle: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.15rem',
+		color: 'rgba(255, 255, 255, 0.5)',
+		marginBottom: 4
+	},
+	expandMembers: {
+		display: 'flex',
+		flexDirection: 'column',
+		gap: 4
+	},
+	expandEmpty: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.15rem',
+		color: 'rgba(255, 255, 255, 0.4)',
+		fontStyle: 'italic'
 	},
 	vsTitle: {
 		fontFamily: '"Noto Sans KR", sans-serif',
@@ -455,9 +488,20 @@ const useStyles = makeStyles()((theme) => ({
 		display: 'flex',
 		alignItems: 'center',
 		gap: 8,
+		padding: '2px 4px',
+		marginLeft: -4,
+		marginRight: -4,
+		borderRadius: 4,
 		fontFamily: '"Noto Sans KR", sans-serif',
 		fontSize: '1.1rem',
-		color: 'rgba(255, 255, 255, 0.85)'
+		color: 'rgba(255, 255, 255, 0.85)',
+		textDecoration: 'none',
+		cursor: 'pointer',
+		transition: 'background 0.15s ease, color 0.15s ease',
+		'&:hover': {
+			background: 'rgba(0, 212, 255, 0.08)',
+			color: '#fff'
+		}
 	},
 	mobileMemberPosIcon: {
 		width: 14,
@@ -674,7 +718,12 @@ function ScrimContent({ tournamentId, teams, scrims, onMutated }) {
 												const memberShort = m.rating != null ? getTierShortLabel(m.rating) : null;
 												const isCaptain = team.captainPuuid === m.puuid;
 												return (
-													<div key={m.puuid} className={classes.mobileMemberRow}>
+													<Link
+														key={m.puuid}
+														to={`/userinfo/${m.puuid}`}
+														className={classes.mobileMemberRow}
+														onClick={(e) => e.stopPropagation()}
+													>
 														<PositionIcon
 															position={m.position}
 															className={classes.mobileMemberPosIcon}
@@ -688,7 +737,7 @@ function ScrimContent({ tournamentId, teams, scrims, onMutated }) {
 														<span className={classes.mobileMemberName}>{name}</span>
 														{isCaptain && <StarIcon className={classes.mobileMemberCaptain} />}
 														{memberShort && <span className={classes.mobileMemberTier}>{memberShort}</span>}
-													</div>
+													</Link>
 												);
 											})}
 										</div>
@@ -761,25 +810,69 @@ function ScrimContent({ tournamentId, teams, scrims, onMutated }) {
 											{expanded && (
 												<tr className={classes.vsRow}>
 													<td className={classes.vsCell} colSpan={6}>
-														{vsRecordsForExpanded.length === 0 ? (
-															<div className={classes.vsTitle}>아직 기록된 상대 전적이 없습니다.</div>
-														) : (
-															<>
-																<div className={classes.vsTitle}>상대팀별 전적</div>
-																<div className={classes.vsList}>
-																	{vsRecordsForExpanded.map(r => (
-																		<div key={r.opponentId} className={classes.vsItem}>
-																			<span className={classes.vsOpponent}>vs {teamName(r.opponentId)}</span>
-																			<span className={classes.vsRecord}>
-																				<span className={classes.vsRecordWin}>{r.mySets}</span>
-																				<span className={classes.vsRecordSep}>:</span>
-																				<span className={classes.vsRecordLoss}>{r.oppSets}</span>
-																			</span>
+														<div className={classes.expandSplit}>
+															<div className={classes.expandBlock}>
+																<div className={classes.expandBlockTitle}>팀 멤버</div>
+																{(() => {
+																	const team = teamMap.get(row.teamId);
+																	const members = (team && team.members) || [];
+																	if (members.length === 0) {
+																		return <div className={classes.expandEmpty}>등록된 멤버가 없습니다</div>;
+																	}
+																	return (
+																		<div className={classes.expandMembers}>
+																			{members.map(m => {
+																				const url = m.profileIconId ? getProfileIconUrl(m.profileIconId) : null;
+																				const name = displayNameForPuuid(m.name, m.puuid);
+																				const memberShort = m.rating != null ? getTierShortLabel(m.rating) : null;
+																				const isCaptain = team.captainPuuid === m.puuid;
+																				return (
+																					<Link
+																						key={m.puuid}
+																						to={`/userinfo/${m.puuid}`}
+																						className={classes.mobileMemberRow}
+																						onClick={(e) => e.stopPropagation()}
+																					>
+																						<PositionIcon
+																							position={m.position}
+																							className={classes.mobileMemberPosIcon}
+																							fallbackClassName={classes.mobileMemberPosFallback}
+																						/>
+																						{url ? (
+																							<img src={url} alt="" className={classes.mobileMemberAvatar} />
+																						) : (
+																							<div className={classes.mobileMemberPlaceholder} />
+																						)}
+																						<span className={classes.mobileMemberName}>{name}</span>
+																						{isCaptain && <StarIcon className={classes.mobileMemberCaptain} />}
+																						{memberShort && <span className={classes.mobileMemberTier}>{memberShort}</span>}
+																					</Link>
+																				);
+																			})}
 																		</div>
-																	))}
-																</div>
-															</>
-														)}
+																	);
+																})()}
+															</div>
+															<div className={classes.expandBlock}>
+																<div className={classes.expandBlockTitle}>상대팀별 전적</div>
+																{vsRecordsForExpanded.length === 0 ? (
+																	<div className={classes.expandEmpty}>아직 기록된 상대 전적이 없습니다</div>
+																) : (
+																	<div className={classes.vsList}>
+																		{vsRecordsForExpanded.map(r => (
+																			<div key={r.opponentId} className={classes.vsItem}>
+																				<span className={classes.vsOpponent}>vs {teamName(r.opponentId)}</span>
+																				<span className={classes.vsRecord}>
+																					<span className={classes.vsRecordWin}>{r.mySets}</span>
+																					<span className={classes.vsRecordSep}>:</span>
+																					<span className={classes.vsRecordLoss}>{r.oppSets}</span>
+																				</span>
+																			</div>
+																		))}
+																	</div>
+																)}
+															</div>
+														</div>
 													</td>
 												</tr>
 											)}

@@ -3,13 +3,17 @@ import { Button } from '@mui/material';
 import { makeStyles } from 'tss-react/mui';
 import EditNoteIcon from '@mui/icons-material/EditNote';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import CheckIcon from '@mui/icons-material/Check';
+import CloseIcon from '@mui/icons-material/Close';
+import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
 import camilleRiotAuthService from 'app/services/camilleRiotAuthService/camilleRiotAuthService';
 import PredictionDialog from './PredictionDialog';
-import { STATUS, displayNameForPuuid } from './tournamentUtils';
+import { STATUS, displayNameForPuuid, isValidMatch, getTotalRoundsFromMatches, getStageLabel } from './tournamentUtils';
 import useDiscordLoginGate from '../components/useDiscordLoginGate';
 
-const LEADER_GRID_DESKTOP = '60px 1fr 100px 120px';
-const LEADER_GRID_MOBILE = '40px 1fr 70px 90px';
+const LEADER_GRID_DESKTOP = '60px 1fr 100px 120px 36px';
+const LEADER_GRID_MOBILE = '40px 1fr 70px 90px 28px';
 
 const useStyles = makeStyles()((theme) => ({
 	root: {
@@ -138,6 +142,141 @@ const useStyles = makeStyles()((theme) => ({
 		color: 'rgba(255, 255, 255, 0.4)',
 		textAlign: 'center',
 		padding: 32
+	},
+	leaderRowClickable: {
+		cursor: 'pointer',
+		transition: 'background 0.15s ease',
+		'&:hover': {
+			background: 'rgba(0, 212, 255, 0.06)'
+		}
+	},
+	expandIconCell: {
+		display: 'flex',
+		alignItems: 'center',
+		justifyContent: 'center',
+		color: 'rgba(255, 255, 255, 0.4)'
+	},
+	expandIcon: {
+		fontSize: '1.6rem',
+		transition: 'transform 0.2s ease'
+	},
+	expandIconOpen: {
+		transform: 'rotate(180deg)',
+		color: '#00d4ff'
+	},
+	expandBlock: {
+		padding: '10px 18px 16px',
+		background: 'rgba(0, 0, 0, 0.25)',
+		borderTop: '1px solid rgba(0, 212, 255, 0.1)',
+		borderBottom: '1px solid rgba(0, 212, 255, 0.08)',
+		[theme.breakpoints.down('sm')]: {
+			padding: '8px 12px 14px'
+		}
+	},
+	expandTitle: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.1rem',
+		color: 'rgba(255, 255, 255, 0.5)',
+		marginBottom: 6
+	},
+	predictionList: {
+		display: 'flex',
+		flexDirection: 'column',
+		gap: 4
+	},
+	predictionRow: {
+		display: 'grid',
+		gridTemplateColumns: '70px 1fr 24px',
+		alignItems: 'center',
+		gap: 10,
+		padding: '6px 8px',
+		borderRadius: 6,
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.15rem',
+		color: 'rgba(255, 255, 255, 0.85)',
+		[theme.breakpoints.down('sm')]: {
+			gridTemplateColumns: '60px 1fr 22px',
+			fontSize: '1.05rem',
+			padding: '5px 6px',
+			gap: 8
+		}
+	},
+	predictionRowCorrect: {
+		background: 'rgba(0, 212, 255, 0.06)'
+	},
+	predictionRowWrong: {
+		background: 'rgba(255, 107, 107, 0.05)'
+	},
+	predictionRowPending: {
+		background: 'rgba(255, 255, 255, 0.02)'
+	},
+	predictionRowInvalid: {
+		opacity: 0.5
+	},
+	predictionRound: {
+		fontFamily: '"Rajdhani", "Noto Sans KR", sans-serif',
+		fontWeight: 700,
+		color: 'rgba(0, 212, 255, 0.85)',
+		letterSpacing: '0.04em'
+	},
+	predictionMatchLine: {
+		minWidth: 0,
+		overflow: 'hidden',
+		display: 'flex',
+		alignItems: 'center',
+		gap: 6,
+		whiteSpace: 'nowrap',
+		textOverflow: 'ellipsis'
+	},
+	predictionPick: {
+		color: '#00d4ff',
+		fontWeight: 700,
+		overflow: 'hidden',
+		textOverflow: 'ellipsis'
+	},
+	predictionPickWrong: {
+		color: '#ff6b6b'
+	},
+	predictionPickDim: {
+		color: 'rgba(255, 255, 255, 0.45)'
+	},
+	predictionOpponent: {
+		color: 'rgba(255, 255, 255, 0.5)',
+		overflow: 'hidden',
+		textOverflow: 'ellipsis'
+	},
+	predictionVs: {
+		color: 'rgba(255, 255, 255, 0.3)',
+		fontSize: '0.95rem'
+	},
+	predictionResult: {
+		display: 'flex',
+		alignItems: 'center',
+		justifyContent: 'center'
+	},
+	predictionResultCorrect: {
+		color: '#00ff7f',
+		fontSize: '1.4rem'
+	},
+	predictionResultWrong: {
+		color: '#ff6b6b',
+		fontSize: '1.4rem'
+	},
+	predictionResultPending: {
+		color: 'rgba(255, 255, 255, 0.35)',
+		fontSize: '1.2rem'
+	},
+	predictionResultMissing: {
+		color: 'rgba(255, 255, 255, 0.25)',
+		fontFamily: '"Rajdhani", sans-serif',
+		fontSize: '1.1rem',
+		fontWeight: 600
+	},
+	predictionInvalidNote: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '0.95rem',
+		color: 'rgba(255, 107, 107, 0.7)',
+		marginTop: 4
 	}
 }));
 
@@ -154,11 +293,51 @@ function formatAccuracy(correct, settled) {
 	return `${pct}% (${correct}/${settled})`;
 }
 
-function PredictionContent({ tournamentId, status, predictionsLocked, matches, teams, leaderboard, onMutated }) {
+function PredictionContent({ tournamentId, status, predictionsLocked, matches, teams, leaderboard, roundLabels, onMutated }) {
 	const { classes, cx } = useStyles();
 	const myPuuid = useMemo(() => camilleRiotAuthService.getAuthenticatedPuuid(), []);
 	const [dialogOpen, setDialogOpen] = useState(false);
+	const [expandedPuuid, setExpandedPuuid] = useState(null);
 	const { requireLogin: requireDiscordLogin, gate: discordLoginGate } = useDiscordLoginGate();
+
+	const teamMap = useMemo(() => {
+		const m = new Map();
+		(teams || []).forEach(t => m.set(t.id, t));
+		return m;
+	}, [teams]);
+
+	const totalRounds = useMemo(() => getTotalRoundsFromMatches(matches), [matches]);
+
+	// BYE/empty 제외한 정상 매치만 — 예측 대상.
+	const predictableMatches = useMemo(
+		() => (matches || []).filter(isValidMatch).sort((a, b) => a.round - b.round || a.bracketSlot - b.bracketSlot),
+		[matches]
+	);
+
+	// 사용자별 매치 예측 결과 — expand 됐을 때만 계산.
+	function buildUserPredictions(userPuuid) {
+		return predictableMatches.map(m => {
+			const pred = (m.predictions || []).find(p => p.userPuuid === userPuuid);
+			const finished = m.winnerTeamId != null;
+			const team1 = teamMap.get(m.team1Id);
+			const team2 = teamMap.get(m.team2Id);
+			let resultStatus = 'missing'; // 미예측
+			let pickedTeam = null;
+			let isInvalid = false;
+			if (pred) {
+				pickedTeam = teamMap.get(pred.predictedTeamId);
+				isInvalid = pred.isValid === false;
+				if (!finished) {
+					resultStatus = 'pending';
+				} else if (pred.predictedTeamId === m.winnerTeamId) {
+					resultStatus = 'correct';
+				} else {
+					resultStatus = 'wrong';
+				}
+			}
+			return { match: m, team1, team2, pred, pickedTeam, resultStatus, isInvalid };
+		});
+	}
 
 	function handleOpenDialog() {
 		if (!requireDiscordLogin('승부예측')) return;
@@ -207,6 +386,7 @@ function PredictionContent({ tournamentId, status, predictionsLocked, matches, t
 					<span>참가자</span>
 					<span style={{ textAlign: 'right' }}>정답</span>
 					<span style={{ textAlign: 'right' }}>적중률</span>
+					<span aria-label="expand" />
 				</div>
 				{(!leaderboard || leaderboard.length === 0) ? (
 					<div className={classes.emptyText}>아직 예측한 사람이 없습니다.</div>
@@ -215,23 +395,97 @@ function PredictionContent({ tournamentId, status, predictionsLocked, matches, t
 						const rank = idx + 1;
 						const medalColor = rankMedalColor(rank);
 						const isMine = myPuuid && row.userPuuid === myPuuid;
+						const expanded = expandedPuuid === row.userPuuid;
+						const items = expanded ? buildUserPredictions(row.userPuuid) : [];
 						return (
-							<div
-								key={row.userPuuid}
-								className={cx(classes.leaderRow, isMine && classes.leaderRowMine)}
-							>
-								<span className={classes.rankCell} style={medalColor ? { color: medalColor } : null}>
-									{rank <= 3 && <EmojiEventsIcon className={classes.rankTopIcon} style={{ color: medalColor }} />}
-									{rank}
-								</span>
-								<span className={classes.nameCell}>
-									{displayNameForPuuid(row.summonerName, row.userPuuid)}
-								</span>
-								<span className={classes.scoreCell}>{row.correctCount}</span>
-								<span className={classes.accuracyCell}>
-									{formatAccuracy(row.correctCount, row.settledCount)}
-								</span>
-							</div>
+							<React.Fragment key={row.userPuuid}>
+								<div
+									className={cx(classes.leaderRow, classes.leaderRowClickable, isMine && classes.leaderRowMine)}
+									onClick={() => setExpandedPuuid(prev => prev === row.userPuuid ? null : row.userPuuid)}
+									role="button"
+									tabIndex={0}
+									onKeyDown={(e) => {
+										if (e.key === 'Enter' || e.key === ' ') {
+											e.preventDefault();
+											setExpandedPuuid(prev => prev === row.userPuuid ? null : row.userPuuid);
+										}
+									}}
+								>
+									<span className={classes.rankCell} style={medalColor ? { color: medalColor } : null}>
+										{rank <= 3 && <EmojiEventsIcon className={classes.rankTopIcon} style={{ color: medalColor }} />}
+										{rank}
+									</span>
+									<span className={classes.nameCell}>
+										{displayNameForPuuid(row.summonerName, row.userPuuid)}
+									</span>
+									<span className={classes.scoreCell}>{row.correctCount}</span>
+									<span className={classes.accuracyCell}>
+										{formatAccuracy(row.correctCount, row.settledCount)}
+									</span>
+									<span className={classes.expandIconCell}>
+										<ExpandMoreIcon className={cx(classes.expandIcon, expanded && classes.expandIconOpen)} />
+									</span>
+								</div>
+								{expanded && (
+									<div className={classes.expandBlock}>
+										<div className={classes.expandTitle}>매치별 예측</div>
+										{items.length === 0 ? (
+											<div className={classes.emptyText}>예측 대상 매치가 없습니다</div>
+										) : (
+											<div className={classes.predictionList}>
+												{items.map(({ match: m, team1, team2, pickedTeam, resultStatus, isInvalid }) => {
+													const stage = getStageLabel(m.round, totalRounds, roundLabels);
+													let rowVariant = null;
+													if (resultStatus === 'correct') rowVariant = classes.predictionRowCorrect;
+													else if (resultStatus === 'wrong') rowVariant = classes.predictionRowWrong;
+													else if (resultStatus === 'pending') rowVariant = classes.predictionRowPending;
+													const opponent = pickedTeam
+														? (pickedTeam.id === m.team1Id ? team2 : team1)
+														: null;
+													let pickCls = classes.predictionPick;
+													if (resultStatus === 'wrong') pickCls = cx(classes.predictionPick, classes.predictionPickWrong);
+													else if (!pickedTeam) pickCls = classes.predictionPickDim;
+													let resultNode = null;
+													if (resultStatus === 'correct') {
+														resultNode = <CheckIcon className={classes.predictionResultCorrect} />;
+													} else if (resultStatus === 'wrong') {
+														resultNode = <CloseIcon className={classes.predictionResultWrong} />;
+													} else if (resultStatus === 'pending') {
+														resultNode = <HourglassEmptyIcon className={classes.predictionResultPending} />;
+													} else {
+														resultNode = <span className={classes.predictionResultMissing}>—</span>;
+													}
+													return (
+														<div
+															key={m.id}
+															className={cx(classes.predictionRow, rowVariant, isInvalid && classes.predictionRowInvalid)}
+															title={isInvalid ? '이전 라운드 결과로 무효화된 예측' : undefined}
+														>
+															<span className={classes.predictionRound}>{stage}</span>
+															<span className={classes.predictionMatchLine}>
+																{pickedTeam ? (
+																	<>
+																		<span className={pickCls}>{pickedTeam.name}</span>
+																		<span className={classes.predictionVs}>vs</span>
+																		<span className={classes.predictionOpponent}>
+																			{opponent ? opponent.name : '?'}
+																		</span>
+																	</>
+																) : (
+																	<span className={classes.predictionPickDim}>
+																		미예측 ({team1 ? team1.name : '?'} vs {team2 ? team2.name : '?'})
+																	</span>
+																)}
+															</span>
+															<span className={classes.predictionResult}>{resultNode}</span>
+														</div>
+													);
+												})}
+											</div>
+										)}
+									</div>
+								)}
+							</React.Fragment>
 						);
 					})
 				)}
