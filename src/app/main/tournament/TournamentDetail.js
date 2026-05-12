@@ -46,7 +46,12 @@ import {
 	bestOfLabel,
 	displayNameForPuuid,
 	isValidMatch,
-	getTrophyIcon
+	getTrophyIcon,
+	getTotalRoundsFromMatches,
+	getTeamStanding,
+	getStandingBadgeLabel,
+	getStandingSortKey,
+	roundLabelFor
 } from './tournamentUtils';
 import { CATEGORY_LABELS } from '../achievementDashboard/constants';
 import PositionIcon from './PositionIcon';
@@ -562,6 +567,132 @@ const useStyles = makeStyles()((theme) => ({
 		fontSize: '1.2rem',
 		color: 'rgba(255, 255, 255, 0.5)',
 		marginLeft: 4
+	},
+	teamCardChampion: {
+		border: '1px solid rgba(255, 215, 0, 0.55)',
+		background: 'linear-gradient(135deg, rgba(255, 215, 0, 0.1) 0%, rgba(0, 0, 0, 0.3) 100%)',
+		boxShadow: '0 0 20px rgba(255, 215, 0, 0.15), 0 0 50px rgba(255, 215, 0, 0.06)'
+	},
+	teamCardRunnerup: {
+		border: '1px solid rgba(255, 255, 255, 0.32)',
+		background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(0, 0, 0, 0.3) 100%)'
+	},
+	teamCardSemifinal: {
+		border: '1px solid rgba(0, 212, 255, 0.4)',
+		background: 'linear-gradient(135deg, rgba(0, 212, 255, 0.06) 0%, rgba(0, 0, 0, 0.3) 100%)'
+	},
+	teamCardAlive: {
+		border: '1px solid rgba(0, 212, 255, 0.28)'
+	},
+	teamCardEliminated: {
+		opacity: 0.62,
+		borderColor: 'rgba(255, 255, 255, 0.08)'
+	},
+	standingBadge: {
+		display: 'inline-flex',
+		alignItems: 'center',
+		gap: 4,
+		padding: '3px 10px',
+		borderRadius: 12,
+		fontFamily: '"Rajdhani", "Noto Sans KR", sans-serif',
+		fontSize: '1.05rem',
+		fontWeight: 700,
+		letterSpacing: '0.05em',
+		flexShrink: 0,
+		whiteSpace: 'nowrap',
+		textTransform: 'uppercase'
+	},
+	standingBadgeChampion: {
+		background: 'linear-gradient(135deg, rgba(255, 215, 0, 0.3), rgba(255, 215, 0, 0.12))',
+		border: '1px solid rgba(255, 215, 0, 0.65)',
+		color: '#ffd700',
+		boxShadow: '0 0 10px rgba(255, 215, 0, 0.3)'
+	},
+	standingBadgeRunnerup: {
+		background: 'rgba(255, 255, 255, 0.08)',
+		border: '1px solid rgba(255, 255, 255, 0.4)',
+		color: 'rgba(255, 255, 255, 0.9)'
+	},
+	standingBadgeSemi: {
+		background: 'rgba(0, 212, 255, 0.12)',
+		border: '1px solid rgba(0, 212, 255, 0.45)',
+		color: '#00d4ff'
+	},
+	standingBadgeAlive: {
+		background: 'rgba(0, 212, 255, 0.06)',
+		border: '1px solid rgba(0, 212, 255, 0.28)',
+		color: 'rgba(0, 212, 255, 0.9)'
+	},
+	standingBadgeEliminated: {
+		background: 'rgba(255, 255, 255, 0.05)',
+		border: '1px solid rgba(255, 255, 255, 0.14)',
+		color: 'rgba(255, 255, 255, 0.5)'
+	},
+	standingBadgeIcon: {
+		fontSize: '1.1rem',
+		display: 'inline-flex',
+		alignItems: 'center'
+	},
+	standingStepRow: {
+		display: 'flex',
+		alignItems: 'flex-start',
+		gap: 10,
+		marginTop: -4,
+		marginBottom: 10,
+		flexWrap: 'wrap'
+	},
+	standingStepItem: {
+		display: 'flex',
+		flexDirection: 'column',
+		alignItems: 'center',
+		gap: 4,
+		flexShrink: 0
+	},
+	standingStepDot: {
+		width: 10,
+		height: 10,
+		borderRadius: '50%',
+		background: 'rgba(255, 255, 255, 0.08)',
+		border: '1px solid rgba(255, 255, 255, 0.18)',
+		display: 'inline-flex',
+		alignItems: 'center',
+		justifyContent: 'center'
+	},
+	standingStepDotWon: {
+		background: '#00d4ff',
+		borderColor: '#00d4ff',
+		boxShadow: '0 0 6px rgba(0, 212, 255, 0.5)'
+	},
+	standingStepDotLost: {
+		background: '#ff6b6b',
+		borderColor: '#ff6b6b'
+	},
+	standingStepDotChampion: {
+		background: '#ffd700',
+		borderColor: '#ffd700',
+		boxShadow: '0 0 10px rgba(255, 215, 0, 0.7)'
+	},
+	standingStepDotPending: {
+		background: 'transparent',
+		borderColor: 'rgba(0, 212, 255, 0.45)',
+		borderStyle: 'dashed'
+	},
+	standingStepDotMark: {
+		fontFamily: '"Rajdhani", sans-serif',
+		fontSize: '0.75rem',
+		fontWeight: 700,
+		color: '#fff',
+		lineHeight: 1
+	},
+	standingStepLabel: {
+		fontFamily: '"Rajdhani", "Noto Sans KR", sans-serif',
+		fontSize: '0.85rem',
+		fontWeight: 600,
+		color: 'rgba(255, 255, 255, 0.4)',
+		letterSpacing: '0.04em'
+	},
+	standingStepLabelActive: {
+		color: 'rgba(255, 255, 255, 0.7)'
 	}
 }));
 
@@ -602,6 +733,29 @@ function TournamentDetail() {
 	}, [teams]);
 
 	const championTeam = detail && detail.championTeamId ? teamMap.get(detail.championTeamId) : null;
+
+	const totalRounds = useMemo(() => getTotalRoundsFromMatches(matches), [matches]);
+	const standingMap = useMemo(() => {
+		const m = new Map();
+		const championTeamId = detail && detail.championTeamId;
+		teams.forEach(t => {
+			m.set(t.id, getTeamStanding(t.id, matches, championTeamId, totalRounds));
+		});
+		return m;
+	}, [teams, matches, detail, totalRounds]);
+
+	// preparing 이면 등록 순서 유지. 그 외엔 성적순 정렬 (우승 > 준우승 > 살아있음 > 깊은 탈락 > 얕은 탈락).
+	const sortedTeams = useMemo(() => {
+		const isPrep = detail && detail.status === STATUS.PREPARING;
+		if (isPrep || !totalRounds) return teams;
+		return [...teams].sort((a, b) => {
+			const ka = getStandingSortKey(standingMap.get(a.id));
+			const kb = getStandingSortKey(standingMap.get(b.id));
+			if (kb !== ka) return kb - ka;
+			if ((b.avgRating || 0) !== (a.avgRating || 0)) return (b.avgRating || 0) - (a.avgRating || 0);
+			return (a.name || '').localeCompare(b.name || '');
+		});
+	}, [teams, detail, totalRounds, standingMap]);
 
 	// 정상 매치(BYE 제외) 모두 적중한 사용자 = "이번 토너먼트 승부의신".
 	// 진행 중엔 settledCount < validMatchCount 라 자연스럽게 빈 배열.
@@ -898,7 +1052,7 @@ function TournamentDetail() {
 							<div className={classes.emptyText}>등록된 팀이 없습니다</div>
 						) : (
 							<div className={classes.teamGrid}>
-								{teams.map(t => {
+								{sortedTeams.map(t => {
 									const avgRating = t.avgRating;
 									const tierName = getTierName(avgRating);
 									const tierLabel = getTierLabel(avgRating);
@@ -908,10 +1062,45 @@ function TournamentDetail() {
 									const canEditTeam = (isAdmin || isCaptain) && !isFinished;
 									// 삭제는 매치를 깨뜨리지 않도록 preparing 상태에서만 허용.
 									const canDeleteTeam = isAdmin && isPreparing;
+
+									const standing = standingMap.get(t.id);
+									const badgeLabel = getStandingBadgeLabel(standing);
+									const isSemifinalBadge = standing
+										&& standing.status === 'eliminated'
+										&& standing.totalRounds
+										&& standing.eliminatedRound === standing.totalRounds - 1;
+									const cardVariantCls = (() => {
+										if (!standing) return null;
+										if (standing.status === 'champion') return classes.teamCardChampion;
+										if (standing.status === 'runnerup') return classes.teamCardRunnerup;
+										if (isSemifinalBadge) return classes.teamCardSemifinal;
+										if (standing.status === 'alive') return classes.teamCardAlive;
+										if (standing.status === 'eliminated') return classes.teamCardEliminated;
+										return null;
+									})();
+									const badgeVariantCls = (() => {
+										if (!standing) return null;
+										if (standing.status === 'champion') return classes.standingBadgeChampion;
+										if (standing.status === 'runnerup') return classes.standingBadgeRunnerup;
+										if (isSemifinalBadge) return classes.standingBadgeSemi;
+										if (standing.status === 'alive') return classes.standingBadgeAlive;
+										if (standing.status === 'eliminated') return classes.standingBadgeEliminated;
+										return null;
+									})();
+									const showSteps = Boolean(standing && standing.totalRounds && standing.status !== 'notStarted');
+
 									return (
-										<div key={t.id} className={classes.teamCard}>
+										<div key={t.id} className={cx(classes.teamCard, cardVariantCls)}>
 											<div className={classes.teamCardHeader}>
 												<span className={classes.teamName}>{t.name}</span>
+												{badgeLabel && (
+													<span className={cx(classes.standingBadge, badgeVariantCls)}>
+														{standing.status === 'champion' && (
+															<EmojiEventsIcon className={classes.standingBadgeIcon} />
+														)}
+														{badgeLabel}
+													</span>
+												)}
 												{(canEditTeam || canDeleteTeam) && (
 													<div className={classes.teamActions}>
 														{canEditTeam && (
@@ -943,6 +1132,70 @@ function TournamentDetail() {
 														<img src={tierEmblem} alt={tierName} className={classes.teamTierEmblem} />
 													)}
 													팀 평균 {tierLabel}
+												</div>
+											)}
+											{showSteps && (
+												<div className={classes.standingStepRow}>
+													{Array.from({ length: standing.totalRounds }).map((_, i) => {
+														const round = i + 1;
+														const stageLabel = roundLabelFor(round, standing.totalRounds);
+														const isFinalRound = round === standing.totalRounds;
+														let dotCls = classes.standingStepDot;
+														let mark = null;
+														let labelActive = false;
+
+														if (standing.status === 'champion') {
+															// 모든 라운드 승리
+															if (isFinalRound) {
+																dotCls = cx(dotCls, classes.standingStepDotChampion);
+															} else {
+																dotCls = cx(dotCls, classes.standingStepDotWon);
+															}
+															labelActive = true;
+														} else if (standing.status === 'runnerup') {
+															if (isFinalRound) {
+																dotCls = cx(dotCls, classes.standingStepDotLost);
+																mark = '✕';
+																labelActive = true;
+															} else {
+																dotCls = cx(dotCls, classes.standingStepDotWon);
+															}
+														} else if (standing.status === 'eliminated') {
+															if (round < standing.eliminatedRound) {
+																dotCls = cx(dotCls, classes.standingStepDotWon);
+															} else if (round === standing.eliminatedRound) {
+																dotCls = cx(dotCls, classes.standingStepDotLost);
+																mark = '✕';
+																labelActive = true;
+															}
+															// 그 이후 라운드는 dim default
+														} else if (standing.status === 'alive') {
+															if (round < standing.reachedRound) {
+																dotCls = cx(dotCls, classes.standingStepDotWon);
+															} else if (round === standing.reachedRound) {
+																dotCls = cx(dotCls, classes.standingStepDotPending);
+																labelActive = true;
+															}
+														}
+
+														return (
+															<div key={round} className={classes.standingStepItem}>
+																<div className={dotCls}>
+																	{mark && (
+																		<span className={classes.standingStepDotMark}>{mark}</span>
+																	)}
+																</div>
+																<div
+																	className={cx(
+																		classes.standingStepLabel,
+																		labelActive && classes.standingStepLabelActive
+																	)}
+																>
+																	{stageLabel}
+																</div>
+															</div>
+														);
+													})}
 												</div>
 											)}
 											<div className={classes.memberList}>

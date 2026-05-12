@@ -301,3 +301,79 @@ export function canEditScrim(scrim, user, isAdmin) {
 	const myDiscordId = user && user.data && user.data.discordUser && user.data.discordUser.discordId;
 	return Boolean(myDiscordId && scrim.recordedByDiscordId === myDiscordId);
 }
+
+// 토너먼트 전체 라운드 수. 매치가 비면 null (preparing 단계).
+export function getTotalRoundsFromMatches(matches) {
+	if (!matches || matches.length === 0) return null;
+	return matches.reduce((mx, x) => Math.max(mx, x.round || 0), 0);
+}
+
+// 팀의 토너먼트 진척 상태.
+// status: 'champion' | 'runnerup' | 'eliminated' | 'alive' | 'notStarted'
+// reachedRound: 도달한 가장 깊은 라운드 (이긴 다음 라운드 또는 탈락 라운드)
+// eliminatedRound: 탈락한 라운드 (champion/alive 일 땐 null)
+export function getTeamStanding(teamId, matches, championTeamId, totalRoundsArg) {
+	const totalRounds = totalRoundsArg != null ? totalRoundsArg : getTotalRoundsFromMatches(matches);
+	if (!teamId || !totalRounds) {
+		return { status: 'notStarted', reachedRound: 0, eliminatedRound: null, totalRounds };
+	}
+	if (championTeamId && championTeamId === teamId) {
+		return { status: 'champion', reachedRound: totalRounds + 1, eliminatedRound: null, totalRounds };
+	}
+	const teamMatches = (matches || [])
+		.filter(m => m.team1Id === teamId || m.team2Id === teamId)
+		.sort((a, b) => b.round - a.round);
+	if (teamMatches.length === 0) {
+		return { status: 'notStarted', reachedRound: 0, eliminatedRound: null, totalRounds };
+	}
+	const lostMatch = teamMatches.find(m => m.winnerTeamId != null && m.winnerTeamId !== teamId);
+	if (lostMatch) {
+		if (lostMatch.round === totalRounds) {
+			return { status: 'runnerup', reachedRound: totalRounds, eliminatedRound: totalRounds, totalRounds };
+		}
+		return { status: 'eliminated', reachedRound: lostMatch.round, eliminatedRound: lostMatch.round, totalRounds };
+	}
+	// 패배 없음 → 진행중. 가장 높은 라운드 매치를 이긴 적 있으면 다음 라운드로 reach.
+	const lastMatch = teamMatches[0];
+	const wonLast = lastMatch.winnerTeamId === teamId;
+	const reached = wonLast ? Math.min(lastMatch.round + 1, totalRounds) : lastMatch.round;
+	return { status: 'alive', reachedRound: reached, eliminatedRound: null, totalRounds };
+}
+
+// 카드 배지 라벨. notStarted/null 이면 null 반환.
+export function getStandingBadgeLabel(standing) {
+	if (!standing || !standing.totalRounds) return null;
+	const { status, eliminatedRound, reachedRound, totalRounds } = standing;
+	if (status === 'champion') return '우승';
+	if (status === 'runnerup') return '준우승';
+	if (status === 'eliminated') {
+		// 4강 탈락은 "4강 진출(=4강 도달)" 로 긍정 프레이밍.
+		if (eliminatedRound === totalRounds - 1) return '4강 진출';
+		return `${roundLabelFor(eliminatedRound, totalRounds)} 탈락`;
+	}
+	if (status === 'alive') {
+		if (reachedRound > totalRounds) return '결승 진출';
+		return `${roundLabelFor(reachedRound, totalRounds)} 진출`;
+	}
+	return null;
+}
+
+// 카드 정렬 키 — 클수록 좋은 성적.
+// champion > runnerup > 더 깊이 진출한 alive > 결승 가까이서 탈락 > notStarted
+export function getStandingSortKey(standing) {
+	if (!standing) return 0;
+	const { status, reachedRound = 0, eliminatedRound = 0, totalRounds = 0 } = standing;
+	if (status === 'champion') return 100000 + totalRounds;
+	if (status === 'runnerup') return 90000 + totalRounds;
+	if (status === 'alive') return 50000 + reachedRound;
+	if (status === 'eliminated') return 10000 + eliminatedRound;
+	return 0;
+}
+
+// 브래킷 매치 안에서 패배팀 옆에 붙는 인라인 라벨.
+// 결승 패자 → '준우승', 그 외 → '{X강} 탈락'.
+export function getMatchLoserLabel(round, totalRounds) {
+	if (!round || !totalRounds) return null;
+	if (round === totalRounds) return '준우승';
+	return `${roundLabelFor(round, totalRounds)} 탈락`;
+}
