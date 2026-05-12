@@ -340,20 +340,29 @@ export function getTeamStanding(teamId, matches, championTeamId, totalRoundsArg)
 	return { status: 'alive', reachedRound: reached, eliminatedRound: null, totalRounds };
 }
 
+// 라운드 라벨 — 백엔드 roundLabels 가 있으면 우선, 없으면 계산 폴백.
+// 9팀 토너먼트 같은 케이스에서 백엔드는 R1="예선" 이라 부르는데 계산은 "16강" 으로 어긋나는 걸 막음.
+function stageLabel(round, totalRounds, roundLabels) {
+	if (roundLabels && roundLabels[round]) return roundLabels[round];
+	return roundLabelFor(round, totalRounds);
+}
+
 // 카드 배지 라벨. notStarted/null 이면 null 반환.
-export function getStandingBadgeLabel(standing) {
+export function getStandingBadgeLabel(standing, roundLabels) {
 	if (!standing || !standing.totalRounds) return null;
 	const { status, eliminatedRound, reachedRound, totalRounds } = standing;
 	if (status === 'champion') return '우승';
 	if (status === 'runnerup') return '준우승';
 	if (status === 'eliminated') {
-		// 4강 탈락은 "4강 진출(=4강 도달)" 로 긍정 프레이밍.
-		if (eliminatedRound === totalRounds - 1) return '4강 진출';
-		return `${roundLabelFor(eliminatedRound, totalRounds)} 탈락`;
+		// 결승 직전(준결승) 탈락은 "4강 진출" 로 긍정 프레이밍.
+		if (eliminatedRound === totalRounds - 1) {
+			return `${stageLabel(eliminatedRound, totalRounds, roundLabels)} 진출`;
+		}
+		return `${stageLabel(eliminatedRound, totalRounds, roundLabels)} 탈락`;
 	}
 	if (status === 'alive') {
 		if (reachedRound > totalRounds) return '결승 진출';
-		return `${roundLabelFor(reachedRound, totalRounds)} 진출`;
+		return `${stageLabel(reachedRound, totalRounds, roundLabels)} 진출`;
 	}
 	return null;
 }
@@ -371,9 +380,14 @@ export function getStandingSortKey(standing) {
 }
 
 // 브래킷 매치 안에서 패배팀 옆에 붙는 인라인 라벨.
-// 결승 패자 → '준우승', 그 외 → '{X강} 탈락'.
-export function getMatchLoserLabel(round, totalRounds) {
+// 결승 패자 → '준우승', 그 외 → '{컬럼 라벨} 탈락'. 백엔드 roundLabels 우선 사용.
+export function getMatchLoserLabel(round, totalRounds, roundLabels) {
 	if (!round || !totalRounds) return null;
 	if (round === totalRounds) return '준우승';
-	return `${roundLabelFor(round, totalRounds)} 탈락`;
+	return `${stageLabel(round, totalRounds, roundLabels)} 탈락`;
+}
+
+// 카드 step indicator 의 라운드별 스테이지 라벨. 외부에서 사용.
+export function getStageLabel(round, totalRounds, roundLabels) {
+	return stageLabel(round, totalRounds, roundLabels);
 }

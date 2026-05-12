@@ -680,7 +680,8 @@ function TournamentBracket({
 		else if (!team) rowCls = cx(rowCls, classes.teamRowTBD);
 
 		// 패배팀에 한해 "X강 탈락"/"준우승" 인라인 라벨. 결승 패자(준우승)는 좀 더 강조 색.
-		const statusLabel = isLoser ? getMatchLoserLabel(matchRound, totalRounds) : null;
+		// roundLabels 는 백엔드가 내려준 컬럼 라벨 (예: 9팀이면 R1="예선") — 카드 라벨과 컬럼 라벨이 어긋나지 않게 우선 사용.
+		const statusLabel = isLoser ? getMatchLoserLabel(matchRound, totalRounds, roundLabels) : null;
 		const isRunnerup = isLoser && matchRound != null && matchRound === totalRounds;
 
 		return (

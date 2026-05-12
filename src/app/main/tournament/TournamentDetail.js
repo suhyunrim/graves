@@ -51,7 +51,7 @@ import {
 	getTeamStanding,
 	getStandingBadgeLabel,
 	getStandingSortKey,
-	roundLabelFor
+	getStageLabel
 } from './tournamentUtils';
 import { CATEGORY_LABELS } from '../achievementDashboard/constants';
 import PositionIcon from './PositionIcon';
@@ -1064,7 +1064,7 @@ function TournamentDetail() {
 									const canDeleteTeam = isAdmin && isPreparing;
 
 									const standing = standingMap.get(t.id);
-									const badgeLabel = getStandingBadgeLabel(standing);
+									const badgeLabel = getStandingBadgeLabel(standing, roundLabels);
 									const isSemifinalBadge = standing
 										&& standing.status === 'eliminated'
 										&& standing.totalRounds
@@ -1138,7 +1138,7 @@ function TournamentDetail() {
 												<div className={classes.standingStepRow}>
 													{Array.from({ length: standing.totalRounds }).map((_, i) => {
 														const round = i + 1;
-														const stageLabel = roundLabelFor(round, standing.totalRounds);
+														const stageLbl = getStageLabel(round, standing.totalRounds, roundLabels);
 														const isFinalRound = round === standing.totalRounds;
 														let dotCls = classes.standingStepDot;
 														let mark = null;
@@ -1191,7 +1191,7 @@ function TournamentDetail() {
 																		labelActive && classes.standingStepLabelActive
 																	)}
 																>
-																	{stageLabel}
+																	{stageLbl}
 																</div>
 															</div>
 														);
