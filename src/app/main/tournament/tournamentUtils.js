@@ -386,8 +386,3 @@ export function getMatchLoserLabel(round, totalRounds, roundLabels) {
 	if (round === totalRounds) return '준우승';
 	return `${stageLabel(round, totalRounds, roundLabels)} 탈락`;
 }
-
-// 카드 step indicator 의 라운드별 스테이지 라벨. 외부에서 사용.
-export function getStageLabel(round, totalRounds, roundLabels) {
-	return stageLabel(round, totalRounds, roundLabels);
-}
