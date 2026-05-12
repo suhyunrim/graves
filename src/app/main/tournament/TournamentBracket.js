@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { makeStyles } from 'tss-react/mui';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import EditIcon from '@mui/icons-material/Edit';
@@ -371,6 +372,17 @@ const useStyles = makeStyles()((theme) => ({
 		fontFamily: '"Noto Sans KR", sans-serif',
 		fontSize: '1.1rem',
 		color: 'rgba(255, 255, 255, 0.85)',
+		textDecoration: 'none',
+		padding: '2px 4px',
+		marginLeft: -4,
+		marginRight: -4,
+		borderRadius: 4,
+		cursor: 'pointer',
+		transition: 'background 0.15s ease, color 0.15s ease',
+		'&:hover': {
+			background: 'rgba(0, 212, 255, 0.08)',
+			color: '#fff'
+		},
 		[theme.breakpoints.down('sm')]: {
 			fontSize: '1rem',
 			gap: 5
@@ -585,7 +597,12 @@ function TournamentBracket({
 					const memberShort = m.rating != null ? getTierShortLabel(m.rating) : null;
 					const isCaptain = team.captainPuuid === m.puuid;
 					return (
-						<div key={m.puuid} className={classes.memberLine}>
+						<Link
+							key={m.puuid}
+							to={`/userinfo/${m.puuid}`}
+							className={classes.memberLine}
+							onClick={(e) => e.stopPropagation()}
+						>
 							<PositionIcon
 								position={m.position}
 								className={classes.memberLinePosIcon}
@@ -599,7 +616,7 @@ function TournamentBracket({
 							<span className={classes.memberLineName}>{name}</span>
 							{isCaptain && <StarIcon className={classes.memberLineCaptain} />}
 							{memberShort && <span className={classes.memberLineTier}>{memberShort}</span>}
-						</div>
+						</Link>
 					);
 				})}
 				{r && r.played > 0 && (

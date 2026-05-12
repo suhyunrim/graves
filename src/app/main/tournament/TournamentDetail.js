@@ -28,7 +28,7 @@ import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import StarIcon from '@mui/icons-material/Star';
 import React, { useEffect, useState, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import camilleRiotAuthService from 'app/services/camilleRiotAuthService/camilleRiotAuthService';
 import useDialogStyles from '../components/dialogStyles';
 import reducer from './store/reducers';
@@ -410,10 +410,20 @@ const useStyles = makeStyles()((theme) => ({
 		display: 'flex',
 		alignItems: 'center',
 		gap: 10,
-		padding: '4px 0',
+		padding: '4px 4px',
+		marginLeft: -4,
+		marginRight: -4,
+		borderRadius: 6,
 		fontFamily: '"Noto Sans KR", sans-serif',
 		fontSize: '1.2rem',
 		color: 'rgba(255, 255, 255, 0.85)',
+		textDecoration: 'none',
+		cursor: 'pointer',
+		transition: 'background 0.15s ease, color 0.15s ease',
+		'&:hover': {
+			background: 'rgba(0, 212, 255, 0.08)',
+			color: '#fff'
+		},
 		[theme.breakpoints.down('sm')]: {
 			gap: 8,
 			fontSize: '1.1rem'
@@ -964,6 +974,7 @@ function TournamentDetail() {
 								matches={matches}
 								teams={teams}
 								leaderboard={leaderboard}
+								roundLabels={roundLabels}
 								onMutated={reload}
 							/>
 						</div>
@@ -1081,7 +1092,11 @@ function TournamentDetail() {
 													const memberTierEmblem = getTierEmblemUrl(memberTierName);
 													const isCaptain = t.captainPuuid === m.puuid;
 													return (
-														<div key={m.puuid} className={classes.memberRow}>
+														<Link
+															key={m.puuid}
+															to={`/userinfo/${m.puuid}`}
+															className={classes.memberRow}
+														>
 															<div className={classes.memberPositionCell}>
 																<PositionIcon
 																	position={m.position}
@@ -1108,7 +1123,7 @@ function TournamentDetail() {
 																	<span className={classes.memberTierShort}>{memberTierShort}</span>
 																</span>
 															)}
-														</div>
+														</Link>
 													);
 												})}
 											</div>
@@ -1132,6 +1147,7 @@ function TournamentDetail() {
 								matches={matches}
 								teams={teams}
 								leaderboard={leaderboard}
+								roundLabels={roundLabels}
 								onMutated={reload}
 							/>
 						</div>

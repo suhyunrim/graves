@@ -386,3 +386,8 @@ export function getMatchLoserLabel(round, totalRounds, roundLabels) {
 	if (round === totalRounds) return '준우승';
 	return `${stageLabel(round, totalRounds, roundLabels)} 탈락`;
 }
+
+// 외부 호출용 라운드 라벨 (백엔드 roundLabels 우선, 폴백은 계산).
+export function getStageLabel(round, totalRounds, roundLabels) {
+	return stageLabel(round, totalRounds, roundLabels);
+}
