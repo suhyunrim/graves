@@ -15,6 +15,8 @@ import {
 	formatScheduledAt,
 	getVisibleMatches,
 	displayNameForPuuid,
+	getMatchLoserLabel,
+	getTotalRoundsFromMatches,
 	BRACKET_LINE_COLOR,
 	BRACKET_LINE_COLOR_FINISHED
 } from './tournamentUtils';
@@ -222,6 +224,24 @@ const useStyles = makeStyles()((theme) => ({
 			fontSize: '1.3rem',
 			marginLeft: 8
 		}
+	},
+	teamRowStatusLabel: {
+		fontFamily: '"Rajdhani", "Noto Sans KR", sans-serif',
+		fontSize: '0.9rem',
+		fontWeight: 600,
+		letterSpacing: '0.05em',
+		color: 'rgba(255, 255, 255, 0.35)',
+		marginLeft: 8,
+		flexShrink: 0,
+		whiteSpace: 'nowrap',
+		[theme.breakpoints.down('sm')]: {
+			fontSize: '0.85rem',
+			marginLeft: 6
+		}
+	},
+	teamRowStatusLabelRunnerup: {
+		color: 'rgba(255, 255, 255, 0.75)',
+		fontWeight: 700
 	},
 	championBadge: {
 		fontSize: '1.4rem',
@@ -509,6 +529,7 @@ function TournamentBracket({
 	}, [teams]);
 
 	const grouped = React.useMemo(() => groupMatchesByRound(matches), [matches]);
+	const totalRounds = React.useMemo(() => getTotalRoundsFromMatches(matches), [matches]);
 
 	// 매치 → 다음 라운드 매치(승자 진출처) 라인 좌표 계산.
 	// 한쪽이 BYE 인 R1 매치는 visibleMatches 에 없어 ref 가 없으므로 자동으로 라인이 안 그려진다
@@ -643,7 +664,7 @@ function TournamentBracket({
 		);
 	}
 
-	function renderTeamRow(teamId, score, winnerTeamId, isFinishedMatch, emptyLabel, isMyPick, sideKey) {
+	function renderTeamRow(teamId, score, winnerTeamId, isFinishedMatch, emptyLabel, isMyPick, sideKey, matchRound) {
 		const team = teamId ? teamMap.get(teamId) : null;
 		const isWinner = winnerTeamId && winnerTeamId === teamId;
 		const isLoser = winnerTeamId && winnerTeamId !== teamId && teamId;
@@ -658,6 +679,11 @@ function TournamentBracket({
 		else if (isLoser) rowCls = cx(rowCls, classes.teamRowLoser);
 		else if (!team) rowCls = cx(rowCls, classes.teamRowTBD);
 
+		// 패배팀에 한해 "X강 탈락"/"준우승" 인라인 라벨. 결승 패자(준우승)는 좀 더 강조 색.
+		// roundLabels 는 백엔드가 내려준 컬럼 라벨 (예: 9팀이면 R1="예선") — 카드 라벨과 컬럼 라벨이 어긋나지 않게 우선 사용.
+		const statusLabel = isLoser ? getMatchLoserLabel(matchRound, totalRounds, roundLabels) : null;
+		const isRunnerup = isLoser && matchRound != null && matchRound === totalRounds;
+
 		return (
 			<div className={rowCls}>
 				<span className={classes.teamName}>
@@ -665,6 +691,16 @@ function TournamentBracket({
 					{isChampion && <EmojiEventsIcon className={classes.championBadge} />}
 					{isMyPick && <StarIcon className={classes.pickStar} />}
 				</span>
+				{statusLabel && (
+					<span
+						className={cx(
+							classes.teamRowStatusLabel,
+							isRunnerup && classes.teamRowStatusLabelRunnerup
+						)}
+					>
+						{statusLabel}
+					</span>
+				)}
 				{showScore && <span className={classes.score}>{score}</span>}
 			</div>
 		);
@@ -849,9 +885,9 @@ function TournamentBracket({
 														)}
 													</div>
 												</div>
-												{renderTeamRow(m.team1Id, m.team1Score, m.winnerTeamId, finished, emptyLabel, isMyPickT1, 'blue')}
+												{renderTeamRow(m.team1Id, m.team1Score, m.winnerTeamId, finished, emptyLabel, isMyPickT1, 'blue', m.round)}
 												{verbose && renderTeamFullDetails(team1)}
-												{renderTeamRow(m.team2Id, m.team2Score, m.winnerTeamId, finished, emptyLabel, isMyPickT2, 'red')}
+												{renderTeamRow(m.team2Id, m.team2Score, m.winnerTeamId, finished, emptyLabel, isMyPickT2, 'red', m.round)}
 												{verbose && renderTeamFullDetails(team2)}
 												{verbose && team1 && team2 && (
 													<>
