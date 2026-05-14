@@ -13,7 +13,7 @@ import { STATUS, displayNameForPuuid, isValidMatch, getTotalRoundsFromMatches, g
 import useDiscordLoginGate from '../components/useDiscordLoginGate';
 
 const LEADER_GRID_DESKTOP = '60px 1fr 100px 120px 36px';
-const LEADER_GRID_MOBILE = '40px 1fr 70px 90px 28px';
+const LEADER_GRID_MOBILE = '40px 1fr 36px 86px 22px';
 
 const useStyles = makeStyles()((theme) => ({
 	root: {
@@ -80,7 +80,8 @@ const useStyles = makeStyles()((theme) => ({
 		borderBottom: '1px solid rgba(0, 212, 255, 0.2)',
 		[theme.breakpoints.down('sm')]: {
 			gridTemplateColumns: LEADER_GRID_MOBILE,
-			padding: '10px 12px',
+			gap: 6,
+			padding: '10px 10px',
 			fontSize: '1rem'
 		}
 	},
@@ -97,7 +98,8 @@ const useStyles = makeStyles()((theme) => ({
 		'&:first-of-type': { borderTop: 'none' },
 		[theme.breakpoints.down('sm')]: {
 			gridTemplateColumns: LEADER_GRID_MOBILE,
-			padding: '8px 12px',
+			gap: 6,
+			padding: '8px 10px',
 			fontSize: '1.1rem'
 		}
 	},
