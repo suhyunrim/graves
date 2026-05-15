@@ -354,10 +354,6 @@ export function getStandingBadgeLabel(standing, roundLabels) {
 	if (status === 'champion') return '우승';
 	if (status === 'runnerup') return '준우승';
 	if (status === 'eliminated') {
-		// 결승 직전(준결승) 탈락은 "4강 진출" 로 긍정 프레이밍.
-		if (eliminatedRound === totalRounds - 1) {
-			return `${stageLabel(eliminatedRound, totalRounds, roundLabels)} 진출`;
-		}
 		return `${stageLabel(eliminatedRound, totalRounds, roundLabels)} 탈락`;
 	}
 	if (status === 'alive') {
