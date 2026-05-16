@@ -11,7 +11,7 @@ import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 
 const createCamilleAxios = () => {
-	const instance = axios.create();
+	const instance = axios.create({ timeout: 15000 });
 
 	instance.defaults.baseURL = import.meta.env.VITE_CAMILLE_HOST;
 
@@ -36,7 +36,7 @@ const createCamilleAxios = () => {
 				return Promise.reject(error);
 			}
 
-			const isServerDown = !error.response || (error.response.status >= 500 && error.response.status <= 599);
+			const isServerDown = error.response && error.response.status >= 500 && error.response.status <= 599;
 			if (isServerDown && !error.config.silentError) {
 				history.replace('/maintenance');
 				return Promise.reject(error);
