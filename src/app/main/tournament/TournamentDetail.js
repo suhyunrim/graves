@@ -586,10 +586,6 @@ const useStyles = makeStyles()((theme) => ({
 		border: '1px solid rgba(255, 255, 255, 0.32)',
 		background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(0, 0, 0, 0.3) 100%)'
 	},
-	teamCardSemifinal: {
-		border: '1px solid rgba(0, 212, 255, 0.4)',
-		background: 'linear-gradient(135deg, rgba(0, 212, 255, 0.06) 0%, rgba(0, 0, 0, 0.3) 100%)'
-	},
 	teamCardAlive: {
 		border: '1px solid rgba(0, 212, 255, 0.28)'
 	},
@@ -621,11 +617,6 @@ const useStyles = makeStyles()((theme) => ({
 		background: 'rgba(255, 255, 255, 0.08)',
 		border: '1px solid rgba(255, 255, 255, 0.4)',
 		color: 'rgba(255, 255, 255, 0.9)'
-	},
-	standingBadgeSemi: {
-		background: 'rgba(0, 212, 255, 0.12)',
-		border: '1px solid rgba(0, 212, 255, 0.45)',
-		color: '#00d4ff'
 	},
 	standingBadgeAlive: {
 		background: 'rgba(0, 212, 255, 0.06)',
@@ -1014,15 +1005,10 @@ function TournamentDetail() {
 
 									const standing = standingMap.get(t.id);
 									const badgeLabel = getStandingBadgeLabel(standing, roundLabels);
-									const isSemifinalBadge = standing
-										&& standing.status === 'eliminated'
-										&& standing.totalRounds
-										&& standing.eliminatedRound === standing.totalRounds - 1;
 									const cardVariantCls = (() => {
 										if (!standing) return null;
 										if (standing.status === 'champion') return classes.teamCardChampion;
 										if (standing.status === 'runnerup') return classes.teamCardRunnerup;
-										if (isSemifinalBadge) return classes.teamCardSemifinal;
 										if (standing.status === 'alive') return classes.teamCardAlive;
 										if (standing.status === 'eliminated') return classes.teamCardEliminated;
 										return null;
@@ -1031,7 +1017,6 @@ function TournamentDetail() {
 										if (!standing) return null;
 										if (standing.status === 'champion') return classes.standingBadgeChampion;
 										if (standing.status === 'runnerup') return classes.standingBadgeRunnerup;
-										if (isSemifinalBadge) return classes.standingBadgeSemi;
 										if (standing.status === 'alive') return classes.standingBadgeAlive;
 										if (standing.status === 'eliminated') return classes.standingBadgeEliminated;
 										return null;
