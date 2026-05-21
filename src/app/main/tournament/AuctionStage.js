@@ -249,11 +249,34 @@ const useStyles = makeStyles()((theme) => ({
 		display: 'flex',
 		flexDirection: 'column',
 		alignItems: 'center',
-		padding: '8px 22px',
+		padding: '8px 22px 12px',
 		borderRadius: 12,
 		background: 'rgba(255, 255, 255, 0.04)',
 		border: '1px solid rgba(255, 255, 255, 0.1)',
-		minWidth: 140
+		minWidth: 180
+	},
+	countdownBar: {
+		width: '100%',
+		height: 6,
+		borderRadius: 3,
+		background: 'rgba(255, 255, 255, 0.08)',
+		overflow: 'hidden',
+		marginTop: 8
+	},
+	countdownBarFill: {
+		height: '100%',
+		background: 'linear-gradient(90deg, #00d4ff, #0099cc)',
+		transition: 'width 0.1s linear, background 0.3s ease',
+		borderRadius: 3
+	},
+	countdownBarFillWarn: {
+		background: 'linear-gradient(90deg, #ffb84d, #ff8c00)'
+	},
+	countdownBarFillDanger: {
+		background: 'linear-gradient(90deg, #ff8585, #ff4444)'
+	},
+	countdownBarFillEnd: {
+		background: 'rgba(255, 255, 255, 0.15)'
 	},
 	countdownLabel: {
 		fontFamily: '"Noto Sans KR", sans-serif',
@@ -542,32 +565,46 @@ function getMemberTier(rating) {
 }
 
 // ─── Countdown ────────────────────────────────────────────────
-function Countdown({ deadline, classes }) {
+function Countdown({ deadline, totalSeconds, classes }) {
 	const [now, setNow] = useState(() => Date.now());
 	useEffect(() => {
-		const id = setInterval(() => setNow(Date.now()), 250);
+		// 100ms 주기로 게이지가 부드럽게 흐르도록.
+		const id = setInterval(() => setNow(Date.now()), 100);
 		return () => clearInterval(id);
 	}, []);
 
 	if (!deadline) return null;
 	const target = new Date(deadline).getTime();
 	const remainMs = target - now;
-	if (remainMs <= 0) {
-		return (
-			<div className={classes.countdownBox}>
-				<span className={classes.countdownLabel}>입찰 시간</span>
-				<span className={`${classes.countdownValue} ${classes.countdownEnd}`}>시간 종료</span>
-			</div>
-		);
+	const totalMs = (totalSeconds || 30) * 1000;
+	const pct = Math.max(0, Math.min(100, (remainMs / totalMs) * 100));
+	const expired = remainMs <= 0;
+	const sec = expired ? 0 : Math.ceil(remainMs / 1000);
+	let textCls = '';
+	let fillCls = '';
+	if (expired) {
+		fillCls = classes.countdownBarFillEnd;
+	} else if (sec <= 5) {
+		textCls = classes.countdownDanger;
+		fillCls = classes.countdownBarFillDanger;
+	} else if (sec <= 10) {
+		textCls = classes.countdownWarn;
+		fillCls = classes.countdownBarFillWarn;
 	}
-	const sec = Math.ceil(remainMs / 1000);
-	let cls = '';
-	if (sec <= 5) cls = classes.countdownDanger;
-	else if (sec <= 10) cls = classes.countdownWarn;
 	return (
 		<div className={classes.countdownBox}>
 			<span className={classes.countdownLabel}>입찰 시간</span>
-			<span className={`${classes.countdownValue} ${cls}`}>{sec}s</span>
+			{expired ? (
+				<span className={`${classes.countdownValue} ${classes.countdownEnd}`}>시간 종료</span>
+			) : (
+				<span className={`${classes.countdownValue} ${textCls}`}>{sec}s</span>
+			)}
+			<div className={classes.countdownBar}>
+				<div
+					className={`${classes.countdownBarFill} ${fillCls}`}
+					style={{ width: `${expired ? 0 : pct}%` }}
+				/>
+			</div>
 		</div>
 	);
 }
@@ -1040,7 +1077,7 @@ function AuctionStage({ tournament, teams, isAdmin, onChanged }) {
 				<div className={classes.candidateTop}>
 					<CandidateInfoCard candidate={currentCandidate} classes={classes} />
 					{deadlineMs != null ? (
-						<Countdown deadline={currentDeadline} classes={classes} />
+						<Countdown deadline={currentDeadline} totalSeconds={bidDuration} classes={classes} />
 					) : (
 						<div className={classes.bidDurationHint}>
 							기본 입찰 시간 <b>{bidDuration}초</b>
