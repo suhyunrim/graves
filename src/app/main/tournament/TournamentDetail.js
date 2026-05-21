@@ -62,6 +62,7 @@ import ScrimContent from './ScrimContent';
 import PredictionContent from './PredictionContent';
 import MatchPredictionDialog from './MatchPredictionDialog';
 import TournamentEditDialog from './TournamentEditDialog';
+import AuctionStage from './AuctionStage';
 
 const useStyles = makeStyles()((theme) => ({
 	layoutRoot: {
@@ -939,12 +940,12 @@ function TournamentDetail() {
 				<div className={classes.pageOuter}>
 				<div className={classes.container}>
 					{isAuctionStatus && (
-						<div className={classes.section}>
-							<div className={classes.sectionHeader}>
-								<div className={classes.sectionTitle}>경매 진행 중</div>
-							</div>
-							<div className={classes.emptyText}>경매 화면은 다음 단계에서 표시됩니다.</div>
-						</div>
+						<AuctionStage
+							tournament={detail}
+							teams={teams}
+							isAdmin={isAdmin}
+							onChanged={reload}
+						/>
 					)}
 
 					{(isInProgress || isFinished) && (
