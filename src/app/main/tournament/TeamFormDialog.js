@@ -168,6 +168,7 @@ function TeamFormDialog({ open, onClose, onSuccess, tournamentId, groupId, team,
 	}, [auctionConfig]);
 
 	const [auctionCaptain, setAuctionCaptain] = useState(null);
+	const [auctionBudget, setAuctionBudget] = useState(1000);
 
 	useEffect(() => {
 		// 팀 후보 목록(active-members)은 다이얼로그 열릴 때만 필요.
@@ -257,6 +258,8 @@ function TeamFormDialog({ open, onClose, onSuccess, tournamentId, groupId, team,
 		if (isAuctionCreate) {
 			if (!auctionCaptain) return '팀장을 선택하세요.';
 			if (!auctionCaptainPosition) return '선택한 사람이 후보 풀에 등록되어 있지 않습니다.';
+			const budgetNum = Number(auctionBudget);
+			if (!Number.isFinite(budgetNum) || budgetNum <= 0) return '예산은 1 이상이어야 합니다.';
 			return null;
 		}
 		const filled = members.filter(m => m.puuid);
@@ -283,7 +286,8 @@ function TeamFormDialog({ open, onClose, onSuccess, tournamentId, groupId, team,
 			? {
 				name: name.trim(),
 				captainPuuid: auctionCaptain.puuid,
-				members: [{ puuid: auctionCaptain.puuid, position: auctionCaptainPosition }]
+				members: [{ puuid: auctionCaptain.puuid, position: auctionCaptainPosition }],
+				budget: Number(auctionBudget)
 			}
 			: {
 				name: name.trim(),
@@ -321,10 +325,12 @@ function TeamFormDialog({ open, onClose, onSuccess, tournamentId, groupId, team,
 			onClose={loading ? undefined : onClose}
 			slotProps={{ paper: { className: cx(dialogClasses.paperCyan, classes.paperWidth) } }}
 		>
-			<DialogTitle className={dialogClasses.titleCyan}>{isEdit ? '팀 수정' : '팀 등록'}</DialogTitle>
+			<DialogTitle className={dialogClasses.titleCyan}>
+				{isEdit ? '팀 수정' : (isAuctionCreate ? '팀장 등록' : '팀 등록')}
+			</DialogTitle>
 			<div className={dialogClasses.subtitle}>
 				{isAuctionCreate
-					? '팀장만 먼저 등록합니다 — 나머지 자리는 경매로 채워집니다'
+					? '팀장과 예산을 등록합니다 — 나머지 자리는 경매로 채워집니다'
 					: '탑/정글/미드/원딜/서폿 — 팀장은 ★ 라디오로 지정'}
 			</div>
 			<DialogContent className={dialogClasses.contentPad}>
@@ -392,6 +398,18 @@ function TeamFormDialog({ open, onClose, onSuccess, tournamentId, groupId, team,
 								포지션: {POSITION_LABELS[auctionCaptainPosition]} (후보 풀 등록 기준)
 							</div>
 						)}
+						<div className={classes.sectionLabel}>경매 예산</div>
+						<TextField
+							className={classes.field}
+							label="예산"
+							type="number"
+							value={auctionBudget}
+							onChange={(e) => setAuctionBudget(e.target.value)}
+							variant="outlined"
+							fullWidth
+							inputProps={{ min: 1 }}
+							helperText="이 팀장이 경매에서 사용할 총 예산 (팀장마다 다르게 줄 수 있음)"
+						/>
 					</>
 				) : (
 					<>

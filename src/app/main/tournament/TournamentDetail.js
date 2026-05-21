@@ -1073,7 +1073,7 @@ function TournamentDetail() {
 									startIcon={<AddIcon />}
 									onClick={handleTeamCreate}
 								>
-									팀 등록
+									{isAuctionType ? '팀장 등록' : '팀 등록'}
 								</Button>
 							)}
 						</div>
