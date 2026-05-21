@@ -1,14 +1,31 @@
-import React, { useState } from 'react';
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, MenuItem } from '@mui/material';
+import React, { useState, useEffect, useMemo } from 'react';
+import {
+	Dialog,
+	DialogTitle,
+	DialogContent,
+	DialogActions,
+	Button,
+	TextField,
+	MenuItem,
+	Tabs,
+	Tab,
+	Autocomplete,
+	FormControlLabel,
+	Switch,
+	Chip
+} from '@mui/material';
 import { makeStyles } from 'tss-react/mui';
+import { useDispatch, useSelector } from 'react-redux';
+import { getProfileIconUrl } from 'app/main/challenge/ddragonUtils';
 import useDialogStyles from '../components/dialogStyles';
 import * as Actions from './store/actions';
-import { bestOfLabel } from './tournamentUtils';
+import { bestOfLabel, POSITIONS, POSITION_LABELS } from './tournamentUtils';
+import PositionIcon from './PositionIcon';
 import TrophyTypeGrid from './TrophyTypeGrid';
 
 const useStyles = makeStyles()((theme) => ({
 	paperWidth: {
-		minWidth: 420,
+		minWidth: 560,
 		[theme.breakpoints.down('sm')]: {
 			minWidth: 'auto',
 			margin: 16
@@ -43,6 +60,167 @@ const useStyles = makeStyles()((theme) => ({
 			color: 'rgba(255, 255, 255, 0.5)'
 		}
 	},
+	typeTabs: {
+		marginBottom: 16,
+		'& .MuiTabs-indicator': {
+			backgroundColor: '#00d4ff',
+			height: 3
+		}
+	},
+	typeTab: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.25rem',
+		color: 'rgba(255, 255, 255, 0.5)',
+		textTransform: 'none',
+		'&.Mui-selected': {
+			color: '#00d4ff',
+			fontWeight: 700
+		}
+	},
+	auctionSection: {
+		background: 'rgba(0, 212, 255, 0.04)',
+		border: '1px solid rgba(0, 212, 255, 0.18)',
+		borderRadius: 12,
+		padding: 16,
+		marginBottom: 16
+	},
+	auctionSectionTitle: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.3rem',
+		fontWeight: 600,
+		color: '#00d4ff',
+		marginBottom: 12,
+		letterSpacing: '0.02em'
+	},
+	auctionRow: {
+		display: 'grid',
+		gridTemplateColumns: '1fr 1fr 1fr',
+		gap: 12,
+		marginBottom: 12,
+		[theme.breakpoints.down('sm')]: {
+			gridTemplateColumns: '1fr 1fr',
+			gap: 8
+		}
+	},
+	switchRow: {
+		display: 'flex',
+		alignItems: 'center',
+		marginBottom: 8,
+		'& .MuiFormControlLabel-label': {
+			fontFamily: '"Noto Sans KR", sans-serif',
+			fontSize: '1.25rem',
+			color: 'rgba(255, 255, 255, 0.85)'
+		},
+		'& .MuiSwitch-switchBase.Mui-checked': {
+			color: '#00d4ff'
+		},
+		'& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
+			backgroundColor: '#00d4ff'
+		}
+	},
+	candidatesBlock: {
+		marginTop: 8
+	},
+	positionRow: {
+		display: 'flex',
+		alignItems: 'flex-start',
+		gap: 10,
+		marginBottom: 10,
+		[theme.breakpoints.down('sm')]: {
+			flexDirection: 'column',
+			alignItems: 'stretch',
+			gap: 4
+		}
+	},
+	positionHeader: {
+		display: 'flex',
+		alignItems: 'center',
+		gap: 6,
+		width: 84,
+		flexShrink: 0,
+		paddingTop: 14,
+		[theme.breakpoints.down('sm')]: {
+			width: 'auto',
+			paddingTop: 0
+		}
+	},
+	positionIcon: {
+		width: 22,
+		height: 22,
+		color: '#00d4ff'
+	},
+	positionLabel: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.25rem',
+		color: '#fff',
+		fontWeight: 600
+	},
+	positionCount: {
+		fontFamily: '"Rajdhani", sans-serif',
+		fontSize: '1.1rem',
+		color: 'rgba(0, 212, 255, 0.8)',
+		marginLeft: 4
+	},
+	positionCountMismatch: {
+		color: '#ff8c00'
+	},
+	memberAutocomplete: {
+		flex: 1,
+		minWidth: 0,
+		'& .MuiInputBase-root': {
+			color: '#fff',
+			fontFamily: '"Noto Sans KR", sans-serif',
+			minHeight: 44
+		},
+		'& .MuiOutlinedInput-notchedOutline': {
+			borderColor: 'rgba(255, 255, 255, 0.2)'
+		},
+		'& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline': {
+			borderColor: 'rgba(0, 212, 255, 0.5)'
+		},
+		'& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline': {
+			borderColor: '#00d4ff'
+		}
+	},
+	memberChip: {
+		background: 'rgba(0, 212, 255, 0.18)',
+		color: '#fff',
+		fontFamily: '"Noto Sans KR", sans-serif',
+		'& .MuiChip-deleteIcon': {
+			color: 'rgba(255, 255, 255, 0.7)',
+			'&:hover': { color: '#fff' }
+		}
+	},
+	memberChipDuplicate: {
+		background: 'rgba(255, 107, 107, 0.25)',
+		border: '1px solid rgba(255, 107, 107, 0.6)'
+	},
+	memberOption: {
+		display: 'flex',
+		alignItems: 'center',
+		gap: 10
+	},
+	optionAvatar: {
+		width: 28,
+		height: 28,
+		borderRadius: 6
+	},
+	optionName: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.25rem'
+	},
+	hintText: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.1rem',
+		color: 'rgba(255, 255, 255, 0.5)',
+		marginTop: 8
+	},
+	hintWarn: {
+		color: '#ff8c00'
+	},
+	hintError: {
+		color: '#ff6b6b'
+	},
 	errorText: {
 		fontFamily: '"Noto Sans KR", sans-serif',
 		fontSize: '1.1rem',
@@ -53,9 +231,25 @@ const useStyles = makeStyles()((theme) => ({
 
 const BEST_OF_OPTIONS = [1, 3, 5, 7];
 
+const DEFAULT_AUCTION = {
+	budget: 1000,
+	minBid: 5,
+	teamSize: 5,
+	allowNegative: false
+};
+
+function makeEmptyCandidates() {
+	return POSITIONS.reduce((acc, p) => {
+		acc[p] = [];
+		return acc;
+	}, {});
+}
+
 function TournamentCreateDialog({ open, onClose, onSuccess, groupId }) {
 	const { classes, cx } = useStyles();
 	const { classes: dialogClasses } = useDialogStyles();
+	const dispatch = useDispatch();
+	const activeMembers = useSelector(({ Tournament }) => Tournament.tournament.activeMembers);
 
 	const [form, setForm] = useState({
 		name: '',
@@ -63,8 +257,37 @@ function TournamentCreateDialog({ open, onClose, onSuccess, groupId }) {
 		finalBestOf: 5,
 		trophyType: ''
 	});
+	const [type, setType] = useState('normal');
+	const [auction, setAuction] = useState(DEFAULT_AUCTION);
+	const [candidates, setCandidates] = useState(makeEmptyCandidates);
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState('');
+
+	useEffect(() => {
+		// 경매 탭으로 전환되거나 다이얼로그가 열린 시점에 멤버 목록을 lazy 로드.
+		if (open && type === 'auction' && groupId) {
+			dispatch(Actions.getActiveMembers(groupId));
+		}
+	}, [dispatch, groupId, open, type]);
+
+	const memberMap = useMemo(() => {
+		const m = new Map();
+		(activeMembers || []).forEach(x => m.set(x.puuid, x));
+		return m;
+	}, [activeMembers]);
+
+	const duplicatePuuids = useMemo(() => {
+		const seen = new Map();
+		POSITIONS.forEach(pos => {
+			candidates[pos].forEach(puuid => {
+				seen.set(puuid, (seen.get(puuid) || 0) + 1);
+			});
+		});
+		return new Set([...seen.entries()].filter(([, n]) => n > 1).map(([puuid]) => puuid));
+	}, [candidates]);
+
+	const counts = useMemo(() => POSITIONS.map(p => candidates[p].length), [candidates]);
+	const allSameCount = counts.every(n => n === counts[0]) && counts[0] > 0;
 
 	function handleChange(e) {
 		const { name, value } = e.target;
@@ -72,8 +295,28 @@ function TournamentCreateDialog({ open, onClose, onSuccess, groupId }) {
 		setForm(prev => ({ ...prev, [name]: isNumberField ? Number(value) : value }));
 	}
 
+	function handleAuctionChange(field) {
+		return (e) => {
+			const v = e.target.value;
+			setAuction(prev => ({ ...prev, [field]: Number(v) }));
+		};
+	}
+
+	function handleCandidatesChange(pos) {
+		return (_e, value) => {
+			setCandidates(prev => ({ ...prev, [pos]: value.map(m => m.puuid) }));
+		};
+	}
+
 	function validate() {
 		if (!form.name.trim()) return '토너먼트 이름을 입력하세요.';
+		if (type === 'auction') {
+			if (!auction.budget || auction.budget <= 0) return '팀장 예산은 1 이상이어야 합니다.';
+			if (!auction.minBid || auction.minBid <= 0) return '최소 입찰가는 1 이상이어야 합니다.';
+			if (!auction.teamSize || auction.teamSize < 2) return '팀 사이즈는 2 이상이어야 합니다.';
+			if (!allSameCount) return '각 포지션의 후보 인원이 동일해야 합니다.';
+			if (duplicatePuuids.size > 0) return '한 사람이 여러 포지션에 등록될 수 없습니다.';
+		}
 		return null;
 	}
 
@@ -86,13 +329,28 @@ function TournamentCreateDialog({ open, onClose, onSuccess, groupId }) {
 		setError('');
 		setLoading(true);
 
-		Actions.createTournament({
+		const body = {
 			groupId,
 			name: form.name.trim(),
 			defaultBestOf: form.defaultBestOf,
 			finalBestOf: form.finalBestOf,
-			trophyType: form.trophyType || null
-		})
+			trophyType: form.trophyType || null,
+			type
+		};
+		if (type === 'auction') {
+			body.auctionConfig = {
+				budget: auction.budget,
+				minBid: auction.minBid,
+				teamSize: auction.teamSize,
+				allowNegative: auction.allowNegative,
+				candidates: POSITIONS.reduce((acc, p) => {
+					acc[p] = candidates[p];
+					return acc;
+				}, {})
+			};
+		}
+
+		Actions.createTournament(body)
 			.then(() => {
 				setLoading(false);
 				onSuccess();
@@ -109,6 +367,87 @@ function TournamentCreateDialog({ open, onClose, onSuccess, groupId }) {
 			});
 	}
 
+	function renderPositionRow(pos) {
+		const selectedPuuids = candidates[pos];
+		const selectedMembers = selectedPuuids
+			.map(puuid => memberMap.get(puuid))
+			.filter(Boolean);
+		const count = selectedPuuids.length;
+		const mismatched = allSameCount ? false : count !== counts[0] || counts.some(n => n !== count);
+
+		return (
+			<div className={classes.positionRow} key={pos}>
+				<div className={classes.positionHeader}>
+					<PositionIcon position={pos} className={classes.positionIcon} />
+					<span className={classes.positionLabel}>{POSITION_LABELS[pos]}</span>
+					<span className={cx(classes.positionCount, mismatched && classes.positionCountMismatch)}>
+						{count}명
+					</span>
+				</div>
+				<Autocomplete
+					multiple
+					className={classes.memberAutocomplete}
+					options={activeMembers || []}
+					value={selectedMembers}
+					onChange={handleCandidatesChange(pos)}
+					getOptionLabel={(opt) => (opt && opt.name) || ''}
+					isOptionEqualToValue={(opt, val) => opt.puuid === val.puuid}
+					renderOption={(props, option) => (
+						<li {...props} key={option.puuid}>
+							<div className={classes.memberOption}>
+								{option.profileIconId != null && (
+									<img
+										className={classes.optionAvatar}
+										src={getProfileIconUrl(option.profileIconId)}
+										alt=""
+									/>
+								)}
+								<span className={classes.optionName}>{option.name}</span>
+							</div>
+						</li>
+					)}
+					renderTags={(value, getTagProps) =>
+						value.map((option, index) => {
+							const isDup = duplicatePuuids.has(option.puuid);
+							const { key, ...tagProps } = getTagProps({ index });
+							return (
+								<Chip
+									key={key}
+									{...tagProps}
+									label={option.name}
+									className={cx(classes.memberChip, isDup && classes.memberChipDuplicate)}
+									size="small"
+								/>
+							);
+						})
+					}
+					renderInput={(params) => (
+						<TextField
+							{...params}
+							placeholder={selectedPuuids.length === 0 ? '후보 선택' : ''}
+							variant="outlined"
+							size="small"
+						/>
+					)}
+				/>
+			</div>
+		);
+	}
+
+	const candidateHint = (() => {
+		if (type !== 'auction') return null;
+		if (duplicatePuuids.size > 0) {
+			return { text: '같은 사람이 여러 포지션에 등록되어 있습니다 (빨간 표시).', cls: classes.hintError };
+		}
+		if (counts.some(n => n === 0)) {
+			return { text: '5개 포지션 모두 후보를 등록해야 합니다.', cls: classes.hintWarn };
+		}
+		if (!allSameCount) {
+			return { text: '각 포지션의 후보 인원이 동일해야 합니다.', cls: classes.hintWarn };
+		}
+		return { text: `포지션별 ${counts[0]}명 — 총 ${counts[0] * 5}명 등록됨.`, cls: classes.hintText };
+	})();
+
 	return (
 		<Dialog
 			open={open}
@@ -117,6 +456,15 @@ function TournamentCreateDialog({ open, onClose, onSuccess, groupId }) {
 		>
 			<DialogTitle className={dialogClasses.titleCyan}>토너먼트 생성</DialogTitle>
 			<DialogContent className={dialogClasses.contentPad}>
+				<Tabs
+					className={classes.typeTabs}
+					value={type}
+					onChange={(_e, v) => setType(v)}
+					variant="fullWidth"
+				>
+					<Tab className={classes.typeTab} value="normal" label="일반" />
+					<Tab className={classes.typeTab} value="auction" label="경매 (자낳대)" />
+				</Tabs>
 				<TextField
 					className={classes.field}
 					label="이름"
@@ -128,7 +476,9 @@ function TournamentCreateDialog({ open, onClose, onSuccess, groupId }) {
 					required
 					autoFocus
 					inputProps={{ maxLength: 60 }}
-					helperText="팀 수는 시작 시점에 등록된 팀 수로 자동 결정됩니다."
+					helperText={type === 'auction'
+						? '팀장만 먼저 등록한 뒤 어드민이 경매를 진행해 팀을 채웁니다.'
+						: '팀 수는 시작 시점에 등록된 팀 수로 자동 결정됩니다.'}
 				/>
 				<TextField
 					className={classes.field}
@@ -166,6 +516,65 @@ function TournamentCreateDialog({ open, onClose, onSuccess, groupId }) {
 					onChange={v => setForm(prev => ({ ...prev, trophyType: v }))}
 					helperText="우승 시 표시되는 트로피. 미지정도 가능."
 				/>
+
+				{type === 'auction' && (
+					<div className={classes.auctionSection}>
+						<div className={classes.auctionSectionTitle}>경매 설정</div>
+						<div className={classes.auctionRow}>
+							<TextField
+								className={classes.field}
+								label="팀장 예산"
+								type="number"
+								value={auction.budget}
+								onChange={handleAuctionChange('budget')}
+								variant="outlined"
+								size="small"
+								inputProps={{ min: 1 }}
+							/>
+							<TextField
+								className={classes.field}
+								label="최소 입찰가"
+								type="number"
+								value={auction.minBid}
+								onChange={handleAuctionChange('minBid')}
+								variant="outlined"
+								size="small"
+								inputProps={{ min: 1 }}
+							/>
+							<TextField
+								className={classes.field}
+								label="팀 사이즈"
+								type="number"
+								value={auction.teamSize}
+								onChange={handleAuctionChange('teamSize')}
+								variant="outlined"
+								size="small"
+								inputProps={{ min: 2, max: 5 }}
+								helperText="팀장 포함"
+							/>
+						</div>
+						<div className={classes.switchRow}>
+							<FormControlLabel
+								control={
+									<Switch
+										checked={auction.allowNegative}
+										onChange={(e) => setAuction(prev => ({ ...prev, allowNegative: e.target.checked }))}
+									/>
+								}
+								label="잔여 예산이 마이너스로 가도 허용"
+							/>
+						</div>
+
+						<div className={classes.auctionSectionTitle} style={{ marginTop: 8 }}>후보자 등록</div>
+						<div className={classes.candidatesBlock}>
+							{POSITIONS.map(p => renderPositionRow(p))}
+						</div>
+						{candidateHint && (
+							<div className={cx(classes.hintText, candidateHint.cls)}>{candidateHint.text}</div>
+						)}
+					</div>
+				)}
+
 				{error && <div className={classes.errorText}>{error}</div>}
 			</DialogContent>
 			<DialogActions className={dialogClasses.actionsPad}>
