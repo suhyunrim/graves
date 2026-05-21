@@ -154,7 +154,8 @@ export function parseRankTier(rankTier) {
 	const parts = String(rankTier).trim().split(/\s+/);
 	const tier = (parts[0] || '').toUpperCase();
 	const initial = TIER_INITIAL[tier];
-	if (!initial) return { tier: null, short: String(rankTier), emblem: null };
+	// 알 수 없는 티어 (예: "UNRANKED") 는 null 로 폴백해 호출부에서 "-" 처리.
+	if (!initial) return null;
 	if (isNonStepTier(tier)) {
 		return { tier, short: initial, emblem: getTierEmblemUrl(tier) };
 	}
