@@ -85,6 +85,61 @@ export function startTournament(tournamentId, slotMapping) {
 	);
 }
 
+export function startAuction(tournamentId) {
+	return createCamilleAxios().post(
+		`/api/tournament/${tournamentId}/start-auction`,
+		{},
+		{ silentError: true }
+	);
+}
+
+export function nextAuctionCandidate(tournamentId) {
+	return createCamilleAxios().post(
+		`/api/tournament/${tournamentId}/auction/next-candidate`,
+		{},
+		{ silentError: true }
+	);
+}
+
+export function startAuctionBid(tournamentId) {
+	return createCamilleAxios().post(
+		`/api/tournament/${tournamentId}/auction/start-bid`,
+		{},
+		{ silentError: true }
+	);
+}
+
+export function extendAuctionTime(tournamentId) {
+	return createCamilleAxios().post(
+		`/api/tournament/${tournamentId}/auction/extend-time`,
+		{},
+		{ silentError: true }
+	);
+}
+
+export function placeAuctionBid(tournamentId, teamId, puuid, amount) {
+	return createCamilleAxios().post(
+		`/api/tournament/${tournamentId}/auction/bid`,
+		{ teamId, puuid, amount },
+		{ silentError: true }
+	);
+}
+
+export function undoAuctionBid(tournamentId, teamId, puuid) {
+	return createCamilleAxios().delete(
+		`/api/tournament/${tournamentId}/auction/bid`,
+		{ data: { teamId, puuid }, silentError: true }
+	);
+}
+
+export function completeAuction(tournamentId) {
+	return createCamilleAxios().post(
+		`/api/tournament/${tournamentId}/auction/complete`,
+		{},
+		{ silentError: true }
+	);
+}
+
 export function updateMatchResult(matchId, team1Score, team2Score) {
 	return createCamilleAxios().patch(
 		`/api/tournament/matches/${matchId}`,

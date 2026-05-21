@@ -1,20 +1,32 @@
 export const STATUS = {
 	PREPARING: 'preparing',
+	AUCTION: 'auction',
 	IN_PROGRESS: 'in_progress',
 	FINISHED: 'finished'
 };
 
 export const STATUS_LABELS = {
 	[STATUS.PREPARING]: '준비 중',
+	[STATUS.AUCTION]: '경매 중',
 	[STATUS.IN_PROGRESS]: '진행 중',
 	[STATUS.FINISHED]: '종료'
 };
 
 export const STATUS_COLORS = {
 	[STATUS.PREPARING]: '#ffd700',
+	[STATUS.AUCTION]: '#ff8c00',
 	[STATUS.IN_PROGRESS]: '#00d4ff',
 	[STATUS.FINISHED]: '#868e96'
 };
+
+export const TOURNAMENT_TYPE = {
+	NORMAL: 'normal',
+	AUCTION: 'auction'
+};
+
+export function isAuctionTournament(detail) {
+	return detail && detail.type === TOURNAMENT_TYPE.AUCTION;
+}
 
 // 토너먼트 트로피 종류. 백엔드 enum 그대로 id 사용. 한국어 라벨/아이콘은 프론트 매핑.
 // trophyType 이 null 이면 일반 우승 표시 (트로피 미지정).
@@ -131,6 +143,24 @@ export function getTierShortLabel(rating) {
 export function getTierEmblemUrl(tierName) {
 	if (!tierName) return null;
 	return `/assets/images/ranked-emblems/Emblem_${tierName}.webp`;
+}
+
+// "GOLD II" → { tier: 'GOLD', short: 'G2', emblem: url }
+// MASTER/GRANDMASTER/CHALLENGER 는 division 없이 약자만.
+const RANK_DIV_NUM = { I: '1', II: '2', III: '3', IV: '4' };
+
+export function parseRankTier(rankTier) {
+	if (!rankTier) return null;
+	const parts = String(rankTier).trim().split(/\s+/);
+	const tier = (parts[0] || '').toUpperCase();
+	const initial = TIER_INITIAL[tier];
+	// 알 수 없는 티어 (예: "UNRANKED") 는 null 로 폴백해 호출부에서 "-" 처리.
+	if (!initial) return null;
+	if (isNonStepTier(tier)) {
+		return { tier, short: initial, emblem: getTierEmblemUrl(tier) };
+	}
+	const divNum = parts[1] ? (RANK_DIV_NUM[parts[1].toUpperCase()] || '') : '';
+	return { tier, short: `${initial}${divNum}`, emblem: getTierEmblemUrl(tier) };
 }
 
 // 백엔드 nextPow2 산정 로직과 일치시켜 slotMapping 길이를 맞춘다

@@ -26,10 +26,12 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import StarIcon from '@mui/icons-material/Star';
+import UndoIcon from '@mui/icons-material/Undo';
 import React, { useEffect, useState, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import camilleRiotAuthService from 'app/services/camilleRiotAuthService/camilleRiotAuthService';
+import { getSocket } from 'app/utility/socketClient';
 import useDialogStyles from '../components/dialogStyles';
 import reducer from './store/reducers';
 import * as Actions from './store/actions';
@@ -62,6 +64,7 @@ import ScrimContent from './ScrimContent';
 import PredictionContent from './PredictionContent';
 import MatchPredictionDialog from './MatchPredictionDialog';
 import TournamentEditDialog from './TournamentEditDialog';
+import AuctionStage from './AuctionStage';
 
 const useStyles = makeStyles()((theme) => ({
 	layoutRoot: {
@@ -406,6 +409,94 @@ const useStyles = makeStyles()((theme) => ({
 		flexDirection: 'column',
 		gap: 6
 	},
+	teamBudgetBadge: {
+		fontFamily: '"Rajdhani", sans-serif',
+		fontSize: '1.3rem',
+		fontWeight: 700,
+		color: '#00d4ff',
+		background: 'rgba(0, 212, 255, 0.1)',
+		border: '1px solid rgba(0, 212, 255, 0.3)',
+		borderRadius: 6,
+		padding: '2px 8px'
+	},
+	teamBudgetBadgeLow: {
+		color: '#ff8c00',
+		background: 'rgba(255, 140, 0, 0.1)',
+		borderColor: 'rgba(255, 140, 0, 0.3)'
+	},
+	teamBudgetBadgeNeg: {
+		color: '#ff6b6b',
+		background: 'rgba(255, 107, 107, 0.1)',
+		borderColor: 'rgba(255, 107, 107, 0.3)'
+	},
+	memberBidAmount: {
+		fontFamily: '"Rajdhani", sans-serif',
+		fontSize: '1.1rem',
+		color: '#ffd700',
+		fontWeight: 700
+	},
+	memberUndoBtn: {
+		color: 'rgba(255, 255, 255, 0.5)',
+		padding: 4,
+		'&:hover': {
+			color: '#ff6b6b',
+			background: 'rgba(255, 107, 107, 0.1)'
+		}
+	},
+	teamBidArea: {
+		marginTop: 10,
+		paddingTop: 10,
+		borderTop: '1px dashed rgba(255, 255, 255, 0.1)',
+		display: 'flex',
+		alignItems: 'center',
+		gap: 6
+	},
+	teamBidInput: {
+		flex: 1,
+		'& .MuiInputBase-root': {
+			color: '#fff',
+			fontSize: '1.15rem',
+			fontFamily: '"Noto Sans KR", sans-serif'
+		},
+		'& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255, 255, 255, 0.2)' },
+		'& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline': {
+			borderColor: 'rgba(0, 212, 255, 0.5)'
+		},
+		'& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline': {
+			borderColor: '#00d4ff'
+		}
+	},
+	teamBidBtn: {
+		background: 'linear-gradient(135deg, #00d4ff 0%, #0099cc 100%)',
+		color: '#000',
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontWeight: 700,
+		fontSize: '1.05rem',
+		padding: '4px 14px',
+		minWidth: 0,
+		borderRadius: 8,
+		textTransform: 'none',
+		'&:hover': {
+			background: 'linear-gradient(135deg, #00bce0 0%, #0088bb 100%)'
+		},
+		'&.Mui-disabled': {
+			background: 'rgba(255, 255, 255, 0.08)',
+			color: 'rgba(255, 255, 255, 0.3)'
+		}
+	},
+	teamBidLocked: {
+		marginTop: 10,
+		paddingTop: 10,
+		borderTop: '1px dashed rgba(255, 255, 255, 0.1)',
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.05rem',
+		color: 'rgba(255, 255, 255, 0.4)',
+		textAlign: 'center'
+	},
+	teamCardActive: {
+		border: '1px solid rgba(0, 212, 255, 0.5) !important',
+		boxShadow: '0 0 0 1px rgba(0, 212, 255, 0.2)'
+	},
 	memberRow: {
 		display: 'flex',
 		alignItems: 'center',
@@ -717,6 +808,45 @@ function TournamentDetail() {
 		};
 	}, [dispatch, tournamentId]);
 
+	// 경매 실시간 동기화: 룸 join 후 status/bid/undo 이벤트가 오면 detail 재로드.
+	useEffect(() => {
+		if (!tournamentId) return undefined;
+		const socket = getSocket();
+		const tid = Number(tournamentId);
+		socket.emit('tournament:join', tid);
+
+		const refresh = () => dispatch(Actions.getTournamentDetail(tournamentId));
+
+		const handleStatus = (payload) => {
+			if (payload && payload.tournamentId != null && Number(payload.tournamentId) !== tid) return;
+			refresh();
+		};
+		const handleBid = (payload) => {
+			if (payload && payload.tournamentId != null && Number(payload.tournamentId) !== tid) return;
+			refresh();
+		};
+		const handleUndo = (payload) => {
+			if (payload && payload.tournamentId != null && Number(payload.tournamentId) !== tid) return;
+			refresh();
+		};
+		socket.on('auction:status', handleStatus);
+		socket.on('auction:bid', handleBid);
+		socket.on('auction:undo', handleUndo);
+		socket.on('auction:candidate', handleStatus);
+		socket.on('auction:bid-start', handleStatus);
+		socket.on('auction:bid-extend', handleStatus);
+
+		return () => {
+			socket.emit('tournament:leave', tid);
+			socket.off('auction:status', handleStatus);
+			socket.off('auction:bid', handleBid);
+			socket.off('auction:undo', handleUndo);
+			socket.off('auction:candidate', handleStatus);
+			socket.off('auction:bid-start', handleStatus);
+			socket.off('auction:bid-extend', handleStatus);
+		};
+	}, [dispatch, tournamentId]);
+
 	function handleTeamCreate() {
 		setEditingTeam(null);
 		setTeamFormOpen(true);
@@ -761,6 +891,31 @@ function TournamentDetail() {
 		reload();
 	}
 
+	function handleStartAuction() {
+		Actions.startAuction(tournamentId)
+			.then(() => {
+				toast.success('경매를 시작했습니다.');
+				reload();
+			})
+			.catch(err => {
+				const msg = err.response && err.response.data ? err.response.data.result : '경매 시작 실패';
+				toast.error(msg);
+			});
+	}
+
+	// 입찰 취소 (status === auction 일 때만 사용). 낙찰은 AuctionStage에서.
+	function handleUndoBid(teamId, puuid) {
+		Actions.undoAuctionBid(tournamentId, teamId, puuid)
+			.then(() => {
+				toast.success('입찰을 취소했습니다.');
+				reload();
+			})
+			.catch(err => {
+				const msg = err.response && err.response.data ? err.response.data.result : '취소 실패';
+				toast.error(msg);
+			});
+	}
+
 	function handleMatchResultSuccess() {
 		setMatchEditTarget(null);
 		toast.success('매치 결과가 저장되었습니다.');
@@ -800,10 +955,19 @@ function TournamentDetail() {
 
 	const statusColor = STATUS_COLORS[detail.status] || '#868e96';
 	const isPreparing = detail.status === STATUS.PREPARING;
+	const isAuctionStatus = detail.status === STATUS.AUCTION;
 	const isInProgress = detail.status === STATUS.IN_PROGRESS;
 	const isFinished = detail.status === STATUS.FINISHED;
+	const isAuctionType = detail.type === 'auction';
+	const auctionConfig = detail.auctionConfig;
+	const auctionMinBid = (auctionConfig && auctionConfig.minBid) || 1;
 	const teamCount = teams.length;
-	const canStart = isAdmin && isPreparing && teamCount >= 2;
+	// auction 완료 후엔 preparing 상태로 돌아오지만, 이미 멤버가 차 있어서 일반 대진 짜기 흐름.
+	const auctionMembersComplete = isAuctionType && teams.length > 0
+		&& teams.every(t => (t.members || []).length >= 5);
+	const canStart = isAdmin && isPreparing && teamCount >= 2
+		&& (!isAuctionType || auctionMembersComplete);
+	const canStartAuction = isAdmin && isPreparing && isAuctionType && !auctionMembersComplete && teamCount >= 2;
 	// preparation 단계에선 detail.bracketSize/teamCount 가 null. 시작 시점에 등록된 팀 수로 산출한다.
 	const computedBracketSize = bracketSizeForTeamCount(teamCount);
 
@@ -866,7 +1030,24 @@ function TournamentDetail() {
 					)}
 					{isAdmin && (
 						<div className={classes.headerActions}>
-							{isPreparing && (
+							{isPreparing && isAuctionType && !auctionMembersComplete && (
+								<Tooltip
+									title={canStartAuction ? '' : '팀장이 2명 이상 등록되어야 경매를 시작할 수 있습니다.'}
+									arrow
+								>
+									<span>
+										<Button
+											className={classes.primaryBtn}
+											startIcon={<PlayArrowIcon />}
+											onClick={handleStartAuction}
+											disabled={!canStartAuction}
+										>
+											경매 시작
+										</Button>
+									</span>
+								</Tooltip>
+							)}
+							{isPreparing && (!isAuctionType || auctionMembersComplete) && (
 								<Tooltip title={canStart ? '' : '팀이 2개 이상 등록되어야 시작할 수 있습니다.'} arrow>
 									<span>
 										<Button
@@ -901,6 +1082,15 @@ function TournamentDetail() {
 			content={
 				<div className={classes.pageOuter}>
 				<div className={classes.container}>
+					{isAuctionStatus && (
+						<AuctionStage
+							tournament={detail}
+							teams={teams}
+							isAdmin={isAdmin}
+							onChanged={reload}
+						/>
+					)}
+
 					{(isInProgress || isFinished) && (
 						<Tabs
 							value={activeTab}
@@ -971,7 +1161,7 @@ function TournamentDetail() {
 						</div>
 					)}
 
-					{(isPreparing || activeTab === 0) && (
+					{(isPreparing || isAuctionStatus || ((isInProgress || isFinished) && activeTab === 0)) && (
 					<div className={classes.section}>
 						<div className={classes.sectionHeader}>
 							<div className={classes.sectionTitle}>
@@ -984,7 +1174,7 @@ function TournamentDetail() {
 									startIcon={<AddIcon />}
 									onClick={handleTeamCreate}
 								>
-									팀 등록
+									{isAuctionType ? '팀장 등록' : '팀 등록'}
 								</Button>
 							)}
 						</div>
@@ -1032,6 +1222,17 @@ function TournamentDetail() {
 															<EmojiEventsIcon className={classes.standingBadgeIcon} />
 														)}
 														{badgeLabel}
+													</span>
+												)}
+												{isAuctionType && t.remainingBudget != null && (
+													<span
+														className={cx(
+															classes.teamBudgetBadge,
+															t.remainingBudget < 0 && classes.teamBudgetBadgeNeg,
+															t.remainingBudget >= 0 && t.remainingBudget < auctionMinBid * 2 && classes.teamBudgetBadgeLow
+														)}
+													>
+														{t.remainingBudget}
 													</span>
 												)}
 												{(canEditTeam || canDeleteTeam) && (
@@ -1108,6 +1309,24 @@ function TournamentDetail() {
 																	<span className={classes.memberTierShort}>{memberTierShort}</span>
 																</span>
 															)}
+															{m.bidAmount != null && (
+																<span className={classes.memberBidAmount}>{m.bidAmount}</span>
+															)}
+															{isAdmin && isAuctionStatus && !isCaptain && (
+																<Tooltip title="입찰 취소" arrow>
+																	<IconButton
+																		className={classes.memberUndoBtn}
+																		size="small"
+																		onClick={(e) => {
+																			e.preventDefault();
+																			e.stopPropagation();
+																			handleUndoBid(t.id, m.puuid);
+																		}}
+																	>
+																		<UndoIcon fontSize="small" />
+																	</IconButton>
+																</Tooltip>
+															)}
 														</Link>
 													);
 												})}
@@ -1150,6 +1369,7 @@ function TournamentDetail() {
 							groupId={detail.groupId}
 							team={editingTeam}
 							allTeams={teams}
+							tournament={detail}
 						/>
 					)}
 					{matchPredictionTarget && (

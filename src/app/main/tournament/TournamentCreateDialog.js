@@ -92,16 +92,6 @@ const useStyles = makeStyles()((theme) => ({
 		marginBottom: 12,
 		letterSpacing: '0.02em'
 	},
-	auctionRow: {
-		display: 'grid',
-		gridTemplateColumns: '1fr 1fr 1fr',
-		gap: 12,
-		marginBottom: 12,
-		[theme.breakpoints.down('sm')]: {
-			gridTemplateColumns: '1fr 1fr',
-			gap: 8
-		}
-	},
 	switchRow: {
 		display: 'flex',
 		alignItems: 'center',
@@ -191,10 +181,6 @@ const useStyles = makeStyles()((theme) => ({
 			'&:hover': { color: '#fff' }
 		}
 	},
-	memberChipDuplicate: {
-		background: 'rgba(255, 107, 107, 0.25)',
-		border: '1px solid rgba(255, 107, 107, 0.6)'
-	},
 	memberOption: {
 		display: 'flex',
 		alignItems: 'center',
@@ -218,9 +204,6 @@ const useStyles = makeStyles()((theme) => ({
 	hintWarn: {
 		color: '#ff8c00'
 	},
-	hintError: {
-		color: '#ff6b6b'
-	},
 	errorText: {
 		fontFamily: '"Noto Sans KR", sans-serif',
 		fontSize: '1.1rem',
@@ -232,9 +215,8 @@ const useStyles = makeStyles()((theme) => ({
 const BEST_OF_OPTIONS = [1, 3, 5, 7];
 
 const DEFAULT_AUCTION = {
-	budget: 1000,
 	minBid: 5,
-	teamSize: 5,
+	bidDurationSeconds: 30,
 	allowNegative: false
 };
 
@@ -276,14 +258,13 @@ function TournamentCreateDialog({ open, onClose, onSuccess, groupId }) {
 		return m;
 	}, [activeMembers]);
 
-	const duplicatePuuids = useMemo(() => {
-		const seen = new Map();
+	// 이미 어떤 포지션에 등록된 puuid는 다른 포지션 옵션에서 제외.
+	const assignedPuuids = useMemo(() => {
+		const s = new Set();
 		POSITIONS.forEach(pos => {
-			candidates[pos].forEach(puuid => {
-				seen.set(puuid, (seen.get(puuid) || 0) + 1);
-			});
+			candidates[pos].forEach(p => s.add(p));
 		});
-		return new Set([...seen.entries()].filter(([, n]) => n > 1).map(([puuid]) => puuid));
+		return s;
 	}, [candidates]);
 
 	const counts = useMemo(() => POSITIONS.map(p => candidates[p].length), [candidates]);
@@ -311,11 +292,11 @@ function TournamentCreateDialog({ open, onClose, onSuccess, groupId }) {
 	function validate() {
 		if (!form.name.trim()) return '토너먼트 이름을 입력하세요.';
 		if (type === 'auction') {
-			if (!auction.budget || auction.budget <= 0) return '팀장 예산은 1 이상이어야 합니다.';
 			if (!auction.minBid || auction.minBid <= 0) return '최소 입찰가는 1 이상이어야 합니다.';
-			if (!auction.teamSize || auction.teamSize < 2) return '팀 사이즈는 2 이상이어야 합니다.';
+			if (!auction.bidDurationSeconds || auction.bidDurationSeconds <= 0) {
+				return '기본 입찰 제한 시간은 1초 이상이어야 합니다.';
+			}
 			if (!allSameCount) return '각 포지션의 후보 인원이 동일해야 합니다.';
-			if (duplicatePuuids.size > 0) return '한 사람이 여러 포지션에 등록될 수 없습니다.';
 		}
 		return null;
 	}
@@ -339,9 +320,8 @@ function TournamentCreateDialog({ open, onClose, onSuccess, groupId }) {
 		};
 		if (type === 'auction') {
 			body.auctionConfig = {
-				budget: auction.budget,
 				minBid: auction.minBid,
-				teamSize: auction.teamSize,
+				bidDurationSeconds: auction.bidDurationSeconds,
 				allowNegative: auction.allowNegative,
 				candidates: POSITIONS.reduce((acc, p) => {
 					acc[p] = candidates[p];
@@ -369,9 +349,14 @@ function TournamentCreateDialog({ open, onClose, onSuccess, groupId }) {
 
 	function renderPositionRow(pos) {
 		const selectedPuuids = candidates[pos];
+		const selectedSet = new Set(selectedPuuids);
 		const selectedMembers = selectedPuuids
 			.map(puuid => memberMap.get(puuid))
 			.filter(Boolean);
+		// 다른 포지션에 이미 등록된 사람은 후보에서 제외 (한 사람이 여러 포지션 등록 불가).
+		const options = (activeMembers || []).filter(
+			m => selectedSet.has(m.puuid) || !assignedPuuids.has(m.puuid)
+		);
 		const count = selectedPuuids.length;
 		const mismatched = allSameCount ? false : count !== counts[0] || counts.some(n => n !== count);
 
@@ -387,7 +372,7 @@ function TournamentCreateDialog({ open, onClose, onSuccess, groupId }) {
 				<Autocomplete
 					multiple
 					className={classes.memberAutocomplete}
-					options={activeMembers || []}
+					options={options}
 					value={selectedMembers}
 					onChange={handleCandidatesChange(pos)}
 					getOptionLabel={(opt) => (opt && opt.name) || ''}
@@ -408,14 +393,13 @@ function TournamentCreateDialog({ open, onClose, onSuccess, groupId }) {
 					)}
 					renderTags={(value, getTagProps) =>
 						value.map((option, index) => {
-							const isDup = duplicatePuuids.has(option.puuid);
 							const { key, ...tagProps } = getTagProps({ index });
 							return (
 								<Chip
 									key={key}
 									{...tagProps}
 									label={option.name}
-									className={cx(classes.memberChip, isDup && classes.memberChipDuplicate)}
+									className={classes.memberChip}
 									size="small"
 								/>
 							);
@@ -436,9 +420,6 @@ function TournamentCreateDialog({ open, onClose, onSuccess, groupId }) {
 
 	const candidateHint = (() => {
 		if (type !== 'auction') return null;
-		if (duplicatePuuids.size > 0) {
-			return { text: '같은 사람이 여러 포지션에 등록되어 있습니다 (빨간 표시).', cls: classes.hintError };
-		}
 		if (counts.some(n => n === 0)) {
 			return { text: '5개 포지션 모두 후보를 등록해야 합니다.', cls: classes.hintWarn };
 		}
@@ -520,39 +501,28 @@ function TournamentCreateDialog({ open, onClose, onSuccess, groupId }) {
 				{type === 'auction' && (
 					<div className={classes.auctionSection}>
 						<div className={classes.auctionSectionTitle}>경매 설정</div>
-						<div className={classes.auctionRow}>
-							<TextField
-								className={classes.field}
-								label="팀장 예산"
-								type="number"
-								value={auction.budget}
-								onChange={handleAuctionChange('budget')}
-								variant="outlined"
-								size="small"
-								inputProps={{ min: 1 }}
-							/>
-							<TextField
-								className={classes.field}
-								label="최소 입찰가"
-								type="number"
-								value={auction.minBid}
-								onChange={handleAuctionChange('minBid')}
-								variant="outlined"
-								size="small"
-								inputProps={{ min: 1 }}
-							/>
-							<TextField
-								className={classes.field}
-								label="팀 사이즈"
-								type="number"
-								value={auction.teamSize}
-								onChange={handleAuctionChange('teamSize')}
-								variant="outlined"
-								size="small"
-								inputProps={{ min: 2, max: 5 }}
-								helperText="팀장 포함"
-							/>
-						</div>
+						<TextField
+							className={classes.field}
+							label="최소 입찰가"
+							type="number"
+							value={auction.minBid}
+							onChange={handleAuctionChange('minBid')}
+							variant="outlined"
+							size="small"
+							inputProps={{ min: 1 }}
+							helperText="팀당 5명 고정. 팀장 예산은 팀장 등록 시 개별로 지정합니다."
+						/>
+						<TextField
+							className={classes.field}
+							label="기본 입찰 제한 시간 (초)"
+							type="number"
+							value={auction.bidDurationSeconds}
+							onChange={handleAuctionChange('bidDurationSeconds')}
+							variant="outlined"
+							size="small"
+							inputProps={{ min: 1 }}
+							helperText="경매 중 모든 입찰의 제한 시간이 됩니다. 토너먼트 시작 후에는 변경할 수 없습니다."
+						/>
 						<div className={classes.switchRow}>
 							<FormControlLabel
 								control={
