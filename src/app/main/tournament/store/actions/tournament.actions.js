@@ -93,6 +93,30 @@ export function startAuction(tournamentId) {
 	);
 }
 
+export function nextAuctionCandidate(tournamentId) {
+	return createCamilleAxios().post(
+		`/api/tournament/${tournamentId}/auction/next-candidate`,
+		{},
+		{ silentError: true }
+	);
+}
+
+export function startAuctionBid(tournamentId, durationSeconds) {
+	return createCamilleAxios().post(
+		`/api/tournament/${tournamentId}/auction/start-bid`,
+		{ durationSeconds },
+		{ silentError: true }
+	);
+}
+
+export function extendAuctionTime(tournamentId, durationSeconds) {
+	return createCamilleAxios().post(
+		`/api/tournament/${tournamentId}/auction/extend-time`,
+		{ durationSeconds },
+		{ silentError: true }
+	);
+}
+
 export function placeAuctionBid(tournamentId, teamId, puuid, amount) {
 	return createCamilleAxios().post(
 		`/api/tournament/${tournamentId}/auction/bid`,

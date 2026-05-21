@@ -9,6 +9,7 @@ const initialState = {
 	scrims: [],
 	roundLabels: {},
 	leaderboard: [],
+	currentCandidate: null,
 	loadingDetail: false,
 	activeMembers: []
 };
@@ -42,6 +43,7 @@ const tournamentReducer = (state = initialState, action) => {
 				scrims: action.payload.scrims || [],
 				roundLabels: action.payload.roundLabels || {},
 				leaderboard,
+				currentCandidate: action.payload.currentCandidate || null,
 				loadingDetail: false
 			};
 		}
@@ -54,6 +56,7 @@ const tournamentReducer = (state = initialState, action) => {
 				scrims: [],
 				roundLabels: {},
 				leaderboard: [],
+				currentCandidate: null,
 				activeMembers: []
 			};
 		}

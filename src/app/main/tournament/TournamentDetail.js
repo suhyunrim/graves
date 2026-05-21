@@ -750,12 +750,18 @@ function TournamentDetail() {
 		socket.on('auction:status', handleStatus);
 		socket.on('auction:bid', handleBid);
 		socket.on('auction:undo', handleUndo);
+		socket.on('auction:candidate', handleStatus);
+		socket.on('auction:bid-start', handleStatus);
+		socket.on('auction:bid-extend', handleStatus);
 
 		return () => {
 			socket.emit('tournament:leave', tid);
 			socket.off('auction:status', handleStatus);
 			socket.off('auction:bid', handleBid);
 			socket.off('auction:undo', handleUndo);
+			socket.off('auction:candidate', handleStatus);
+			socket.off('auction:bid-start', handleStatus);
+			socket.off('auction:bid-extend', handleStatus);
 		};
 	}, [dispatch, tournamentId]);
 
