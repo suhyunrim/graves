@@ -29,9 +29,11 @@ import {
 	getTierName,
 	getTierLabel,
 	getTierShortLabel,
-	getTierEmblemUrl
+	getTierEmblemUrl,
+	parseRankTier
 } from './tournamentUtils';
 import PositionIcon from './PositionIcon';
+import { CATEGORY_LABELS } from '../achievementDashboard/constants';
 
 const blink = keyframes({
 	'0%, 100%': { opacity: 1 },
@@ -64,14 +66,36 @@ const useStyles = makeStyles()((theme) => ({
 		fontSize: '1.4rem',
 		color: 'rgba(255, 255, 255, 0.5)'
 	},
-	candidateLayout: {
+	candidateTop: {
 		display: 'grid',
-		gridTemplateColumns: 'minmax(0, 1.4fr) minmax(0, 1fr)',
+		gridTemplateColumns: 'minmax(0, 1fr) auto',
 		gap: 18,
 		alignItems: 'center',
 		[theme.breakpoints.down('md')]: {
-			gridTemplateColumns: '1fr'
+			gridTemplateColumns: '1fr',
+			gap: 12
 		}
+	},
+	topActionBar: {
+		display: 'flex',
+		gap: 10,
+		flexWrap: 'wrap',
+		alignItems: 'center',
+		padding: '10px 14px',
+		background: 'rgba(0, 212, 255, 0.06)',
+		border: '1px solid rgba(0, 212, 255, 0.2)',
+		borderRadius: 12,
+		marginBottom: 14
+	},
+	topActionLabel: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.15rem',
+		color: 'rgba(0, 212, 255, 0.8)',
+		fontWeight: 600,
+		marginRight: 4
+	},
+	topActionSpacer: {
+		flex: 1
 	},
 	candidateMain: {
 		display: 'flex',
@@ -121,63 +145,89 @@ const useStyles = makeStyles()((theme) => ({
 	},
 	statRow: {
 		display: 'flex',
-		gap: 16,
+		gap: 18,
 		marginTop: 8,
 		flexWrap: 'wrap',
 		fontFamily: '"Noto Sans KR", sans-serif',
 		fontSize: '1.2rem',
 		color: 'rgba(255, 255, 255, 0.8)'
 	},
+	statBlock: {
+		display: 'inline-flex',
+		alignItems: 'center',
+		gap: 6
+	},
 	statLabel: {
-		color: 'rgba(255, 255, 255, 0.45)',
-		marginRight: 4
+		color: 'rgba(255, 255, 255, 0.45)'
 	},
 	statValue: {
 		fontWeight: 600,
 		color: '#fff'
 	},
+	statTierEmblem: {
+		width: 20,
+		height: 20
+	},
+	statTierShort: {
+		fontFamily: '"Rajdhani", sans-serif',
+		fontSize: '1.25rem',
+		fontWeight: 700,
+		color: '#fff'
+	},
+	statWL: {
+		color: 'rgba(255, 255, 255, 0.55)',
+		fontSize: '1.1rem'
+	},
 	statSep: {
 		color: 'rgba(255, 255, 255, 0.2)'
 	},
-	achievementRow: {
-		marginTop: 8,
+	candidateExtras: {
+		marginTop: 14,
+		paddingTop: 12,
+		borderTop: '1px solid rgba(255, 255, 255, 0.08)',
 		display: 'flex',
+		flexWrap: 'wrap',
+		alignItems: 'center',
+		gap: 18,
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.1rem',
+		color: 'rgba(255, 255, 255, 0.65)'
+	},
+	achievementGroup: {
+		display: 'inline-flex',
 		alignItems: 'center',
 		gap: 6,
-		fontFamily: '"Noto Sans KR", sans-serif',
-		fontSize: '1.1rem',
-		color: 'rgba(255, 255, 255, 0.7)',
 		flexWrap: 'wrap'
 	},
-	achievementChip: {
-		background: 'rgba(255, 215, 0, 0.12)',
-		border: '1px solid rgba(255, 215, 0, 0.3)',
-		color: '#ffd700',
-		padding: '2px 8px',
-		borderRadius: 6,
+	achievementLabel: {
+		color: 'rgba(255, 255, 255, 0.4)',
 		fontSize: '1.05rem'
 	},
-	honorRow: {
-		marginTop: 6,
-		display: 'flex',
+	achievementIcons: {
+		display: 'inline-flex',
 		alignItems: 'center',
-		gap: 8,
-		fontFamily: '"Noto Sans KR", sans-serif',
-		fontSize: '1.1rem',
-		color: 'rgba(255, 255, 255, 0.6)'
+		gap: 4
+	},
+	achievementIcon: {
+		display: 'inline-flex',
+		alignItems: 'center',
+		justifyContent: 'center',
+		width: 24,
+		height: 24,
+		borderRadius: 6,
+		background: 'rgba(255, 215, 0, 0.12)',
+		border: '1px solid rgba(255, 215, 0, 0.3)',
+		fontSize: '1.05rem',
+		lineHeight: 1
+	},
+	honorGroup: {
+		display: 'inline-flex',
+		alignItems: 'center',
+		gap: 6
 	},
 	honorTitle: {
 		color: '#ffd700',
 		fontWeight: 600
-	},
-	auctionSide: {
-		display: 'flex',
-		flexDirection: 'column',
-		alignItems: 'center',
-		gap: 10,
-		[theme.breakpoints.down('md')]: {
-			alignItems: 'stretch'
-		}
 	},
 	countdownBox: {
 		display: 'flex',
@@ -211,12 +261,6 @@ const useStyles = makeStyles()((theme) => ({
 	countdownEnd: {
 		color: 'rgba(255, 255, 255, 0.4)',
 		fontSize: '1.4rem'
-	},
-	adminActions: {
-		display: 'flex',
-		gap: 8,
-		flexWrap: 'wrap',
-		justifyContent: 'center'
 	},
 	adminBtn: {
 		background: 'linear-gradient(135deg, #00d4ff 0%, #0099cc 100%)',
@@ -371,9 +415,17 @@ const useStyles = makeStyles()((theme) => ({
 		whiteSpace: 'nowrap'
 	},
 	smallTier: {
+		display: 'inline-flex',
+		alignItems: 'center',
+		gap: 4,
 		fontFamily: '"Rajdhani", sans-serif',
-		fontSize: '0.95rem',
-		color: 'rgba(255, 255, 255, 0.5)'
+		fontSize: '1.05rem',
+		color: 'rgba(255, 255, 255, 0.75)',
+		fontWeight: 600
+	},
+	smallTierEmblem: {
+		width: 16,
+		height: 16
 	},
 	emptyText: {
 		fontFamily: '"Noto Sans KR", sans-serif',
@@ -526,23 +578,49 @@ function DurationDialog({ open, title, hint, confirmLabel, onClose, onConfirm, c
 	);
 }
 
+// ─── 티어 표시 (솔랭 / 내전 공용) ───────────────────────────
+function TierStat({ classes, label, emblem, short, wl }) {
+	if (!short && !wl) return null;
+	return (
+		<span className={classes.statBlock}>
+			<span className={classes.statLabel}>{label}</span>
+			{emblem && <img src={emblem} alt="" className={classes.statTierEmblem} />}
+			{short && <span className={classes.statTierShort}>{short}</span>}
+			{wl && <span className={classes.statWL}>({wl})</span>}
+		</span>
+	);
+}
+
 // ─── CandidateInfoCard ────────────────────────────────────────
 function CandidateInfoCard({ candidate, classes }) {
 	if (!candidate) return null;
 	const positionLabel = POSITION_LABELS[candidate.position] || candidate.position;
-	const rankParts = [];
-	if (candidate.rankTier) rankParts.push(candidate.rankTier);
+
+	const rank = parseRankTier(candidate.rankTier);
 	const rankWL = (candidate.rankWin != null || candidate.rankLose != null)
 		? `${candidate.rankWin || 0}승 ${candidate.rankLose || 0}패`
 		: null;
-	const internalParts = [];
-	if (candidate.internalRating != null) internalParts.push(`${candidate.internalRating}`);
+
+	const internalTierName = candidate.internalRating != null ? getTierName(candidate.internalRating) : null;
+	const internalEmblem = internalTierName ? getTierEmblemUrl(internalTierName) : null;
+	const internalShort = candidate.internalRating != null ? getTierShortLabel(candidate.internalRating) : null;
+	const internalLabel = candidate.internalRating != null ? getTierLabel(candidate.internalRating) : null;
 	const internalWL = (candidate.win != null || candidate.lose != null)
 		? `${candidate.win || 0}승 ${candidate.lose || 0}패`
 		: null;
 
 	const achievements = candidate.achievements || [];
 	const honor = candidate.honor;
+
+	// honor.title — 객체 또는 문자열 폴리포림.
+	let honorTitleText = null;
+	let honorTitleEmoji = null;
+	if (honor && honor.title && typeof honor.title === 'object') {
+		honorTitleText = honor.title.title || null;
+		honorTitleEmoji = honor.title.emoji || null;
+	} else if (honor && typeof honor.title === 'string') {
+		honorTitleText = honor.title;
+	}
 
 	return (
 		<div className={classes.candidateMain}>
@@ -569,78 +647,68 @@ function CandidateInfoCard({ candidate, classes }) {
 					</span>
 				</div>
 				<div className={classes.statRow}>
-					{(rankParts.length > 0 || rankWL) && (
-						<span>
-							<span className={classes.statLabel}>솔랭</span>
-							<span className={classes.statValue}>{rankParts.join(' ') || '-'}</span>
-							{rankWL && (
-								<>
-									{' '}<span className={classes.statSep}>·</span>{' '}
-									<span>{rankWL}</span>
-								</>
-							)}
-						</span>
-					)}
-					{(internalParts.length > 0 || internalWL) && (
-						<span>
-							<span className={classes.statLabel}>내전</span>
-							<span className={classes.statValue}>{internalParts.join(' ') || '-'}</span>
-							{internalWL && (
-								<>
-									{' '}<span className={classes.statSep}>·</span>{' '}
-									<span>{internalWL}</span>
-								</>
-							)}
-						</span>
-					)}
+					<TierStat
+						classes={classes}
+						label="솔랭"
+						emblem={rank ? rank.emblem : null}
+						short={rank ? rank.short : null}
+						wl={rankWL}
+					/>
+					<TierStat
+						classes={classes}
+						label="내전"
+						emblem={internalEmblem}
+						short={internalShort}
+						wl={internalWL}
+					/>
 				</div>
-				{achievements.length > 0 && (
-					<div className={classes.achievementRow}>
-						<EmojiEventsIcon style={{ color: '#ffd700', width: 18, height: 18 }} />
-						<span>업적</span>
-						{achievements.map(a => {
-							const label = a.title || a.name || a.id;
-							const key = a.id || a.title || a.name;
-							const labelStr = typeof label === 'string' ? label : (label && label.id) || '';
-							return (
-								<span key={key} className={classes.achievementChip}>{labelStr}</span>
-							);
-						})}
+				{(achievements.length > 0 || (honor && (honor.received != null || honorTitleText))) && (
+					<div className={classes.candidateExtras}>
+						{achievements.length > 0 && (
+							<span className={classes.achievementGroup}>
+								<span className={classes.achievementLabel}>업적</span>
+								<span className={classes.achievementIcons}>
+									{achievements.map(a => {
+										const cat = CATEGORY_LABELS[a.category] || CATEGORY_LABELS[a.id] || null;
+										const icon = (typeof a.icon === 'string' && a.icon) || (cat && cat.icon) || '🏅';
+										const labelText = (cat && cat.label) || a.title || a.name || a.id || '업적';
+										const labelStr = typeof labelText === 'string' ? labelText : (labelText.title || '업적');
+										const key = a.id || a.category || a.title || labelStr;
+										return (
+											<Tooltip key={key} title={labelStr} arrow>
+												<span className={classes.achievementIcon} role="img" aria-label={labelStr}>
+													{icon}
+												</span>
+											</Tooltip>
+										);
+									})}
+								</span>
+							</span>
+						)}
+						{honor && (honor.received != null || honorTitleText) && (
+							<span className={classes.honorGroup}>
+								<span role="img" aria-label="sparkles">✨</span>
+								<span>
+									명예 <span className={classes.statValue}>{honor.received || 0}</span>
+									{honor.given != null && <> · 줌 <span className={classes.statValue}>{honor.given}</span></>}
+								</span>
+								{honorTitleText && (
+									<>
+										<span className={classes.statSep}>·</span>
+										<span className={classes.honorTitle}>
+											{honorTitleEmoji && (
+												<span role="img" aria-label="title" style={{ marginRight: 4 }}>
+													{honorTitleEmoji}
+												</span>
+											)}
+											{honorTitleText}
+										</span>
+									</>
+								)}
+							</span>
+						)}
 					</div>
 				)}
-				{honor && (honor.received != null || honor.title) && (() => {
-					// honor.title은 객체 형태 ({ title, emoji, minVotes }) 또는 문자열로 올 수 있음.
-					let titleText = null;
-					let titleEmoji = null;
-					if (honor.title && typeof honor.title === 'object') {
-						titleText = honor.title.title || null;
-						titleEmoji = honor.title.emoji || null;
-					} else if (typeof honor.title === 'string') {
-						titleText = honor.title;
-					}
-					return (
-						<div className={classes.honorRow}>
-							<span role="img" aria-label="sparkles">✨</span>
-							<span>
-								명예 받음 <span className={classes.statValue}>{honor.received || 0}</span>
-								{honor.given != null && <> · 줌 <span className={classes.statValue}>{honor.given}</span></>}
-							</span>
-							{titleText && (
-								<>
-									<span className={classes.statSep}>·</span>
-									<span className={classes.honorTitle}>
-										{titleEmoji && (
-											<span role="img" aria-label="title badge" style={{ marginRight: 4 }}>
-												{titleEmoji}
-											</span>
-										)}
-										{titleText}
-									</span>
-								</>
-							)}
-						</div>
-					);
-				})()}
 			</div>
 		</div>
 	);
@@ -753,87 +821,79 @@ function AuctionStage({ tournament, teams, isAdmin, onChanged }) {
 			});
 	}
 
+	function renderAdminActionBar() {
+		if (!isAdmin) return null;
+		return (
+			<div className={classes.topActionBar}>
+				<span className={classes.topActionLabel}>경매 진행</span>
+				<Tooltip
+					title={bidActive ? '입찰 진행 중에는 다음 매물로 넘어갈 수 없습니다' : ''}
+					arrow
+				>
+					<span>
+						<Button
+							className={classes.adminBtnSecondary}
+							startIcon={<SkipNextIcon />}
+							onClick={handleNextCandidate}
+							disabled={bidActive || nextLoading}
+						>
+							다음 매물
+						</Button>
+					</span>
+				</Tooltip>
+				{hasCurrent && !bidActive && (
+					<Button
+						className={classes.adminBtn}
+						startIcon={<PlayArrowIcon />}
+						onClick={() => setStartBidOpen(true)}
+					>
+						입찰 시작
+					</Button>
+				)}
+				{hasCurrent && bidActive && (
+					<Button
+						className={classes.adminBtn}
+						startIcon={<TimerIcon />}
+						onClick={() => setExtendOpen(true)}
+					>
+						시간 갱신
+					</Button>
+				)}
+				<span className={classes.topActionSpacer} />
+				<Tooltip
+					title={allTeamsFull ? '' : '모든 팀의 멤버가 채워져야 완료할 수 있습니다.'}
+					arrow
+				>
+					<span>
+						<Button
+							className={classes.completeBtn}
+							startIcon={<DoneAllIcon />}
+							onClick={() => setCompleteOpen(true)}
+							disabled={!allTeamsFull}
+						>
+							경매 완료
+						</Button>
+					</span>
+				</Tooltip>
+			</div>
+		);
+	}
+
 	function renderAuctionBlock() {
 		if (!hasCurrent) {
 			return (
 				<div className={classes.auctionBlock}>
 					<div className={classes.auctionEmpty}>
 						<div className={classes.auctionEmptyText}>다음 매물을 선정하세요</div>
-						{isAdmin && (
-							<div className={classes.adminActions}>
-								<Button
-									className={classes.adminBtn}
-									startIcon={<SkipNextIcon />}
-									onClick={handleNextCandidate}
-									disabled={nextLoading}
-								>
-									다음 매물
-								</Button>
-								<Tooltip
-									title={allTeamsFull ? '' : '모든 팀의 멤버가 채워져야 완료할 수 있습니다.'}
-									arrow
-								>
-									<span>
-										<Button
-											className={classes.completeBtn}
-											startIcon={<DoneAllIcon />}
-											onClick={() => setCompleteOpen(true)}
-											disabled={!allTeamsFull}
-										>
-											경매 완료
-										</Button>
-									</span>
-								</Tooltip>
-							</div>
-						)}
 					</div>
 				</div>
 			);
 		}
 		return (
 			<div className={classes.auctionBlock}>
-				<div className={classes.candidateLayout}>
+				<div className={classes.candidateTop}>
 					<CandidateInfoCard candidate={currentCandidate} classes={classes} />
-					<div className={classes.auctionSide}>
-						{deadlineMs != null && <Countdown deadline={currentDeadline} classes={classes} />}
-						{isAdmin && (
-							<div className={classes.adminActions}>
-								{!bidActive && (
-									<Button
-										className={classes.adminBtn}
-										startIcon={<PlayArrowIcon />}
-										onClick={() => setStartBidOpen(true)}
-									>
-										입찰 시작
-									</Button>
-								)}
-								{bidActive && (
-									<Button
-										className={classes.adminBtn}
-										startIcon={<TimerIcon />}
-										onClick={() => setExtendOpen(true)}
-									>
-										시간 갱신
-									</Button>
-								)}
-								<Tooltip
-									title={bidActive ? '입찰 진행 중에는 다음 매물로 넘어갈 수 없습니다' : ''}
-									arrow
-								>
-									<span>
-										<Button
-											className={classes.adminBtnSecondary}
-											startIcon={<SkipNextIcon />}
-											onClick={handleNextCandidate}
-											disabled={bidActive || nextLoading}
-										>
-											다음 매물
-										</Button>
-									</span>
-								</Tooltip>
-							</div>
-						)}
-					</div>
+					{deadlineMs != null && <Countdown deadline={currentDeadline} classes={classes} />}
 				</div>
 			</div>
 		);
@@ -862,9 +922,10 @@ function AuctionStage({ tournament, teams, isAdmin, onChanged }) {
 					<span className={classes.smallName}>
 						{name || displayNameForPuuid(null, puuid)}
 					</span>
-					{tier.label && (
-						<span className={classes.smallTier}>
-							{tier.short ? `${tier.short} · ${tier.label}` : tier.label}
+					{tier.short && (
+						<span className={classes.smallTier} title={tier.label || ''}>
+							{tier.emblem && <img src={tier.emblem} alt="" className={classes.smallTierEmblem} />}
+							<span>{tier.short}</span>
 						</span>
 					)}
 				</div>
@@ -875,6 +936,7 @@ function AuctionStage({ tournament, teams, isAdmin, onChanged }) {
 	return (
 		<>
 			<div className={classes.wrapper}>
+				{renderAdminActionBar()}
 				{renderAuctionBlock()}
 
 				{bidExpired && isAdmin && (

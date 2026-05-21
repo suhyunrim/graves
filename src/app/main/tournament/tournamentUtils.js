@@ -145,6 +145,23 @@ export function getTierEmblemUrl(tierName) {
 	return `/assets/images/ranked-emblems/Emblem_${tierName}.webp`;
 }
 
+// "GOLD II" → { tier: 'GOLD', short: 'G2', emblem: url }
+// MASTER/GRANDMASTER/CHALLENGER 는 division 없이 약자만.
+const RANK_DIV_NUM = { I: '1', II: '2', III: '3', IV: '4' };
+
+export function parseRankTier(rankTier) {
+	if (!rankTier) return null;
+	const parts = String(rankTier).trim().split(/\s+/);
+	const tier = (parts[0] || '').toUpperCase();
+	const initial = TIER_INITIAL[tier];
+	if (!initial) return { tier: null, short: String(rankTier), emblem: null };
+	if (isNonStepTier(tier)) {
+		return { tier, short: initial, emblem: getTierEmblemUrl(tier) };
+	}
+	const divNum = parts[1] ? (RANK_DIV_NUM[parts[1].toUpperCase()] || '') : '';
+	return { tier, short: `${initial}${divNum}`, emblem: getTierEmblemUrl(tier) };
+}
+
 // 백엔드 nextPow2 산정 로직과 일치시켜 slotMapping 길이를 맞춘다
 export function bracketSizeForTeamCount(teamCount) {
 	if (!teamCount || teamCount < 2) return 2;
