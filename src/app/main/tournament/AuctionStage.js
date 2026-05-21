@@ -14,6 +14,7 @@ import {
 	DialogActions
 } from '@mui/material';
 import { makeStyles } from 'tss-react/mui';
+import { keyframes } from '@emotion/react';
 import { useDispatch, useSelector } from 'react-redux';
 import GavelIcon from '@mui/icons-material/Gavel';
 import UndoIcon from '@mui/icons-material/Undo';
@@ -32,6 +33,11 @@ import {
 	getTierEmblemUrl
 } from './tournamentUtils';
 import PositionIcon from './PositionIcon';
+
+const flashCyan = keyframes({
+	'0%': { background: 'rgba(0, 212, 255, 0.35)', boxShadow: '0 0 0 2px rgba(0, 212, 255, 0.8)' },
+	'100%': { background: 'rgba(255, 255, 255, 0.03)', boxShadow: '0 0 0 0 rgba(0, 212, 255, 0)' }
+});
 
 const useStyles = makeStyles()((theme) => ({
 	root: {
@@ -135,6 +141,10 @@ const useStyles = makeStyles()((theme) => ({
 		padding: '6px 0',
 		borderBottom: '1px solid rgba(255, 255, 255, 0.04)',
 		'&:last-child': { borderBottom: 'none' }
+	},
+	slotRowFlash: {
+		animation: `${flashCyan} 1.4s ease-out`,
+		borderRadius: 6
 	},
 	slotPosCell: {
 		width: 28,
@@ -326,7 +336,7 @@ function getMemberTier(rating) {
 	};
 }
 
-function AuctionStage({ tournament, teams, isAdmin, onChanged }) {
+function AuctionStage({ tournament, teams, isAdmin, onChanged, lastBidPuuid }) {
 	const { classes, cx } = useStyles();
 	const dispatch = useDispatch();
 	const toast = useToast();
@@ -478,8 +488,9 @@ function AuctionStage({ tournament, teams, isAdmin, onChanged }) {
 				{slots.map(({ pos, member }) => {
 					const isCaptain = member && team.captainPuuid === member.puuid;
 					const tier = member ? getMemberTier(member.rating) : null;
+					const flash = member && lastBidPuuid && member.puuid === lastBidPuuid;
 					return (
-						<div key={pos} className={classes.slotRow}>
+						<div key={pos} className={cx(classes.slotRow, flash && classes.slotRowFlash)}>
 							<div className={classes.slotPosCell}>
 								<PositionIcon position={pos} className={classes.slotPosIcon} />
 							</div>

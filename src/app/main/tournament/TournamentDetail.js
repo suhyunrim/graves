@@ -30,6 +30,7 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import camilleRiotAuthService from 'app/services/camilleRiotAuthService/camilleRiotAuthService';
+import { getSocket } from 'app/utility/socketClient';
 import useDialogStyles from '../components/dialogStyles';
 import reducer from './store/reducers';
 import * as Actions from './store/actions';
@@ -718,6 +719,46 @@ function TournamentDetail() {
 		};
 	}, [dispatch, tournamentId]);
 
+	const [lastBidPuuid, setLastBidPuuid] = useState(null);
+
+	// 경매 실시간 동기화: 룸 join 후 status/bid/undo 이벤트가 오면 detail 재로드.
+	useEffect(() => {
+		if (!tournamentId) return undefined;
+		const socket = getSocket();
+		const tid = Number(tournamentId);
+		socket.emit('tournament:join', tid);
+
+		const refresh = () => dispatch(Actions.getTournamentDetail(tournamentId));
+
+		const handleStatus = (payload) => {
+			if (payload && payload.tournamentId != null && Number(payload.tournamentId) !== tid) return;
+			refresh();
+		};
+		const handleBid = (payload) => {
+			if (payload && payload.tournamentId != null && Number(payload.tournamentId) !== tid) return;
+			if (payload && payload.puuid) {
+				setLastBidPuuid(payload.puuid);
+				// 1.4초 후 강조 해제 — 다음 이벤트 오면 또 갱신됨.
+				setTimeout(() => setLastBidPuuid(prev => (prev === payload.puuid ? null : prev)), 1400);
+			}
+			refresh();
+		};
+		const handleUndo = (payload) => {
+			if (payload && payload.tournamentId != null && Number(payload.tournamentId) !== tid) return;
+			refresh();
+		};
+		socket.on('auction:status', handleStatus);
+		socket.on('auction:bid', handleBid);
+		socket.on('auction:undo', handleUndo);
+
+		return () => {
+			socket.emit('tournament:leave', tid);
+			socket.off('auction:status', handleStatus);
+			socket.off('auction:bid', handleBid);
+			socket.off('auction:undo', handleUndo);
+		};
+	}, [dispatch, tournamentId]);
+
 	function handleTeamCreate() {
 		setEditingTeam(null);
 		setTeamFormOpen(true);
@@ -945,6 +986,7 @@ function TournamentDetail() {
 							teams={teams}
 							isAdmin={isAdmin}
 							onChanged={reload}
+							lastBidPuuid={lastBidPuuid}
 						/>
 					)}
 
