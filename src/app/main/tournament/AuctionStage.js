@@ -1119,9 +1119,12 @@ function AuctionStage({ tournament, teams, isAdmin, onChanged }) {
 		const member = memberMap.get(puuid);
 		const name = member ? member.name : null;
 		const profileIconId = member ? member.profileIconId : null;
-		const rating = member ? member.rating : null;
+		// 내전 rating — active-members 객체는 `rating`, currentCandidate enrich 객체는 `internalRating`.
+		const rating = member
+			? (member.rating != null ? member.rating : member.internalRating)
+			: null;
 		const internalTier = getMemberTier(rating);
-		// active-members 응답에 솔랭 정보가 enrich돼 올 가능성 — 가능한 필드명 모두 시도.
+		// 솔랭 — currentCandidate / active-members 응답 모두 `rankTier` 우선, 다른 필드명도 폴백.
 		const soloRankStr = member && (member.rankTier || member.soloRank || member.solo_rank || null);
 		const soloRank = parseRankTier(soloRankStr);
 		const isCurrent = puuid === currentPuuid;
