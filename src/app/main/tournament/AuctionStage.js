@@ -449,7 +449,18 @@ const useStyles = makeStyles()((theme) => ({
 	},
 	smallTierEmblem: {
 		width: 16,
-		height: 16
+		height: 16,
+		flexShrink: 0
+	},
+	smallTierEmblemPlaceholder: {
+		display: 'inline-block',
+		width: 16,
+		height: 16,
+		flexShrink: 0
+	},
+	smallTierValue: {
+		minWidth: 22,
+		textAlign: 'left'
 	},
 	smallTierEmpty: {
 		color: 'rgba(255, 255, 255, 0.3)',
@@ -987,25 +998,29 @@ function AuctionStage({ tournament, teams, isAdmin, onChanged }) {
 				<div className={classes.smallTierRow}>
 					<span className={classes.smallTier}>
 						<span className={classes.smallTierLabel}>솔랭</span>
-						{soloRank && soloRank.short ? (
-							<>
-								{soloRank.emblem && <img src={soloRank.emblem} alt="" className={classes.smallTierEmblem} />}
-								<span>{soloRank.short}</span>
-							</>
+						{soloRank && soloRank.emblem ? (
+							<img src={soloRank.emblem} alt="" className={classes.smallTierEmblem} />
 						) : (
-							<span className={classes.smallTierEmpty}>-</span>
+							<span className={classes.smallTierEmblemPlaceholder} />
 						)}
+						<span className={classes.smallTierValue}>
+							{soloRank && soloRank.short
+								? soloRank.short
+								: <span className={classes.smallTierEmpty}>-</span>}
+						</span>
 					</span>
 					<span className={classes.smallTier}>
 						<span className={classes.smallTierLabel}>내전</span>
-						{internalTier.short ? (
-							<>
-								{internalTier.emblem && <img src={internalTier.emblem} alt="" className={classes.smallTierEmblem} />}
-								<span>{internalTier.short}</span>
-							</>
+						{internalTier.emblem ? (
+							<img src={internalTier.emblem} alt="" className={classes.smallTierEmblem} />
 						) : (
-							<span className={classes.smallTierEmpty}>-</span>
+							<span className={classes.smallTierEmblemPlaceholder} />
 						)}
+						<span className={classes.smallTierValue}>
+							{internalTier.short
+								? internalTier.short
+								: <span className={classes.smallTierEmpty}>-</span>}
+						</span>
 					</span>
 				</div>
 			</div>
