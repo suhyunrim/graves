@@ -9,7 +9,8 @@ import {
 	DialogContentText,
 	DialogActions,
 	ToggleButton,
-	ToggleButtonGroup
+	ToggleButtonGroup,
+	MenuItem
 } from '@mui/material';
 import { makeStyles } from 'tss-react/mui';
 import { keyframes } from '@emotion/react';
@@ -19,6 +20,7 @@ import SkipNextIcon from '@mui/icons-material/SkipNext';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import TimerIcon from '@mui/icons-material/Timer';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
+import GavelIcon from '@mui/icons-material/Gavel';
 import useToast from 'app/utility/useToast';
 import { getProfileIconUrl } from 'app/main/challenge/ddragonUtils';
 import * as Actions from './store/actions';
@@ -518,6 +520,20 @@ const useStyles = makeStyles()((theme) => ({
 		fontFamily: '"Noto Sans KR", sans-serif',
 		fontSize: '1.1rem',
 		color: 'rgba(255, 255, 255, 0.5)'
+	},
+	bidDialogField: {
+		marginTop: 12,
+		'& .MuiInputBase-root': { color: '#fff' },
+		'& .MuiInputLabel-root': { color: 'rgba(255, 255, 255, 0.6)' },
+		'& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255, 255, 255, 0.2)' },
+		'& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline': {
+			borderColor: 'rgba(0, 212, 255, 0.5)'
+		},
+		'& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline': {
+			borderColor: '#00d4ff'
+		},
+		'& .MuiSelect-icon': { color: 'rgba(255, 255, 255, 0.5)' },
+		'& .MuiFormHelperText-root': { color: 'rgba(255, 255, 255, 0.5)' }
 	}
 }));
 
@@ -612,6 +628,80 @@ function DurationDialog({ open, title, hint, confirmLabel, onClose, onConfirm, c
 			<DialogActions>
 				<Button onClick={onClose}>취소</Button>
 				<Button onClick={handleConfirm} disabled={!valid}>{confirmLabel}</Button>
+			</DialogActions>
+		</Dialog>
+	);
+}
+
+// ─── BidDialog (낙찰 — 팀 선택 + 금액) ────────────────────
+function BidDialog({
+	open, teams, candidatePosition, minBid, allowNegative,
+	teamId, amount, pending, onTeamChange, onAmountChange, onClose, onConfirm, classes
+}) {
+	const valid = Boolean(teamId) && Number(amount) >= minBid;
+	const options = (teams || []).map(t => {
+		const filled = new Set((t.members || []).map(m => m.position));
+		const teamFull = (t.members || []).length >= 5;
+		const remaining = t.remainingBudget;
+		const budgetOk = allowNegative || remaining == null || remaining >= minBid;
+		const posTaken = candidatePosition && filled.has(candidatePosition);
+		const disabled = posTaken || teamFull || !budgetOk;
+		let reason = '';
+		if (posTaken) reason = `${POSITION_LABELS[candidatePosition] || candidatePosition} 자리가 차 있습니다`;
+		else if (teamFull) reason = '팀 정원이 가득 찼습니다';
+		else if (!budgetOk) reason = '예산 부족';
+		return { team: t, disabled, reason };
+	});
+	return (
+		<Dialog
+			open={open}
+			onClose={pending ? undefined : onClose}
+			slotProps={{ paper: { className: classes.dialogPaper } }}
+		>
+			<DialogTitle className={classes.dialogTitle}>낙찰</DialogTitle>
+			<DialogContent>
+				<TextField
+					className={classes.bidDialogField}
+					label="팀"
+					select
+					value={teamId || ''}
+					onChange={(e) => onTeamChange(Number(e.target.value))}
+					variant="outlined"
+					fullWidth
+					size="small"
+				>
+					{options.map(({ team, disabled, reason }) => (
+						<MenuItem key={team.id} value={team.id} disabled={disabled}>
+							{team.name}
+							{team.remainingBudget != null && (
+								<span style={{ color: 'rgba(255,255,255,0.4)', marginLeft: 6 }}>
+									(잔여 {team.remainingBudget})
+								</span>
+							)}
+							{disabled && (
+								<span style={{ color: 'rgba(255, 107, 107, 0.7)', marginLeft: 6 }}>
+									· {reason}
+								</span>
+							)}
+						</MenuItem>
+					))}
+				</TextField>
+				<TextField
+					className={classes.bidDialogField}
+					label="낙찰가"
+					type="number"
+					value={amount}
+					onChange={(e) => onAmountChange(e.target.value)}
+					variant="outlined"
+					fullWidth
+					size="small"
+					inputProps={{ min: minBid }}
+					helperText={`최소 입찰가 ${minBid}`}
+				/>
+			</DialogContent>
+			<DialogActions>
+				<Button onClick={onClose} disabled={pending}>취소</Button>
+				<Button onClick={onConfirm} disabled={!valid || pending}>낙찰</Button>
 			</DialogActions>
 		</Dialog>
 	);
@@ -793,6 +883,8 @@ function AuctionStage({ tournament, teams, isAdmin, onChanged }) {
 
 	const auctionConfig = tournament.auctionConfig;
 	const tournamentId = tournament.id;
+	const minBid = (auctionConfig && auctionConfig.minBid) || 1;
+	const allowNegative = Boolean(auctionConfig && auctionConfig.allowNegative);
 
 	const currentPuuid = tournament.currentAuctionPuuid;
 	const currentDeadline = tournament.currentAuctionDeadline;
@@ -841,8 +933,12 @@ function AuctionStage({ tournament, teams, isAdmin, onChanged }) {
 
 	const [completeOpen, setCompleteOpen] = useState(false);
 	const [startBidOpen, setStartBidOpen] = useState(false);
-	const [extendOpen, setExtendOpen] = useState(false);
 	const [nextLoading, setNextLoading] = useState(false);
+	const [lastDuration, setLastDuration] = useState(30);
+	const [bidDialogOpen, setBidDialogOpen] = useState(false);
+	const [bidDialogTeamId, setBidDialogTeamId] = useState('');
+	const [bidDialogAmount, setBidDialogAmount] = useState('');
+	const [bidDialogPending, setBidDialogPending] = useState(false);
 
 	const allTeamsFull = teams.length > 0 && teams.every(t => (t.members || []).length >= 5);
 
@@ -859,6 +955,7 @@ function AuctionStage({ tournament, teams, isAdmin, onChanged }) {
 
 	function handleStartBidConfirm(durationSeconds) {
 		setStartBidOpen(false);
+		setLastDuration(durationSeconds);
 		Actions.startAuctionBid(tournamentId, durationSeconds)
 			.then(() => onChanged && onChanged())
 			.catch(err => {
@@ -867,14 +964,46 @@ function AuctionStage({ tournament, teams, isAdmin, onChanged }) {
 			});
 	}
 
-	function handleExtendConfirm(durationSeconds) {
-		setExtendOpen(false);
-		Actions.extendAuctionTime(tournamentId, durationSeconds)
+	// extendOpen 관련 다이얼로그 흐름 제거 — handleExtendQuick으로 대체.
+	function handleExtendQuick() {
+		Actions.extendAuctionTime(tournamentId, lastDuration)
 			.then(() => onChanged && onChanged())
 			.catch(err => {
 				const msg = err.response && err.response.data ? err.response.data.result : '시간 갱신 실패';
 				toast.error(msg);
 			});
+	}
+
+	function openBidDialog() {
+		setBidDialogTeamId('');
+		setBidDialogAmount('');
+		setBidDialogOpen(true);
+	}
+
+	function handleBidConfirm() {
+		if (!currentPuuid) return;
+		const teamId = Number(bidDialogTeamId);
+		const amount = Number(bidDialogAmount);
+		if (!teamId) {
+			toast.error('팀을 선택하세요.');
+			return;
+		}
+		if (!Number.isFinite(amount) || amount < minBid) {
+			toast.error(`최소 입찰가는 ${minBid} 입니다.`);
+			return;
+		}
+		setBidDialogPending(true);
+		Actions.placeAuctionBid(tournamentId, teamId, currentPuuid, amount)
+			.then(() => {
+				toast.success('낙찰 완료');
+				setBidDialogOpen(false);
+				onChanged && onChanged();
+			})
+			.catch(err => {
+				const msg = err.response && err.response.data ? err.response.data.result : '낙찰 실패';
+				toast.error(msg);
+			})
+			.finally(() => setBidDialogPending(false));
 	}
 
 	function handleComplete() {
@@ -910,7 +1039,7 @@ function AuctionStage({ tournament, teams, isAdmin, onChanged }) {
 						</Button>
 					</span>
 				</Tooltip>
-				{hasCurrent && !bidActive && (
+				{hasCurrent && !bidActive && !bidExpired && (
 					<Button
 						className={classes.adminBtn}
 						startIcon={<PlayArrowIcon />}
@@ -923,9 +1052,18 @@ function AuctionStage({ tournament, teams, isAdmin, onChanged }) {
 					<Button
 						className={classes.adminBtn}
 						startIcon={<TimerIcon />}
-						onClick={() => setExtendOpen(true)}
+						onClick={handleExtendQuick}
 					>
-						시간 갱신
+						시간 갱신 ({lastDuration}s)
+					</Button>
+				)}
+				{hasCurrent && bidExpired && (
+					<Button
+						className={classes.adminBtn}
+						startIcon={<GavelIcon />}
+						onClick={openBidDialog}
+					>
+						낙찰
 					</Button>
 				)}
 				<span className={classes.topActionSpacer} />
@@ -1084,13 +1222,19 @@ function AuctionStage({ tournament, teams, isAdmin, onChanged }) {
 				onConfirm={handleStartBidConfirm}
 				classes={classes}
 			/>
-			<DurationDialog
-				open={extendOpen}
-				title="시간 갱신"
-				hint="현재 시각부터 N초 후로 재설정됩니다 (남은 시간 + 추가가 아님)"
-				confirmLabel="갱신"
-				onClose={() => setExtendOpen(false)}
-				onConfirm={handleExtendConfirm}
+			<BidDialog
+				open={bidDialogOpen}
+				teams={teams}
+				candidatePosition={candidatePosition}
+				minBid={minBid}
+				allowNegative={allowNegative}
+				teamId={bidDialogTeamId}
+				amount={bidDialogAmount}
+				pending={bidDialogPending}
+				onTeamChange={setBidDialogTeamId}
+				onAmountChange={setBidDialogAmount}
+				onClose={() => setBidDialogOpen(false)}
+				onConfirm={handleBidConfirm}
 				classes={classes}
 			/>
 		</>

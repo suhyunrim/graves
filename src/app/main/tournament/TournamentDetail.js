@@ -14,8 +14,7 @@ import {
 	Tabs,
 	Tab,
 	FormControlLabel,
-	Switch,
-	TextField
+	Switch
 } from '@mui/material';
 import useToast from 'app/utility/useToast';
 import { getProfileIconUrl } from 'app/main/challenge/ddragonUtils';
@@ -27,7 +26,6 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import StarIcon from '@mui/icons-material/Star';
-import GavelIcon from '@mui/icons-material/Gavel';
 import UndoIcon from '@mui/icons-material/Undo';
 import React, { useEffect, useState, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -742,7 +740,6 @@ function TournamentDetail() {
 	const scrims = useSelector(({ Tournament }) => Tournament.tournament.scrims);
 	const roundLabels = useSelector(({ Tournament }) => Tournament.tournament.roundLabels);
 	const leaderboard = useSelector(({ Tournament }) => Tournament.tournament.leaderboard);
-	const currentCandidate = useSelector(({ Tournament }) => Tournament.tournament.currentCandidate);
 	const loadingDetail = useSelector(({ Tournament }) => Tournament.tournament.loadingDetail);
 	const user = useSelector(state => state.auth.user);
 	const isAdmin = checkIsAdmin(user);
@@ -906,44 +903,7 @@ function TournamentDetail() {
 			});
 	}
 
-	// 경매 입찰 (status === auction 일 때만 사용).
-	const [teamBidAmount, setTeamBidAmount] = useState({});
-	const [pendingBidTeams, setPendingBidTeams] = useState({});
-
-	function setBidFor(teamId, amount) {
-		setTeamBidAmount(prev => ({ ...prev, [teamId]: amount }));
-	}
-
-	function handlePlaceTeamBid(teamId, puuid, minBid) {
-		const amount = Number(teamBidAmount[teamId]);
-		if (!Number.isFinite(amount) || amount < minBid) {
-			toast.error(`최소 입찰가는 ${minBid} 입니다.`);
-			return;
-		}
-		setPendingBidTeams(prev => ({ ...prev, [teamId]: true }));
-		Actions.placeAuctionBid(tournamentId, teamId, puuid, amount)
-			.then(() => {
-				toast.success('낙찰 완료');
-				setTeamBidAmount(prev => {
-					const next = { ...prev };
-					delete next[teamId];
-					return next;
-				});
-				reload();
-			})
-			.catch(err => {
-				const msg = err.response && err.response.data ? err.response.data.result : '입찰 실패';
-				toast.error(msg);
-			})
-			.finally(() => {
-				setPendingBidTeams(prev => {
-					const next = { ...prev };
-					delete next[teamId];
-					return next;
-				});
-			});
-	}
-
+	// 입찰 취소 (status === auction 일 때만 사용). 낙찰은 AuctionStage에서.
 	function handleUndoBid(teamId, puuid) {
 		Actions.undoAuctionBid(tournamentId, teamId, puuid)
 			.then(() => {
@@ -1001,13 +961,6 @@ function TournamentDetail() {
 	const isAuctionType = detail.type === 'auction';
 	const auctionConfig = detail.auctionConfig;
 	const auctionMinBid = (auctionConfig && auctionConfig.minBid) || 1;
-	const auctionAllowNegative = Boolean(auctionConfig && auctionConfig.allowNegative);
-	const currentPuuid = detail.currentAuctionPuuid;
-	const currentDeadline = detail.currentAuctionDeadline;
-	const candidatePosition = currentCandidate ? currentCandidate.position : null;
-	const deadlineMs = currentDeadline ? new Date(currentDeadline).getTime() : null;
-	const bidActive = isAuctionStatus && Boolean(currentPuuid)
-		&& deadlineMs != null && deadlineMs > Date.now();
 	const teamCount = teams.length;
 	// auction 완료 후엔 preparing 상태로 돌아오지만, 이미 멤버가 차 있어서 일반 대진 짜기 흐름.
 	const auctionMembersComplete = isAuctionType && teams.length > 0
@@ -1378,43 +1331,6 @@ function TournamentDetail() {
 													);
 												})}
 											</div>
-											{isAdmin && isAuctionStatus && currentPuuid && (() => {
-												const filledPos = new Set((t.members || []).map(mb => mb.position));
-												const teamIsFull = (t.members || []).length >= 5;
-												const remaining = t.remainingBudget;
-												const posTaken = candidatePosition && filledPos.has(candidatePosition);
-												const budgetOk = auctionAllowNegative || remaining == null || remaining >= auctionMinBid;
-												const canBid = !posTaken && !teamIsFull && budgetOk;
-												const isPending = pendingBidTeams[t.id];
-												let lockReason = '';
-												if (posTaken) lockReason = `${candidatePosition} 자리가 차 있습니다`;
-												else if (teamIsFull) lockReason = '팀 정원이 가득 찼습니다';
-												else if (!budgetOk) lockReason = '예산 부족';
-												if (!canBid) {
-													return <div className={classes.teamBidLocked}>{lockReason || '입찰 불가'}</div>;
-												}
-												return (
-													<div className={classes.teamBidArea}>
-														<TextField
-															className={classes.teamBidInput}
-															size="small"
-															type="number"
-															placeholder={String(auctionMinBid)}
-															value={teamBidAmount[t.id] == null ? '' : teamBidAmount[t.id]}
-															onChange={(e) => setBidFor(t.id, e.target.value)}
-															inputProps={{ min: auctionMinBid }}
-														/>
-														<Button
-															className={classes.teamBidBtn}
-															startIcon={<GavelIcon />}
-															onClick={() => handlePlaceTeamBid(t.id, currentPuuid, auctionMinBid)}
-															disabled={isPending}
-														>
-															낙찰
-														</Button>
-													</div>
-												);
-											})()}
 										</div>
 									);
 								})}
