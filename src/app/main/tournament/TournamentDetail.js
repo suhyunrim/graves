@@ -761,6 +761,18 @@ function TournamentDetail() {
 		reload();
 	}
 
+	function handleStartAuction() {
+		Actions.startAuction(tournamentId)
+			.then(() => {
+				toast.success('경매를 시작했습니다.');
+				reload();
+			})
+			.catch(err => {
+				const msg = err.response && err.response.data ? err.response.data.result : '경매 시작 실패';
+				toast.error(msg);
+			});
+	}
+
 	function handleMatchResultSuccess() {
 		setMatchEditTarget(null);
 		toast.success('매치 결과가 저장되었습니다.');
@@ -800,10 +812,18 @@ function TournamentDetail() {
 
 	const statusColor = STATUS_COLORS[detail.status] || '#868e96';
 	const isPreparing = detail.status === STATUS.PREPARING;
+	const isAuctionStatus = detail.status === STATUS.AUCTION;
 	const isInProgress = detail.status === STATUS.IN_PROGRESS;
 	const isFinished = detail.status === STATUS.FINISHED;
+	const isAuctionType = detail.type === 'auction';
+	const auctionConfig = detail.auctionConfig;
 	const teamCount = teams.length;
-	const canStart = isAdmin && isPreparing && teamCount >= 2;
+	// auction 완료 후엔 preparing 상태로 돌아오지만, 이미 멤버가 차 있어서 일반 대진 짜기 흐름.
+	const auctionMembersComplete = isAuctionType && auctionConfig && teams.length > 0
+		&& teams.every(t => (t.members || []).length >= (auctionConfig.teamSize || 5));
+	const canStart = isAdmin && isPreparing && teamCount >= 2
+		&& (!isAuctionType || auctionMembersComplete);
+	const canStartAuction = isAdmin && isPreparing && isAuctionType && !auctionMembersComplete && teamCount >= 2;
 	// preparation 단계에선 detail.bracketSize/teamCount 가 null. 시작 시점에 등록된 팀 수로 산출한다.
 	const computedBracketSize = bracketSizeForTeamCount(teamCount);
 
@@ -866,7 +886,24 @@ function TournamentDetail() {
 					)}
 					{isAdmin && (
 						<div className={classes.headerActions}>
-							{isPreparing && (
+							{isPreparing && isAuctionType && !auctionMembersComplete && (
+								<Tooltip
+									title={canStartAuction ? '' : '팀장이 2명 이상 등록되어야 경매를 시작할 수 있습니다.'}
+									arrow
+								>
+									<span>
+										<Button
+											className={classes.primaryBtn}
+											startIcon={<PlayArrowIcon />}
+											onClick={handleStartAuction}
+											disabled={!canStartAuction}
+										>
+											경매 시작
+										</Button>
+									</span>
+								</Tooltip>
+							)}
+							{isPreparing && (!isAuctionType || auctionMembersComplete) && (
 								<Tooltip title={canStart ? '' : '팀이 2개 이상 등록되어야 시작할 수 있습니다.'} arrow>
 									<span>
 										<Button
@@ -901,6 +938,15 @@ function TournamentDetail() {
 			content={
 				<div className={classes.pageOuter}>
 				<div className={classes.container}>
+					{isAuctionStatus && (
+						<div className={classes.section}>
+							<div className={classes.sectionHeader}>
+								<div className={classes.sectionTitle}>경매 진행 중</div>
+							</div>
+							<div className={classes.emptyText}>경매 화면은 다음 단계에서 표시됩니다.</div>
+						</div>
+					)}
+
 					{(isInProgress || isFinished) && (
 						<Tabs
 							value={activeTab}
@@ -1150,6 +1196,7 @@ function TournamentDetail() {
 							groupId={detail.groupId}
 							team={editingTeam}
 							allTeams={teams}
+							tournament={detail}
 						/>
 					)}
 					{matchPredictionTarget && (

@@ -1,20 +1,32 @@
 export const STATUS = {
 	PREPARING: 'preparing',
+	AUCTION: 'auction',
 	IN_PROGRESS: 'in_progress',
 	FINISHED: 'finished'
 };
 
 export const STATUS_LABELS = {
 	[STATUS.PREPARING]: '준비 중',
+	[STATUS.AUCTION]: '경매 중',
 	[STATUS.IN_PROGRESS]: '진행 중',
 	[STATUS.FINISHED]: '종료'
 };
 
 export const STATUS_COLORS = {
 	[STATUS.PREPARING]: '#ffd700',
+	[STATUS.AUCTION]: '#ff8c00',
 	[STATUS.IN_PROGRESS]: '#00d4ff',
 	[STATUS.FINISHED]: '#868e96'
 };
+
+export const TOURNAMENT_TYPE = {
+	NORMAL: 'normal',
+	AUCTION: 'auction'
+};
+
+export function isAuctionTournament(detail) {
+	return detail && detail.type === TOURNAMENT_TYPE.AUCTION;
+}
 
 // 토너먼트 트로피 종류. 백엔드 enum 그대로 id 사용. 한국어 라벨/아이콘은 프론트 매핑.
 // trophyType 이 null 이면 일반 우승 표시 (트로피 미지정).

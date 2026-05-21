@@ -147,12 +147,27 @@ function makeEmptySlots() {
 	return POSITIONS.map(p => ({ puuid: null, position: p }));
 }
 
-function TeamFormDialog({ open, onClose, onSuccess, tournamentId, groupId, team, allTeams }) {
+function TeamFormDialog({ open, onClose, onSuccess, tournamentId, groupId, team, allTeams, tournament }) {
 	const { classes, cx } = useStyles();
 	const { classes: dialogClasses } = useDialogStyles();
 	const dispatch = useDispatch();
 	const activeMembers = useSelector(({ Tournament }) => Tournament.tournament.activeMembers);
 	const isEdit = Boolean(team);
+	const isAuctionCreate = !isEdit && tournament && tournament.type === 'auction';
+	const auctionConfig = tournament && tournament.auctionConfig;
+
+	// 각 puuid가 등록된 포지션을 룩업하기 위한 맵 (auction 모드 전용).
+	const candidatePositionMap = useMemo(() => {
+		const m = new Map();
+		if (auctionConfig && auctionConfig.candidates) {
+			Object.entries(auctionConfig.candidates).forEach(([pos, puuids]) => {
+				(puuids || []).forEach(p => m.set(p, pos));
+			});
+		}
+		return m;
+	}, [auctionConfig]);
+
+	const [auctionCaptain, setAuctionCaptain] = useState(null);
 
 	useEffect(() => {
 		// 팀 후보 목록(active-members)은 다이얼로그 열릴 때만 필요.
@@ -204,6 +219,18 @@ function TeamFormDialog({ open, onClose, onSuccess, tournamentId, groupId, team,
 		[activeMembers, otherTeamPuuids]
 	);
 
+	// auction 모드: 후보 풀에 있는 사람 중 아직 어느 팀의 팀장도 아닌 사람만.
+	const auctionCaptainCandidates = useMemo(() => {
+		if (!isAuctionCreate) return [];
+		return (activeMembers || []).filter(m =>
+			candidatePositionMap.has(m.puuid) && !otherTeamPuuids.has(m.puuid)
+		);
+	}, [isAuctionCreate, activeMembers, candidatePositionMap, otherTeamPuuids]);
+
+	const auctionCaptainPosition = auctionCaptain
+		? candidatePositionMap.get(auctionCaptain.puuid)
+		: null;
+
 	function handleMemberChange(idx, member) {
 		setMembers(prev => {
 			const next = prev.slice();
@@ -227,6 +254,11 @@ function TeamFormDialog({ open, onClose, onSuccess, tournamentId, groupId, team,
 
 	function validate() {
 		if (!name.trim()) return '팀명을 입력하세요.';
+		if (isAuctionCreate) {
+			if (!auctionCaptain) return '팀장을 선택하세요.';
+			if (!auctionCaptainPosition) return '선택한 사람이 후보 풀에 등록되어 있지 않습니다.';
+			return null;
+		}
 		const filled = members.filter(m => m.puuid);
 		if (filled.length !== 5) return '팀원 5명을 모두 선택하세요.';
 		const puuidSet = new Set(filled.map(m => m.puuid));
@@ -247,11 +279,17 @@ function TeamFormDialog({ open, onClose, onSuccess, tournamentId, groupId, team,
 		setError('');
 		setLoading(true);
 
-		const body = {
-			name: name.trim(),
-			captainPuuid,
-			members: members.map(m => ({ puuid: m.puuid, position: m.position }))
-		};
+		const body = isAuctionCreate
+			? {
+				name: name.trim(),
+				captainPuuid: auctionCaptain.puuid,
+				members: [{ puuid: auctionCaptain.puuid, position: auctionCaptainPosition }]
+			}
+			: {
+				name: name.trim(),
+				captainPuuid,
+				members: members.map(m => ({ puuid: m.puuid, position: m.position }))
+			};
 
 		const req = isEdit
 			? Actions.updateTeam(tournamentId, team.id, body)
@@ -284,7 +322,11 @@ function TeamFormDialog({ open, onClose, onSuccess, tournamentId, groupId, team,
 			slotProps={{ paper: { className: cx(dialogClasses.paperCyan, classes.paperWidth) } }}
 		>
 			<DialogTitle className={dialogClasses.titleCyan}>{isEdit ? '팀 수정' : '팀 등록'}</DialogTitle>
-			<div className={dialogClasses.subtitle}>탑/정글/미드/원딜/서폿 — 팀장은 ★ 라디오로 지정</div>
+			<div className={dialogClasses.subtitle}>
+				{isAuctionCreate
+					? '팀장만 먼저 등록합니다 — 나머지 자리는 경매로 채워집니다'
+					: '탑/정글/미드/원딜/서폿 — 팀장은 ★ 라디오로 지정'}
+			</div>
 			<DialogContent className={dialogClasses.contentPad}>
 				<TextField
 					className={classes.field}
@@ -297,9 +339,67 @@ function TeamFormDialog({ open, onClose, onSuccess, tournamentId, groupId, team,
 					autoFocus
 					inputProps={{ maxLength: 40 }}
 				/>
-				<div className={classes.captainHint}>★ 표시 라디오로 팀장을 지정하세요</div>
-				<div className={classes.sectionLabel}>팀원</div>
-				{members.map((slot, idx) => {
+				{isAuctionCreate ? (
+					<>
+						<div className={classes.sectionLabel}>팀장</div>
+						<div className={classes.memberRow}>
+							{auctionCaptainPosition ? renderPositionCell(auctionCaptainPosition) : (
+								<div className={classes.positionCell}>
+									<span className={classes.positionFallback}>?</span>
+								</div>
+							)}
+							<Autocomplete
+								className={classes.memberAutocomplete}
+								options={auctionCaptainCandidates}
+								value={auctionCaptain}
+								getOptionLabel={(o) => (o && o.name) || ''}
+								isOptionEqualToValue={(o, v) => o.puuid === v.puuid}
+								onChange={(_, value) => setAuctionCaptain(value)}
+								renderOption={(props, option) => {
+									const { key, ...rest } = props;
+									const pos = candidatePositionMap.get(option.puuid);
+									return (
+										<li key={key} {...rest} className={classes.memberOption}>
+											{option.profileIconId && (
+												<img
+													src={getProfileIconUrl(option.profileIconId)}
+													alt=""
+													className={classes.optionAvatar}
+												/>
+											)}
+											<span className={classes.optionName}>
+												{option.name}
+												{pos && (
+													<span style={{ color: '#00d4ff', marginLeft: 8 }}>
+														{POSITION_LABELS[pos]}
+													</span>
+												)}
+											</span>
+										</li>
+									);
+								}}
+								renderInput={(params) => (
+									<TextField
+										{...params}
+										variant="outlined"
+										label="팀장 선택"
+									/>
+								)}
+							/>
+						</div>
+						{auctionCaptainPosition && (
+							<div className={classes.captainHint}>
+								포지션: {POSITION_LABELS[auctionCaptainPosition]} (후보 풀 등록 기준)
+							</div>
+						)}
+					</>
+				) : (
+					<>
+						<div className={classes.captainHint}>★ 표시 라디오로 팀장을 지정하세요</div>
+						<div className={classes.sectionLabel}>팀원</div>
+					</>
+				)}
+				{!isAuctionCreate && members.map((slot, idx) => {
 					const selectedMember = slot.puuid ? memberMap.get(slot.puuid) : null;
 					return (
 						<div key={slot.position} className={classes.memberRow}>
