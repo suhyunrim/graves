@@ -340,6 +340,44 @@ const useStyles = makeStyles()((theme) => ({
 		fontFamily: '"Rajdhani", sans-serif',
 		fontSize: '1.4rem',
 		color: 'rgba(255, 255, 255, 0.4)'
+	},
+	runnerUpSection: {
+		marginTop: 18,
+		paddingTop: 12,
+		borderTop: '1px solid rgba(255, 255, 255, 0.07)',
+		display: 'flex',
+		alignItems: 'center',
+		gap: 8,
+		flexWrap: 'wrap',
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.05rem',
+		color: 'rgba(255, 255, 255, 0.45)'
+	},
+	runnerUpBadge: {
+		fontFamily: '"Rajdhani", "Noto Sans KR", sans-serif',
+		fontSize: '0.95rem',
+		fontWeight: 700,
+		letterSpacing: '0.06em',
+		padding: '2px 8px',
+		borderRadius: 4,
+		background: 'rgba(255, 255, 255, 0.06)',
+		color: 'rgba(255, 255, 255, 0.55)',
+		textTransform: 'uppercase'
+	},
+	runnerUpName: {
+		fontWeight: 600,
+		color: 'rgba(255, 255, 255, 0.7)'
+	},
+	runnerUpSep: {
+		color: 'rgba(255, 255, 255, 0.2)'
+	},
+	runnerUpDuoIcon: {
+		color: 'rgba(255, 105, 180, 0.5)',
+		fontSize: '0.95rem'
+	},
+	runnerUpVersusIcon: {
+		color: 'rgba(138, 43, 226, 0.5)',
+		fontSize: '0.95rem'
 	}
 }));
 
@@ -416,6 +454,14 @@ function Dashboard() {
 							<span>{item.wins}승 {item.losses}패</span>
 							<span>({item.winRate}%)</span>
 						</div>
+						{item.runnerUp && (
+							<div className={classes.runnerUpSection}>
+								<span className={classes.runnerUpBadge}>2위</span>
+								<span className={classes.runnerUpName}>{item.runnerUp.name}</span>
+								<span className={classes.runnerUpSep}>·</span>
+								<span>{item.runnerUp.games}판 ({item.runnerUp.winRate}%)</span>
+							</div>
+						)}
 					</div>
 				) : (
 					<div className={classes.emptyText}>데이터가 없습니다</div>
@@ -444,6 +490,14 @@ function Dashboard() {
 							<span>{item.games}판</span>
 							<span>{item.wins}승 {item.losses}패</span>
 						</div>
+						{item.runnerUp && (
+							<div className={classes.runnerUpSection}>
+								<span className={classes.runnerUpBadge}>2위</span>
+								<span className={classes.runnerUpName}>{item.runnerUp.name}</span>
+								<span className={classes.runnerUpSep}>·</span>
+								<span>{item.runnerUp.winRate}% ({item.runnerUp.games}판)</span>
+							</div>
+						)}
 					</div>
 				) : (
 					<div className={classes.emptyText}>데이터가 없습니다</div>
@@ -471,6 +525,14 @@ function Dashboard() {
 							<span className={classes.streakNumber}>{item.streak}</span>
 							<span className={classes.streakLabel}>연승</span>
 						</div>
+						{item.runnerUp && (
+							<div className={classes.runnerUpSection}>
+								<span className={classes.runnerUpBadge}>2위</span>
+								<span className={classes.runnerUpName}>{item.runnerUp.name}</span>
+								<span className={classes.runnerUpSep}>·</span>
+								<span>{item.runnerUp.streak}연승</span>
+							</div>
+						)}
 					</div>
 				) : (
 					<div className={classes.emptyText}>데이터가 없습니다</div>
@@ -503,6 +565,16 @@ function Dashboard() {
 							<span>{item.games}판</span>
 							<span>{item.wins}승 {item.losses}패</span>
 						</div>
+						{item.runnerUp && (
+							<div className={classes.runnerUpSection}>
+								<span className={classes.runnerUpBadge}>2위</span>
+								<span className={classes.runnerUpName}>{item.runnerUp.name1}</span>
+								<span className={classes.runnerUpDuoIcon}>♥</span>
+								<span className={classes.runnerUpName}>{item.runnerUp.name2}</span>
+								<span className={classes.runnerUpSep}>·</span>
+								<span>{item.runnerUp.winRate}% ({item.runnerUp.games}판)</span>
+							</div>
+						)}
 					</div>
 				) : (
 					<div className={classes.emptyText}>데이터가 없습니다</div>
@@ -536,6 +608,16 @@ function Dashboard() {
 							<span style={{ color: 'rgba(255,255,255,0.3)' }}>vs</span>
 							<span className={classes.rivalryWins} style={{ color: '#ff6b6b' }}>{item.player2Wins}승</span>
 						</div>
+						{item.runnerUp && (
+							<div className={classes.runnerUpSection}>
+								<span className={classes.runnerUpBadge}>2위</span>
+								<span className={classes.runnerUpName}>{item.runnerUp.name1}</span>
+								<span className={classes.runnerUpVersusIcon}>↔</span>
+								<span className={classes.runnerUpName}>{item.runnerUp.name2}</span>
+								<span className={classes.runnerUpSep}>·</span>
+								<span>{item.runnerUp.games}판 ({item.runnerUp.player1Wins}:{item.runnerUp.player2Wins})</span>
+							</div>
+						)}
 					</div>
 				) : (
 					<div className={classes.emptyText}>데이터가 없습니다</div>
@@ -611,6 +693,14 @@ function Dashboard() {
 							{renderTierBadge(item.endRating)}
 							<span>{item.games}판</span>
 						</div>
+						{item.runnerUp && (
+							<div className={classes.runnerUpSection}>
+								<span className={classes.runnerUpBadge}>2위</span>
+								<span className={classes.runnerUpName}>{item.runnerUp.name}</span>
+								<span className={classes.runnerUpSep}>·</span>
+								<span>{item.runnerUp.startRating} → {item.runnerUp.endRating} ({item.runnerUp.games}판)</span>
+							</div>
+						)}
 					</div>
 				) : (
 					<div className={classes.emptyText}>데이터가 없습니다</div>
@@ -638,6 +728,14 @@ function Dashboard() {
 							<span className={`${classes.statHighlight} ${classes.highlightIndigo}`}>{item.lateNightRate}%</span>
 							<span>{item.games}판 중 {item.lateNightGames}판</span>
 						</div>
+						{item.runnerUp && (
+							<div className={classes.runnerUpSection}>
+								<span className={classes.runnerUpBadge}>2위</span>
+								<span className={classes.runnerUpName}>{item.runnerUp.name}</span>
+								<span className={classes.runnerUpSep}>·</span>
+								<span>{item.runnerUp.lateNightRate}% ({item.runnerUp.lateNightGames}/{item.runnerUp.games}판)</span>
+							</div>
+						)}
 					</div>
 				) : (
 					<div className={classes.emptyText}>데이터가 없습니다</div>
@@ -672,6 +770,23 @@ function Dashboard() {
 							</span>
 						)}
 						</div>
+						{item.runnerUp && (
+							<div className={classes.runnerUpSection}>
+								<span className={classes.runnerUpBadge}>2위</span>
+								<span className={classes.runnerUpName}>{item.runnerUp.name}</span>
+								<span className={classes.runnerUpSep}>·</span>
+								<span>{item.runnerUp.votes}표</span>
+								{item.runnerUp.title && (
+									<>
+										<span className={classes.runnerUpSep}>·</span>
+										<span>
+											<span role="img" aria-label="title badge">{item.runnerUp.title.emoji}</span>
+											{' '}{item.runnerUp.title.title}
+										</span>
+									</>
+								)}
+							</div>
+						)}
 					</div>
 				) : (
 					<div className={classes.emptyText}>데이터가 없습니다</div>
@@ -699,6 +814,14 @@ function Dashboard() {
 							<span className={`${classes.statHighlight} ${classes.highlightDarkGold}`}>{item.darkHorseWinRate}%</span>
 							<span>총 {item.games}판 중 {item.darkHorseGames}판 최저 레이팅 / {item.darkHorseWins}승 {item.darkHorseGames - item.darkHorseWins}패</span>
 						</div>
+						{item.runnerUp && (
+							<div className={classes.runnerUpSection}>
+								<span className={classes.runnerUpBadge}>2위</span>
+								<span className={classes.runnerUpName}>{item.runnerUp.name}</span>
+								<span className={classes.runnerUpSep}>·</span>
+								<span>{item.runnerUp.darkHorseWinRate}% ({item.runnerUp.darkHorseWins}승/{item.runnerUp.darkHorseGames}판)</span>
+							</div>
+						)}
 					</div>
 				) : (
 					<div className={classes.emptyText}>데이터가 없습니다</div>
@@ -732,6 +855,16 @@ function Dashboard() {
 							<span className={`${classes.statHighlight} ${classes.highlightGreen}`}>{item.games}판</span>
 							<span>첫 내전: {formatDate(item.firstMatchDate)}</span>
 						</div>
+						{item.runnerUp && (
+							<div className={classes.runnerUpSection}>
+								<span className={classes.runnerUpBadge}>2위</span>
+								<span className={classes.runnerUpName}>{item.runnerUp.name}</span>
+								<span className={classes.runnerUpSep}>·</span>
+								<span>{item.runnerUp.games}판</span>
+								<span className={classes.runnerUpSep}>·</span>
+								<span>{formatDate(item.runnerUp.firstMatchDate)}</span>
+							</div>
+						)}
 					</div>
 				) : (
 					<div className={classes.emptyText}>데이터가 없습니다</div>
