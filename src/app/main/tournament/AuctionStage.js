@@ -426,8 +426,10 @@ const useStyles = makeStyles()((theme) => ({
 	smallTierRow: {
 		display: 'flex',
 		flexDirection: 'column',
+		alignItems: 'flex-end',
 		gap: 2,
-		marginTop: 2
+		marginLeft: 'auto',
+		flexShrink: 0
 	},
 	smallTier: {
 		display: 'inline-flex',
@@ -981,30 +983,30 @@ function AuctionStage({ tournament, teams, isAdmin, onChanged }) {
 					<span className={classes.smallName}>
 						{name || displayNameForPuuid(null, puuid)}
 					</span>
-					<div className={classes.smallTierRow}>
-						<span className={classes.smallTier}>
-							<span className={classes.smallTierLabel}>솔랭</span>
-							{soloRank && soloRank.short ? (
-								<>
-									{soloRank.emblem && <img src={soloRank.emblem} alt="" className={classes.smallTierEmblem} />}
-									<span>{soloRank.short}</span>
-								</>
-							) : (
-								<span className={classes.smallTierEmpty}>-</span>
-							)}
-						</span>
-						<span className={classes.smallTier}>
-							<span className={classes.smallTierLabel}>내전</span>
-							{internalTier.short ? (
-								<>
-									{internalTier.emblem && <img src={internalTier.emblem} alt="" className={classes.smallTierEmblem} />}
-									<span>{internalTier.short}</span>
-								</>
-							) : (
-								<span className={classes.smallTierEmpty}>-</span>
-							)}
-						</span>
-					</div>
+				</div>
+				<div className={classes.smallTierRow}>
+					<span className={classes.smallTier}>
+						<span className={classes.smallTierLabel}>솔랭</span>
+						{soloRank && soloRank.short ? (
+							<>
+								{soloRank.emblem && <img src={soloRank.emblem} alt="" className={classes.smallTierEmblem} />}
+								<span>{soloRank.short}</span>
+							</>
+						) : (
+							<span className={classes.smallTierEmpty}>-</span>
+						)}
+					</span>
+					<span className={classes.smallTier}>
+						<span className={classes.smallTierLabel}>내전</span>
+						{internalTier.short ? (
+							<>
+								{internalTier.emblem && <img src={internalTier.emblem} alt="" className={classes.smallTierEmblem} />}
+								<span>{internalTier.short}</span>
+							</>
+						) : (
+							<span className={classes.smallTierEmpty}>-</span>
+						)}
+					</span>
 				</div>
 			</div>
 		);
