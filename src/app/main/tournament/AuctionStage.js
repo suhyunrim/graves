@@ -672,9 +672,16 @@ function CandidateInfoCard({ candidate, classes }) {
 				{(achievements.length > 0 || (honor && (honor.received != null || honorTitleText))) && (
 					<div className={classes.candidateExtras}>
 						{achievements.length > 0 && (() => {
+							// 티어 높은 순 정렬. IRON은 TIER_RANK에 없어 0 으로 떨어지므로 명시 폴백.
+							const tierScore = (t) => {
+								if (t == null) return -1;
+								if (t in TIER_RANK) return TIER_RANK[t];
+								if (t === 'IRON') return 0;
+								return -1;
+							};
 							const sorted = [...achievements]
 								.filter(Boolean)
-								.sort((a, b) => (TIER_RANK[b.tier] || 0) - (TIER_RANK[a.tier] || 0));
+								.sort((a, b) => tierScore(b.tier) - tierScore(a.tier));
 							if (sorted.length === 0) return null;
 							return (
 								<span className={classes.achievementGroup}>
