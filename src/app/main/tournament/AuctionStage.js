@@ -33,7 +33,7 @@ import {
 	parseRankTier
 } from './tournamentUtils';
 import PositionIcon from './PositionIcon';
-import { CATEGORY_LABELS } from '../achievementDashboard/constants';
+import { CATEGORY_LABELS, TIER_COLORS, TIER_RANK } from '../achievementDashboard/constants';
 
 const blink = keyframes({
 	'0%, 100%': { opacity: 1 },
@@ -206,18 +206,24 @@ const useStyles = makeStyles()((theme) => ({
 	achievementIcons: {
 		display: 'inline-flex',
 		alignItems: 'center',
-		gap: 4
+		gap: 6,
+		flexWrap: 'wrap'
 	},
-	achievementIcon: {
+	achievementEmblem: {
+		width: 28,
+		height: 28,
+		objectFit: 'contain'
+	},
+	achievementEmojiBox: {
 		display: 'inline-flex',
 		alignItems: 'center',
 		justifyContent: 'center',
-		width: 24,
-		height: 24,
+		width: 28,
+		height: 28,
 		borderRadius: 6,
 		background: 'rgba(255, 215, 0, 0.12)',
 		border: '1px solid rgba(255, 215, 0, 0.3)',
-		fontSize: '1.05rem',
+		fontSize: '1.15rem',
 		lineHeight: 1
 	},
 	honorGroup: {
@@ -664,27 +670,70 @@ function CandidateInfoCard({ candidate, classes }) {
 				</div>
 				{(achievements.length > 0 || (honor && (honor.received != null || honorTitleText))) && (
 					<div className={classes.candidateExtras}>
-						{achievements.length > 0 && (
-							<span className={classes.achievementGroup}>
-								<span className={classes.achievementLabel}>업적</span>
-								<span className={classes.achievementIcons}>
-									{achievements.map(a => {
-										const cat = CATEGORY_LABELS[a.category] || CATEGORY_LABELS[a.id] || null;
-										const icon = (typeof a.icon === 'string' && a.icon) || (cat && cat.icon) || '🏅';
-										const labelText = (cat && cat.label) || a.title || a.name || a.id || '업적';
-										const labelStr = typeof labelText === 'string' ? labelText : (labelText.title || '업적');
-										const key = a.id || a.category || a.title || labelStr;
-										return (
-											<Tooltip key={key} title={labelStr} arrow>
-												<span className={classes.achievementIcon} role="img" aria-label={labelStr}>
-													{icon}
-												</span>
-											</Tooltip>
-										);
-									})}
+						{achievements.length > 0 && (() => {
+							// AchievementContent의 summary 패턴 — 카테고리별 가장 높은 tier 1개만 추려서 emblem으로 표시.
+							const byCategory = new Map();
+							achievements.forEach(a => {
+								if (!a || !a.category) return;
+								const cur = byCategory.get(a.category);
+								if (!cur || (TIER_RANK[a.tier] || 0) > (TIER_RANK[cur.tier] || 0)) {
+									byCategory.set(a.category, a);
+								}
+							});
+							const summary = [...byCategory.values()].sort(
+								(a, b) => (TIER_RANK[b.tier] || 0) - (TIER_RANK[a.tier] || 0)
+							);
+							const fallback = achievements.filter(a => a && !a.category);
+							if (summary.length === 0 && fallback.length === 0) return null;
+							return (
+								<span className={classes.achievementGroup}>
+									<span className={classes.achievementLabel}>업적</span>
+									<span className={classes.achievementIcons}>
+										{summary.map(a => {
+											const catMeta = CATEGORY_LABELS[a.category];
+											const catLabel = (catMeta && catMeta.label) || a.category;
+											const title = `${catLabel}${a.name ? ` · ${a.name}` : ''}${a.tier ? ` (${a.tier})` : ''}`;
+											const tierColor = TIER_COLORS[a.tier] || '#fff';
+											const isTierCat = a.category === 'tier';
+											const emblemTier = isTierCat
+												? String(a.id || '').replace('TIER_', '')
+												: a.tier;
+											if (emblemTier) {
+												return (
+													<Tooltip key={a.id || a.category} title={title} arrow>
+														<img
+															className={classes.achievementEmblem}
+															src={`/assets/images/ranked-emblems/Emblem_${emblemTier}.webp`}
+															alt={a.name || catLabel}
+															style={{ filter: `drop-shadow(0 0 6px ${tierColor}50)` }}
+														/>
+													</Tooltip>
+												);
+											}
+											const emoji = a.emoji || (catMeta && catMeta.icon) || '🏅';
+											return (
+												<Tooltip key={a.id || a.category} title={title} arrow>
+													<span className={classes.achievementEmojiBox} role="img" aria-label={catLabel}>
+														{emoji}
+													</span>
+												</Tooltip>
+											);
+										})}
+										{fallback.map(a => {
+											const emoji = a.emoji || '🏅';
+											const title = a.name || a.id || '업적';
+											return (
+												<Tooltip key={a.id || title} title={title} arrow>
+													<span className={classes.achievementEmojiBox} role="img" aria-label={title}>
+														{emoji}
+													</span>
+												</Tooltip>
+											);
+										})}
+									</span>
 								</span>
-							</span>
-						)}
+							);
+						})()}
 						{honor && (honor.received != null || honorTitleText) && (
 							<span className={classes.honorGroup}>
 								<span role="img" aria-label="sparkles">✨</span>
