@@ -598,26 +598,49 @@ function CandidateInfoCard({ candidate, classes }) {
 					<div className={classes.achievementRow}>
 						<EmojiEventsIcon style={{ color: '#ffd700', width: 18, height: 18 }} />
 						<span>업적</span>
-						{achievements.map(a => (
-							<span key={a.id} className={classes.achievementChip}>{a.id}</span>
-						))}
+						{achievements.map(a => {
+							const label = a.title || a.name || a.id;
+							const key = a.id || a.title || a.name;
+							const labelStr = typeof label === 'string' ? label : (label && label.id) || '';
+							return (
+								<span key={key} className={classes.achievementChip}>{labelStr}</span>
+							);
+						})}
 					</div>
 				)}
-				{honor && (honor.received != null || honor.title) && (
-					<div className={classes.honorRow}>
-						<span role="img" aria-label="sparkles">✨</span>
-						<span>
-							명예 받음 <span className={classes.statValue}>{honor.received || 0}</span>
-							{honor.given != null && <> · 줌 <span className={classes.statValue}>{honor.given}</span></>}
-						</span>
-						{honor.title && (
-							<>
-								<span className={classes.statSep}>·</span>
-								<span className={classes.honorTitle}>{honor.title}</span>
-							</>
-						)}
-					</div>
-				)}
+				{honor && (honor.received != null || honor.title) && (() => {
+					// honor.title은 객체 형태 ({ title, emoji, minVotes }) 또는 문자열로 올 수 있음.
+					let titleText = null;
+					let titleEmoji = null;
+					if (honor.title && typeof honor.title === 'object') {
+						titleText = honor.title.title || null;
+						titleEmoji = honor.title.emoji || null;
+					} else if (typeof honor.title === 'string') {
+						titleText = honor.title;
+					}
+					return (
+						<div className={classes.honorRow}>
+							<span role="img" aria-label="sparkles">✨</span>
+							<span>
+								명예 받음 <span className={classes.statValue}>{honor.received || 0}</span>
+								{honor.given != null && <> · 줌 <span className={classes.statValue}>{honor.given}</span></>}
+							</span>
+							{titleText && (
+								<>
+									<span className={classes.statSep}>·</span>
+									<span className={classes.honorTitle}>
+										{titleEmoji && (
+											<span role="img" aria-label="title badge" style={{ marginRight: 4 }}>
+												{titleEmoji}
+											</span>
+										)}
+										{titleText}
+									</span>
+								</>
+							)}
+						</div>
+					);
+				})()}
 			</div>
 		</div>
 	);
