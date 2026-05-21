@@ -858,11 +858,10 @@ function TournamentDetail() {
 	const isInProgress = detail.status === STATUS.IN_PROGRESS;
 	const isFinished = detail.status === STATUS.FINISHED;
 	const isAuctionType = detail.type === 'auction';
-	const auctionConfig = detail.auctionConfig;
 	const teamCount = teams.length;
 	// auction 완료 후엔 preparing 상태로 돌아오지만, 이미 멤버가 차 있어서 일반 대진 짜기 흐름.
-	const auctionMembersComplete = isAuctionType && auctionConfig && teams.length > 0
-		&& teams.every(t => (t.members || []).length >= (auctionConfig.teamSize || 5));
+	const auctionMembersComplete = isAuctionType && teams.length > 0
+		&& teams.every(t => (t.members || []).length >= 5);
 	const canStart = isAdmin && isPreparing && teamCount >= 2
 		&& (!isAuctionType || auctionMembersComplete);
 	const canStartAuction = isAdmin && isPreparing && isAuctionType && !auctionMembersComplete && teamCount >= 2;

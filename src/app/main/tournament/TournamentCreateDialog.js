@@ -219,8 +219,6 @@ const DEFAULT_AUCTION = {
 	allowNegative: false
 };
 
-const TEAM_SIZE = 5;
-
 function makeEmptyCandidates() {
 	return POSITIONS.reduce((acc, p) => {
 		acc[p] = [];
@@ -319,7 +317,6 @@ function TournamentCreateDialog({ open, onClose, onSuccess, groupId }) {
 		if (type === 'auction') {
 			body.auctionConfig = {
 				minBid: auction.minBid,
-				teamSize: TEAM_SIZE,
 				allowNegative: auction.allowNegative,
 				candidates: POSITIONS.reduce((acc, p) => {
 					acc[p] = candidates[p];

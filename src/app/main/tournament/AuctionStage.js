@@ -344,7 +344,7 @@ function AuctionStage({ tournament, teams, isAdmin, onChanged, lastBidPuuid }) {
 
 	const auctionConfig = tournament.auctionConfig;
 	const tournamentId = tournament.id;
-	const teamSize = (auctionConfig && auctionConfig.teamSize) || 5;
+	const teamSize = 5;
 	const minBid = (auctionConfig && auctionConfig.minBid) || 1;
 	const allowNegative = Boolean(auctionConfig && auctionConfig.allowNegative);
 
