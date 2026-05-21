@@ -101,18 +101,18 @@ export function nextAuctionCandidate(tournamentId) {
 	);
 }
 
-export function startAuctionBid(tournamentId, durationSeconds) {
+export function startAuctionBid(tournamentId) {
 	return createCamilleAxios().post(
 		`/api/tournament/${tournamentId}/auction/start-bid`,
-		{ durationSeconds },
+		{},
 		{ silentError: true }
 	);
 }
 
-export function extendAuctionTime(tournamentId, durationSeconds) {
+export function extendAuctionTime(tournamentId) {
 	return createCamilleAxios().post(
 		`/api/tournament/${tournamentId}/auction/extend-time`,
-		{ durationSeconds },
+		{},
 		{ silentError: true }
 	);
 }

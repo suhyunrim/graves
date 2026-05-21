@@ -216,6 +216,7 @@ const BEST_OF_OPTIONS = [1, 3, 5, 7];
 
 const DEFAULT_AUCTION = {
 	minBid: 5,
+	bidDurationSeconds: 30,
 	allowNegative: false
 };
 
@@ -292,6 +293,9 @@ function TournamentCreateDialog({ open, onClose, onSuccess, groupId }) {
 		if (!form.name.trim()) return '토너먼트 이름을 입력하세요.';
 		if (type === 'auction') {
 			if (!auction.minBid || auction.minBid <= 0) return '최소 입찰가는 1 이상이어야 합니다.';
+			if (!auction.bidDurationSeconds || auction.bidDurationSeconds <= 0) {
+				return '기본 입찰 제한 시간은 1초 이상이어야 합니다.';
+			}
 			if (!allSameCount) return '각 포지션의 후보 인원이 동일해야 합니다.';
 		}
 		return null;
@@ -317,6 +321,7 @@ function TournamentCreateDialog({ open, onClose, onSuccess, groupId }) {
 		if (type === 'auction') {
 			body.auctionConfig = {
 				minBid: auction.minBid,
+				bidDurationSeconds: auction.bidDurationSeconds,
 				allowNegative: auction.allowNegative,
 				candidates: POSITIONS.reduce((acc, p) => {
 					acc[p] = candidates[p];
@@ -506,6 +511,17 @@ function TournamentCreateDialog({ open, onClose, onSuccess, groupId }) {
 							size="small"
 							inputProps={{ min: 1 }}
 							helperText="팀당 5명 고정. 팀장 예산은 팀장 등록 시 개별로 지정합니다."
+						/>
+						<TextField
+							className={classes.field}
+							label="기본 입찰 제한 시간 (초)"
+							type="number"
+							value={auction.bidDurationSeconds}
+							onChange={handleAuctionChange('bidDurationSeconds')}
+							variant="outlined"
+							size="small"
+							inputProps={{ min: 1 }}
+							helperText="경매 중 모든 입찰의 제한 시간이 됩니다. 토너먼트 시작 후에는 변경할 수 없습니다."
 						/>
 						<div className={classes.switchRow}>
 							<FormControlLabel

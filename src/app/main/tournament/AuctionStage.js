@@ -8,8 +8,6 @@ import {
 	DialogContent,
 	DialogContentText,
 	DialogActions,
-	ToggleButton,
-	ToggleButtonGroup,
 	MenuItem
 } from '@mui/material';
 import { makeStyles } from 'tss-react/mui';
@@ -494,32 +492,21 @@ const useStyles = makeStyles()((theme) => ({
 		color: '#00d4ff',
 		fontWeight: 700
 	},
-	durationToggle: {
-		marginTop: 8,
-		'& .MuiToggleButton-root': {
-			color: 'rgba(255, 255, 255, 0.7)',
-			borderColor: 'rgba(255, 255, 255, 0.2)',
-			fontFamily: '"Noto Sans KR", sans-serif',
-			fontSize: '1.15rem',
-			padding: '6px 16px',
-			'&.Mui-selected': {
-				color: '#00d4ff',
-				borderColor: '#00d4ff',
-				background: 'rgba(0, 212, 255, 0.12)'
-			}
-		}
-	},
-	customInput: {
-		marginTop: 12,
-		'& .MuiInputBase-root': { color: '#fff' },
-		'& .MuiInputLabel-root': { color: 'rgba(255, 255, 255, 0.6)' },
-		'& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255, 255, 255, 0.2)' }
-	},
-	dialogHint: {
+	bidDurationHint: {
 		fontFamily: '"Noto Sans KR", sans-serif',
-		fontSize: '1.1rem',
+		fontSize: '1.15rem',
 		color: 'rgba(255, 255, 255, 0.5)',
-		marginTop: 8
+		padding: '8px 14px',
+		borderRadius: 10,
+		background: 'rgba(255, 255, 255, 0.03)',
+		border: '1px dashed rgba(255, 255, 255, 0.1)',
+		'& b': {
+			color: '#00d4ff',
+			fontFamily: '"Rajdhani", sans-serif',
+			fontWeight: 700,
+			fontSize: '1.4rem',
+			margin: '0 2px'
+		}
 	},
 	expiredHint: {
 		textAlign: 'center',
@@ -543,8 +530,6 @@ const useStyles = makeStyles()((theme) => ({
 		'& .MuiFormHelperText-root': { color: 'rgba(255, 255, 255, 0.5)' }
 	}
 }));
-
-const DURATION_PRESETS = [30, 60, 120];
 
 function getMemberTier(rating) {
 	const tierName = getTierName(rating);
@@ -587,58 +572,7 @@ function Countdown({ deadline, classes }) {
 	);
 }
 
-// ─── Duration Dialog ──────────────────────────────────────────
-function DurationDialog({ open, title, hint, confirmLabel, onClose, onConfirm, classes }) {
-	const [preset, setPreset] = useState(30);
-	const [custom, setCustom] = useState('');
-	const useCustom = preset === 'custom';
-	const value = useCustom ? Number(custom) : preset;
-	const valid = Number.isFinite(value) && value > 0 && value <= 600;
-	function handleConfirm() {
-		if (!valid) return;
-		onConfirm(value);
-	}
-	return (
-		<Dialog
-			open={open}
-			onClose={onClose}
-			slotProps={{ paper: { className: classes.dialogPaper } }}
-		>
-			<DialogTitle className={classes.dialogTitle}>{title}</DialogTitle>
-			<DialogContent>
-				<ToggleButtonGroup
-					exclusive
-					value={preset}
-					onChange={(_e, v) => v != null && setPreset(v)}
-					className={classes.durationToggle}
-				>
-					{DURATION_PRESETS.map(p => (
-						<ToggleButton key={p} value={p}>{p}초</ToggleButton>
-					))}
-					<ToggleButton value="custom">직접 입력</ToggleButton>
-				</ToggleButtonGroup>
-				{useCustom && (
-					<TextField
-						className={classes.customInput}
-						label="초"
-						type="number"
-						value={custom}
-						onChange={(e) => setCustom(e.target.value)}
-						variant="outlined"
-						fullWidth
-						size="small"
-						inputProps={{ min: 1, max: 600 }}
-					/>
-				)}
-				{hint && <div className={classes.dialogHint}>{hint}</div>}
-			</DialogContent>
-			<DialogActions>
-				<Button onClick={onClose}>취소</Button>
-				<Button onClick={handleConfirm} disabled={!valid}>{confirmLabel}</Button>
-			</DialogActions>
-		</Dialog>
-	);
-}
+// ─── (legacy) DurationDialog removed — bidDurationSeconds is now configured at tournament creation.
 
 // ─── BidDialog (낙찰 — 팀 선택 + 금액) ────────────────────
 function BidDialog({
@@ -894,6 +828,7 @@ function AuctionStage({ tournament, teams, isAdmin, onChanged }) {
 	const tournamentId = tournament.id;
 	const minBid = (auctionConfig && auctionConfig.minBid) || 1;
 	const allowNegative = Boolean(auctionConfig && auctionConfig.allowNegative);
+	const bidDuration = (auctionConfig && auctionConfig.bidDurationSeconds) || 30;
 
 	const currentPuuid = tournament.currentAuctionPuuid;
 	const currentDeadline = tournament.currentAuctionDeadline;
@@ -941,9 +876,7 @@ function AuctionStage({ tournament, teams, isAdmin, onChanged }) {
 	}, [auctionConfig, assignedPuuids]);
 
 	const [completeOpen, setCompleteOpen] = useState(false);
-	const [startBidOpen, setStartBidOpen] = useState(false);
 	const [nextLoading, setNextLoading] = useState(false);
-	const [lastDuration, setLastDuration] = useState(30);
 	const [bidDialogOpen, setBidDialogOpen] = useState(false);
 	const [bidDialogTeamId, setBidDialogTeamId] = useState('');
 	const [bidDialogAmount, setBidDialogAmount] = useState('');
@@ -962,10 +895,8 @@ function AuctionStage({ tournament, teams, isAdmin, onChanged }) {
 			.finally(() => setNextLoading(false));
 	}
 
-	function handleStartBidConfirm(durationSeconds) {
-		setStartBidOpen(false);
-		setLastDuration(durationSeconds);
-		Actions.startAuctionBid(tournamentId, durationSeconds)
+	function handleStartBid() {
+		Actions.startAuctionBid(tournamentId)
 			.then(() => onChanged && onChanged())
 			.catch(err => {
 				const msg = err.response && err.response.data ? err.response.data.result : '입찰 시작 실패';
@@ -973,9 +904,8 @@ function AuctionStage({ tournament, teams, isAdmin, onChanged }) {
 			});
 	}
 
-	// extendOpen 관련 다이얼로그 흐름 제거 — handleExtendQuick으로 대체.
 	function handleExtendQuick() {
-		Actions.extendAuctionTime(tournamentId, lastDuration)
+		Actions.extendAuctionTime(tournamentId)
 			.then(() => onChanged && onChanged())
 			.catch(err => {
 				const msg = err.response && err.response.data ? err.response.data.result : '시간 갱신 실패';
@@ -1052,9 +982,9 @@ function AuctionStage({ tournament, teams, isAdmin, onChanged }) {
 					<Button
 						className={classes.adminBtn}
 						startIcon={<PlayArrowIcon />}
-						onClick={() => setStartBidOpen(true)}
+						onClick={handleStartBid}
 					>
-						입찰 시작
+						입찰 시작 ({bidDuration}s)
 					</Button>
 				)}
 				{hasCurrent && bidActive && (
@@ -1063,7 +993,7 @@ function AuctionStage({ tournament, teams, isAdmin, onChanged }) {
 						startIcon={<TimerIcon />}
 						onClick={handleExtendQuick}
 					>
-						시간 갱신 ({lastDuration}s)
+						시간 갱신 ({bidDuration}s)
 					</Button>
 				)}
 				{hasCurrent && bidExpired && (
@@ -1109,7 +1039,13 @@ function AuctionStage({ tournament, teams, isAdmin, onChanged }) {
 			<div className={classes.auctionBlock}>
 				<div className={classes.candidateTop}>
 					<CandidateInfoCard candidate={currentCandidate} classes={classes} />
-					{deadlineMs != null && <Countdown deadline={currentDeadline} classes={classes} />}
+					{deadlineMs != null ? (
+						<Countdown deadline={currentDeadline} classes={classes} />
+					) : (
+						<div className={classes.bidDurationHint}>
+							기본 입찰 시간 <b>{bidDuration}초</b>
+						</div>
+					)}
 				</div>
 			</div>
 		);
@@ -1226,14 +1162,6 @@ function AuctionStage({ tournament, teams, isAdmin, onChanged }) {
 				</DialogActions>
 			</Dialog>
 
-			<DurationDialog
-				open={startBidOpen}
-				title="입찰 시간 설정"
-				confirmLabel="시작"
-				onClose={() => setStartBidOpen(false)}
-				onConfirm={handleStartBidConfirm}
-				classes={classes}
-			/>
 			<BidDialog
 				open={bidDialogOpen}
 				teams={teams}
