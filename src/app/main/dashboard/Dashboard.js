@@ -378,6 +378,22 @@ const useStyles = makeStyles()((theme) => ({
 	runnerUpVersusIcon: {
 		color: 'rgba(138, 43, 226, 0.5)',
 		fontSize: '0.95rem'
+	},
+	runnerUpTierEmblem: {
+		width: 20,
+		height: 20,
+		opacity: 0.85
+	},
+	runnerUpTierShortName: {
+		fontFamily: '"Rajdhani", sans-serif',
+		fontSize: '1.1rem',
+		fontWeight: 700,
+		color: 'rgba(255, 255, 255, 0.7)'
+	},
+	runnerUpTierArrow: {
+		fontFamily: '"Rajdhani", sans-serif',
+		fontSize: '1rem',
+		color: 'rgba(255, 255, 255, 0.3)'
 	}
 }));
 
@@ -660,17 +676,17 @@ function Dashboard() {
 			return map[div] || '';
 		};
 
-		const renderTierBadge = (rating) => {
+		const renderTierBadge = (rating, small = false) => {
 			const info = getTierInfo(rating);
 			const label = info.division ? `${info.short}${divisionToNum(info.division)}` : info.short;
 			return (
 				<span className={classes.tierBadge}>
 					<img
-						className={classes.tierEmblemSmall}
+						className={small ? classes.runnerUpTierEmblem : classes.tierEmblemSmall}
 						src={`/assets/images/ranked-emblems/Emblem_${info.tier}.webp`}
 						alt={info.tier}
 					/>
-					<span className={classes.tierShortName}>{label}</span>
+					<span className={small ? classes.runnerUpTierShortName : classes.tierShortName}>{label}</span>
 				</span>
 			);
 		};
@@ -698,7 +714,10 @@ function Dashboard() {
 								<span className={classes.runnerUpBadge}>2위</span>
 								<span className={classes.runnerUpName}>{item.runnerUp.name}</span>
 								<span className={classes.runnerUpSep}>·</span>
-								<span>{item.runnerUp.startRating} → {item.runnerUp.endRating} ({item.runnerUp.games}판)</span>
+								{renderTierBadge(item.runnerUp.startRating, true)}
+								<span className={classes.runnerUpTierArrow}>→</span>
+								{renderTierBadge(item.runnerUp.endRating, true)}
+								<span>({item.runnerUp.games}판)</span>
 							</div>
 						)}
 					</div>
