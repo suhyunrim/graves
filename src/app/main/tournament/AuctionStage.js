@@ -209,22 +209,23 @@ const useStyles = makeStyles()((theme) => ({
 		gap: 6,
 		flexWrap: 'wrap'
 	},
-	achievementEmblem: {
-		width: 28,
-		height: 28,
-		objectFit: 'contain'
-	},
-	achievementEmojiBox: {
+	achievementChip: {
 		display: 'inline-flex',
 		alignItems: 'center',
-		justifyContent: 'center',
-		width: 28,
-		height: 28,
-		borderRadius: 6,
-		background: 'rgba(255, 215, 0, 0.12)',
-		border: '1px solid rgba(255, 215, 0, 0.3)',
-		fontSize: '1.15rem',
+		gap: 6,
+		padding: '3px 10px',
+		borderRadius: 8,
+		fontSize: '1.1rem',
+		fontFamily: '"Noto Sans KR", sans-serif',
+		lineHeight: 1.3
+	},
+	achievementChipEmoji: {
+		fontSize: '1.2rem',
 		lineHeight: 1
+	},
+	achievementChipName: {
+		color: '#fff',
+		fontWeight: 600
 	},
 	honorGroup: {
 		display: 'inline-flex',
@@ -671,7 +672,6 @@ function CandidateInfoCard({ candidate, classes }) {
 				{(achievements.length > 0 || (honor && (honor.received != null || honorTitleText))) && (
 					<div className={classes.candidateExtras}>
 						{achievements.length > 0 && (() => {
-							// 백엔드가 카테고리당 최대 1개로 enrich해 보낸다는 전제. tier 내림차순 정렬만.
 							const sorted = [...achievements]
 								.filter(Boolean)
 								.sort((a, b) => (TIER_RANK[b.tier] || 0) - (TIER_RANK[a.tier] || 0));
@@ -683,25 +683,30 @@ function CandidateInfoCard({ candidate, classes }) {
 										{sorted.map(a => {
 											const catMeta = CATEGORY_LABELS[a.category];
 											const catLabel = (catMeta && catMeta.label) || a.category || '';
-											const tierColor = TIER_COLORS[a.tier] || '#fff';
-											const title = `${catLabel}${a.name ? ` · ${a.name}` : ''}${a.tier ? ` (${a.tier})` : ''}`;
-											if (a.tier) {
-												return (
-													<Tooltip key={a.id || a.category || a.name} title={title} arrow>
-														<img
-															className={classes.achievementEmblem}
-															src={`/assets/images/ranked-emblems/Emblem_${a.tier}.webp`}
-															alt={a.name || catLabel}
-															style={{ filter: `drop-shadow(0 0 6px ${tierColor}50)` }}
-														/>
-													</Tooltip>
-												);
-											}
 											const emoji = a.emoji || (catMeta && catMeta.icon) || '🏅';
+											const name = a.name || catLabel || '업적';
+											const tierColor = TIER_COLORS[a.tier] || 'rgba(255,255,255,0.4)';
+											const desc = a.description || (catMeta && catMeta.description) || '';
+											const tooltipTitle = (
+												<span>
+													{name}{a.tier ? ` (${a.tier})` : ''}
+													{desc && <><br />{desc}</>}
+												</span>
+											);
 											return (
-												<Tooltip key={a.id || a.category || a.name || title} title={title} arrow>
-													<span className={classes.achievementEmojiBox} role="img" aria-label={catLabel || title}>
-														{emoji}
+												<Tooltip key={a.id || a.category || name} title={tooltipTitle} arrow>
+													<span
+														className={classes.achievementChip}
+														style={{
+															background: `${tierColor}15`,
+															border: `1px solid ${tierColor}60`,
+															boxShadow: `0 0 6px ${tierColor}25`
+														}}
+													>
+														<span className={classes.achievementChipEmoji} role="img" aria-label={catLabel}>
+															{emoji}
+														</span>
+														<span className={classes.achievementChipName}>{name}</span>
 													</span>
 												</Tooltip>
 											);
