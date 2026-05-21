@@ -145,38 +145,40 @@ const useStyles = makeStyles()((theme) => ({
 	},
 	statRow: {
 		display: 'flex',
-		gap: 18,
-		marginTop: 8,
+		gap: 28,
+		marginTop: 12,
 		flexWrap: 'wrap',
 		fontFamily: '"Noto Sans KR", sans-serif',
-		fontSize: '1.2rem',
-		color: 'rgba(255, 255, 255, 0.8)'
+		fontSize: '1.6rem',
+		color: 'rgba(255, 255, 255, 0.85)'
 	},
 	statBlock: {
 		display: 'inline-flex',
 		alignItems: 'center',
-		gap: 6
+		gap: 8
 	},
 	statLabel: {
-		color: 'rgba(255, 255, 255, 0.45)'
+		color: 'rgba(255, 255, 255, 0.5)',
+		fontSize: '1.3rem'
 	},
 	statValue: {
 		fontWeight: 600,
 		color: '#fff'
 	},
 	statTierEmblem: {
-		width: 20,
-		height: 20
+		width: 34,
+		height: 34
 	},
 	statTierShort: {
 		fontFamily: '"Rajdhani", sans-serif',
-		fontSize: '1.25rem',
+		fontSize: '1.9rem',
 		fontWeight: 700,
-		color: '#fff'
+		color: '#fff',
+		lineHeight: 1
 	},
 	statWL: {
-		color: 'rgba(255, 255, 255, 0.55)',
-		fontSize: '1.1rem'
+		color: 'rgba(255, 255, 255, 0.6)',
+		fontSize: '1.3rem'
 	},
 	statSep: {
 		color: 'rgba(255, 255, 255, 0.2)'
@@ -421,6 +423,12 @@ const useStyles = makeStyles()((theme) => ({
 		textOverflow: 'ellipsis',
 		whiteSpace: 'nowrap'
 	},
+	smallTierRow: {
+		display: 'flex',
+		flexDirection: 'column',
+		gap: 2,
+		marginTop: 2
+	},
 	smallTier: {
 		display: 'inline-flex',
 		alignItems: 'center',
@@ -430,9 +438,20 @@ const useStyles = makeStyles()((theme) => ({
 		color: 'rgba(255, 255, 255, 0.75)',
 		fontWeight: 600
 	},
+	smallTierLabel: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '0.9rem',
+		color: 'rgba(255, 255, 255, 0.4)',
+		marginRight: 2,
+		minWidth: 26
+	},
 	smallTierEmblem: {
 		width: 16,
 		height: 16
+	},
+	smallTierEmpty: {
+		color: 'rgba(255, 255, 255, 0.3)',
+		fontStyle: 'italic'
 	},
 	emptyText: {
 		fontFamily: '"Noto Sans KR", sans-serif',
@@ -941,7 +960,10 @@ function AuctionStage({ tournament, teams, isAdmin, onChanged }) {
 		const name = member ? member.name : null;
 		const profileIconId = member ? member.profileIconId : null;
 		const rating = member ? member.rating : null;
-		const tier = getMemberTier(rating);
+		const internalTier = getMemberTier(rating);
+		// active-members 응답에 솔랭 정보가 enrich돼 올 가능성 — 가능한 필드명 모두 시도.
+		const soloRankStr = member && (member.rankTier || member.soloRank || member.solo_rank || null);
+		const soloRank = parseRankTier(soloRankStr);
 		const isCurrent = puuid === currentPuuid;
 
 		return (
@@ -959,12 +981,30 @@ function AuctionStage({ tournament, teams, isAdmin, onChanged }) {
 					<span className={classes.smallName}>
 						{name || displayNameForPuuid(null, puuid)}
 					</span>
-					{tier.short && (
-						<span className={classes.smallTier} title={tier.label || ''}>
-							{tier.emblem && <img src={tier.emblem} alt="" className={classes.smallTierEmblem} />}
-							<span>{tier.short}</span>
+					<div className={classes.smallTierRow}>
+						<span className={classes.smallTier}>
+							<span className={classes.smallTierLabel}>솔랭</span>
+							{soloRank && soloRank.short ? (
+								<>
+									{soloRank.emblem && <img src={soloRank.emblem} alt="" className={classes.smallTierEmblem} />}
+									<span>{soloRank.short}</span>
+								</>
+							) : (
+								<span className={classes.smallTierEmpty}>-</span>
+							)}
 						</span>
-					)}
+						<span className={classes.smallTier}>
+							<span className={classes.smallTierLabel}>내전</span>
+							{internalTier.short ? (
+								<>
+									{internalTier.emblem && <img src={internalTier.emblem} alt="" className={classes.smallTierEmblem} />}
+									<span>{internalTier.short}</span>
+								</>
+							) : (
+								<span className={classes.smallTierEmpty}>-</span>
+							)}
+						</span>
+					</div>
 				</div>
 			</div>
 		);
