@@ -99,6 +99,13 @@ const useStyles = makeStyles()((theme) => ({
 	topActionSpacer: {
 		flex: 1
 	},
+	candidateColumn: {
+		display: 'flex',
+		flexDirection: 'column',
+		gap: 12,
+		minWidth: 0,
+		width: '100%'
+	},
 	candidateMain: {
 		display: 'flex',
 		alignItems: 'center',
@@ -752,47 +759,50 @@ function CandidateInfoCard({ candidate, classes }) {
 	}
 
 	return (
-		<div className={classes.candidateMain}>
-			{candidate.profileIconId != null ? (
-				<img
-					className={classes.candidateAvatarLg}
-					src={getProfileIconUrl(candidate.profileIconId)}
-					alt=""
-				/>
-			) : (
-				<div className={classes.candidateAvatarLg} style={{ background: 'rgba(255,255,255,0.05)' }} />
-			)}
-			<div className={classes.candidateBody}>
-				<div className={classes.candidateNameRow}>
-					<span className={classes.candidateName}>
-						{candidate.name || displayNameForPuuid(null, candidate.puuid)}
-					</span>
-					<span className={classes.candidatePosBadge}>
-						<PositionIcon
-							position={candidate.position}
-							className={classes.candidatePosBadgeIcon}
+		<div className={classes.candidateColumn}>
+			<div className={classes.candidateMain}>
+				{candidate.profileIconId != null ? (
+					<img
+						className={classes.candidateAvatarLg}
+						src={getProfileIconUrl(candidate.profileIconId)}
+						alt=""
+					/>
+				) : (
+					<div className={classes.candidateAvatarLg} style={{ background: 'rgba(255,255,255,0.05)' }} />
+				)}
+				<div className={classes.candidateBody}>
+					<div className={classes.candidateNameRow}>
+						<span className={classes.candidateName}>
+							{candidate.name || displayNameForPuuid(null, candidate.puuid)}
+						</span>
+						<span className={classes.candidatePosBadge}>
+							<PositionIcon
+								position={candidate.position}
+								className={classes.candidatePosBadgeIcon}
+							/>
+							{positionLabel}
+						</span>
+					</div>
+					<div className={classes.statRow}>
+						<TierStat
+							classes={classes}
+							label="솔랭"
+							emblem={rank ? rank.emblem : null}
+							short={rank ? rank.short : null}
+							wl={rankWL}
 						/>
-						{positionLabel}
-					</span>
+						<TierStat
+							classes={classes}
+							label="내전"
+							emblem={internalEmblem}
+							short={internalShort}
+							wl={internalWL}
+						/>
+					</div>
 				</div>
-				<div className={classes.statRow}>
-					<TierStat
-						classes={classes}
-						label="솔랭"
-						emblem={rank ? rank.emblem : null}
-						short={rank ? rank.short : null}
-						wl={rankWL}
-					/>
-					<TierStat
-						classes={classes}
-						label="내전"
-						emblem={internalEmblem}
-						short={internalShort}
-						wl={internalWL}
-					/>
-				</div>
-				{(achievements.length > 0 || (honor && (honor.received != null || honorTitleText))) && (
-					<div className={classes.candidateExtras}>
+			</div>
+			{(achievements.length > 0 || (honor && (honor.received != null || honorTitleText))) && (
+				<div className={classes.candidateExtras}>
 						{achievements.length > 0 && (() => {
 							// 티어 높은 순 정렬. IRON은 TIER_RANK에 없어 0 으로 떨어지므로 명시 폴백.
 							const tierScore = (t) => {
@@ -868,7 +878,6 @@ function CandidateInfoCard({ candidate, classes }) {
 						)}
 					</div>
 				)}
-			</div>
 		</div>
 	);
 }
