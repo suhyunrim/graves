@@ -14,7 +14,8 @@ import {
 	Tabs,
 	Tab,
 	FormControlLabel,
-	Switch
+	Switch,
+	TextField
 } from '@mui/material';
 import useToast from 'app/utility/useToast';
 import { getProfileIconUrl } from 'app/main/challenge/ddragonUtils';
@@ -26,6 +27,8 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import StarIcon from '@mui/icons-material/Star';
+import GavelIcon from '@mui/icons-material/Gavel';
+import UndoIcon from '@mui/icons-material/Undo';
 import React, { useEffect, useState, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams, useNavigate, Link } from 'react-router-dom';
@@ -408,6 +411,94 @@ const useStyles = makeStyles()((theme) => ({
 		flexDirection: 'column',
 		gap: 6
 	},
+	teamBudgetBadge: {
+		fontFamily: '"Rajdhani", sans-serif',
+		fontSize: '1.3rem',
+		fontWeight: 700,
+		color: '#00d4ff',
+		background: 'rgba(0, 212, 255, 0.1)',
+		border: '1px solid rgba(0, 212, 255, 0.3)',
+		borderRadius: 6,
+		padding: '2px 8px'
+	},
+	teamBudgetBadgeLow: {
+		color: '#ff8c00',
+		background: 'rgba(255, 140, 0, 0.1)',
+		borderColor: 'rgba(255, 140, 0, 0.3)'
+	},
+	teamBudgetBadgeNeg: {
+		color: '#ff6b6b',
+		background: 'rgba(255, 107, 107, 0.1)',
+		borderColor: 'rgba(255, 107, 107, 0.3)'
+	},
+	memberBidAmount: {
+		fontFamily: '"Rajdhani", sans-serif',
+		fontSize: '1.1rem',
+		color: '#ffd700',
+		fontWeight: 700
+	},
+	memberUndoBtn: {
+		color: 'rgba(255, 255, 255, 0.5)',
+		padding: 4,
+		'&:hover': {
+			color: '#ff6b6b',
+			background: 'rgba(255, 107, 107, 0.1)'
+		}
+	},
+	teamBidArea: {
+		marginTop: 10,
+		paddingTop: 10,
+		borderTop: '1px dashed rgba(255, 255, 255, 0.1)',
+		display: 'flex',
+		alignItems: 'center',
+		gap: 6
+	},
+	teamBidInput: {
+		flex: 1,
+		'& .MuiInputBase-root': {
+			color: '#fff',
+			fontSize: '1.15rem',
+			fontFamily: '"Noto Sans KR", sans-serif'
+		},
+		'& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255, 255, 255, 0.2)' },
+		'& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline': {
+			borderColor: 'rgba(0, 212, 255, 0.5)'
+		},
+		'& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline': {
+			borderColor: '#00d4ff'
+		}
+	},
+	teamBidBtn: {
+		background: 'linear-gradient(135deg, #00d4ff 0%, #0099cc 100%)',
+		color: '#000',
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontWeight: 700,
+		fontSize: '1.05rem',
+		padding: '4px 14px',
+		minWidth: 0,
+		borderRadius: 8,
+		textTransform: 'none',
+		'&:hover': {
+			background: 'linear-gradient(135deg, #00bce0 0%, #0088bb 100%)'
+		},
+		'&.Mui-disabled': {
+			background: 'rgba(255, 255, 255, 0.08)',
+			color: 'rgba(255, 255, 255, 0.3)'
+		}
+	},
+	teamBidLocked: {
+		marginTop: 10,
+		paddingTop: 10,
+		borderTop: '1px dashed rgba(255, 255, 255, 0.1)',
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.05rem',
+		color: 'rgba(255, 255, 255, 0.4)',
+		textAlign: 'center'
+	},
+	teamCardActive: {
+		border: '1px solid rgba(0, 212, 255, 0.5) !important',
+		boxShadow: '0 0 0 1px rgba(0, 212, 255, 0.2)'
+	},
 	memberRow: {
 		display: 'flex',
 		alignItems: 'center',
@@ -651,6 +742,7 @@ function TournamentDetail() {
 	const scrims = useSelector(({ Tournament }) => Tournament.tournament.scrims);
 	const roundLabels = useSelector(({ Tournament }) => Tournament.tournament.roundLabels);
 	const leaderboard = useSelector(({ Tournament }) => Tournament.tournament.leaderboard);
+	const currentCandidate = useSelector(({ Tournament }) => Tournament.tournament.currentCandidate);
 	const loadingDetail = useSelector(({ Tournament }) => Tournament.tournament.loadingDetail);
 	const user = useSelector(state => state.auth.user);
 	const isAdmin = checkIsAdmin(user);
@@ -719,8 +811,6 @@ function TournamentDetail() {
 		};
 	}, [dispatch, tournamentId]);
 
-	const [lastBidPuuid, setLastBidPuuid] = useState(null);
-
 	// 경매 실시간 동기화: 룸 join 후 status/bid/undo 이벤트가 오면 detail 재로드.
 	useEffect(() => {
 		if (!tournamentId) return undefined;
@@ -736,11 +826,6 @@ function TournamentDetail() {
 		};
 		const handleBid = (payload) => {
 			if (payload && payload.tournamentId != null && Number(payload.tournamentId) !== tid) return;
-			if (payload && payload.puuid) {
-				setLastBidPuuid(payload.puuid);
-				// 1.4초 후 강조 해제 — 다음 이벤트 오면 또 갱신됨.
-				setTimeout(() => setLastBidPuuid(prev => (prev === payload.puuid ? null : prev)), 1400);
-			}
 			refresh();
 		};
 		const handleUndo = (payload) => {
@@ -821,6 +906,56 @@ function TournamentDetail() {
 			});
 	}
 
+	// 경매 입찰 (status === auction 일 때만 사용).
+	const [teamBidAmount, setTeamBidAmount] = useState({});
+	const [pendingBidTeams, setPendingBidTeams] = useState({});
+
+	function setBidFor(teamId, amount) {
+		setTeamBidAmount(prev => ({ ...prev, [teamId]: amount }));
+	}
+
+	function handlePlaceTeamBid(teamId, puuid, minBid) {
+		const amount = Number(teamBidAmount[teamId]);
+		if (!Number.isFinite(amount) || amount < minBid) {
+			toast.error(`최소 입찰가는 ${minBid} 입니다.`);
+			return;
+		}
+		setPendingBidTeams(prev => ({ ...prev, [teamId]: true }));
+		Actions.placeAuctionBid(tournamentId, teamId, puuid, amount)
+			.then(() => {
+				toast.success('낙찰 완료');
+				setTeamBidAmount(prev => {
+					const next = { ...prev };
+					delete next[teamId];
+					return next;
+				});
+				reload();
+			})
+			.catch(err => {
+				const msg = err.response && err.response.data ? err.response.data.result : '입찰 실패';
+				toast.error(msg);
+			})
+			.finally(() => {
+				setPendingBidTeams(prev => {
+					const next = { ...prev };
+					delete next[teamId];
+					return next;
+				});
+			});
+	}
+
+	function handleUndoBid(teamId, puuid) {
+		Actions.undoAuctionBid(tournamentId, teamId, puuid)
+			.then(() => {
+				toast.success('입찰을 취소했습니다.');
+				reload();
+			})
+			.catch(err => {
+				const msg = err.response && err.response.data ? err.response.data.result : '취소 실패';
+				toast.error(msg);
+			});
+	}
+
 	function handleMatchResultSuccess() {
 		setMatchEditTarget(null);
 		toast.success('매치 결과가 저장되었습니다.');
@@ -864,6 +999,15 @@ function TournamentDetail() {
 	const isInProgress = detail.status === STATUS.IN_PROGRESS;
 	const isFinished = detail.status === STATUS.FINISHED;
 	const isAuctionType = detail.type === 'auction';
+	const auctionConfig = detail.auctionConfig;
+	const auctionMinBid = (auctionConfig && auctionConfig.minBid) || 1;
+	const auctionAllowNegative = Boolean(auctionConfig && auctionConfig.allowNegative);
+	const currentPuuid = detail.currentAuctionPuuid;
+	const currentDeadline = detail.currentAuctionDeadline;
+	const candidatePosition = currentCandidate ? currentCandidate.position : null;
+	const deadlineMs = currentDeadline ? new Date(currentDeadline).getTime() : null;
+	const bidActive = isAuctionStatus && Boolean(currentPuuid)
+		&& deadlineMs != null && deadlineMs > Date.now();
 	const teamCount = teams.length;
 	// auction 완료 후엔 preparing 상태로 돌아오지만, 이미 멤버가 차 있어서 일반 대진 짜기 흐름.
 	const auctionMembersComplete = isAuctionType && teams.length > 0
@@ -991,7 +1135,6 @@ function TournamentDetail() {
 							teams={teams}
 							isAdmin={isAdmin}
 							onChanged={reload}
-							lastBidPuuid={lastBidPuuid}
 						/>
 					)}
 
@@ -1065,7 +1208,7 @@ function TournamentDetail() {
 						</div>
 					)}
 
-					{(isPreparing || activeTab === 0) && (
+					{(isPreparing || isAuctionStatus || ((isInProgress || isFinished) && activeTab === 0)) && (
 					<div className={classes.section}>
 						<div className={classes.sectionHeader}>
 							<div className={classes.sectionTitle}>
@@ -1126,6 +1269,17 @@ function TournamentDetail() {
 															<EmojiEventsIcon className={classes.standingBadgeIcon} />
 														)}
 														{badgeLabel}
+													</span>
+												)}
+												{isAuctionType && t.remainingBudget != null && (
+													<span
+														className={cx(
+															classes.teamBudgetBadge,
+															t.remainingBudget < 0 && classes.teamBudgetBadgeNeg,
+															t.remainingBudget >= 0 && t.remainingBudget < auctionMinBid * 2 && classes.teamBudgetBadgeLow
+														)}
+													>
+														{t.remainingBudget}
 													</span>
 												)}
 												{(canEditTeam || canDeleteTeam) && (
@@ -1202,10 +1356,65 @@ function TournamentDetail() {
 																	<span className={classes.memberTierShort}>{memberTierShort}</span>
 																</span>
 															)}
+															{m.bidAmount != null && (
+																<span className={classes.memberBidAmount}>{m.bidAmount}</span>
+															)}
+															{isAdmin && isAuctionStatus && !isCaptain && (
+																<Tooltip title="입찰 취소" arrow>
+																	<IconButton
+																		className={classes.memberUndoBtn}
+																		size="small"
+																		onClick={(e) => {
+																			e.preventDefault();
+																			e.stopPropagation();
+																			handleUndoBid(t.id, m.puuid);
+																		}}
+																	>
+																		<UndoIcon fontSize="small" />
+																	</IconButton>
+																</Tooltip>
+															)}
 														</Link>
 													);
 												})}
 											</div>
+											{isAdmin && isAuctionStatus && currentPuuid && (() => {
+												const filledPos = new Set((t.members || []).map(mb => mb.position));
+												const teamIsFull = (t.members || []).length >= 5;
+												const remaining = t.remainingBudget;
+												const posTaken = candidatePosition && filledPos.has(candidatePosition);
+												const budgetOk = auctionAllowNegative || remaining == null || remaining >= auctionMinBid;
+												const canBid = !posTaken && !teamIsFull && budgetOk;
+												const isPending = pendingBidTeams[t.id];
+												let lockReason = '';
+												if (posTaken) lockReason = `${candidatePosition} 자리가 차 있습니다`;
+												else if (teamIsFull) lockReason = '팀 정원이 가득 찼습니다';
+												else if (!budgetOk) lockReason = '예산 부족';
+												if (!canBid) {
+													return <div className={classes.teamBidLocked}>{lockReason || '입찰 불가'}</div>;
+												}
+												return (
+													<div className={classes.teamBidArea}>
+														<TextField
+															className={classes.teamBidInput}
+															size="small"
+															type="number"
+															placeholder={String(auctionMinBid)}
+															value={teamBidAmount[t.id] == null ? '' : teamBidAmount[t.id]}
+															onChange={(e) => setBidFor(t.id, e.target.value)}
+															inputProps={{ min: auctionMinBid }}
+														/>
+														<Button
+															className={classes.teamBidBtn}
+															startIcon={<GavelIcon />}
+															onClick={() => handlePlaceTeamBid(t.id, currentPuuid, auctionMinBid)}
+															disabled={isPending}
+														>
+															낙찰
+														</Button>
+													</div>
+												);
+											})()}
 										</div>
 									);
 								})}
