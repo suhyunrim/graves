@@ -14,6 +14,10 @@ import {
 	Switch,
 	Chip
 } from '@mui/material';
+import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import koLocale from 'date-fns/locale/ko';
+import { format } from 'date-fns';
 import { makeStyles } from 'tss-react/mui';
 import { useDispatch, useSelector } from 'react-redux';
 import { getProfileIconUrl } from 'app/main/challenge/ddragonUtils';
@@ -237,9 +241,11 @@ function TournamentCreateDialog({ open, onClose, onSuccess, groupId }) {
 		name: '',
 		defaultBestOf: 3,
 		finalBestOf: 5,
-		trophyType: ''
+		trophyType: '',
+		heldAt: new Date()
 	});
 	const [type, setType] = useState('normal');
+	const [allowSingleTeam, setAllowSingleTeam] = useState(false);
 	const [auction, setAuction] = useState(DEFAULT_AUCTION);
 	const [candidates, setCandidates] = useState(makeEmptyCandidates);
 	const [loading, setLoading] = useState(false);
@@ -291,6 +297,7 @@ function TournamentCreateDialog({ open, onClose, onSuccess, groupId }) {
 
 	function validate() {
 		if (!form.name.trim()) return '토너먼트 이름을 입력하세요.';
+		if (!form.heldAt || Number.isNaN(form.heldAt.getTime())) return '개최일을 선택하세요.';
 		if (type === 'auction') {
 			if (!auction.minBid || auction.minBid <= 0) return '최소 입찰가는 1 이상이어야 합니다.';
 			if (!auction.bidDurationSeconds || auction.bidDurationSeconds <= 0) {
@@ -316,8 +323,12 @@ function TournamentCreateDialog({ open, onClose, onSuccess, groupId }) {
 			defaultBestOf: form.defaultBestOf,
 			finalBestOf: form.finalBestOf,
 			trophyType: form.trophyType || null,
-			type
+			type,
+			heldAt: format(form.heldAt, 'yyyy-MM-dd')
 		};
+		if (type === 'normal' && allowSingleTeam) {
+			body.allowSingleTeam = true;
+		}
 		if (type === 'auction') {
 			body.auctionConfig = {
 				minBid: auction.minBid,
@@ -491,12 +502,50 @@ function TournamentCreateDialog({ open, onClose, onSuccess, groupId }) {
 						<MenuItem key={n} value={n}>{bestOfLabel(n)}</MenuItem>
 					))}
 				</TextField>
+				<LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={koLocale}>
+					<DatePicker
+						className={classes.field}
+						label="개최일"
+						format="yyyy-MM-dd"
+						value={form.heldAt}
+						onChange={(date) => setForm(prev => ({ ...prev, heldAt: date }))}
+						slotProps={{
+							textField: {
+								variant: 'outlined',
+								fullWidth: true,
+								required: true,
+								helperText: '토너먼트가 열린 날짜. 과거 토너먼트는 실제 개최일을 선택하세요.'
+							}
+						}}
+					/>
+				</LocalizationProvider>
 				<TrophyTypeGrid
 					label="트로피 종류 (선택)"
 					value={form.trophyType}
 					onChange={v => setForm(prev => ({ ...prev, trophyType: v }))}
 					helperText="우승 시 표시되는 트로피. 미지정도 가능."
 				/>
+
+				{type === 'normal' && (
+					<>
+						<div className={classes.switchRow}>
+							<FormControlLabel
+								control={
+									<Switch
+										checked={allowSingleTeam}
+										onChange={(e) => setAllowSingleTeam(e.target.checked)}
+									/>
+								}
+								label="이미 끝난 과거 토너먼트 (우승팀만 등록)"
+							/>
+						</div>
+						{allowSingleTeam && (
+							<div className={classes.hintText}>
+								우승팀 1팀만 등록하고 시작하면 즉시 우승 처리됩니다. 브래킷 배치는 생략됩니다.
+							</div>
+						)}
+					</>
+				)}
 
 				{type === 'auction' && (
 					<div className={classes.auctionSection}>

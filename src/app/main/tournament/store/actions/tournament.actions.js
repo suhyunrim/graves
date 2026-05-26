@@ -77,10 +77,11 @@ export function deleteTeam(tournamentId, teamId) {
 	return createCamilleAxios().delete(`/api/tournament/${tournamentId}/teams/${teamId}`, { silentError: true });
 }
 
-export function startTournament(tournamentId, slotMapping) {
+export function startTournament(tournamentId, slotMapping, allowSingleTeam) {
+	const body = allowSingleTeam ? { allowSingleTeam: true } : { slotMapping };
 	return createCamilleAxios().post(
 		`/api/tournament/${tournamentId}/start`,
-		{ slotMapping },
+		body,
 		{ silentError: true }
 	);
 }
