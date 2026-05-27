@@ -37,10 +37,12 @@ export function clearTournamentDetail() {
 	return { type: CLEAR_TOURNAMENT_DETAIL };
 }
 
+// 토너먼트 팀원/후보 선택기는 현역 + outsider(과거 우승자) 전원이 필요하므로 all-members 사용.
+// (멘션/태그 자동완성 등 다른 곳은 active-members 유지 — profileApi 참고.)
 export function getActiveMembers(groupId) {
 	return dispatch =>
 		createCamilleAxios()
-			.get(`/api/group/${groupId}/active-members`, { silentError: true })
+			.get(`/api/group/${groupId}/all-members`, { silentError: true })
 			.then(response => {
 				dispatch({ type: SET_ACTIVE_MEMBERS, payload: response.data.result || [] });
 				return response.data.result;
