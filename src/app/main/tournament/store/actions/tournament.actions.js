@@ -120,6 +120,14 @@ export function extendAuctionTime(tournamentId) {
 	);
 }
 
+export function endAuctionBid(tournamentId) {
+	return createCamilleAxios().post(
+		`/api/tournament/${tournamentId}/auction/end-bid`,
+		{},
+		{ silentError: true }
+	);
+}
+
 export function placeAuctionBid(tournamentId, teamId, puuid, amount) {
 	return createCamilleAxios().post(
 		`/api/tournament/${tournamentId}/auction/bid`,

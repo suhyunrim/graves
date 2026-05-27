@@ -19,6 +19,7 @@ import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import TimerIcon from '@mui/icons-material/Timer';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import GavelIcon from '@mui/icons-material/Gavel';
+import TimerOffIcon from '@mui/icons-material/TimerOff';
 import useToast from 'app/utility/useToast';
 import { getProfileIconUrl } from 'app/main/challenge/ddragonUtils';
 import * as Actions from './store/actions';
@@ -413,6 +414,40 @@ const useStyles = makeStyles()((theme) => ({
 		textTransform: 'none',
 		'&:hover': {
 			background: 'linear-gradient(135deg, #ffe43d 0%, #d4ad08 100%)'
+		},
+		'&.Mui-disabled': {
+			background: 'rgba(255, 255, 255, 0.08)',
+			color: 'rgba(255, 255, 255, 0.3)'
+		}
+	},
+	adminBtnSuccess: {
+		background: 'linear-gradient(135deg, #00ff7f 0%, #00b359 100%)',
+		color: '#003a1f',
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontWeight: 700,
+		fontSize: '1.1rem',
+		padding: '6px 16px',
+		borderRadius: 8,
+		textTransform: 'none',
+		'&:hover': {
+			background: 'linear-gradient(135deg, #33ff9a 0%, #00cc66 100%)'
+		},
+		'&.Mui-disabled': {
+			background: 'rgba(255, 255, 255, 0.08)',
+			color: 'rgba(255, 255, 255, 0.3)'
+		}
+	},
+	adminBtnEnd: {
+		background: 'linear-gradient(135deg, #ffa94d 0%, #ff8c00 100%)',
+		color: '#3a2400',
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontWeight: 700,
+		fontSize: '1.1rem',
+		padding: '6px 16px',
+		borderRadius: 8,
+		textTransform: 'none',
+		'&:hover': {
+			background: 'linear-gradient(135deg, #ffbb6b 0%, #ff9e1f 100%)'
 		},
 		'&.Mui-disabled': {
 			background: 'rgba(255, 255, 255, 0.08)',
@@ -1078,26 +1113,33 @@ function AuctionStage({ tournament, teams, isAdmin, onChanged }) {
 			});
 	}
 
+	function handleEndBid() {
+		Actions.endAuctionBid(tournamentId)
+			.then(() => {
+				toast.success('입찰을 마감했습니다.');
+				onChanged && onChanged();
+			})
+			.catch(err => {
+				const msg = err.response && err.response.data ? err.response.data.result : '입찰 마감 실패';
+				toast.error(msg);
+			});
+	}
+
 	function renderAdminActionBar() {
 		if (!isAdmin) return null;
 		return (
 			<div className={classes.topActionBar}>
 				<span className={classes.topActionLabel}>경매 진행</span>
-				<Tooltip
-					title={bidActive ? '입찰 진행 중에는 다음 매물로 넘어갈 수 없습니다' : ''}
-					arrow
-				>
-					<span>
-						<Button
-							className={classes.adminBtnSecondary}
-							startIcon={<SkipNextIcon />}
-							onClick={handleNextCandidate}
-							disabled={bidActive || nextLoading}
-						>
-							다음 매물
-						</Button>
-					</span>
-				</Tooltip>
+				{!bidActive && (
+					<Button
+						className={classes.adminBtnSecondary}
+						startIcon={<SkipNextIcon />}
+						onClick={handleNextCandidate}
+						disabled={nextLoading}
+					>
+						다음 매물
+					</Button>
+				)}
 				{hasCurrent && !bidActive && !bidExpired && (
 					<Button
 						className={classes.adminBtn}
@@ -1108,17 +1150,26 @@ function AuctionStage({ tournament, teams, isAdmin, onChanged }) {
 					</Button>
 				)}
 				{hasCurrent && bidActive && (
-					<Button
-						className={classes.adminBtn}
-						startIcon={<TimerIcon />}
-						onClick={handleExtendQuick}
-					>
-						시간 갱신 ({bidDuration}초)
-					</Button>
+					<>
+						<Button
+							className={classes.adminBtn}
+							startIcon={<TimerIcon />}
+							onClick={handleExtendQuick}
+						>
+							시간 갱신 ({bidDuration}초)
+						</Button>
+						<Button
+							className={classes.adminBtnEnd}
+							startIcon={<TimerOffIcon />}
+							onClick={handleEndBid}
+						>
+							시간 종료
+						</Button>
+					</>
 				)}
 				{hasCurrent && bidExpired && (
 					<Button
-						className={classes.adminBtn}
+						className={classes.adminBtnSuccess}
 						startIcon={<GavelIcon />}
 						onClick={openBidDialog}
 					>
