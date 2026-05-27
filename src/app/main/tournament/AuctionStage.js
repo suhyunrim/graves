@@ -21,7 +21,7 @@ import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import GavelIcon from '@mui/icons-material/Gavel';
 import TimerOffIcon from '@mui/icons-material/TimerOff';
 import useToast from 'app/utility/useToast';
-import { getProfileIconUrl } from 'app/main/challenge/ddragonUtils';
+import { getProfileIconUrl, getChampionIcon, loadChampionNames } from 'app/main/challenge/ddragonUtils';
 import * as Actions from './store/actions';
 import {
 	POSITIONS,
@@ -176,6 +176,45 @@ const useStyles = makeStyles()((theme) => ({
 	statTierEmblem: {
 		width: 34,
 		height: 34
+	},
+	mostRow: {
+		display: 'flex',
+		alignItems: 'center',
+		gap: 12,
+		marginTop: 12,
+		flexWrap: 'wrap',
+		fontFamily: '"Noto Sans KR", sans-serif'
+	},
+	mostLabel: {
+		color: 'rgba(255, 255, 255, 0.5)',
+		fontSize: '1.3rem'
+	},
+	mostChips: {
+		display: 'flex',
+		gap: 10,
+		flexWrap: 'wrap'
+	},
+	mostChip: {
+		display: 'inline-flex',
+		alignItems: 'center',
+		gap: 6,
+		background: 'rgba(0, 212, 255, 0.06)',
+		border: '1px solid rgba(0, 212, 255, 0.2)',
+		borderRadius: 8,
+		padding: '3px 8px 3px 3px'
+	},
+	mostChipImg: {
+		width: 28,
+		height: 28,
+		borderRadius: '50%',
+		objectFit: 'cover',
+		border: '1px solid rgba(0, 212, 255, 0.3)'
+	},
+	mostChipText: {
+		fontSize: '1.2rem',
+		color: 'rgba(255, 255, 255, 0.85)',
+		fontWeight: 600,
+		whiteSpace: 'nowrap'
 	},
 	statTierShort: {
 		fontFamily: '"Rajdhani", sans-serif',
@@ -816,6 +855,48 @@ function TierStat({ classes, label, emblem, short, wl }) {
 	);
 }
 
+// ─── CandidateMostRow (솔랭 모스트 챔피언) ────────────────────
+function CandidateMostRow({ champions, classes }) {
+	const [names, setNames] = useState({});
+	useEffect(() => {
+		let alive = true;
+		loadChampionNames().then(m => {
+			if (alive) setNames(m);
+		});
+		return () => {
+			alive = false;
+		};
+	}, []);
+	const list = (champions || []).slice(0, 3);
+	if (list.length === 0) return null;
+	return (
+		<div className={classes.mostRow}>
+			<span className={classes.mostLabel}>솔랭 모스트</span>
+			<span className={classes.mostChips}>
+				{list.map(c => {
+					const wr = typeof c.winRate === 'number' ? c.winRate : 0;
+					const name = names[c.championName] || c.championName;
+					return (
+						<Tooltip key={c.championName} title={name} arrow>
+							<span className={classes.mostChip}>
+								<img
+									className={classes.mostChipImg}
+									src={getChampionIcon(c.championName)}
+									alt={name}
+									onError={e => {
+										e.currentTarget.style.visibility = 'hidden';
+									}}
+								/>
+								<span className={classes.mostChipText}>{c.games}판 {wr}%</span>
+							</span>
+						</Tooltip>
+					);
+				})}
+			</span>
+		</div>
+	);
+}
+
 // ─── CandidateInfoCard ────────────────────────────────────────
 function CandidateInfoCard({ candidate, classes }) {
 	if (!candidate) return null;
@@ -888,6 +969,7 @@ function CandidateInfoCard({ candidate, classes }) {
 							wl={internalWL}
 						/>
 					</div>
+					<CandidateMostRow champions={candidate.mostChampions} classes={classes} />
 				</div>
 			</div>
 			{(achievements.length > 0 || (honor && (honor.received != null || honorTitleText))) && (
