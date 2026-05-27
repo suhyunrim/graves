@@ -301,48 +301,70 @@ const useStyles = makeStyles()((theme) => ({
 		color: 'rgba(255, 255, 255, 0.4)',
 		fontSize: '1.4rem'
 	},
-	bigCountdownBox: {
+	timerRow: {
 		display: 'flex',
-		flexDirection: 'column',
-		gap: 10,
-		padding: '14px 20px 16px',
-		borderRadius: 14,
-		background: 'rgba(255, 255, 255, 0.04)',
-		border: '1px solid rgba(255, 255, 255, 0.1)',
-		marginBottom: 16
-	},
-	bigCountdownHead: {
-		display: 'flex',
-		alignItems: 'baseline',
-		justifyContent: 'space-between',
-		gap: 12
-	},
-	bigCountdownLabel: {
-		fontFamily: '"Noto Sans KR", sans-serif',
-		fontSize: '1.3rem',
-		color: 'rgba(255, 255, 255, 0.55)',
-		letterSpacing: '0.02em'
-	},
-	bigCountdownValue: {
-		fontFamily: '"Rajdhani", "Noto Sans KR", sans-serif',
-		fontSize: '4.5rem',
-		fontWeight: 700,
-		color: '#fff',
-		lineHeight: 1,
+		alignItems: 'center',
+		gap: 16,
+		padding: '12px 20px',
+		borderRadius: 16,
+		background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
+		border: '1px solid rgba(0, 212, 255, 0.25)',
 		[theme.breakpoints.down('sm')]: {
-			fontSize: '3.4rem'
+			gap: 12,
+			padding: '10px 14px'
 		}
 	},
-	bigCountdownEnd: {
-		color: 'rgba(255, 255, 255, 0.4)',
-		fontSize: '2.6rem'
+	timerLabel: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.5rem',
+		fontWeight: 600,
+		color: 'rgba(255, 255, 255, 0.7)',
+		whiteSpace: 'nowrap',
+		flexShrink: 0,
+		[theme.breakpoints.down('sm')]: {
+			fontSize: '1.3rem'
+		}
 	},
-	bigCountdownBar: {
-		width: '100%',
-		height: 16,
-		borderRadius: 8,
+	timerTrack: {
+		position: 'relative',
+		flex: 1,
+		minWidth: 0,
+		height: 44,
+		borderRadius: 12,
 		background: 'rgba(255, 255, 255, 0.08)',
-		overflow: 'hidden'
+		overflow: 'hidden',
+		display: 'flex',
+		alignItems: 'center',
+		[theme.breakpoints.down('sm')]: {
+			height: 38
+		}
+	},
+	timerFill: {
+		position: 'absolute',
+		top: 0,
+		left: 0,
+		bottom: 0,
+		background: 'linear-gradient(90deg, #00d4ff, #0099cc)',
+		transition: 'width 0.1s linear, background 0.3s ease',
+		borderRadius: 12
+	},
+	timerText: {
+		position: 'relative',
+		zIndex: 1,
+		width: '100%',
+		textAlign: 'center',
+		fontFamily: '"Rajdhani", "Noto Sans KR", sans-serif',
+		fontSize: '2.2rem',
+		fontWeight: 700,
+		color: '#fff',
+		letterSpacing: '0.04em',
+		textShadow: '0 1px 4px rgba(0, 0, 0, 0.55)',
+		[theme.breakpoints.down('sm')]: {
+			fontSize: '1.8rem'
+		}
+	},
+	timerTextBlink: {
+		animation: `${blink} 0.6s linear infinite`
 	},
 	adminBtn: {
 		background: 'linear-gradient(135deg, #00d4ff 0%, #0099cc 100%)',
@@ -625,9 +647,11 @@ function Countdown({ deadline, totalSeconds, classes, large }) {
 	const sec = expired ? 0 : Math.ceil(remainMs / 1000);
 	let textCls = '';
 	let fillCls = '';
+	let isDanger = false;
 	if (expired) {
 		fillCls = classes.countdownBarFillEnd;
 	} else if (pct <= 15 || sec <= 3) {
+		isDanger = true;
 		textCls = classes.countdownDanger;
 		fillCls = classes.countdownBarFillDanger;
 	} else if (pct <= 40 || sec <= 5) {
@@ -636,20 +660,16 @@ function Countdown({ deadline, totalSeconds, classes, large }) {
 	}
 	if (large) {
 		return (
-			<div className={classes.bigCountdownBox}>
-				<div className={classes.bigCountdownHead}>
-					<span className={classes.bigCountdownLabel}>입찰 시간</span>
-					{expired ? (
-						<span className={`${classes.bigCountdownValue} ${classes.bigCountdownEnd}`}>시간 종료</span>
-					) : (
-						<span className={`${classes.bigCountdownValue} ${textCls}`}>{sec}초</span>
-					)}
-				</div>
-				<div className={classes.bigCountdownBar}>
+			<div className={classes.timerRow}>
+				<span className={classes.timerLabel}>남은 시간</span>
+				<div className={classes.timerTrack}>
 					<div
-						className={`${classes.countdownBarFill} ${fillCls}`}
+						className={`${classes.timerFill} ${fillCls}`}
 						style={{ width: `${expired ? 0 : pct}%` }}
 					/>
+					<span className={`${classes.timerText} ${isDanger ? classes.timerTextBlink : ''}`}>
+						{expired ? '시간 종료' : `${sec}초`}
+					</span>
 				</div>
 			</div>
 		);
@@ -1137,13 +1157,6 @@ function AuctionStage({ tournament, teams, isAdmin, onChanged }) {
 		}
 		return (
 			<div className={classes.auctionBlock}>
-				{deadlineMs != null ? (
-					<Countdown deadline={currentDeadline} totalSeconds={bidDuration} classes={classes} large />
-				) : (
-					<div className={classes.bidDurationHint}>
-						기본 입찰 시간 <b>{bidDuration}초</b>
-					</div>
-				)}
 				<div className={classes.candidateTop}>
 					<CandidateInfoCard candidate={currentCandidate} classes={classes} />
 				</div>
@@ -1217,6 +1230,14 @@ function AuctionStage({ tournament, teams, isAdmin, onChanged }) {
 		<>
 			<div className={classes.wrapper}>
 				{renderAdminActionBar()}
+				{hasCurrent &&
+					(deadlineMs != null ? (
+						<Countdown deadline={currentDeadline} totalSeconds={bidDuration} classes={classes} large />
+					) : (
+						<div className={classes.bidDurationHint}>
+							기본 입찰 시간 <b>{bidDuration}초</b>
+						</div>
+					))}
 				{renderAuctionBlock()}
 
 				{bidExpired && isAdmin && (
