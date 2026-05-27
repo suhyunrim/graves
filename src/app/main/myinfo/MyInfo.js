@@ -30,6 +30,7 @@ import VisitorCounter from './VisitorCounter';
 import Guestbook from './Guestbook';
 import StatusMessage from './StatusMessage';
 import TrophyCabinet from './TrophyCabinet';
+import MostChampions from './MostChampions';
 import reducer from './store/reducers';
 import * as Actions from './store/actions';
 
@@ -779,6 +780,7 @@ function MyInfoPage(props) {
 	const honorStats = useSelector(({ MyInfo }) => MyInfo.myInfo.honorStats);
 	const subAccount = useSelector(({ MyInfo }) => MyInfo.myInfo.subAccount);
 	const tournamentChampionships = useSelector(({ MyInfo }) => MyInfo.myInfo.tournamentChampionships);
+	const mostChampions = useSelector(({ MyInfo }) => MyInfo.myInfo.mostChampions);
 
 	const [activeTab, setActiveTab] = useState(0);
 	const [subAccountInput, setSubAccountInput] = useState('');
@@ -1071,6 +1073,11 @@ function MyInfoPage(props) {
 									<div className={classes.decorLine} style={{ color: '#00d4ff' }} />
 								</div>
 							</div>
+							{mostChampions && mostChampions.length > 0 && (
+								<div className={classes.trophyCabinetWrap}>
+									<MostChampions champions={mostChampions} />
+								</div>
+							)}
 
 							{/* 최근 전적 & 연승/연패 통계 */}
 							<div className={classes.statsSection}>

@@ -1,3 +1,4 @@
+import axios from 'axios';
 import getDataVersion from 'app/utility/getLatesetRiotDataVersion';
 
 // 소환사 스펠 ID → Data Dragon 키 매핑
@@ -116,4 +117,27 @@ export function getMultiKillBadge(participant) {
 	if (participant.tripleKills > 0) return '트리플킬';
 	if (participant.doubleKills > 0) return '더블킬';
 	return null;
+}
+
+let championNamesPromise = null;
+
+// DDragon ko_KR 챔피언 id → 한글명 매핑을 1회 로드해 캐시 (promise 공유).
+export function loadChampionNames() {
+	if (championNamesPromise) return championNamesPromise;
+	championNamesPromise = axios
+		.get('https://ddragon.leagueoflegends.com/api/versions.json')
+		.then(res => {
+			const v = (res.data && res.data[0]) || import.meta.env.VITE_RIOT_DATA_VERSION || '14.10.1';
+			return axios.get(`https://ddragon.leagueoflegends.com/cdn/${v}/data/ko_KR/champion.json`);
+		})
+		.then(res => {
+			const data = (res.data && res.data.data) || {};
+			const map = {};
+			Object.keys(data).forEach(id => {
+				map[id] = data[id].name;
+			});
+			return map;
+		})
+		.catch(() => ({}));
+	return championNamesPromise;
 }
