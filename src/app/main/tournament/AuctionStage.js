@@ -301,6 +301,49 @@ const useStyles = makeStyles()((theme) => ({
 		color: 'rgba(255, 255, 255, 0.4)',
 		fontSize: '1.4rem'
 	},
+	bigCountdownBox: {
+		display: 'flex',
+		flexDirection: 'column',
+		gap: 10,
+		padding: '14px 20px 16px',
+		borderRadius: 14,
+		background: 'rgba(255, 255, 255, 0.04)',
+		border: '1px solid rgba(255, 255, 255, 0.1)',
+		marginBottom: 16
+	},
+	bigCountdownHead: {
+		display: 'flex',
+		alignItems: 'baseline',
+		justifyContent: 'space-between',
+		gap: 12
+	},
+	bigCountdownLabel: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.3rem',
+		color: 'rgba(255, 255, 255, 0.55)',
+		letterSpacing: '0.02em'
+	},
+	bigCountdownValue: {
+		fontFamily: '"Rajdhani", "Noto Sans KR", sans-serif',
+		fontSize: '4.5rem',
+		fontWeight: 700,
+		color: '#fff',
+		lineHeight: 1,
+		[theme.breakpoints.down('sm')]: {
+			fontSize: '3.4rem'
+		}
+	},
+	bigCountdownEnd: {
+		color: 'rgba(255, 255, 255, 0.4)',
+		fontSize: '2.6rem'
+	},
+	bigCountdownBar: {
+		width: '100%',
+		height: 16,
+		borderRadius: 8,
+		background: 'rgba(255, 255, 255, 0.08)',
+		overflow: 'hidden'
+	},
 	adminBtn: {
 		background: 'linear-gradient(135deg, #00d4ff 0%, #0099cc 100%)',
 		color: '#000',
@@ -565,7 +608,7 @@ function getMemberTier(rating) {
 }
 
 // ─── Countdown ────────────────────────────────────────────────
-function Countdown({ deadline, totalSeconds, classes }) {
+function Countdown({ deadline, totalSeconds, classes, large }) {
 	const [now, setNow] = useState(() => Date.now());
 	useEffect(() => {
 		// 100ms 주기로 게이지가 부드럽게 흐르도록.
@@ -584,12 +627,32 @@ function Countdown({ deadline, totalSeconds, classes }) {
 	let fillCls = '';
 	if (expired) {
 		fillCls = classes.countdownBarFillEnd;
-	} else if (sec <= 5) {
+	} else if (pct <= 15 || sec <= 3) {
 		textCls = classes.countdownDanger;
 		fillCls = classes.countdownBarFillDanger;
-	} else if (sec <= 10) {
+	} else if (pct <= 40 || sec <= 5) {
 		textCls = classes.countdownWarn;
 		fillCls = classes.countdownBarFillWarn;
+	}
+	if (large) {
+		return (
+			<div className={classes.bigCountdownBox}>
+				<div className={classes.bigCountdownHead}>
+					<span className={classes.bigCountdownLabel}>입찰 시간</span>
+					{expired ? (
+						<span className={`${classes.bigCountdownValue} ${classes.bigCountdownEnd}`}>시간 종료</span>
+					) : (
+						<span className={`${classes.bigCountdownValue} ${textCls}`}>{sec}초</span>
+					)}
+				</div>
+				<div className={classes.bigCountdownBar}>
+					<div
+						className={`${classes.countdownBarFill} ${fillCls}`}
+						style={{ width: `${expired ? 0 : pct}%` }}
+					/>
+				</div>
+			</div>
+		);
 	}
 	return (
 		<div className={classes.countdownBox}>
@@ -597,7 +660,7 @@ function Countdown({ deadline, totalSeconds, classes }) {
 			{expired ? (
 				<span className={`${classes.countdownValue} ${classes.countdownEnd}`}>시간 종료</span>
 			) : (
-				<span className={`${classes.countdownValue} ${textCls}`}>{sec}s</span>
+				<span className={`${classes.countdownValue} ${textCls}`}>{sec}초</span>
 			)}
 			<div className={classes.countdownBar}>
 				<div
@@ -1021,7 +1084,7 @@ function AuctionStage({ tournament, teams, isAdmin, onChanged }) {
 						startIcon={<PlayArrowIcon />}
 						onClick={handleStartBid}
 					>
-						입찰 시작 ({bidDuration}s)
+						입찰 시작 ({bidDuration}초)
 					</Button>
 				)}
 				{hasCurrent && bidActive && (
@@ -1030,7 +1093,7 @@ function AuctionStage({ tournament, teams, isAdmin, onChanged }) {
 						startIcon={<TimerIcon />}
 						onClick={handleExtendQuick}
 					>
-						시간 갱신 ({bidDuration}s)
+						시간 갱신 ({bidDuration}초)
 					</Button>
 				)}
 				{hasCurrent && bidExpired && (
@@ -1074,15 +1137,15 @@ function AuctionStage({ tournament, teams, isAdmin, onChanged }) {
 		}
 		return (
 			<div className={classes.auctionBlock}>
+				{deadlineMs != null ? (
+					<Countdown deadline={currentDeadline} totalSeconds={bidDuration} classes={classes} large />
+				) : (
+					<div className={classes.bidDurationHint}>
+						기본 입찰 시간 <b>{bidDuration}초</b>
+					</div>
+				)}
 				<div className={classes.candidateTop}>
 					<CandidateInfoCard candidate={currentCandidate} classes={classes} />
-					{deadlineMs != null ? (
-						<Countdown deadline={currentDeadline} totalSeconds={bidDuration} classes={classes} />
-					) : (
-						<div className={classes.bidDurationHint}>
-							기본 입찰 시간 <b>{bidDuration}초</b>
-						</div>
-					)}
 				</div>
 			</div>
 		);
