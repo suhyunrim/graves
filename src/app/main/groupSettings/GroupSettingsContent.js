@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import {
 	Table,
 	TableBody,
@@ -7,6 +7,7 @@ import {
 	TableHead,
 	TableRow,
 	TableSortLabel,
+	TablePagination,
 	Button,
 	Dialog,
 	DialogTitle,
@@ -26,6 +27,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { SettingsSkeleton } from '../components/SkeletonLoaders';
 import useDialogStyles from '../components/dialogStyles';
 import * as Actions from './store/actions';
+
+const ROWS_PER_PAGE = 50;
 
 const TIER_THRESHOLDS = {
 	IRON: 200,
@@ -55,32 +58,6 @@ const TIER_COLORS = {
 	CHALLENGER: '#F0E68C'
 };
 
-function isNonStepTier(name) {
-	return name === 'MASTER' || name === 'GRANDMASTER' || name === 'CHALLENGER';
-}
-
-function getTierName(rating) {
-	const entries = Object.entries(TIER_THRESHOLDS).sort((a, b) => b[1] - a[1]);
-	const match = entries.find(([, threshold]) => rating >= threshold);
-	return match ? match[0] : 'IRON';
-}
-
-const TIER_RANK_MAP = { IV: '4', III: '3', II: '2', I: '1' };
-
-function getRatingTierShort(rating) {
-	const entries = Object.entries(TIER_THRESHOLDS).sort((a, b) => b[1] - a[1]);
-	const match = entries.find(([, threshold]) => rating >= threshold);
-	if (!match) return 'I4';
-	const [name, threshold] = match;
-	const abbr = TIER_ABBR[name] || name.charAt(0);
-	if (isNonStepTier(name)) {
-		const lp = Math.floor((rating - threshold) * 4);
-		return `${abbr} ${lp}LP`;
-	}
-	const step = TIER_STEPS[Math.floor((rating - threshold) / 25)];
-	return `${abbr}${TIER_RANK_MAP[step] || ''}`;
-}
-
 // 약어 매핑 (API 전송용)
 const TIER_ABBR = {
 	IRON: 'I',
@@ -94,6 +71,33 @@ const TIER_ABBR = {
 	GRANDMASTER: 'GM',
 	CHALLENGER: 'C'
 };
+
+const TIER_RANK_MAP = { IV: '4', III: '3', II: '2', I: '1' };
+
+// rating 내림차순으로 미리 정렬 — getTierName/getRatingTierShort가 호출마다 sort하던 비용 제거.
+const TIER_THRESHOLDS_DESC = Object.entries(TIER_THRESHOLDS).sort((a, b) => b[1] - a[1]);
+
+function isNonStepTier(name) {
+	return name === 'MASTER' || name === 'GRANDMASTER' || name === 'CHALLENGER';
+}
+
+function getTierName(rating) {
+	const match = TIER_THRESHOLDS_DESC.find(([, threshold]) => rating >= threshold);
+	return match ? match[0] : 'IRON';
+}
+
+function getRatingTierShort(rating) {
+	const match = TIER_THRESHOLDS_DESC.find(([, threshold]) => rating >= threshold);
+	if (!match) return 'I4';
+	const [name, threshold] = match;
+	const abbr = TIER_ABBR[name] || name.charAt(0);
+	if (isNonStepTier(name)) {
+		const lp = Math.floor((rating - threshold) * 4);
+		return `${abbr} ${lp}LP`;
+	}
+	const step = TIER_STEPS[Math.floor((rating - threshold) / 25)];
+	return `${abbr}${TIER_RANK_MAP[step] || ''}`;
+}
 
 // 티어 선택 옵션: rating = defaultRating 값, apiValue = 서버 전송용 약어
 const TIER_OPTIONS = [];
@@ -112,6 +116,62 @@ const TIER_OPTIONS = [];
 		TIER_OPTIONS.push({ label: `${TIER_ABBR[tier]} ${lp}LP`, tierName: tier, rating, apiValue });
 	});
 });
+
+function getSortValue(member, key) {
+	switch (key) {
+		case 'name':
+			return member.name.toLowerCase();
+		case 'rating':
+			return member.defaultRating + member.additionalRating;
+		case 'voice':
+			return member.lastVoiceJoinedAt ? new Date(member.lastVoiceJoinedAt).getTime() : 0;
+		case 'latestMatch':
+			return member.latestMatchDate ? new Date(member.latestMatchDate).getTime() : 0;
+		case 'created':
+			return member.createdAt ? new Date(member.createdAt).getTime() : 0;
+		default:
+			return 0;
+	}
+}
+
+function getStatusKeys(member) {
+	if (member.role === 'outsider') return ['outsider'];
+	if (member.leftGuildAt) return ['leftGuild'];
+	return [member.role];
+}
+
+function getStatusPriority(member) {
+	if (member.role === 'admin') return 1;
+	if (member.role === 'outsider') return 4;
+	if (member.leftGuildAt) return 3;
+	return 2;
+}
+
+function formatDate(dateStr) {
+	if (!dateStr) return '-';
+	const d = new Date(dateStr);
+	const y = String(d.getFullYear()).slice(-2);
+	const m = String(d.getMonth() + 1).padStart(2, '0');
+	const day = String(d.getDate()).padStart(2, '0');
+	return `${y}.${m}.${day}`;
+}
+
+function formatRelativeTime(dateStr) {
+	if (!dateStr) return null;
+	const now = new Date();
+	const d = new Date(dateStr);
+	const diffMs = now - d;
+	const diffMin = Math.floor(diffMs / 60000);
+	const diffHour = Math.floor(diffMin / 60);
+	const diffDay = Math.floor(diffHour / 24);
+
+	if (diffMin < 1) return '방금 전';
+	if (diffMin < 60) return `${diffMin}분 전`;
+	if (diffHour < 24) return `${diffHour}시간 전`;
+	if (diffDay < 30) return `${diffDay}일 전`;
+	if (diffDay < 365) return `${Math.floor(diffDay / 30)}개월 전`;
+	return `${Math.floor(diffDay / 365)}년 전`;
+}
 
 const useStyles = makeStyles()((theme) => ({
 	root: {
@@ -282,6 +342,24 @@ const useStyles = makeStyles()((theme) => ({
 		fontSize: '1.15rem',
 		padding: '4px 12px'
 	},
+	pagination: {
+		color: 'rgba(255, 255, 255, 0.7)',
+		fontFamily: '"Noto Sans KR", sans-serif',
+		'& .MuiTablePagination-toolbar': {
+			fontFamily: '"Noto Sans KR", sans-serif'
+		},
+		'& .MuiTablePagination-displayedRows': {
+			fontFamily: '"Rajdhani", sans-serif',
+			fontSize: '1.15rem',
+			color: 'rgba(255, 255, 255, 0.6)'
+		},
+		'& .MuiTablePagination-actions button': {
+			color: 'rgba(255, 255, 255, 0.7)'
+		},
+		'& .MuiTablePagination-actions button.Mui-disabled': {
+			color: 'rgba(255, 255, 255, 0.2)'
+		}
+	},
 	// Mobile card styles
 	cardList: {
 		display: 'flex',
@@ -372,6 +450,202 @@ const useStyles = makeStyles()((theme) => ({
 	}
 }));
 
+function renderTierOption(tierName, label) {
+	const color = TIER_COLORS[tierName] || '#fff';
+	return (
+		<div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+			<img
+				style={{ width: 20, height: 20 }}
+				src={`/assets/images/ranked-emblems/Emblem_${tierName}.webp`}
+				alt={tierName}
+			/>
+			<span style={{ color, fontFamily: '"Rajdhani", sans-serif', fontWeight: 600 }}>{label}</span>
+		</div>
+	);
+}
+
+function renderStatus(member, classes) {
+	const chips = [];
+	if (member.role === 'admin') {
+		chips.push(<Chip key="admin" label="관리자" className={classes.chipAdmin} size="small" />);
+	}
+	if (member.role === 'outsider') {
+		chips.push(<Chip key="outsider" label="추방됨" className={classes.chipOutsider} size="small" />);
+	}
+	if (member.leftGuildAt) {
+		chips.push(<Chip key="left" label="서버 탈퇴" className={classes.chipLeftGuild} size="small" />);
+	}
+	if (chips.length === 0) {
+		return <span className={classes.statsText}>-</span>;
+	}
+	return <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>{chips}</div>;
+}
+
+function renderTier(rating, classes) {
+	const tierName = getTierName(rating);
+	const color = TIER_COLORS[tierName] || '#fff';
+	return (
+		<div className={classes.tierCell}>
+			<img
+				className={classes.tierEmblem}
+				src={`/assets/images/ranked-emblems/Emblem_${tierName}.webp`}
+				alt={tierName}
+			/>
+			<span className={classes.tierText} style={{ color }}>
+				{getRatingTierShort(rating)}
+			</span>
+		</div>
+	);
+}
+
+function renderVoiceStatus(dateStr, classes) {
+	if (!dateStr) {
+		return <span className={classes.statsText}>-</span>;
+	}
+	return <span className={classes.statsText}>{formatRelativeTime(dateStr)}</span>;
+}
+
+function TierSelect({ member, mobile, classes, onTierChange }) {
+	return (
+		<Select
+			className={mobile ? classes.tierSelectMobile : classes.tierSelect}
+			value={member.defaultRating}
+			onChange={e => onTierChange(member.puuid, e.target.value)}
+			renderValue={val => renderTierOption(getTierName(val), getRatingTierShort(val))}
+			MenuProps={{
+				PaperProps: {
+					style: {
+						background: '#1a1a2e',
+						border: '1px solid rgba(0, 212, 255, 0.3)',
+						color: '#fff',
+						maxHeight: 300
+					}
+				}
+			}}
+		>
+			{TIER_OPTIONS.map(opt => (
+				<MenuItem key={opt.apiValue} value={opt.rating} className={classes.tierMenuItem}>
+					{renderTierOption(opt.tierName, opt.label)}
+				</MenuItem>
+			))}
+		</Select>
+	);
+}
+
+function ActionBtn({ member, classes, onBlacklist, onRestore }) {
+	if (member.role === 'admin') return null;
+	if (member.role === 'outsider') {
+		return (
+			<Button className={classes.restoreBtn} size="small" onClick={() => onRestore(member)}>
+				복구
+			</Button>
+		);
+	}
+	return (
+		<Button className={classes.blacklistBtn} size="small" onClick={() => onBlacklist(member)}>
+			추방
+		</Button>
+	);
+}
+
+const MemberRow = React.memo(function MemberRow({ member, classes, onBlacklist, onRestore, onTierChange }) {
+	const totalRating = member.defaultRating + member.additionalRating;
+	return (
+		<TableRow
+			className={`${classes.row} ${member.role === 'outsider' ? classes.rowOutsider : ''} ${
+				member.leftGuildAt ? classes.rowLeftGuild : ''
+			}`}
+		>
+			<TableCell className={classes.bodyCell}>
+				{member.name}
+				{member.subAccounts && member.subAccounts.length > 0 && (
+					<div className={classes.subAccountText}>
+						부캐: {member.subAccounts.map(s => s.name).join(', ')}
+					</div>
+				)}
+			</TableCell>
+			<TableCell className={classes.bodyCell}>{renderStatus(member, classes)}</TableCell>
+			<TableCell className={classes.bodyCell} align="center">
+				<span className={classes.statsText}>
+					{member.win}W {member.lose}L
+				</span>
+			</TableCell>
+			<TableCell className={classes.bodyCell} align="center">
+				<TierSelect member={member} mobile={false} classes={classes} onTierChange={onTierChange} />
+			</TableCell>
+			<TableCell className={classes.bodyCell} align="center">
+				{renderTier(totalRating, classes)}
+			</TableCell>
+			<TableCell className={classes.bodyCell} align="center">
+				<span className={classes.statsText}>{formatDate(member.createdAt)}</span>
+			</TableCell>
+			<TableCell className={classes.bodyCell} align="center">
+				<span className={classes.statsText}>{formatDate(member.latestMatchDate)}</span>
+			</TableCell>
+			<TableCell className={classes.bodyCell} align="center">
+				{renderVoiceStatus(member.lastVoiceJoinedAt, classes)}
+			</TableCell>
+			<TableCell className={classes.bodyCell} align="center">
+				<ActionBtn member={member} classes={classes} onBlacklist={onBlacklist} onRestore={onRestore} />
+			</TableCell>
+		</TableRow>
+	);
+});
+
+const MemberCard = React.memo(function MemberCard({ member, classes, onBlacklist, onRestore, onTierChange }) {
+	const totalRating = member.defaultRating + member.additionalRating;
+	return (
+		<div
+			className={`${classes.card} ${member.role === 'outsider' ? classes.cardOutsider : ''} ${
+				member.leftGuildAt ? classes.rowLeftGuild : ''
+			}`}
+		>
+			<div className={classes.cardHeader}>
+				<div>
+					<span className={classes.cardName}>{member.name}</span>
+					{member.subAccounts && member.subAccounts.length > 0 && (
+						<div className={classes.subAccountText}>
+							부캐: {member.subAccounts.map(s => s.name).join(', ')}
+						</div>
+					)}
+				</div>
+				{renderStatus(member, classes)}
+			</div>
+			<div className={classes.cardBody}>
+				<div className={classes.cardField}>
+					<span className={classes.cardLabel}>전적</span>
+					<span className={classes.cardValue}>
+						{member.win}W {member.lose}L
+					</span>
+				</div>
+				<div className={classes.cardField}>
+					<span className={classes.cardLabel}>현재 티어</span>
+					{renderTier(totalRating, classes)}
+				</div>
+				<div className={classes.cardField}>
+					<span className={classes.cardLabel}>생성일</span>
+					<span className={classes.cardValue}>{formatDate(member.createdAt)}</span>
+				</div>
+				<div className={classes.cardField}>
+					<span className={classes.cardLabel}>최근 경기</span>
+					<span className={classes.cardValue}>{formatDate(member.latestMatchDate)}</span>
+				</div>
+				<div className={classes.cardField}>
+					<span className={classes.cardLabel}>보이스 접속</span>
+					{renderVoiceStatus(member.lastVoiceJoinedAt, classes)}
+				</div>
+				<div className={`${classes.cardField} ${classes.cardTierRow}`}>
+					<span className={classes.cardLabel}>기본 티어</span>
+					<TierSelect member={member} mobile classes={classes} onTierChange={onTierChange} />
+				</div>
+			</div>
+			<div className={classes.cardActions}>
+				<ActionBtn member={member} classes={classes} onBlacklist={onBlacklist} onRestore={onRestore} />
+			</div>
+		</div>
+	);
+});
+
 function GroupSettingsContent() {
 	const { classes } = useStyles();
 	const { classes: dialogClasses } = useDialogStyles();
@@ -384,6 +658,7 @@ function GroupSettingsContent() {
 	const [sortKey, setSortKey] = useState(null);
 	const [sortDir, setSortDir] = useState('asc');
 	const [statusFilter, setStatusFilter] = useState(['admin', 'member', 'outsider', 'leftGuild']);
+	const [page, setPage] = useState(0);
 
 	const groupId = user?.reprGroup?.groupId;
 	const isAdmin = user?.reprGroup?.isAdmin;
@@ -394,6 +669,75 @@ function GroupSettingsContent() {
 		}
 	}, [dispatch, groupId, isAdmin]);
 
+	const filteredMembers = useMemo(
+		() =>
+			members
+				.filter(m => m.name.toLowerCase().includes(searchText.toLowerCase()))
+				.filter(m => getStatusKeys(m).some(k => statusFilter.includes(k))),
+		[members, searchText, statusFilter]
+	);
+
+	const sortedMembers = useMemo(
+		() =>
+			[...filteredMembers].sort((a, b) => {
+				if (sortKey) {
+					const aVal = getSortValue(a, sortKey);
+					const bVal = getSortValue(b, sortKey);
+					if (aVal < bVal) return sortDir === 'asc' ? -1 : 1;
+					if (aVal > bVal) return sortDir === 'asc' ? 1 : -1;
+				}
+				return getStatusPriority(a) - getStatusPriority(b);
+			}),
+		[filteredMembers, sortKey, sortDir]
+	);
+
+	const pagedMembers = useMemo(
+		() => sortedMembers.slice(page * ROWS_PER_PAGE, page * ROWS_PER_PAGE + ROWS_PER_PAGE),
+		[sortedMembers, page]
+	);
+
+	// 검색/필터/정렬이 바뀌면 첫 페이지로 되돌린다 (현재 페이지가 결과 범위를 벗어나는 것 방지).
+	useEffect(() => {
+		setPage(0);
+	}, [searchText, statusFilter, sortKey, sortDir]);
+
+	const handleSort = useCallback(key => {
+		setSortKey(prevKey => {
+			if (prevKey === key) {
+				setSortDir(d => (d === 'asc' ? 'desc' : 'asc'));
+				return prevKey;
+			}
+			setSortDir('asc');
+			return key;
+		});
+	}, []);
+
+	const handleBlacklist = useCallback(member => setConfirmDialog({ type: 'blacklist', member }), []);
+	const handleRestore = useCallback(member => setConfirmDialog({ type: 'restore', member }), []);
+
+	const handleTierChange = useCallback(
+		(puuid, rating) => {
+			const opt = TIER_OPTIONS.find(o => o.rating === rating);
+			if (opt) {
+				dispatch(Actions.changeDefaultTier(groupId, puuid, opt.apiValue, opt.rating));
+			}
+		},
+		[dispatch, groupId]
+	);
+
+	const handleConfirm = useCallback(() => {
+		setConfirmDialog(cd => {
+			if (cd) {
+				if (cd.type === 'blacklist') {
+					dispatch(Actions.addBlacklist(groupId, cd.member.puuid));
+				} else {
+					dispatch(Actions.removeBlacklist(groupId, cd.member.puuid));
+				}
+			}
+			return null;
+		});
+	}, [dispatch, groupId]);
+
 	if (!isAdmin) {
 		return <div className={classes.noAdmin}>관리자 권한이 필요합니다.</div>;
 	}
@@ -402,207 +746,22 @@ function GroupSettingsContent() {
 		return <SettingsSkeleton />;
 	}
 
-	const handleSort = key => {
-		if (sortKey === key) {
-			setSortDir(sortDir === 'asc' ? 'desc' : 'asc');
-		} else {
-			setSortKey(key);
-			setSortDir('asc');
-		}
-	};
+	const totalCount = sortedMembers.length;
 
-	const getSortValue = (member, key) => {
-		switch (key) {
-			case 'name':
-				return member.name.toLowerCase();
-			case 'rating':
-				return member.defaultRating + member.additionalRating;
-			case 'voice':
-				return member.lastVoiceJoinedAt ? new Date(member.lastVoiceJoinedAt).getTime() : 0;
-			case 'latestMatch':
-				return member.latestMatchDate ? new Date(member.latestMatchDate).getTime() : 0;
-			case 'created':
-				return member.createdAt ? new Date(member.createdAt).getTime() : 0;
-			default:
-				return 0;
-		}
-	};
-
-	function getStatusKeys(member) {
-		if (member.role === 'outsider') return ['outsider'];
-		if (member.leftGuildAt) return ['leftGuild'];
-		return [member.role];
-	}
-
-	function getStatusPriority(member) {
-		if (member.role === 'admin') return 1;
-		if (member.role === 'outsider') return 4;
-		if (member.leftGuildAt) return 3;
-		return 2;
-	}
-
-	const filteredMembers = members
-		.filter(m => m.name.toLowerCase().includes(searchText.toLowerCase()))
-		.filter(m => getStatusKeys(m).some(k => statusFilter.includes(k)));
-
-	const sortedMembers = [...filteredMembers].sort((a, b) => {
-		if (sortKey) {
-			const aVal = getSortValue(a, sortKey);
-			const bVal = getSortValue(b, sortKey);
-			if (aVal < bVal) return sortDir === 'asc' ? -1 : 1;
-			if (aVal > bVal) return sortDir === 'asc' ? 1 : -1;
-		}
-		return getStatusPriority(a) - getStatusPriority(b);
-	});
-
-	function handleBlacklist(member) {
-		setConfirmDialog({ type: 'blacklist', member });
-	}
-
-	function handleRestore(member) {
-		setConfirmDialog({ type: 'restore', member });
-	}
-
-	function handleConfirm() {
-		if (!confirmDialog) return;
-		const { type, member } = confirmDialog;
-		if (type === 'blacklist') {
-			dispatch(Actions.addBlacklist(groupId, member.puuid));
-		} else {
-			dispatch(Actions.removeBlacklist(groupId, member.puuid));
-		}
-		setConfirmDialog(null);
-	}
-
-	function handleTierChange(puuid, rating) {
-		const opt = TIER_OPTIONS.find(o => o.rating === rating);
-		if (opt) {
-			dispatch(Actions.changeDefaultTier(groupId, puuid, opt.apiValue, opt.rating));
-		}
-	}
-
-	function renderTierOption(tierName, label) {
-		const color = TIER_COLORS[tierName] || '#fff';
+	function renderPagination() {
+		if (totalCount <= ROWS_PER_PAGE) return null;
 		return (
-			<div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-				<img
-					style={{ width: 20, height: 20 }}
-					src={`/assets/images/ranked-emblems/Emblem_${tierName}.webp`}
-					alt={tierName}
-				/>
-				<span style={{ color, fontFamily: '"Rajdhani", sans-serif', fontWeight: 600 }}>{label}</span>
-			</div>
+			<TablePagination
+				className={classes.pagination}
+				component="div"
+				count={totalCount}
+				page={page}
+				onPageChange={(_e, p) => setPage(p)}
+				rowsPerPage={ROWS_PER_PAGE}
+				rowsPerPageOptions={[]}
+				labelDisplayedRows={({ from, to, count }) => `${from}–${to} / ${count}명`}
+			/>
 		);
-	}
-
-	function renderStatus(member) {
-		const chips = [];
-		if (member.role === 'admin') {
-			chips.push(<Chip key="admin" label="관리자" className={classes.chipAdmin} size="small" />);
-		}
-		if (member.role === 'outsider') {
-			chips.push(<Chip key="outsider" label="추방됨" className={classes.chipOutsider} size="small" />);
-		}
-		if (member.leftGuildAt) {
-			chips.push(<Chip key="left" label="서버 탈퇴" className={classes.chipLeftGuild} size="small" />);
-		}
-		if (chips.length === 0) {
-			return <span className={classes.statsText}>-</span>;
-		}
-		return <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>{chips}</div>;
-	}
-
-	function renderTier(rating) {
-		const tierName = getTierName(rating);
-		const color = TIER_COLORS[tierName] || '#fff';
-		return (
-			<div className={classes.tierCell}>
-				<img
-					className={classes.tierEmblem}
-					src={`/assets/images/ranked-emblems/Emblem_${tierName}.webp`}
-					alt={tierName}
-				/>
-				<span className={classes.tierText} style={{ color }}>
-					{getRatingTierShort(rating)}
-				</span>
-			</div>
-		);
-	}
-
-	function renderTierSelect(member, mobile) {
-		return (
-			<Select
-				className={mobile ? classes.tierSelectMobile : classes.tierSelect}
-				value={member.defaultRating}
-				onChange={e => handleTierChange(member.puuid, e.target.value)}
-				renderValue={val => renderTierOption(getTierName(val), getRatingTierShort(val))}
-				MenuProps={{
-					PaperProps: {
-						style: {
-							background: '#1a1a2e',
-							border: '1px solid rgba(0, 212, 255, 0.3)',
-							color: '#fff',
-							maxHeight: 300
-						}
-					}
-				}}
-			>
-				{TIER_OPTIONS.map(opt => (
-					<MenuItem key={opt.apiValue} value={opt.rating} className={classes.tierMenuItem}>
-						{renderTierOption(opt.tierName, opt.label)}
-					</MenuItem>
-				))}
-			</Select>
-		);
-	}
-
-	function renderActionBtn(member) {
-		if (member.role === 'admin') return null;
-		if (member.role === 'outsider') {
-			return (
-				<Button className={classes.restoreBtn} size="small" onClick={() => handleRestore(member)}>
-					복구
-				</Button>
-			);
-		}
-		return (
-			<Button className={classes.blacklistBtn} size="small" onClick={() => handleBlacklist(member)}>
-				추방
-			</Button>
-		);
-	}
-
-	function formatDate(dateStr) {
-		if (!dateStr) return '-';
-		const d = new Date(dateStr);
-		const y = String(d.getFullYear()).slice(-2);
-		const m = String(d.getMonth() + 1).padStart(2, '0');
-		const day = String(d.getDate()).padStart(2, '0');
-		return `${y}.${m}.${day}`;
-	}
-
-	function formatRelativeTime(dateStr) {
-		if (!dateStr) return null;
-		const now = new Date();
-		const d = new Date(dateStr);
-		const diffMs = now - d;
-		const diffMin = Math.floor(diffMs / 60000);
-		const diffHour = Math.floor(diffMin / 60);
-		const diffDay = Math.floor(diffHour / 24);
-
-		if (diffMin < 1) return '방금 전';
-		if (diffMin < 60) return `${diffMin}분 전`;
-		if (diffHour < 24) return `${diffHour}시간 전`;
-		if (diffDay < 30) return `${diffDay}일 전`;
-		if (diffDay < 365) return `${Math.floor(diffDay / 30)}개월 전`;
-		return `${Math.floor(diffDay / 365)}년 전`;
-	}
-
-	function renderVoiceStatus(dateStr) {
-		if (!dateStr) {
-			return <span className={classes.statsText}>-</span>;
-		}
-		return <span className={classes.statsText}>{formatRelativeTime(dateStr)}</span>;
 	}
 
 	function renderConfirmDialog() {
@@ -650,59 +809,18 @@ function GroupSettingsContent() {
 		return (
 			<div className={classes.root}>
 				<div className={classes.cardList}>
-					{sortedMembers.map(member => {
-						const totalRating = member.defaultRating + member.additionalRating;
-						return (
-							<div
-								key={member.puuid}
-								className={`${classes.card} ${member.role === 'outsider' ? classes.cardOutsider : ''} ${
-									member.leftGuildAt ? classes.rowLeftGuild : ''
-								}`}
-							>
-								<div className={classes.cardHeader}>
-									<div>
-										<span className={classes.cardName}>{member.name}</span>
-										{member.subAccounts && member.subAccounts.length > 0 && (
-											<div className={classes.subAccountText}>
-												부캐: {member.subAccounts.map(s => s.name).join(', ')}
-											</div>
-										)}
-									</div>
-									{renderStatus(member)}
-								</div>
-								<div className={classes.cardBody}>
-									<div className={classes.cardField}>
-										<span className={classes.cardLabel}>전적</span>
-										<span className={classes.cardValue}>
-											{member.win}W {member.lose}L
-										</span>
-									</div>
-									<div className={classes.cardField}>
-										<span className={classes.cardLabel}>현재 티어</span>
-										{renderTier(totalRating)}
-									</div>
-									<div className={classes.cardField}>
-										<span className={classes.cardLabel}>생성일</span>
-										<span className={classes.cardValue}>{formatDate(member.createdAt)}</span>
-									</div>
-									<div className={classes.cardField}>
-										<span className={classes.cardLabel}>최근 경기</span>
-										<span className={classes.cardValue}>{formatDate(member.latestMatchDate)}</span>
-									</div>
-									<div className={classes.cardField}>
-										<span className={classes.cardLabel}>보이스 접속</span>
-										{renderVoiceStatus(member.lastVoiceJoinedAt)}
-									</div>
-									<div className={`${classes.cardField} ${classes.cardTierRow}`}>
-										<span className={classes.cardLabel}>기본 티어</span>
-										{renderTierSelect(member, true)}
-									</div>
-								</div>
-								<div className={classes.cardActions}>{renderActionBtn(member)}</div>
-							</div>
-						);
-					})}
+					{pagedMembers.map(member => (
+						<MemberCard
+							key={member.puuid}
+							member={member}
+							classes={classes}
+							onBlacklist={handleBlacklist}
+							onRestore={handleRestore}
+							onTierChange={handleTierChange}
+						/>
+					))}
 				</div>
+				{renderPagination()}
 				{renderConfirmDialog()}
 			</div>
 		);
@@ -806,53 +924,20 @@ function GroupSettingsContent() {
 						</TableRow>
 					</TableHead>
 					<TableBody>
-						{sortedMembers.map(member => {
-							const totalRating = member.defaultRating + member.additionalRating;
-							return (
-								<TableRow
-									key={member.puuid}
-									className={`${classes.row} ${member.role === 'outsider' ? classes.rowOutsider : ''} ${
-										member.leftGuildAt ? classes.rowLeftGuild : ''
-									}`}
-								>
-									<TableCell className={classes.bodyCell}>
-									{member.name}
-									{member.subAccounts && member.subAccounts.length > 0 && (
-										<div className={classes.subAccountText}>
-											부캐: {member.subAccounts.map(s => s.name).join(', ')}
-										</div>
-									)}
-								</TableCell>
-									<TableCell className={classes.bodyCell}>{renderStatus(member)}</TableCell>
-									<TableCell className={classes.bodyCell} align="center">
-										<span className={classes.statsText}>
-											{member.win}W {member.lose}L
-										</span>
-									</TableCell>
-									<TableCell className={classes.bodyCell} align="center">
-										{renderTierSelect(member, false)}
-									</TableCell>
-									<TableCell className={classes.bodyCell} align="center">
-										{renderTier(totalRating)}
-									</TableCell>
-									<TableCell className={classes.bodyCell} align="center">
-										<span className={classes.statsText}>{formatDate(member.createdAt)}</span>
-									</TableCell>
-									<TableCell className={classes.bodyCell} align="center">
-										<span className={classes.statsText}>{formatDate(member.latestMatchDate)}</span>
-									</TableCell>
-									<TableCell className={classes.bodyCell} align="center">
-										{renderVoiceStatus(member.lastVoiceJoinedAt)}
-									</TableCell>
-									<TableCell className={classes.bodyCell} align="center">
-										{renderActionBtn(member)}
-									</TableCell>
-								</TableRow>
-							);
-						})}
+						{pagedMembers.map(member => (
+							<MemberRow
+								key={member.puuid}
+								member={member}
+								classes={classes}
+								onBlacklist={handleBlacklist}
+								onRestore={handleRestore}
+								onTierChange={handleTierChange}
+							/>
+						))}
 					</TableBody>
 				</Table>
 			</TableContainer>
+			{renderPagination()}
 			{renderConfirmDialog()}
 		</div>
 	);

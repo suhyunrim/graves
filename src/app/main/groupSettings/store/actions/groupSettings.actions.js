@@ -60,9 +60,9 @@ export function changeDefaultTier(groupId, puuid, tier, rating) {
 	};
 }
 
-export function setSearchText(event) {
+export function setSearchText(searchText) {
 	return {
 		type: SET_SEARCH_TEXT,
-		searchText: event.target.value
+		searchText
 	};
 }

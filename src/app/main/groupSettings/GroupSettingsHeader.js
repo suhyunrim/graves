@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Typography, InputBase } from '@mui/material';
 import { makeStyles } from 'tss-react/mui';
 import SearchIcon from '@mui/icons-material/Search';
 import { useDispatch, useSelector } from 'react-redux';
+import debounce from 'lodash/debounce';
 import * as Actions from './store/actions';
 
 const useStyles = makeStyles()((theme) => ({
@@ -101,7 +102,23 @@ const useStyles = makeStyles()((theme) => ({
 function GroupSettingsHeader({ subtitle, showSearch }) {
 	const { classes } = useStyles();
 	const dispatch = useDispatch();
-	const searchText = useSelector(({ GroupSettings }) => GroupSettings.groupSettings.searchText);
+	const reduxSearchText = useSelector(({ GroupSettings }) => GroupSettings.groupSettings.searchText);
+	// 입력값은 로컬 state로 즉시 반영하고, 실제 필터를 트리거하는 redux 반영은 디바운스한다.
+	// (매 키 입력마다 SET_SEARCH_TEXT 디스패치 → 220행 목록 전체 재렌더되던 문제 방지)
+	const [localSearch, setLocalSearch] = useState(reduxSearchText);
+
+	const debouncedDispatch = useMemo(
+		() => debounce(value => dispatch(Actions.setSearchText(value)), 250),
+		[dispatch]
+	);
+
+	useEffect(() => () => debouncedDispatch.cancel(), [debouncedDispatch]);
+
+	const handleSearchChange = ev => {
+		const { value } = ev.target;
+		setLocalSearch(value);
+		debouncedDispatch(value);
+	};
 
 	return (
 		<div className={classes.root}>
@@ -116,8 +133,8 @@ function GroupSettingsHeader({ subtitle, showSearch }) {
 						<InputBase
 							className={classes.searchInput}
 							placeholder="소환사 검색..."
-							value={searchText}
-							onChange={ev => dispatch(Actions.setSearchText(ev))}
+							value={localSearch}
+							onChange={handleSearchChange}
 							inputProps={{ 'aria-label': 'search' }}
 						/>
 					</div>
