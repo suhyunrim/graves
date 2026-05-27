@@ -190,7 +190,10 @@ const useStyles = makeStyles()((theme) => ({
 		}
 	},
 	trophyCabinetWrap: {
-		marginBottom: 24
+		marginBottom: 24,
+		animation: `${fadeInUp} 0.6s ease forwards`,
+		opacity: 0,
+		animationDelay: '0.05s'
 	},
 	rankCard: {
 		position: 'relative',

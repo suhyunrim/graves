@@ -891,6 +891,19 @@ function TournamentDetail() {
 		reload();
 	}
 
+	// 과거 토너먼트(우승팀만) — 브래킷 배치 없이 바로 시작, 백엔드가 자동 우승 처리.
+	function handleStartSingleTeam() {
+		Actions.startTournament(tournamentId, undefined, true)
+			.then(() => {
+				toast.success('우승팀이 등록되어 토너먼트가 종료되었습니다.');
+				reload();
+			})
+			.catch(err => {
+				const msg = err.response && err.response.data ? err.response.data.result : '시작 실패';
+				toast.error(msg);
+			});
+	}
+
 	function handleStartAuction() {
 		Actions.startAuction(tournamentId)
 			.then(() => {
@@ -965,7 +978,10 @@ function TournamentDetail() {
 	// auction 완료 후엔 preparing 상태로 돌아오지만, 이미 멤버가 차 있어서 일반 대진 짜기 흐름.
 	const auctionMembersComplete = isAuctionType && teams.length > 0
 		&& teams.every(t => (t.members || []).length >= 5);
-	const canStart = isAdmin && isPreparing && teamCount >= 2
+	// 과거 토너먼트(우승팀만 등록) 모드 — 1팀만 등록돼도 시작(즉시 우승) 가능, 브래킷 배치 생략.
+	const allowSingleTeam = Boolean(detail.allowSingleTeam);
+	const minTeams = allowSingleTeam ? 1 : 2;
+	const canStart = isAdmin && isPreparing && teamCount >= minTeams
 		&& (!isAuctionType || auctionMembersComplete);
 	const canStartAuction = isAdmin && isPreparing && isAuctionType && !auctionMembersComplete && teamCount >= 2;
 	// preparation 단계에선 detail.bracketSize/teamCount 가 null. 시작 시점에 등록된 팀 수로 산출한다.
@@ -1048,15 +1064,22 @@ function TournamentDetail() {
 								</Tooltip>
 							)}
 							{isPreparing && (!isAuctionType || auctionMembersComplete) && (
-								<Tooltip title={canStart ? '' : '팀이 2개 이상 등록되어야 시작할 수 있습니다.'} arrow>
+								<Tooltip
+									title={canStart
+										? ''
+										: (allowSingleTeam
+											? '우승팀 1팀이 등록되어야 시작할 수 있습니다.'
+											: '팀이 2개 이상 등록되어야 시작할 수 있습니다.')}
+									arrow
+								>
 									<span>
 										<Button
 											className={classes.primaryBtn}
 											startIcon={<PlayArrowIcon />}
-											onClick={() => setSlotMappingOpen(true)}
+											onClick={() => (allowSingleTeam ? handleStartSingleTeam() : setSlotMappingOpen(true))}
 											disabled={!canStart}
 										>
-											브래킷 배치 & 시작
+											{allowSingleTeam ? '우승 확정 & 종료' : '브래킷 배치 & 시작'}
 										</Button>
 									</span>
 								</Tooltip>

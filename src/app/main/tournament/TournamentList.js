@@ -7,6 +7,7 @@ import AddIcon from '@mui/icons-material/Add';
 import GroupIcon from '@mui/icons-material/Group';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import StarIcon from '@mui/icons-material/Star';
+import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import React, { useEffect, useState, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
@@ -390,6 +391,12 @@ function TournamentList() {
 														{STATUS_LABELS[t.status] || t.status}
 													</span>
 												</div>
+												{t.heldAt && (
+													<div className={classes.cardMeta}>
+														<CalendarTodayIcon style={{ fontSize: '1.4rem' }} />
+														{String(t.heldAt).slice(0, 10)}
+													</div>
+												)}
 												{t.teamCount != null && t.bracketSize != null && (
 													<div className={classes.cardMeta}>
 														<GroupIcon style={{ fontSize: '1.4rem' }} />
