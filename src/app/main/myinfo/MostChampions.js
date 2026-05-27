@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { makeStyles } from 'tss-react/mui';
-import { getChampionIcon } from 'app/main/challenge/ddragonUtils';
+import { getChampionIcon, loadChampionNames } from 'app/main/challenge/ddragonUtils';
 
 const useStyles = makeStyles()((theme) => ({
 	root: {
@@ -100,6 +100,18 @@ const useStyles = makeStyles()((theme) => ({
 
 function MostChampions({ champions }) {
 	const { classes } = useStyles();
+	const [names, setNames] = useState({});
+
+	useEffect(() => {
+		let alive = true;
+		loadChampionNames().then(map => {
+			if (alive) setNames(map);
+		});
+		return () => {
+			alive = false;
+		};
+	}, []);
+
 	const list = (champions || []).slice(0, 5);
 
 	if (list.length === 0) {
@@ -116,18 +128,19 @@ function MostChampions({ champions }) {
 				{list.map(c => {
 					const wr = typeof c.winRate === 'number' ? c.winRate : 0;
 					const wrColor = wr >= 50 ? '#00ff7f' : 'rgba(255, 255, 255, 0.55)';
+					const name = names[c.championName] || c.championName;
 					return (
 						<div key={c.championName} className={classes.card}>
 							<img
 								className={classes.champImg}
 								src={getChampionIcon(c.championName)}
-								alt={c.championName}
+								alt={name}
 								onError={e => {
 									e.currentTarget.style.visibility = 'hidden';
 								}}
 							/>
-							<div className={classes.champName} title={c.championName}>
-								{c.championName}
+							<div className={classes.champName} title={name}>
+								{name}
 							</div>
 							<div className={classes.stat}>
 								{c.games}판 · 승률{' '}
