@@ -1013,11 +1013,6 @@ function MyInfoPage(props) {
 									<TrophyCabinet championships={tournamentChampionships} />
 								</div>
 							)}
-							{mostChampions && mostChampions.length > 0 && (
-								<div className={classes.trophyCabinetWrap}>
-									<MostChampions champions={mostChampions} />
-								</div>
-							)}
 							{/* 랭크 카드들 */}
 							<div className={classes.cardsGrid}>
 								{/* 솔로 랭크 카드 */}
@@ -1078,6 +1073,11 @@ function MyInfoPage(props) {
 									<div className={classes.decorLine} style={{ color: '#00d4ff' }} />
 								</div>
 							</div>
+							{mostChampions && mostChampions.length > 0 && (
+								<div className={classes.trophyCabinetWrap}>
+									<MostChampions champions={mostChampions} />
+								</div>
+							)}
 
 							{/* 최근 전적 & 연승/연패 통계 */}
 							<div className={classes.statsSection}>
