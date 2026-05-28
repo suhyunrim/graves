@@ -118,9 +118,9 @@ const useStyles = makeStyles()((theme) => ({
 		}
 	},
 	candidateAvatarLg: {
-		width: 80,
-		height: 80,
-		borderRadius: 12,
+		width: 96,
+		height: 96,
+		borderRadius: 14,
 		flexShrink: 0
 	},
 	candidateBody: {
@@ -159,9 +159,9 @@ const useStyles = makeStyles()((theme) => ({
 	},
 	statRow: {
 		display: 'flex',
-		gap: 28,
+		flexDirection: 'column',
+		gap: 6,
 		marginTop: 12,
-		flexWrap: 'wrap',
 		fontFamily: '"Noto Sans KR", sans-serif',
 		fontSize: '1.6rem',
 		color: 'rgba(255, 255, 255, 0.85)'
@@ -186,10 +186,10 @@ const useStyles = makeStyles()((theme) => ({
 	},
 	mostRow: {
 		display: 'flex',
-		alignItems: 'center',
-		gap: 12,
+		flexDirection: 'column',
+		alignItems: 'flex-start',
+		gap: 6,
 		marginTop: 12,
-		flexWrap: 'wrap',
 		fontFamily: '"Noto Sans KR", sans-serif'
 	},
 	mostLabel: {
