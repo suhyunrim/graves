@@ -911,11 +911,18 @@ function BidDialog({
 }
 
 // ─── 티어 표시 (솔랭 / 내전 공용) ───────────────────────────
-function TierStat({ classes, label, emblem, short, wl }) {
+function TierStat({ classes, label, icon, emblem, short, wl }) {
 	if (!short && !wl) return null;
 	return (
 		<span className={classes.statBlock}>
-			<span className={classes.statLabel}>{label}</span>
+			<span className={classes.statLabel}>
+				{icon && (
+					<span role="img" aria-label={label} style={{ marginRight: 4 }}>
+						{icon}
+					</span>
+				)}
+				{label}
+			</span>
 			{emblem && <img src={emblem} alt="" className={classes.statTierEmblem} />}
 			{short && <span className={classes.statTierShort}>{short}</span>}
 			{wl && <span className={classes.statWL}>({wl})</span>}
@@ -939,7 +946,7 @@ function CandidateMostRow({ champions, classes }) {
 	if (list.length === 0) return null;
 	return (
 		<div className={classes.mostRow}>
-			<span className={classes.mostLabel}>솔랭 모스트</span>
+			<span className={classes.mostLabel}><span role="img" aria-label="솔랭 모스트" style={{ marginRight: 4 }}>⭐</span>솔랭 모스트</span>
 			<span className={classes.mostChips}>
 				{list.map(c => {
 					const wr = typeof c.winRate === 'number' ? c.winRate : 0;
@@ -966,12 +973,13 @@ function CandidateMostRow({ champions, classes }) {
 }
 
 // ─── CandidatePlayerRow (천생연분 / 톰과제리) ────────────────
-function CandidatePlayerRow({ label, desc, players, mode, classes }) {
+function CandidatePlayerRow({ label, icon, desc, players, mode, classes }) {
 	const list = (players || []).slice(0, 3);
 	if (list.length === 0) return null;
 	return (
 		<div className={classes.mostRow}>
 			<span className={classes.mostLabel}>
+				{icon && <span role="img" aria-label={label} style={{ marginRight: 4 }}>{icon}</span>}
 				{label}
 				{desc && <span className={classes.mostDescInline}>{desc}</span>}
 			</span>
@@ -1013,7 +1021,7 @@ function CandidateTrophyRow({ championships, classes }) {
 	if (list.length === 0) return null;
 	return (
 		<div className={classes.mostRow}>
-			<span className={classes.mostLabel}>우승</span>
+			<span className={classes.mostLabel}><span role="img" aria-label="우승" style={{ marginRight: 4 }}>🏆</span>우승</span>
 			<span className={classes.mostChips}>
 				{list.map(t => {
 					const icon = getTrophyIcon(t.trophyType);
@@ -1095,6 +1103,7 @@ function CandidateInfoCard({ candidate, classes }) {
 						<TierStat
 							classes={classes}
 							label="솔랭"
+							icon="⚔️"
 							emblem={rank ? rank.emblem : null}
 							short={rank ? rank.short : null}
 							wl={rankWL}
@@ -1102,14 +1111,15 @@ function CandidateInfoCard({ candidate, classes }) {
 						<TierStat
 							classes={classes}
 							label="내전"
+							icon="🏟️"
 							emblem={internalEmblem}
 							short={internalShort}
 							wl={internalWL}
 						/>
 					</div>
 					<CandidateMostRow champions={candidate.mostChampions} classes={classes} />
-					<CandidatePlayerRow label="전생에 부부" desc="듀오 승률 최고" players={candidate.soulmates} mode="soulmate" classes={classes} />
-					<CandidatePlayerRow label="톰과제리" desc="상대 최다 판수" players={candidate.nemeses} mode="nemesis" classes={classes} />
+					<CandidatePlayerRow label="전생에 부부" icon="💞" desc="듀오 승률 최고" players={candidate.soulmates} mode="soulmate" classes={classes} />
+					<CandidatePlayerRow label="톰과제리" icon="😼" desc="상대 최다 판수" players={candidate.nemeses} mode="nemesis" classes={classes} />
 					<CandidateTrophyRow championships={candidate.tournamentChampionships} classes={classes} />
 				</div>
 			</div>
