@@ -211,24 +211,42 @@ const useStyles = makeStyles()((theme) => ({
 	mostChip: {
 		display: 'inline-flex',
 		alignItems: 'center',
-		gap: 6,
+		gap: 8,
 		background: 'rgba(0, 212, 255, 0.06)',
 		border: '1px solid rgba(0, 212, 255, 0.2)',
-		borderRadius: 8,
-		padding: '3px 8px 3px 3px'
+		borderRadius: 10,
+		padding: '5px 12px 5px 5px'
 	},
 	mostChipImg: {
-		width: 28,
-		height: 28,
+		width: 36,
+		height: 36,
 		borderRadius: '50%',
 		objectFit: 'cover',
 		border: '1px solid rgba(0, 212, 255, 0.3)'
 	},
-	mostChipText: {
+	mostChipBody: {
+		display: 'flex',
+		flexDirection: 'column',
+		gap: 2,
+		minWidth: 0
+	},
+	mostChipName: {
+		fontFamily: '"Noto Sans KR", sans-serif',
 		fontSize: '1.2rem',
-		color: 'rgba(255, 255, 255, 0.85)',
-		fontWeight: 600,
-		whiteSpace: 'nowrap'
+		color: 'rgba(255, 255, 255, 0.92)',
+		fontWeight: 700,
+		maxWidth: 140,
+		overflow: 'hidden',
+		textOverflow: 'ellipsis',
+		whiteSpace: 'nowrap',
+		lineHeight: 1.2
+	},
+	mostChipStat: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.05rem',
+		color: 'rgba(255, 255, 255, 0.55)',
+		whiteSpace: 'nowrap',
+		lineHeight: 1.2
 	},
 	socialChip: {
 		display: 'inline-flex',
@@ -969,7 +987,12 @@ function CandidateMostRow({ champions, classes }) {
 										e.currentTarget.style.visibility = 'hidden';
 									}}
 								/>
-								<span className={classes.mostChipText}>{c.games}판 {c.wins || 0}승 {Math.max(0, (c.games || 0) - (c.wins || 0))}패 {wr}%</span>
+								<span className={classes.mostChipBody}>
+									<span className={classes.mostChipName}>{name}</span>
+									<span className={classes.mostChipStat}>
+										{c.games}판 ({c.wins || 0}승 {Math.max(0, (c.games || 0) - (c.wins || 0))}패) {wr}%
+									</span>
+								</span>
 							</span>
 						</Tooltip>
 					);
