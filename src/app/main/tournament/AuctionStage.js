@@ -949,7 +949,7 @@ function CandidateMostRow({ champions, classes }) {
 			alive = false;
 		};
 	}, []);
-	const list = (champions || []).slice(0, 3);
+	const list = (champions || []).slice(0, 5);
 	if (list.length === 0) return null;
 	return (
 		<div className={classes.mostRow}>
