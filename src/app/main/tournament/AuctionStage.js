@@ -31,7 +31,8 @@ import {
 	getTierLabel,
 	getTierShortLabel,
 	getTierEmblemUrl,
-	parseRankTier
+	parseRankTier,
+	getTrophyIcon
 } from './tournamentUtils';
 import PositionIcon from './PositionIcon';
 import { CATEGORY_LABELS, TIER_COLORS, TIER_RANK } from '../achievementDashboard/constants';
@@ -214,6 +215,67 @@ const useStyles = makeStyles()((theme) => ({
 		fontSize: '1.2rem',
 		color: 'rgba(255, 255, 255, 0.85)',
 		fontWeight: 600,
+		whiteSpace: 'nowrap'
+	},
+	socialChip: {
+		display: 'inline-flex',
+		alignItems: 'center',
+		gap: 6,
+		background: 'rgba(255, 255, 255, 0.05)',
+		border: '1px solid rgba(255, 255, 255, 0.12)',
+		borderRadius: 8,
+		padding: '3px 10px 3px 3px'
+	},
+	socialChipImg: {
+		width: 26,
+		height: 26,
+		borderRadius: '50%',
+		objectFit: 'cover'
+	},
+	socialChipPlaceholder: {
+		width: 26,
+		height: 26,
+		borderRadius: '50%',
+		background: 'rgba(255, 255, 255, 0.08)'
+	},
+	socialChipName: {
+		fontSize: '1.2rem',
+		color: 'rgba(255, 255, 255, 0.85)',
+		fontWeight: 600,
+		maxWidth: 120,
+		overflow: 'hidden',
+		textOverflow: 'ellipsis',
+		whiteSpace: 'nowrap'
+	},
+	socialChipStat: {
+		fontSize: '1.1rem',
+		color: 'rgba(255, 255, 255, 0.5)',
+		whiteSpace: 'nowrap'
+	},
+	trophyChip: {
+		display: 'inline-flex',
+		alignItems: 'center',
+		gap: 6,
+		background: 'rgba(255, 215, 0, 0.08)',
+		border: '1px solid rgba(255, 215, 0, 0.3)',
+		borderRadius: 8,
+		padding: '3px 10px'
+	},
+	trophyChipImg: {
+		width: 24,
+		height: 24,
+		objectFit: 'contain'
+	},
+	trophyChipFallback: {
+		fontSize: '1.4rem'
+	},
+	trophyChipName: {
+		fontSize: '1.2rem',
+		color: 'rgba(255, 215, 0, 0.9)',
+		fontWeight: 600,
+		maxWidth: 140,
+		overflow: 'hidden',
+		textOverflow: 'ellipsis',
 		whiteSpace: 'nowrap'
 	},
 	statTierShort: {
@@ -897,6 +959,71 @@ function CandidateMostRow({ champions, classes }) {
 	);
 }
 
+// ─── CandidatePlayerRow (천생연분 / 톰과제리) ────────────────
+function CandidatePlayerRow({ label, players, mode, classes }) {
+	const list = (players || []).slice(0, 3);
+	if (list.length === 0) return null;
+	return (
+		<div className={classes.mostRow}>
+			<span className={classes.mostLabel}>{label}</span>
+			<span className={classes.mostChips}>
+				{list.map(p => {
+					const pname = p.name || displayNameForPuuid(null, p.puuid);
+					const avatar = p.profileIconId != null ? getProfileIconUrl(p.profileIconId) : null;
+					const stat =
+						mode === 'nemesis'
+							? `${p.games}판 ${p.wins || 0}승 ${p.losses || 0}패`
+							: `${p.games}판 승률 ${typeof p.winRate === 'number' ? p.winRate : 0}%`;
+					return (
+						<span key={p.puuid} className={classes.socialChip}>
+							{avatar ? (
+								<img
+									className={classes.socialChipImg}
+									src={avatar}
+									alt=""
+									onError={e => {
+										e.currentTarget.style.visibility = 'hidden';
+									}}
+								/>
+							) : (
+								<span className={classes.socialChipPlaceholder} />
+							)}
+							<span className={classes.socialChipName}>{pname}</span>
+							<span className={classes.socialChipStat}>{stat}</span>
+						</span>
+					);
+				})}
+			</span>
+		</div>
+	);
+}
+
+// ─── CandidateTrophyRow (우승 트로피) ─────────────────────────
+function CandidateTrophyRow({ championships, classes }) {
+	const list = championships || [];
+	if (list.length === 0) return null;
+	return (
+		<div className={classes.mostRow}>
+			<span className={classes.mostLabel}>우승</span>
+			<span className={classes.mostChips}>
+				{list.map(t => {
+					const icon = getTrophyIcon(t.trophyType);
+					return (
+						<span key={t.tournamentId} className={classes.trophyChip}>
+							{icon ? (
+								<img className={classes.trophyChipImg} src={icon} alt="" />
+							) : (
+								<span className={classes.trophyChipFallback} role="img" aria-label="trophy">🏆</span>
+							)}
+							<span className={classes.trophyChipName}>{t.tournamentName}</span>
+						</span>
+					);
+				})}
+			</span>
+		</div>
+	);
+}
+
 // ─── CandidateInfoCard ────────────────────────────────────────
 function CandidateInfoCard({ candidate, classes }) {
 	if (!candidate) return null;
@@ -970,6 +1097,9 @@ function CandidateInfoCard({ candidate, classes }) {
 						/>
 					</div>
 					<CandidateMostRow champions={candidate.mostChampions} classes={classes} />
+					<CandidatePlayerRow label="천생연분" players={candidate.soulmates} mode="soulmate" classes={classes} />
+					<CandidatePlayerRow label="톰과제리" players={candidate.nemeses} mode="nemesis" classes={classes} />
+					<CandidateTrophyRow championships={candidate.tournamentChampionships} classes={classes} />
 				</div>
 			</div>
 			{(achievements.length > 0 || (honor && (honor.received != null || honorTitleText))) && (
