@@ -118,9 +118,9 @@ const useStyles = makeStyles()((theme) => ({
 		}
 	},
 	candidateAvatarLg: {
-		width: 80,
-		height: 80,
-		borderRadius: 12,
+		width: 96,
+		height: 96,
+		borderRadius: 14,
 		flexShrink: 0
 	},
 	candidateBody: {
@@ -159,9 +159,9 @@ const useStyles = makeStyles()((theme) => ({
 	},
 	statRow: {
 		display: 'flex',
-		gap: 28,
+		flexDirection: 'column',
+		gap: 6,
 		marginTop: 12,
-		flexWrap: 'wrap',
 		fontFamily: '"Noto Sans KR", sans-serif',
 		fontSize: '1.6rem',
 		color: 'rgba(255, 255, 255, 0.85)'
@@ -186,10 +186,10 @@ const useStyles = makeStyles()((theme) => ({
 	},
 	mostRow: {
 		display: 'flex',
-		alignItems: 'center',
-		gap: 12,
+		flexDirection: 'column',
+		alignItems: 'flex-start',
+		gap: 6,
 		marginTop: 12,
-		flexWrap: 'wrap',
 		fontFamily: '"Noto Sans KR", sans-serif'
 	},
 	mostLabel: {
@@ -949,7 +949,7 @@ function CandidateMostRow({ champions, classes }) {
 			alive = false;
 		};
 	}, []);
-	const list = (champions || []).slice(0, 3);
+	const list = (champions || []).slice(0, 5);
 	if (list.length === 0) return null;
 	return (
 		<div className={classes.mostRow}>
@@ -969,7 +969,7 @@ function CandidateMostRow({ champions, classes }) {
 										e.currentTarget.style.visibility = 'hidden';
 									}}
 								/>
-								<span className={classes.mostChipText}>{c.games}판 {wr}%</span>
+								<span className={classes.mostChipText}>{c.games}판 {c.wins || 0}승 {Math.max(0, (c.games || 0) - (c.wins || 0))}패 {wr}%</span>
 							</span>
 						</Tooltip>
 					);
@@ -1125,12 +1125,12 @@ function CandidateInfoCard({ candidate, classes }) {
 							wl={internalWL}
 						/>
 					</div>
-					<CandidateMostRow champions={candidate.mostChampions} classes={classes} />
-					<CandidatePlayerRow label="전생에 부부" icon="💞" desc="듀오 승률 최고" players={candidate.soulmates} mode="soulmate" classes={classes} />
-					<CandidatePlayerRow label="톰과제리" icon="😼" desc="상대 최다 판수" players={candidate.nemeses} mode="nemesis" classes={classes} />
-					<CandidateTrophyRow championships={candidate.tournamentChampionships} classes={classes} />
 				</div>
 			</div>
+			<CandidateMostRow champions={candidate.mostChampions} classes={classes} />
+			<CandidatePlayerRow label="전생에 부부" icon="💞" desc="듀오 승률 최고" players={candidate.soulmates} mode="soulmate" classes={classes} />
+			<CandidatePlayerRow label="톰과제리" icon="😼" desc="상대 최다 판수" players={candidate.nemeses} mode="nemesis" classes={classes} />
+			<CandidateTrophyRow championships={candidate.tournamentChampionships} classes={classes} />
 			{(achievements.length > 0 || (honor && (honor.received != null || honorTitleText))) && (
 				<div className={classes.candidateExtras}>
 						{achievements.length > 0 && (() => {
