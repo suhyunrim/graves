@@ -328,22 +328,23 @@ const useStyles = makeStyles()((theme) => ({
 		paddingTop: 12,
 		borderTop: '1px solid rgba(255, 255, 255, 0.08)',
 		display: 'flex',
-		flexWrap: 'wrap',
-		alignItems: 'center',
-		gap: 18,
+		flexDirection: 'column',
+		alignItems: 'flex-start',
+		gap: 12,
 		fontFamily: '"Noto Sans KR", sans-serif',
 		fontSize: '1.1rem',
 		color: 'rgba(255, 255, 255, 0.65)'
 	},
 	achievementGroup: {
-		display: 'inline-flex',
-		alignItems: 'center',
-		gap: 6,
-		flexWrap: 'wrap'
+		display: 'flex',
+		flexDirection: 'column',
+		alignItems: 'flex-start',
+		gap: 6
 	},
 	achievementLabel: {
-		color: 'rgba(255, 255, 255, 0.4)',
-		fontSize: '1.05rem'
+		color: 'rgba(255, 255, 255, 0.85)',
+		fontSize: '1.3rem',
+		fontWeight: 600
 	},
 	achievementIcons: {
 		display: 'inline-flex',
@@ -1170,7 +1171,7 @@ function CandidateInfoCard({ candidate, classes }) {
 							if (sorted.length === 0) return null;
 							return (
 								<span className={classes.achievementGroup}>
-									<span className={classes.achievementLabel}>업적</span>
+									<span className={classes.achievementLabel}><span role="img" aria-label="업적" style={{ marginRight: 4, fontSize: '1.5rem' }}>🏅</span>업적</span>
 									<span className={classes.achievementIcons}>
 										{sorted.map(a => {
 											const catMeta = CATEGORY_LABELS[a.category];
