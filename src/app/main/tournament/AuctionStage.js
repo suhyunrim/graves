@@ -190,6 +190,12 @@ const useStyles = makeStyles()((theme) => ({
 		color: 'rgba(255, 255, 255, 0.5)',
 		fontSize: '1.3rem'
 	},
+	mostDescInline: {
+		marginLeft: 6,
+		fontSize: '1rem',
+		fontWeight: 400,
+		color: 'rgba(255, 255, 255, 0.35)'
+	},
 	mostChips: {
 		display: 'flex',
 		gap: 10,
@@ -960,12 +966,15 @@ function CandidateMostRow({ champions, classes }) {
 }
 
 // ─── CandidatePlayerRow (천생연분 / 톰과제리) ────────────────
-function CandidatePlayerRow({ label, players, mode, classes }) {
+function CandidatePlayerRow({ label, desc, players, mode, classes }) {
 	const list = (players || []).slice(0, 3);
 	if (list.length === 0) return null;
 	return (
 		<div className={classes.mostRow}>
-			<span className={classes.mostLabel}>{label}</span>
+			<span className={classes.mostLabel}>
+				{label}
+				{desc && <span className={classes.mostDescInline}>{desc}</span>}
+			</span>
 			<span className={classes.mostChips}>
 				{list.map(p => {
 					const pname = p.name || displayNameForPuuid(null, p.puuid);
@@ -1030,16 +1039,18 @@ function CandidateInfoCard({ candidate, classes }) {
 	const positionLabel = POSITION_LABELS[candidate.position] || candidate.position;
 
 	const rank = parseRankTier(candidate.rankTier);
+	const rankTotal = (candidate.rankWin || 0) + (candidate.rankLose || 0);
 	const rankWL = (candidate.rankWin != null || candidate.rankLose != null)
-		? `${candidate.rankWin || 0}승 ${candidate.rankLose || 0}패`
+		? `${candidate.rankWin || 0}승 ${candidate.rankLose || 0}패${rankTotal > 0 ? ` ${Math.round(((candidate.rankWin || 0) / rankTotal) * 100)}%` : ''}`
 		: null;
 
 	const internalTierName = candidate.internalRating != null ? getTierName(candidate.internalRating) : null;
 	const internalEmblem = internalTierName ? getTierEmblemUrl(internalTierName) : null;
 	const internalShort = candidate.internalRating != null ? getTierShortLabel(candidate.internalRating) : null;
 	const internalLabel = candidate.internalRating != null ? getTierLabel(candidate.internalRating) : null;
+	const internalTotal = (candidate.win || 0) + (candidate.lose || 0);
 	const internalWL = (candidate.win != null || candidate.lose != null)
-		? `${candidate.win || 0}승 ${candidate.lose || 0}패`
+		? `${candidate.win || 0}승 ${candidate.lose || 0}패${internalTotal > 0 ? ` ${Math.round(((candidate.win || 0) / internalTotal) * 100)}%` : ''}`
 		: null;
 
 	const achievements = candidate.achievements || [];
@@ -1097,8 +1108,8 @@ function CandidateInfoCard({ candidate, classes }) {
 						/>
 					</div>
 					<CandidateMostRow champions={candidate.mostChampions} classes={classes} />
-					<CandidatePlayerRow label="천생연분" players={candidate.soulmates} mode="soulmate" classes={classes} />
-					<CandidatePlayerRow label="톰과제리" players={candidate.nemeses} mode="nemesis" classes={classes} />
+					<CandidatePlayerRow label="전생에 부부" desc="듀오 승률 최고" players={candidate.soulmates} mode="soulmate" classes={classes} />
+					<CandidatePlayerRow label="톰과제리" desc="상대 최다 판수" players={candidate.nemeses} mode="nemesis" classes={classes} />
 					<CandidateTrophyRow championships={candidate.tournamentChampionships} classes={classes} />
 				</div>
 			</div>
