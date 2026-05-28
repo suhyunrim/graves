@@ -969,7 +969,7 @@ function CandidateMostRow({ champions, classes }) {
 										e.currentTarget.style.visibility = 'hidden';
 									}}
 								/>
-								<span className={classes.mostChipText}>{c.games}판 {wr}%</span>
+								<span className={classes.mostChipText}>{c.games}판 {c.wins || 0}승 {Math.max(0, (c.games || 0) - (c.wins || 0))}패 {wr}%</span>
 							</span>
 						</Tooltip>
 					);
