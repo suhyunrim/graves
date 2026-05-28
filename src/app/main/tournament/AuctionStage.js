@@ -1125,12 +1125,12 @@ function CandidateInfoCard({ candidate, classes }) {
 							wl={internalWL}
 						/>
 					</div>
-					<CandidateMostRow champions={candidate.mostChampions} classes={classes} />
-					<CandidatePlayerRow label="전생에 부부" icon="💞" desc="듀오 승률 최고" players={candidate.soulmates} mode="soulmate" classes={classes} />
-					<CandidatePlayerRow label="톰과제리" icon="😼" desc="상대 최다 판수" players={candidate.nemeses} mode="nemesis" classes={classes} />
-					<CandidateTrophyRow championships={candidate.tournamentChampionships} classes={classes} />
 				</div>
 			</div>
+			<CandidateMostRow champions={candidate.mostChampions} classes={classes} />
+			<CandidatePlayerRow label="전생에 부부" icon="💞" desc="듀오 승률 최고" players={candidate.soulmates} mode="soulmate" classes={classes} />
+			<CandidatePlayerRow label="톰과제리" icon="😼" desc="상대 최다 판수" players={candidate.nemeses} mode="nemesis" classes={classes} />
+			<CandidateTrophyRow championships={candidate.tournamentChampionships} classes={classes} />
 			{(achievements.length > 0 || (honor && (honor.received != null || honorTitleText))) && (
 				<div className={classes.candidateExtras}>
 						{achievements.length > 0 && (() => {
