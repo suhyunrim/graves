@@ -54,8 +54,9 @@ jobs:
         id: ai
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          COMMITS_INPUT: ${{ steps.commits.outputs.commits }}
         run: |
-          COMMITS='${{ steps.commits.outputs.commits }}'
+          COMMITS="$COMMITS_INPUT"
 
           RESPONSE=$(curl -s https://api.anthropic.com/v1/messages \
             -H "content-type: application/json" \
@@ -120,8 +121,9 @@ jobs:
         id: title
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          CHANGES_INPUT: ${{ steps.ai.outputs.changes }}
         run: |
-          CHANGES='${{ steps.ai.outputs.changes }}'
+          CHANGES="$CHANGES_INPUT"
 
           RESPONSE=$(curl -s https://api.anthropic.com/v1/messages \
             -H "content-type: application/json" \
