@@ -172,8 +172,9 @@ const useStyles = makeStyles()((theme) => ({
 		gap: 8
 	},
 	statLabel: {
-		color: 'rgba(255, 255, 255, 0.5)',
-		fontSize: '1.3rem'
+		color: 'rgba(255, 255, 255, 0.85)',
+		fontSize: '1.3rem',
+		fontWeight: 600
 	},
 	statValue: {
 		fontWeight: 600,
@@ -192,8 +193,9 @@ const useStyles = makeStyles()((theme) => ({
 		fontFamily: '"Noto Sans KR", sans-serif'
 	},
 	mostLabel: {
-		color: 'rgba(255, 255, 255, 0.5)',
-		fontSize: '1.3rem'
+		color: 'rgba(255, 255, 255, 0.85)',
+		fontSize: '1.3rem',
+		fontWeight: 600
 	},
 	mostDescInline: {
 		marginLeft: 6,
@@ -335,14 +337,14 @@ const useStyles = makeStyles()((theme) => ({
 		display: 'inline-flex',
 		alignItems: 'center',
 		gap: 6,
-		padding: '3px 10px',
+		padding: '4px 12px',
 		borderRadius: 8,
-		fontSize: '1.1rem',
+		fontSize: '1.25rem',
 		fontFamily: '"Noto Sans KR", sans-serif',
 		lineHeight: 1.3
 	},
 	achievementChipEmoji: {
-		fontSize: '1.2rem',
+		fontSize: '1.5rem',
 		lineHeight: 1
 	},
 	achievementChipName: {
@@ -922,7 +924,7 @@ function TierStat({ classes, label, icon, emblem, short, wl, color }) {
 		<span className={classes.statBlock}>
 			<span className={classes.statLabel}>
 				{icon && (
-					<span role="img" aria-label={label} style={{ marginRight: 4 }}>
+					<span role="img" aria-label={label} style={{ marginRight: 4, fontSize: '1.5rem' }}>
 						{icon}
 					</span>
 				)}
@@ -951,7 +953,7 @@ function CandidateMostRow({ champions, classes }) {
 	if (list.length === 0) return null;
 	return (
 		<div className={classes.mostRow}>
-			<span className={classes.mostLabel}><span role="img" aria-label="솔랭 모스트" style={{ marginRight: 4 }}>⭐</span>솔랭 모스트</span>
+			<span className={classes.mostLabel}><span role="img" aria-label="솔랭 모스트" style={{ marginRight: 4, fontSize: '1.5rem' }}>⭐</span>솔랭 모스트</span>
 			<span className={classes.mostChips}>
 				{list.map(c => {
 					const wr = typeof c.winRate === 'number' ? c.winRate : 0;
@@ -984,7 +986,7 @@ function CandidatePlayerRow({ label, icon, desc, players, mode, classes }) {
 	return (
 		<div className={classes.mostRow}>
 			<span className={classes.mostLabel}>
-				{icon && <span role="img" aria-label={label} style={{ marginRight: 4 }}>{icon}</span>}
+				{icon && <span role="img" aria-label={label} style={{ marginRight: 4, fontSize: '1.5rem' }}>{icon}</span>}
 				{label}
 				{desc && <span className={classes.mostDescInline}>{desc}</span>}
 			</span>
@@ -1026,7 +1028,7 @@ function CandidateTrophyRow({ championships, classes }) {
 	if (list.length === 0) return null;
 	return (
 		<div className={classes.mostRow}>
-			<span className={classes.mostLabel}><span role="img" aria-label="우승" style={{ marginRight: 4 }}>🏆</span>우승</span>
+			<span className={classes.mostLabel}><span role="img" aria-label="우승" style={{ marginRight: 4, fontSize: '1.5rem' }}>🏆</span>우승</span>
 			<span className={classes.mostChips}>
 				{list.map(t => {
 					const icon = getTrophyIcon(t.trophyType);
@@ -1186,15 +1188,14 @@ function CandidateInfoCard({ candidate, classes }) {
 							<span className={classes.honorGroup}>
 								<span role="img" aria-label="sparkles">✨</span>
 								<span>
-									명예 <span className={classes.statValue}>{honor.received || 0}</span>
-									{honor.given != null && <> · 줌 <span className={classes.statValue}>{honor.given}</span></>}
+									<span className={classes.statValue}>{honor.received || 0}</span>표 받음
 								</span>
 								{honorTitleText && (
 									<>
 										<span className={classes.statSep}>·</span>
 										<span className={classes.honorTitle}>
 											{honorTitleEmoji && (
-												<span role="img" aria-label="title" style={{ marginRight: 4 }}>
+												<span role="img" aria-label="title" style={{ marginRight: 4, fontSize: '1.5rem' }}>
 													{honorTitleEmoji}
 												</span>
 											)}
