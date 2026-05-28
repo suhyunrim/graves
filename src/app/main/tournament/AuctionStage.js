@@ -108,9 +108,14 @@ const useStyles = makeStyles()((theme) => ({
 	},
 	candidateMain: {
 		display: 'flex',
-		alignItems: 'center',
+		alignItems: 'flex-start',
 		gap: 16,
-		minWidth: 0
+		minWidth: 0,
+		[theme.breakpoints.down('sm')]: {
+			flexDirection: 'column',
+			alignItems: 'center',
+			gap: 12
+		}
 	},
 	candidateAvatarLg: {
 		width: 80,
