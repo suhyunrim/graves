@@ -911,7 +911,7 @@ function BidDialog({
 }
 
 // ─── 티어 표시 (솔랭 / 내전 공용) ───────────────────────────
-function TierStat({ classes, label, icon, emblem, short, wl }) {
+function TierStat({ classes, label, icon, emblem, short, wl, color }) {
 	if (!short && !wl) return null;
 	return (
 		<span className={classes.statBlock}>
@@ -924,7 +924,7 @@ function TierStat({ classes, label, icon, emblem, short, wl }) {
 				{label}
 			</span>
 			{emblem && <img src={emblem} alt="" className={classes.statTierEmblem} />}
-			{short && <span className={classes.statTierShort}>{short}</span>}
+			{short && <span className={classes.statTierShort} style={color ? { color } : undefined}>{short}</span>}
 			{wl && <span className={classes.statWL}>({wl})</span>}
 		</span>
 	);
@@ -1054,7 +1054,6 @@ function CandidateInfoCard({ candidate, classes }) {
 
 	const internalTierName = candidate.internalRating != null ? getTierName(candidate.internalRating) : null;
 	const internalEmblem = internalTierName ? getTierEmblemUrl(internalTierName) : null;
-	const internalShort = candidate.internalRating != null ? getTierShortLabel(candidate.internalRating) : null;
 	const internalLabel = candidate.internalRating != null ? getTierLabel(candidate.internalRating) : null;
 	const internalTotal = (candidate.win || 0) + (candidate.lose || 0);
 	const internalWL = (candidate.win != null || candidate.lose != null)
@@ -1105,7 +1104,8 @@ function CandidateInfoCard({ candidate, classes }) {
 							label="솔랭"
 							icon="⚔️"
 							emblem={rank ? rank.emblem : null}
-							short={rank ? rank.short : null}
+							short={rank ? candidate.rankTier : null}
+							color={rank ? (TIER_COLORS[rank.tier] || '#9aa4b2') : undefined}
 							wl={rankWL}
 						/>
 						<TierStat
@@ -1113,7 +1113,8 @@ function CandidateInfoCard({ candidate, classes }) {
 							label="내전"
 							icon="🏟️"
 							emblem={internalEmblem}
-							short={internalShort}
+							short={internalLabel}
+							color={internalTierName ? (TIER_COLORS[internalTierName] || '#9aa4b2') : undefined}
 							wl={internalWL}
 						/>
 					</div>
