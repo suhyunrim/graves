@@ -31,7 +31,8 @@ import {
 	getTierLabel,
 	getTierShortLabel,
 	getTierEmblemUrl,
-	parseRankTier
+	parseRankTier,
+	getTrophyIcon
 } from './tournamentUtils';
 import PositionIcon from './PositionIcon';
 import { CATEGORY_LABELS, TIER_COLORS, TIER_RANK } from '../achievementDashboard/constants';
@@ -107,9 +108,14 @@ const useStyles = makeStyles()((theme) => ({
 	},
 	candidateMain: {
 		display: 'flex',
-		alignItems: 'center',
+		alignItems: 'flex-start',
 		gap: 16,
-		minWidth: 0
+		minWidth: 0,
+		[theme.breakpoints.down('sm')]: {
+			flexDirection: 'column',
+			alignItems: 'center',
+			gap: 12
+		}
 	},
 	candidateAvatarLg: {
 		width: 80,
@@ -189,6 +195,12 @@ const useStyles = makeStyles()((theme) => ({
 		color: 'rgba(255, 255, 255, 0.5)',
 		fontSize: '1.3rem'
 	},
+	mostDescInline: {
+		marginLeft: 6,
+		fontSize: '1rem',
+		fontWeight: 400,
+		color: 'rgba(255, 255, 255, 0.35)'
+	},
 	mostChips: {
 		display: 'flex',
 		gap: 10,
@@ -214,6 +226,67 @@ const useStyles = makeStyles()((theme) => ({
 		fontSize: '1.2rem',
 		color: 'rgba(255, 255, 255, 0.85)',
 		fontWeight: 600,
+		whiteSpace: 'nowrap'
+	},
+	socialChip: {
+		display: 'inline-flex',
+		alignItems: 'center',
+		gap: 6,
+		background: 'rgba(255, 255, 255, 0.05)',
+		border: '1px solid rgba(255, 255, 255, 0.12)',
+		borderRadius: 8,
+		padding: '3px 10px 3px 3px'
+	},
+	socialChipImg: {
+		width: 26,
+		height: 26,
+		borderRadius: '50%',
+		objectFit: 'cover'
+	},
+	socialChipPlaceholder: {
+		width: 26,
+		height: 26,
+		borderRadius: '50%',
+		background: 'rgba(255, 255, 255, 0.08)'
+	},
+	socialChipName: {
+		fontSize: '1.2rem',
+		color: 'rgba(255, 255, 255, 0.85)',
+		fontWeight: 600,
+		maxWidth: 120,
+		overflow: 'hidden',
+		textOverflow: 'ellipsis',
+		whiteSpace: 'nowrap'
+	},
+	socialChipStat: {
+		fontSize: '1.1rem',
+		color: 'rgba(255, 255, 255, 0.5)',
+		whiteSpace: 'nowrap'
+	},
+	trophyChip: {
+		display: 'inline-flex',
+		alignItems: 'center',
+		gap: 6,
+		background: 'rgba(255, 215, 0, 0.08)',
+		border: '1px solid rgba(255, 215, 0, 0.3)',
+		borderRadius: 8,
+		padding: '3px 10px'
+	},
+	trophyChipImg: {
+		width: 24,
+		height: 24,
+		objectFit: 'contain'
+	},
+	trophyChipFallback: {
+		fontSize: '1.4rem'
+	},
+	trophyChipName: {
+		fontSize: '1.2rem',
+		color: 'rgba(255, 215, 0, 0.9)',
+		fontWeight: 600,
+		maxWidth: 140,
+		overflow: 'hidden',
+		textOverflow: 'ellipsis',
 		whiteSpace: 'nowrap'
 	},
 	statTierShort: {
@@ -843,13 +916,20 @@ function BidDialog({
 }
 
 // ─── 티어 표시 (솔랭 / 내전 공용) ───────────────────────────
-function TierStat({ classes, label, emblem, short, wl }) {
+function TierStat({ classes, label, icon, emblem, short, wl, color }) {
 	if (!short && !wl) return null;
 	return (
 		<span className={classes.statBlock}>
-			<span className={classes.statLabel}>{label}</span>
+			<span className={classes.statLabel}>
+				{icon && (
+					<span role="img" aria-label={label} style={{ marginRight: 4 }}>
+						{icon}
+					</span>
+				)}
+				{label}
+			</span>
 			{emblem && <img src={emblem} alt="" className={classes.statTierEmblem} />}
-			{short && <span className={classes.statTierShort}>{short}</span>}
+			{short && <span className={classes.statTierShort} style={color ? { color } : undefined}>{short}</span>}
 			{wl && <span className={classes.statWL}>({wl})</span>}
 		</span>
 	);
@@ -871,7 +951,7 @@ function CandidateMostRow({ champions, classes }) {
 	if (list.length === 0) return null;
 	return (
 		<div className={classes.mostRow}>
-			<span className={classes.mostLabel}>솔랭 모스트</span>
+			<span className={classes.mostLabel}><span role="img" aria-label="솔랭 모스트" style={{ marginRight: 4 }}>⭐</span>솔랭 모스트</span>
 			<span className={classes.mostChips}>
 				{list.map(c => {
 					const wr = typeof c.winRate === 'number' ? c.winRate : 0;
@@ -897,22 +977,92 @@ function CandidateMostRow({ champions, classes }) {
 	);
 }
 
+// ─── CandidatePlayerRow (천생연분 / 톰과제리) ────────────────
+function CandidatePlayerRow({ label, icon, desc, players, mode, classes }) {
+	const list = (players || []).slice(0, 3);
+	if (list.length === 0) return null;
+	return (
+		<div className={classes.mostRow}>
+			<span className={classes.mostLabel}>
+				{icon && <span role="img" aria-label={label} style={{ marginRight: 4 }}>{icon}</span>}
+				{label}
+				{desc && <span className={classes.mostDescInline}>{desc}</span>}
+			</span>
+			<span className={classes.mostChips}>
+				{list.map(p => {
+					const pname = p.name || displayNameForPuuid(null, p.puuid);
+					const avatar = p.profileIconId != null ? getProfileIconUrl(p.profileIconId) : null;
+					const stat =
+						mode === 'nemesis'
+							? `${p.games}판 ${p.wins || 0}승 ${p.losses || 0}패`
+							: `${p.games}판 승률 ${typeof p.winRate === 'number' ? p.winRate : 0}%`;
+					return (
+						<span key={p.puuid} className={classes.socialChip}>
+							{avatar ? (
+								<img
+									className={classes.socialChipImg}
+									src={avatar}
+									alt=""
+									onError={e => {
+										e.currentTarget.style.visibility = 'hidden';
+									}}
+								/>
+							) : (
+								<span className={classes.socialChipPlaceholder} />
+							)}
+							<span className={classes.socialChipName}>{pname}</span>
+							<span className={classes.socialChipStat}>{stat}</span>
+						</span>
+					);
+				})}
+			</span>
+		</div>
+	);
+}
+
+// ─── CandidateTrophyRow (우승 트로피) ─────────────────────────
+function CandidateTrophyRow({ championships, classes }) {
+	const list = championships || [];
+	if (list.length === 0) return null;
+	return (
+		<div className={classes.mostRow}>
+			<span className={classes.mostLabel}><span role="img" aria-label="우승" style={{ marginRight: 4 }}>🏆</span>우승</span>
+			<span className={classes.mostChips}>
+				{list.map(t => {
+					const icon = getTrophyIcon(t.trophyType);
+					return (
+						<span key={t.tournamentId} className={classes.trophyChip}>
+							{icon ? (
+								<img className={classes.trophyChipImg} src={icon} alt="" />
+							) : (
+								<span className={classes.trophyChipFallback} role="img" aria-label="trophy">🏆</span>
+							)}
+							<span className={classes.trophyChipName}>{t.tournamentName}</span>
+						</span>
+					);
+				})}
+			</span>
+		</div>
+	);
+}
+
 // ─── CandidateInfoCard ────────────────────────────────────────
 function CandidateInfoCard({ candidate, classes }) {
 	if (!candidate) return null;
 	const positionLabel = POSITION_LABELS[candidate.position] || candidate.position;
 
 	const rank = parseRankTier(candidate.rankTier);
+	const rankTotal = (candidate.rankWin || 0) + (candidate.rankLose || 0);
 	const rankWL = (candidate.rankWin != null || candidate.rankLose != null)
-		? `${candidate.rankWin || 0}승 ${candidate.rankLose || 0}패`
+		? `${candidate.rankWin || 0}승 ${candidate.rankLose || 0}패${rankTotal > 0 ? ` ${Math.round(((candidate.rankWin || 0) / rankTotal) * 100)}%` : ''}`
 		: null;
 
 	const internalTierName = candidate.internalRating != null ? getTierName(candidate.internalRating) : null;
 	const internalEmblem = internalTierName ? getTierEmblemUrl(internalTierName) : null;
-	const internalShort = candidate.internalRating != null ? getTierShortLabel(candidate.internalRating) : null;
 	const internalLabel = candidate.internalRating != null ? getTierLabel(candidate.internalRating) : null;
+	const internalTotal = (candidate.win || 0) + (candidate.lose || 0);
 	const internalWL = (candidate.win != null || candidate.lose != null)
-		? `${candidate.win || 0}승 ${candidate.lose || 0}패`
+		? `${candidate.win || 0}승 ${candidate.lose || 0}패${internalTotal > 0 ? ` ${Math.round(((candidate.win || 0) / internalTotal) * 100)}%` : ''}`
 		: null;
 
 	const achievements = candidate.achievements || [];
@@ -957,19 +1107,26 @@ function CandidateInfoCard({ candidate, classes }) {
 						<TierStat
 							classes={classes}
 							label="솔랭"
+							icon="⚔️"
 							emblem={rank ? rank.emblem : null}
-							short={rank ? rank.short : null}
+							short={rank ? candidate.rankTier : null}
+							color={rank ? (TIER_COLORS[rank.tier] || '#9aa4b2') : undefined}
 							wl={rankWL}
 						/>
 						<TierStat
 							classes={classes}
 							label="내전"
+							icon="🏟️"
 							emblem={internalEmblem}
-							short={internalShort}
+							short={internalLabel}
+							color={internalTierName ? (TIER_COLORS[internalTierName] || '#9aa4b2') : undefined}
 							wl={internalWL}
 						/>
 					</div>
 					<CandidateMostRow champions={candidate.mostChampions} classes={classes} />
+					<CandidatePlayerRow label="전생에 부부" icon="💞" desc="듀오 승률 최고" players={candidate.soulmates} mode="soulmate" classes={classes} />
+					<CandidatePlayerRow label="톰과제리" icon="😼" desc="상대 최다 판수" players={candidate.nemeses} mode="nemesis" classes={classes} />
+					<CandidateTrophyRow championships={candidate.tournamentChampionships} classes={classes} />
 				</div>
 			</div>
 			{(achievements.length > 0 || (honor && (honor.received != null || honorTitleText))) && (
