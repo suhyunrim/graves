@@ -1,4 +1,6 @@
 import createCamilleAxios from 'app/utility/camilleAxios';
+import { isSampleMode } from 'app/main/sample/sampleStorage';
+import { getSampleVoiceChannelsData, getSampleGeneratorsData } from 'app/main/sample/sampleData';
 
 export const GET_VOICE_CHANNELS = '[TEMP_VOICE] GET VOICE CHANNELS';
 export const GET_GENERATORS = '[TEMP_VOICE] GET GENERATORS';
@@ -7,6 +9,12 @@ export const REMOVE_GENERATOR = '[TEMP_VOICE] REMOVE GENERATOR';
 export const SET_LOADING = '[TEMP_VOICE] SET LOADING';
 
 export function getVoiceChannels(groupId) {
+	if (isSampleMode()) {
+		return dispatch => {
+			dispatch({ type: SET_LOADING });
+			setTimeout(() => dispatch({ type: GET_VOICE_CHANNELS, payload: getSampleVoiceChannelsData() }), 300);
+		};
+	}
 	return dispatch => {
 		dispatch({ type: SET_LOADING });
 
@@ -22,6 +30,12 @@ export function getVoiceChannels(groupId) {
 }
 
 export function getGenerators(groupId) {
+	if (isSampleMode()) {
+		return dispatch => {
+			dispatch({ type: GET_GENERATORS, payload: getSampleGeneratorsData() });
+			return Promise.resolve();
+		};
+	}
 	return dispatch => {
 		const request = createCamilleAxios().get(`/api/temp-voice/${groupId}/generators`);
 
@@ -35,6 +49,12 @@ export function getGenerators(groupId) {
 }
 
 export function saveGenerator(groupId, data) {
+	if (isSampleMode()) {
+		return dispatch => {
+			dispatch({ type: UPSERT_GENERATOR, payload: data });
+			return Promise.resolve();
+		};
+	}
 	return dispatch => {
 		dispatch({ type: UPSERT_GENERATOR, payload: data });
 
@@ -48,6 +68,12 @@ export function saveGenerator(groupId, data) {
 }
 
 export function deleteGenerator(groupId, channelId) {
+	if (isSampleMode()) {
+		return dispatch => {
+			dispatch({ type: REMOVE_GENERATOR, payload: channelId });
+			return Promise.resolve();
+		};
+	}
 	return dispatch => {
 		dispatch({ type: REMOVE_GENERATOR, payload: channelId });
 

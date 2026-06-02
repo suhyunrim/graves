@@ -10,6 +10,7 @@ import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import clsx from 'clsx';
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import * as authActions from 'app/auth/store/actions';
 import startDiscordLogin from 'app/utility/discordAuth';
@@ -206,6 +207,21 @@ const useStyles = makeStyles()((theme) => ({
 			height: 32,
 			marginRight: 12
 		}
+	},
+	whatLink: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '0.85rem',
+		color: 'rgba(255, 255, 255, 0.4)',
+		marginTop: 24,
+		textDecoration: 'none',
+		transition: 'color 0.2s ease',
+		'&:hover': {
+			color: '#00d4ff'
+		},
+		[theme.breakpoints.up('md')]: {
+			fontSize: '1.4rem',
+			marginTop: 32
+		}
 	}
 }));
 
@@ -286,6 +302,10 @@ function LoginPage() {
 								</svg>
 								Discord로 로그인
 							</Button>
+
+							<Link className={classes.whatLink} to="/welcome">
+								Graves가 뭔가요? →
+							</Link>
 						</CardContent>
 					</Card>
 				</FuseAnimate>

@@ -517,4 +517,448 @@ export function getSampleUserMatchesData(puuid) {
 	return getSampleData(`userMatches_${puuid}`) || getDefaultUserMatchesData(puuid);
 }
 
+// ============================================================
+// 밸런스 리포트 데이터
+// ============================================================
+function getDefaultBalanceReportData() {
+	return {
+		summary: { favoredTeamWinRate: 56.3, expectedWinRate: 58.1 },
+		setAnalysis: {
+			totalSets: 64,
+			twoZero: { rate: 54.7, count: 35, favoredWin: 22, underdogWin: 13 },
+			twoOne: { rate: 39.1, count: 25, favoredWin: 14, underdogWin: 11 },
+			incomplete: 4,
+			positionScoreImpact: [
+				{ label: '균형', twoZeroRate: 48.2, totalSets: 28 },
+				{ label: '약간 불균형', twoZeroRate: 57.5, totalSets: 22 },
+				{ label: '불균형', twoZeroRate: 68.4, totalSets: 14 }
+			]
+		},
+		positionAnalysis: {
+			avgPositionBalance: '보통',
+			mostOverlappedPositions: [
+				{ position: 'MID', count: 42, rate: 28.5 },
+				{ position: 'JUNGLE', count: 33, rate: 22.4 },
+				{ position: 'ADC', count: 27, rate: 18.3 },
+				{ position: 'TOP', count: 25, rate: 17.0 },
+				{ position: 'SUPPORT', count: 20, rate: 13.6 }
+			]
+		},
+		ratingBrackets: [
+			{ label: '0~25', favoredWinRate: 51.2, expectedWinRate: 53.0, count: 24 },
+			{ label: '25~50', favoredWinRate: 55.8, expectedWinRate: 57.2, count: 31 },
+			{ label: '50~75', favoredWinRate: 60.3, expectedWinRate: 62.1, count: 18 },
+			{ label: '75~100', favoredWinRate: 64.7, expectedWinRate: 67.4, count: 12 },
+			{ label: '100+', favoredWinRate: 71.4, expectedWinRate: 73.9, count: 8 }
+		],
+		monthlyTrend: [
+			{ month: '2026-01', favoredWinRate: 54.1, avgPerPlayerDiff: 12.3, matchCount: 38 },
+			{ month: '2026-02', favoredWinRate: 57.2, avgPerPlayerDiff: 14.1, matchCount: 42 },
+			{ month: '2026-03', favoredWinRate: 55.8, avgPerPlayerDiff: 11.7, matchCount: 47 },
+			{ month: '2026-04', favoredWinRate: 58.3, avgPerPlayerDiff: 13.5, matchCount: 51 }
+		],
+		tierSpread: [
+			{ label: '0~50', count: 22, favoredWinRate: 52.1 },
+			{ label: '50~100', count: 28, favoredWinRate: 56.4 },
+			{ label: '100~150', count: 14, favoredWinRate: 61.2 },
+			{ label: '150+', count: 8, favoredWinRate: 68.5 }
+		]
+	};
+}
+
+export function getSampleBalanceReportData() {
+	return getSampleData('balanceReport') || getDefaultBalanceReportData();
+}
+
+// ============================================================
+// 업적 대시보드 데이터 (그룹 전체 업적 현황)
+// ============================================================
+const ACH_DASH_CATEGORIES = [
+	{ key: 'match', total: 4 },
+	{ key: 'games', total: 5 },
+	{ key: 'win_streak', total: 4 },
+	{ key: 'sweep_win', total: 3 },
+	{ key: 'underdog', total: 3 },
+	{ key: 'tier', total: 9 },
+	{ key: 'honor_received', total: 4 },
+	{ key: 'night_owl', total: 3 }
+];
+
+const ACH_CAT_LABEL = {
+	match: '첫걸음',
+	games: '판수',
+	win_streak: '연승',
+	sweep_win: '완승 스윕',
+	underdog: '언더독',
+	tier: '티어 달성',
+	honor_received: '명예왕',
+	night_owl: '밤새기'
+};
+
+const ACH_CAT_EMOJI = {
+	match: '🏆',
+	games: '📊',
+	win_streak: '🔥',
+	sweep_win: '🧹',
+	underdog: '💪',
+	tier: '👑',
+	honor_received: '🎖️',
+	night_owl: '🦉'
+};
+
+function achTopUnlockers(seedIdx, n) {
+	const out = [];
+	for (let i = 0; i < n; i++) {
+		const p = PLAYERS[(seedIdx + i) % PLAYERS.length];
+		const d = new Date(2026, 3, 20);
+		d.setDate(d.getDate() - (seedIdx + i));
+		out.push({ puuid: p.puuid, name: p.name, rank: i + 1, profileIconId: null, unlockedAt: d.toISOString() });
+	}
+	return out;
+}
+
+function getDefaultAchievementDashboardData() {
+	const totalAchievements = ACH_DASH_CATEGORIES.reduce((s, c) => s + c.total, 0);
+	const categoryStats = ACH_DASH_CATEGORIES.map((c, i) => {
+		const unlocked = Math.max(1, c.total - (i % 3));
+		return {
+			category: c.key,
+			unlockedAchievements: unlocked,
+			totalAchievements: c.total,
+			totalUnlocks: 20 + i * 7,
+			unlockRate: Math.round((unlocked / c.total) * 1000) / 10
+		};
+	});
+	const unlockedAchievements = categoryStats.reduce((s, c) => s + c.unlockedAchievements, 0);
+	const totalUnlocks = categoryStats.reduce((s, c) => s + c.totalUnlocks, 0);
+	return {
+		summary: {
+			totalAchievements,
+			unlockedAchievements,
+			unlockRate: Math.round((unlockedAchievements / totalAchievements) * 1000) / 10,
+			newUnlocksThisWeek: 7,
+			totalUnlocks,
+			totalActiveUsers: PLAYERS.length
+		},
+		topUsers: PLAYERS.slice(0, 3).map((p, i) => ({ puuid: p.puuid, name: p.name, unlockCount: 28 - i * 4 })),
+		categoryStats
+	};
+}
+
+export function getSampleAchievementDashboardData() {
+	return getSampleData('achievementDashboard') || getDefaultAchievementDashboardData();
+}
+
+function getDefaultAchievementCategoryData(category) {
+	const isTier = category === 'tier';
+	const TIER_SEQ = ['GOLD', 'PLATINUM', 'EMERALD', 'DIAMOND', 'MASTER', 'GRANDMASTER', 'CHALLENGER'];
+	const ROMAN = ['I', 'II', 'III', 'IV', 'V'];
+	const count = isTier ? 5 : 3;
+	const achievements = [];
+	for (let i = 0; i < count; i += 1) {
+		const tier = TIER_SEQ[i % TIER_SEQ.length];
+		const unlockedCount = Math.max(1, 12 - i * 3);
+		const top = achTopUnlockers(i * 2, Math.min(3, unlockedCount));
+		const id = isTier ? `TIER_${tier}` : `${category.toUpperCase()}_${i + 1}`;
+		achievements.push({
+			id,
+			name: isTier ? `${tier} 달성` : `${ACH_CAT_LABEL[category] || category} ${ROMAN[i] || i + 1}`,
+			tier,
+			emoji: ACH_CAT_EMOJI[category] || '🏆',
+			category,
+			goal: (i + 1) * 5,
+			unlockedCount,
+			unlockRate: Math.round((unlockedCount / PLAYERS.length) * 1000) / 10,
+			topUnlockers: top,
+			latestUnlocker: top[0] ? { unlockedAt: top[0].unlockedAt } : null
+		});
+	}
+	return { achievements };
+}
+
+export function getSampleAchievementCategoryData(category) {
+	return getSampleData(`achievementCategory_${category}`) || getDefaultAchievementCategoryData(category);
+}
+
+function getDefaultAchievementUserRankingData() {
+	const rankings = PLAYERS.map((p, i) => ({
+		rank: i + 1,
+		puuid: p.puuid,
+		name: p.name,
+		unlockCount: Math.max(0, 30 - i),
+		profileIconId: null
+	}));
+	return {
+		totalActiveUsers: PLAYERS.length,
+		totalRanked: rankings.filter(r => r.unlockCount > 0).length,
+		rankings
+	};
+}
+
+export function getSampleAchievementUserRankingData() {
+	return getSampleData('achievementUserRanking') || getDefaultAchievementUserRankingData();
+}
+
+// ============================================================
+// 그룹 설정 데이터
+// ============================================================
+function getDefaultGroupInfoData() {
+	return {
+		discordGuildIcon: null,
+		discordGuildName: 'Sample Guild',
+		groupName: 'Sample Group',
+		totalMatches: 387,
+		createdAt: '2025-08-01T00:00:00Z',
+		members: {
+			total: PLAYERS.length,
+			active: PLAYERS.length - 2,
+			blacklisted: 1,
+			leftGuild: 1
+		},
+		settings: {
+			onboardingEnabled: true,
+			matchVoteMode: 'normal',
+			seasonEndMonth: null
+		}
+	};
+}
+
+export function getSampleGroupInfoData() {
+	return getSampleData('groupInfo') || getDefaultGroupInfoData();
+}
+
+function getDefaultGroupMembersData() {
+	return PLAYERS.map((p, i) => {
+		const rating = RANKING_RATINGS[i] != null ? RANKING_RATINGS[i] : 500;
+		const defaultRating = Math.round(rating * 0.6);
+		return {
+			puuid: p.puuid,
+			name: p.name,
+			role: i === 0 ? 'admin' : i === PLAYERS.length - 1 ? 'outsider' : 'member',
+			leftGuildAt: null,
+			subAccounts: i % 6 === 0 ? [{ name: `${p.name} 부캐` }] : [],
+			win: RANKING_WINS[i] != null ? RANKING_WINS[i] : 20,
+			lose: RANKING_LOSSES[i] != null ? RANKING_LOSSES[i] : 20,
+			defaultRating,
+			additionalRating: rating - defaultRating,
+			createdAt: '2025-08-01T00:00:00Z',
+			latestMatchDate: '2026-04-10T19:00:00Z',
+			lastVoiceJoinedAt: '2026-04-10T20:30:00Z'
+		};
+	});
+}
+
+export function getSampleGroupMembersData() {
+	return getSampleData('groupMembers') || getDefaultGroupMembersData();
+}
+
+export function getSampleDiscordRolesData() {
+	return [
+		{ id: 'role-everyone', name: '@everyone' },
+		{ id: 'role-member', name: '내전러' },
+		{ id: 'role-admin', name: '관리자' },
+		{ id: 'role-newbie', name: '뉴비' }
+	];
+}
+
+function getDefaultAuditLogsData() {
+	const logs = [];
+	const templates = [
+		(i, d) => ({ source: 'web', actorName: '페이커', action: 'match.create', details: { gameId: `sample-match-${String(i).padStart(3, '0')}` } }),
+		(i, d) => ({ source: 'discord', actorName: 'Graves Bot', action: 'user.blacklist', details: { puuid: PLAYERS[(i + 5) % PLAYERS.length].puuid, previousRole: 'member' } }),
+		(i, d) => ({ source: 'web', actorName: '쵸비', action: 'generator.create', details: { channelName: '연습방', defaultName: '{username}의 채널', defaultUserLimit: 5 } })
+	];
+	for (let i = 0; i < 12; i += 1) {
+		const d = new Date(2026, 3, 11);
+		d.setHours(d.getHours() - i * 5);
+		const t = templates[i % templates.length](i + 1, d);
+		logs.push({ id: `log-${i + 1}`, createdAt: d.toISOString(), ...t });
+	}
+	return { logs, total: logs.length, page: 1, limit: 50 };
+}
+
+export function getSampleAuditLogsData() {
+	return getSampleData('auditLogs') || getDefaultAuditLogsData();
+}
+
+export function getSampleVoiceChannelsData() {
+	return [
+		{ id: 'vc-1', name: '내전 대기실', categoryName: '내전' },
+		{ id: 'vc-2', name: '1팀', categoryName: '내전' },
+		{ id: 'vc-3', name: '2팀', categoryName: '내전' },
+		{ id: 'vc-4', name: '자유 음성', categoryName: '일반' },
+		{ id: 'vc-5', name: 'AFK', categoryName: null }
+	];
+}
+
+export function getSampleGeneratorsData() {
+	return [
+		{ channelId: 'vc-1', defaultName: '{username}의 채널', defaultUserLimit: 0 },
+		{ channelId: 'vc-4', defaultName: '연습방 - {count}', defaultUserLimit: 5 }
+	];
+}
+
+// ============================================================
+// 토너먼트 데이터
+// ============================================================
+const TOURNEY_POS = ['top', 'jungle', 'mid', 'adc', 'support'];
+
+function tourneyTeamMembers(startIdx) {
+	return TOURNEY_POS.map((pos, j) => {
+		const p = PLAYERS[(startIdx + j) % PLAYERS.length];
+		return {
+			name: p.name,
+			puuid: p.puuid,
+			position: pos,
+			rating: RANKING_RATINGS[(startIdx + j) % RANKING_RATINGS.length],
+			profileIconId: null,
+			bidAmount: null
+		};
+	});
+}
+
+const TOURNEY_TEAM_DEFS = [
+	{ id: 1, name: '미정이가 누구야?', startIdx: 0 },
+	{ id: 2, name: '챙공불이', startIdx: 5 },
+	{ id: 3, name: '슈퍼알치라메', startIdx: 10 },
+	{ id: 4, name: '송혜원졌다고', startIdx: 15 }
+];
+
+function buildTourneyTeams() {
+	return TOURNEY_TEAM_DEFS.map(t => {
+		const members = tourneyTeamMembers(t.startIdx);
+		const avgRating = Math.round(members.reduce((s, m) => s + m.rating, 0) / members.length);
+		return {
+			id: t.id,
+			name: t.name,
+			captainPuuid: PLAYERS[t.startIdx].puuid,
+			avgRating,
+			remainingBudget: null,
+			members,
+			scrimRecord: null
+		};
+	});
+}
+
+function buildTourneyMatches() {
+	const mk = (id, round, slot, t1, t2, win, s1, s2, bestOf) => ({
+		id,
+		round,
+		bracketSlot: slot,
+		team1Id: t1,
+		team2Id: t2,
+		winnerTeamId: win,
+		team1Score: s1,
+		team2Score: s2,
+		bestOf,
+		scheduledAt: null,
+		predictions: [],
+		team1PredictionCount: 0,
+		team2PredictionCount: 0,
+		team1PredictionPct: null,
+		team2PredictionPct: null,
+		predictionsActive: false,
+		team1WinProb: null,
+		team2WinProb: null,
+		headToHeadScrim: null
+	});
+	return [
+		// 4강
+		mk(1, 1, 0, 1, 4, 1, 2, 0, 3),
+		mk(2, 1, 1, 2, 3, 2, 2, 1, 3),
+		// 결승
+		mk(3, 2, 0, 1, 2, 1, 3, 1, 5)
+	];
+}
+
+function getDefaultTournamentDetailData(tournamentId) {
+	const teams = buildTourneyTeams();
+	return {
+		tournament: {
+			id: Number(tournamentId) || 1,
+			groupId: 'sample-group',
+			name: '2026 봄 내전 토너먼트',
+			status: 'finished',
+			type: 'normal',
+			trophyType: 'worlds',
+			championTeamId: 1,
+			allowSingleTeam: false,
+			bracketSize: 4,
+			teamCount: 4,
+			defaultBestOf: 3,
+			finalBestOf: 5,
+			auctionConfig: null,
+			predictionsLocked: true
+		},
+		teams,
+		matches: buildTourneyMatches(),
+		scrims: [],
+		roundLabels: { 1: '4강', 2: '결승' },
+		leaderboard: PLAYERS.slice(0, 5).map((p, i) => ({
+			summonerName: p.name,
+			userPuuid: p.puuid,
+			correctCount: 3 - Math.min(i, 3),
+			settledCount: 3
+		})),
+		currentCandidate: null
+	};
+}
+
+export function getSampleTournamentDetailData(tournamentId) {
+	return getSampleData(`tournamentDetail_${tournamentId}`) || getDefaultTournamentDetailData(tournamentId);
+}
+
+function getDefaultTournamentListData() {
+	const champMembers = tourneyTeamMembers(0).map(m => ({
+		name: m.name,
+		puuid: m.puuid,
+		position: m.position,
+		profileIconId: null
+	}));
+	return [
+		{
+			id: 1,
+			name: '2026 봄 내전 토너먼트',
+			status: 'finished',
+			trophyType: 'worlds',
+			heldAt: '2026-04-05T00:00:00Z',
+			teamCount: 4,
+			bracketSize: 4,
+			defaultBestOf: 3,
+			finalBestOf: 5,
+			championTeam: {
+				id: 1,
+				name: '미정이가 누구야?',
+				captainPuuid: PLAYERS[0].puuid,
+				members: champMembers
+			}
+		},
+		{
+			id: 2,
+			name: '2026 여름 칼바람 컵',
+			status: 'in_progress',
+			trophyType: 'msi',
+			heldAt: '2026-06-01T00:00:00Z',
+			teamCount: 4,
+			bracketSize: 4,
+			defaultBestOf: 3,
+			finalBestOf: 5
+		}
+	];
+}
+
+export function getSampleTournamentListData() {
+	return getSampleData('tournamentList') || getDefaultTournamentListData();
+}
+
+export function getSampleTournamentActiveMembersData() {
+	return PLAYERS.map((p, i) => ({
+		name: p.name,
+		puuid: p.puuid,
+		position: TOURNEY_POS[i % TOURNEY_POS.length],
+		rating: RANKING_RATINGS[i] != null ? RANKING_RATINGS[i] : 500,
+		profileIconId: null
+	}));
+}
+
 export { MY_PUUID, PLAYERS };

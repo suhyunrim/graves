@@ -1,4 +1,10 @@
 import createCamilleAxios from 'app/utility/camilleAxios';
+import { isSampleMode } from 'app/main/sample/sampleStorage';
+import {
+	getSampleTournamentListData,
+	getSampleTournamentDetailData,
+	getSampleTournamentActiveMembersData
+} from 'app/main/sample/sampleData';
 
 export const LOADING_LIST = '[TOURNAMENT] LOADING LIST';
 export const GET_TOURNAMENT_LIST = '[TOURNAMENT] GET TOURNAMENT LIST';
@@ -8,6 +14,12 @@ export const CLEAR_TOURNAMENT_DETAIL = '[TOURNAMENT] CLEAR TOURNAMENT DETAIL';
 export const SET_ACTIVE_MEMBERS = '[TOURNAMENT] SET ACTIVE MEMBERS';
 
 export function getTournamentList(groupId) {
+	if (isSampleMode()) {
+		return dispatch => {
+			dispatch({ type: LOADING_LIST });
+			setTimeout(() => dispatch({ type: GET_TOURNAMENT_LIST, payload: getSampleTournamentListData() }), 300);
+		};
+	}
 	const request = createCamilleAxios().get(`/api/tournament/group/${groupId}`);
 	return dispatch => {
 		dispatch({ type: LOADING_LIST });
@@ -21,6 +33,15 @@ export function getTournamentList(groupId) {
 }
 
 export function getTournamentDetail(tournamentId) {
+	if (isSampleMode()) {
+		return dispatch => {
+			dispatch({ type: LOADING_DETAIL });
+			setTimeout(
+				() => dispatch({ type: GET_TOURNAMENT_DETAIL, payload: getSampleTournamentDetailData(tournamentId) }),
+				300
+			);
+		};
+	}
 	const request = createCamilleAxios().get(`/api/tournament/${tournamentId}`);
 	return dispatch => {
 		dispatch({ type: LOADING_DETAIL });
@@ -40,6 +61,13 @@ export function clearTournamentDetail() {
 // 토너먼트 팀원/후보 선택기는 현역 + outsider(과거 우승자) 전원이 필요하므로 all-members 사용.
 // (멘션/태그 자동완성 등 다른 곳은 active-members 유지 — profileApi 참고.)
 export function getActiveMembers(groupId) {
+	if (isSampleMode()) {
+		return dispatch => {
+			const members = getSampleTournamentActiveMembersData();
+			dispatch({ type: SET_ACTIVE_MEMBERS, payload: members });
+			return Promise.resolve(members);
+		};
+	}
 	return dispatch =>
 		createCamilleAxios()
 			.get(`/api/group/${groupId}/all-members`, { silentError: true })
