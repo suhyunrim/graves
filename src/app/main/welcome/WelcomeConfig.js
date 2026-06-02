@@ -17,6 +17,11 @@ const WelcomeConfig = {
 			path: '/welcome',
 			auth: null,
 			component: React.lazy(() => import('./Welcome'))
+		},
+		{
+			path: '/welcome2',
+			auth: null,
+			component: React.lazy(() => import('./WelcomeEmbed'))
 		}
 	]
 };
