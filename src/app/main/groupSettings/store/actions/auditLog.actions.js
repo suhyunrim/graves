@@ -1,9 +1,17 @@
 import createCamilleAxios from 'app/utility/camilleAxios';
+import { isSampleMode } from 'app/main/sample/sampleStorage';
+import { getSampleAuditLogsData } from 'app/main/sample/sampleData';
 
 export const GET_AUDIT_LOGS = '[AUDIT_LOG] GET LOGS';
 export const GET_AUDIT_LOGS_LOADING = '[AUDIT_LOG] LOADING';
 
 export function getAuditLogs(groupId, params = {}) {
+	if (isSampleMode()) {
+		return dispatch => {
+			dispatch({ type: GET_AUDIT_LOGS_LOADING });
+			setTimeout(() => dispatch({ type: GET_AUDIT_LOGS, payload: getSampleAuditLogsData() }), 300);
+		};
+	}
 	return dispatch => {
 		dispatch({ type: GET_AUDIT_LOGS_LOADING });
 

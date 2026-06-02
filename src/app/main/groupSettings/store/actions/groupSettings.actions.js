@@ -1,4 +1,6 @@
 import createCamilleAxios from 'app/utility/camilleAxios';
+import { isSampleMode } from 'app/main/sample/sampleStorage';
+import { getSampleGroupMembersData } from 'app/main/sample/sampleData';
 
 export const GET_MEMBERS = '[GROUP_SETTINGS] GET MEMBERS';
 export const GET_MEMBERS_LOADING = '[GROUP_SETTINGS] GET MEMBERS LOADING';
@@ -7,6 +9,12 @@ export const SET_MEMBER_ROLE = '[GROUP_SETTINGS] SET MEMBER ROLE';
 export const SET_SEARCH_TEXT = '[GROUP_SETTINGS] SET SEARCH TEXT';
 
 export function getMembers(groupId) {
+	if (isSampleMode()) {
+		return dispatch => {
+			dispatch({ type: GET_MEMBERS_LOADING });
+			setTimeout(() => dispatch({ type: GET_MEMBERS, payload: getSampleGroupMembersData() }), 300);
+		};
+	}
 	return dispatch => {
 		dispatch({ type: GET_MEMBERS_LOADING });
 
@@ -22,6 +30,12 @@ export function getMembers(groupId) {
 }
 
 export function addBlacklist(groupId, puuid) {
+	if (isSampleMode()) {
+		return dispatch => {
+			dispatch({ type: SET_MEMBER_ROLE, payload: { puuid, role: 'outsider' } });
+			return Promise.resolve();
+		};
+	}
 	return dispatch => {
 		dispatch({ type: SET_MEMBER_ROLE, payload: { puuid, role: 'outsider' } });
 
@@ -35,6 +49,12 @@ export function addBlacklist(groupId, puuid) {
 }
 
 export function removeBlacklist(groupId, puuid) {
+	if (isSampleMode()) {
+		return dispatch => {
+			dispatch({ type: SET_MEMBER_ROLE, payload: { puuid, role: 'member' } });
+			return Promise.resolve();
+		};
+	}
 	return dispatch => {
 		dispatch({ type: SET_MEMBER_ROLE, payload: { puuid, role: 'member' } });
 
@@ -48,6 +68,12 @@ export function removeBlacklist(groupId, puuid) {
 }
 
 export function changeDefaultTier(groupId, puuid, tier, rating) {
+	if (isSampleMode()) {
+		return dispatch => {
+			dispatch({ type: SET_MEMBER_RATING, payload: { puuid, defaultRating: rating } });
+			return Promise.resolve();
+		};
+	}
 	return dispatch => {
 		dispatch({ type: SET_MEMBER_RATING, payload: { puuid, defaultRating: rating } });
 
