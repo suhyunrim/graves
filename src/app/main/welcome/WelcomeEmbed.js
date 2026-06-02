@@ -150,8 +150,8 @@ const useStyles = makeStyles()((theme) => ({
 		letterSpacing: '0.08em',
 		color: 'rgba(255,255,255,0.5)'
 	},
-	// 실제 페이지 컴포넌트가 들어갈 스크롤 뷰포트
-	frameBody: { maxHeight: 720, overflowY: 'auto', overflowX: 'hidden' },
+	// 실제 페이지 컴포넌트가 자연 높이로 펼쳐지도록 (내부 스크롤 X → 페이지 한 번만 스크롤)
+	frameBody: { overflowX: 'hidden' },
 	footer: { textAlign: 'center', padding: '90px 24px 100px' },
 	footerTitle: {
 		fontFamily: '"Rajdhani", "Noto Sans KR", sans-serif',
