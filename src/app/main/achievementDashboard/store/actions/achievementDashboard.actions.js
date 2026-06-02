@@ -1,4 +1,10 @@
 import createCamilleAxios from 'app/utility/camilleAxios';
+import { isSampleMode } from 'app/main/sample/sampleStorage';
+import {
+	getSampleAchievementDashboardData,
+	getSampleAchievementCategoryData,
+	getSampleAchievementUserRankingData
+} from 'app/main/sample/sampleData';
 
 export const GET_DASHBOARD_LOADING = '[ACHIEVEMENT_DASHBOARD] GET DASHBOARD LOADING';
 export const GET_DASHBOARD = '[ACHIEVEMENT_DASHBOARD] GET DASHBOARD';
@@ -19,6 +25,12 @@ export const GET_USER_RANKING_ERROR = '[ACHIEVEMENT_DASHBOARD] GET USER RANKING 
 export const INVALIDATE_CACHE = '[ACHIEVEMENT_DASHBOARD] INVALIDATE CACHE';
 
 export function getDashboard(groupId) {
+	if (isSampleMode()) {
+		return dispatch => {
+			dispatch({ type: GET_DASHBOARD_LOADING });
+			setTimeout(() => dispatch({ type: GET_DASHBOARD, payload: getSampleAchievementDashboardData() }), 300);
+		};
+	}
 	return dispatch => {
 		dispatch({ type: GET_DASHBOARD_LOADING });
 		return createCamilleAxios()
@@ -29,6 +41,21 @@ export function getDashboard(groupId) {
 }
 
 export function getCategory(groupId, category) {
+	if (isSampleMode()) {
+		return (dispatch, getState) => {
+			const cached = getState().AchievementDashboard?.achievementDashboard?.categories?.[category];
+			if (cached && cached.data) {
+				return Promise.resolve();
+			}
+			dispatch({ type: GET_CATEGORY_LOADING, payload: { category } });
+			return new Promise(resolve => {
+				setTimeout(() => {
+					dispatch({ type: GET_CATEGORY, payload: { category, data: getSampleAchievementCategoryData(category) } });
+					resolve();
+				}, 200);
+			});
+		};
+	}
 	return (dispatch, getState) => {
 		const cached = getState().AchievementDashboard?.achievementDashboard?.categories?.[category];
 		if (cached && cached.data) {
@@ -53,6 +80,12 @@ export function getAchievementRanking(groupId, achievementId) {
 }
 
 export function getUserRanking(groupId) {
+	if (isSampleMode()) {
+		return dispatch => {
+			dispatch({ type: GET_USER_RANKING_LOADING });
+			setTimeout(() => dispatch({ type: GET_USER_RANKING, payload: getSampleAchievementUserRankingData() }), 300);
+		};
+	}
 	return dispatch => {
 		dispatch({ type: GET_USER_RANKING_LOADING });
 		return createCamilleAxios()

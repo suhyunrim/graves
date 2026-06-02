@@ -80,7 +80,7 @@ const user = (state = initialState, action) => {
 			return initialState;
 		}
 		case Actions.ENTER_SAMPLE_MODE: {
-			const sampleGroup = { groupId: 'sample-group', groupName: 'Sample Group' };
+			const sampleGroup = { groupId: 'sample-group', groupName: 'Sample Group', isAdmin: true };
 			return {
 				...state,
 				role: ['admin'],
