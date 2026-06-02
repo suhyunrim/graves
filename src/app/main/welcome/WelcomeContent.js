@@ -1,7 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 import { makeStyles } from 'tss-react/mui';
 import { keyframes } from '@emotion/react';
+import * as userActions from 'app/auth/store/actions';
 
 // ─────────────────────────────────────────────────────────────
 //  TACTICAL HEXTECH HUD — /welcome 랜딩
@@ -732,10 +734,16 @@ function GrowthChart({ classes }) {
 function WelcomeContent() {
 	const { classes, cx } = useStyles();
 	const navigate = useNavigate();
+	const dispatch = useDispatch();
 	const heroRef = useInView(0.3);
 	const achRef = useInView(0.4);
 
 	const goLogin = () => navigate('/login');
+	// 데모(샘플) 모드 진입 — 서버 없이 실제 앱 전체를 샘플 데이터로 체험
+	const goDemo = () => {
+		dispatch(userActions.enterSampleMode());
+		navigate('/dashboard');
+	};
 	const scrollTo = (id) => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
 
 	return (
@@ -773,8 +781,8 @@ function WelcomeContent() {
 							그룹 내전을 추적하고 티어·랭킹·업적으로 겨루는 통계 플랫폼. 솔랭이 아닌 우리만의 진짜 순위를 매깁니다.
 						</p>
 						<div className={classes.heroCtas}>
-							<button type="button" className={classes.btnPrimary} onClick={goLogin}>
-								시작하기
+							<button type="button" className={classes.btnPrimary} onClick={goDemo}>
+								체험하기
 							</button>
 							<button type="button" className={classes.btnGhost} onClick={() => scrollTo('ladder')}>
 								랭킹 둘러보기
@@ -1040,6 +1048,9 @@ function WelcomeContent() {
 						<h2 className={classes.footerTitle}>전장에 합류하라</h2>
 						<p className={classes.footerDesc}>롤 닉네임#태그 하나면 충분합니다.</p>
 						<div className={classes.heroCtas} style={{ justifyContent: 'center', marginTop: 32 }}>
+							<button type="button" className={classes.btnGhost} onClick={goDemo}>
+								체험하기
+							</button>
 							<button type="button" className={classes.btnPrimary} onClick={goLogin}>
 								로그인하고 시작하기
 							</button>
