@@ -306,6 +306,10 @@ function LoginPage() {
 							<Link className={classes.whatLink} to="/welcome">
 								Graves가 뭔가요? →
 							</Link>
+
+							<Link className={classes.whatLink} to="/welcome2">
+								Graves가 뭔가요? - 2 →
+							</Link>
 						</CardContent>
 					</Card>
 				</FuseAnimate>
