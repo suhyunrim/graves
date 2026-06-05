@@ -25,11 +25,25 @@ const createCamilleAxios = () => {
 		instance.defaults.headers.common.Puuid = puuid;
 	}
 
+	// 백엔드 JWT 슬라이딩 만료: 만료 임박 시 응답 헤더로 갱신된 토큰을 내려준다.
+	// 헤더가 있으면 기존 키(camille_discord_token)에 그대로 덮어쓰고, 이 인스턴스의
+	// default Authorization 도 갱신해 같은 인스턴스의 다음 요청부터 새 토큰이 실리게 한다.
+	const applyRenewedToken = response => {
+		const renewedToken = response && response.headers && response.headers['x-renewed-token'];
+		if (renewedToken) {
+			camilleRiotAuthService.setDiscordToken(renewedToken);
+			instance.defaults.headers.common.Authorization = `Bearer ${renewedToken}`;
+		}
+	};
+
 	instance.interceptors.response.use(
 		response => {
+			applyRenewedToken(response);
 			return response;
 		},
 		error => {
+			applyRenewedToken(error.response);
+
 			if (error.response && error.response.status === 401 && camilleRiotAuthService.getDiscordToken()) {
 				camilleRiotAuthService.logout();
 				window.location.href = '/login';
