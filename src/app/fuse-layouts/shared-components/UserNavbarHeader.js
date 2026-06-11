@@ -10,6 +10,7 @@ import Divider from '@mui/material/Divider';
 import { makeStyles } from 'tss-react/mui';
 import Typography from '@mui/material/Typography';
 import * as authActions from 'app/auth/store/actions';
+import { isSampleMode } from 'app/main/sample/sampleStorage';
 import startDiscordLogin from 'app/utility/discordAuth';
 import clsx from 'clsx';
 import React, { useState } from 'react';
@@ -139,6 +140,22 @@ const useStyles = makeStyles()((theme) => ({
 		'&:hover': {
 			background: 'linear-gradient(135deg, #4752c4 0%, #3942a8 100%)'
 		}
+	},
+	demoExitBtn: {
+		background: 'linear-gradient(135deg, #00d4ff 0%, #0099cc 100%)',
+		color: '#000',
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontWeight: 700,
+		fontSize: '1.15rem',
+		padding: '6px 16px',
+		borderRadius: 8,
+		textTransform: 'none',
+		whiteSpace: 'nowrap',
+		boxShadow: '0 4px 18px rgba(0, 212, 255, 0.25)',
+		'&:hover': {
+			background: 'linear-gradient(135deg, #00bce0 0%, #0088bb 100%)',
+			boxShadow: '0 6px 22px rgba(0, 212, 255, 0.4)'
+		}
 	}
 }));
 
@@ -262,12 +279,19 @@ function UserNavbarHeader(props) {
 				/>
 			</AppBar>
 			<div className={classes.discordInfo}>
-				{user.data.discordUser ? (
+				{/* 데모(샘플) 모드: OAuth 대신 데모를 끝내고 로그인 페이지로 보낸다 */}
+				{isSampleMode() && (
+					<Button className={classes.demoExitBtn} onClick={() => dispatch(authActions.exitSampleMode())}>
+						데모 종료하고 로그인
+					</Button>
+				)}
+				{!isSampleMode() && user.data.discordUser && (
 					<>
 						<img className={classes.discordIcon} src="/assets/images/logos/discord-mark-white.svg" alt="Discord" />
 						<span className={classes.discordName}>{user.data.discordUser.globalName || user.data.discordUser.username}</span>
 					</>
-				) : (
+				)}
+				{!isSampleMode() && !user.data.discordUser && (
 					<Button
 						className={classes.discordLoginBtn}
 						onClick={() => {

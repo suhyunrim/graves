@@ -125,6 +125,23 @@ export function enterSampleMode() {
 	};
 }
 
+// 데모(샘플) 모드 종료 — 서버 세션이 없으므로 로그아웃 절차 없이 로그인 페이지로 바로 이동
+export function exitSampleMode() {
+	return dispatch => {
+		disableSampleMode();
+
+		history.push({
+			pathname: '/login'
+		});
+
+		dispatch(FuseActions.setInitialSettings());
+
+		return dispatch({
+			type: USER_LOGGED_OUT
+		});
+	};
+}
+
 export function logoutUser() {
 	return (dispatch, getState) => {
 		disableSampleMode();
