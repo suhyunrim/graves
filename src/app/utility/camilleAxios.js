@@ -11,7 +11,10 @@ import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 
 const createCamilleAxios = () => {
-	const instance = axios.create({ timeout: 15000 });
+	// withCredentials: API(zeroboom.lol)와 프론트(graves.zeroboom.lol)가 cross-origin이라
+	// 세션 쿠키(zb_session)를 요청에 실으려면 필요. localStorage 토큰이 비어도(모바일 ITP)
+	// 쿠키로 인증이 유지된다.
+	const instance = axios.create({ timeout: 15000, withCredentials: true });
 
 	instance.defaults.baseURL = import.meta.env.VITE_CAMILLE_HOST;
 
