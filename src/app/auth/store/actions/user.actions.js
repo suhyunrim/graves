@@ -65,9 +65,19 @@ export function retrieveGroupList() {
 export function retrieveDiscordUser() {
 	return dispatch =>
 		import('app/utility/camilleAxios').then(({ default: createCamilleAxios }) => {
-			return createCamilleAxios().get('/api/auth/me');
+			// silentError: 부팅 시 비로그인(쿠키 없음)이면 401이 나는데 전역 에러 다이얼로그가
+			// 뜨지 않도록 조용히 reject. 로그인 유저의 401은 인터셉터가 먼저 로그아웃 처리.
+			return createCamilleAxios().get('/api/auth/me', { silentError: true });
 		}).then(response => {
 				const user = response.data.result;
+
+				// 서버가 body로 내려준 토큰을 localStorage에 재시드한다. 모바일 Safari가
+				// localStorage를 비워도 쿠키로 /me에 도달 → 매 부팅마다 토큰을 다시 채워
+				// 디스코드 토큰에 의존하는 UI(예: 승부예측 게이트)가 정상 동작한다.
+				// (토큰을 응답 헤더가 아니라 body로 받는 이유: nginx 헤더 버퍼 초과(502) 방지)
+				if (user.token) {
+					CamilleRiotAuthService.setDiscordToken(user.token);
+				}
 
 				if (user.puuid) {
 					CamilleRiotAuthService.setSession(user.puuid);
@@ -144,6 +154,14 @@ export function exitSampleMode() {
 
 export function logoutUser() {
 	return (dispatch, getState) => {
+		// 서버 세션 쿠키(httpOnly)는 프론트 JS로 못 지우므로 로그아웃 엔드포인트로 제거한다.
+		// 실패해도 로컬 로그아웃은 그대로 진행 (silentError + catch).
+		import('app/utility/camilleAxios').then(({ default: createCamilleAxios }) => {
+			createCamilleAxios()
+				.post('/api/auth/logout', {}, { silentError: true })
+				.catch(() => {});
+		});
+
 		disableSampleMode();
 
 		CamilleRiotAuthService.logout();
