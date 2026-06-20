@@ -47,13 +47,7 @@ class Auth extends Component {
 						.catch(() => resolve());
 				}
 			} else {
-				// localStorage가 비어도(모바일 Safari ITP가 비우는 경우) httpOnly 세션 쿠키가
-				// 살아있을 수 있다. 쿠키 기반으로 /me 를 한 번 시도해 세션을 복원한다.
-				// 쿠키도 없는 진짜 비로그인은 401 → catch → 게스트로 진행된다.
-				this.props
-					.retrieveDiscordUser()
-					.then(() => resolve())
-					.catch(() => resolve());
+				resolve();
 			}
 		});
 
