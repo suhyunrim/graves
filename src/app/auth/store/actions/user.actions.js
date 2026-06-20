@@ -65,9 +65,7 @@ export function retrieveGroupList() {
 export function retrieveDiscordUser() {
 	return dispatch =>
 		import('app/utility/camilleAxios').then(({ default: createCamilleAxios }) => {
-			// silentError: 부팅 시 비로그인(쿠키 없음)이면 401이 나는데, 전역 에러 다이얼로그가
-			// 뜨지 않도록 조용히 reject 시킨다. 로그인 유저의 401은 인터셉터가 먼저 로그아웃 처리.
-			return createCamilleAxios().get('/api/auth/me', { silentError: true });
+			return createCamilleAxios().get('/api/auth/me');
 		}).then(response => {
 				const user = response.data.result;
 
@@ -146,14 +144,6 @@ export function exitSampleMode() {
 
 export function logoutUser() {
 	return (dispatch, getState) => {
-		// 서버 세션 쿠키(httpOnly)는 프론트 JS로 못 지우므로 로그아웃 엔드포인트로 제거한다.
-		// 실패해도 로컬 로그아웃은 그대로 진행 (silentError + catch).
-		import('app/utility/camilleAxios').then(({ default: createCamilleAxios }) => {
-			createCamilleAxios()
-				.post('/api/auth/logout', {}, { silentError: true })
-				.catch(() => {});
-		});
-
 		disableSampleMode();
 
 		CamilleRiotAuthService.logout();
