@@ -386,7 +386,12 @@ const useStyles = makeStyles()((theme) => ({
 		fontFamily: '"Noto Sans KR", sans-serif',
 		fontSize: '1.4rem',
 		fontWeight: 700,
-		color: '#fff'
+		color: '#fff',
+		display: 'block',
+		maxWidth: '100%',
+		whiteSpace: 'nowrap',
+		overflow: 'hidden',
+		textOverflow: 'ellipsis'
 	},
 	cardBody: {
 		display: 'grid',
@@ -425,7 +430,18 @@ const useStyles = makeStyles()((theme) => ({
 		fontFamily: '"Noto Sans KR", sans-serif',
 		fontSize: '1rem',
 		color: 'rgba(255, 255, 255, 0.35)',
-		marginTop: 2
+		marginTop: 2,
+		maxWidth: 200,
+		whiteSpace: 'nowrap',
+		overflow: 'hidden',
+		textOverflow: 'ellipsis'
+	},
+	nameText: {
+		display: 'block',
+		maxWidth: 200,
+		whiteSpace: 'nowrap',
+		overflow: 'hidden',
+		textOverflow: 'ellipsis'
 	},
 	sortLabel: {
 		'& .MuiTableSortLabel-icon': {
@@ -557,12 +573,14 @@ const MemberRow = React.memo(function MemberRow({ member, classes, onBlacklist, 
 			}`}
 		>
 			<TableCell className={classes.bodyCell}>
-				{member.name}
+				<span className={classes.nameText} title={member.name}>{member.name}</span>
 				{member.discordNickname && (
-					<div className={classes.subAccountText}>디코: {member.discordNickname}</div>
+					<div className={classes.subAccountText} title={member.discordNickname}>
+						디코: {member.discordNickname}
+					</div>
 				)}
 				{member.subAccounts && member.subAccounts.length > 0 && (
-					<div className={classes.subAccountText}>
+					<div className={classes.subAccountText} title={member.subAccounts.map(s => s.name).join(', ')}>
 						부캐: {member.subAccounts.map(s => s.name).join(', ')}
 					</div>
 				)}
@@ -604,13 +622,15 @@ const MemberCard = React.memo(function MemberCard({ member, classes, onBlacklist
 			}`}
 		>
 			<div className={classes.cardHeader}>
-				<div>
-					<span className={classes.cardName}>{member.name}</span>
+				<div style={{ minWidth: 0 }}>
+					<span className={classes.cardName} title={member.name}>{member.name}</span>
 					{member.discordNickname && (
-						<div className={classes.subAccountText}>디코: {member.discordNickname}</div>
+						<div className={classes.subAccountText} title={member.discordNickname}>
+							디코: {member.discordNickname}
+						</div>
 					)}
 					{member.subAccounts && member.subAccounts.length > 0 && (
-						<div className={classes.subAccountText}>
+						<div className={classes.subAccountText} title={member.subAccounts.map(s => s.name).join(', ')}>
 							부캐: {member.subAccounts.map(s => s.name).join(', ')}
 						</div>
 					)}
