@@ -734,6 +734,7 @@ function getDefaultGroupMembersData() {
 		return {
 			puuid: p.puuid,
 			name: p.name,
+			discordNickname: i % 4 === 0 ? null : p.name,
 			role: i === 0 ? 'admin' : i === PLAYERS.length - 1 ? 'outsider' : 'member',
 			leftGuildAt: null,
 			subAccounts: i % 6 === 0 ? [{ name: `${p.name} 부캐` }] : [],

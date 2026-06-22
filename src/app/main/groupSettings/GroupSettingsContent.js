@@ -558,6 +558,9 @@ const MemberRow = React.memo(function MemberRow({ member, classes, onBlacklist, 
 		>
 			<TableCell className={classes.bodyCell}>
 				{member.name}
+				{member.discordNickname && (
+					<div className={classes.subAccountText}>디코: {member.discordNickname}</div>
+				)}
 				{member.subAccounts && member.subAccounts.length > 0 && (
 					<div className={classes.subAccountText}>
 						부캐: {member.subAccounts.map(s => s.name).join(', ')}
@@ -603,6 +606,9 @@ const MemberCard = React.memo(function MemberCard({ member, classes, onBlacklist
 			<div className={classes.cardHeader}>
 				<div>
 					<span className={classes.cardName}>{member.name}</span>
+					{member.discordNickname && (
+						<div className={classes.subAccountText}>디코: {member.discordNickname}</div>
+					)}
 					{member.subAccounts && member.subAccounts.length > 0 && (
 						<div className={classes.subAccountText}>
 							부캐: {member.subAccounts.map(s => s.name).join(', ')}
