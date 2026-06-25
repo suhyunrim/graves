@@ -8,7 +8,7 @@ import { useSelector } from 'react-redux';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import remarkBreaks from 'remark-breaks';
-import { askAI, AI_QUESTION_MAX } from './aiApi';
+import { askAI, getQuota, AI_QUESTION_MAX } from './aiApi';
 
 const blink = keyframes`
 	0%, 80%, 100% { opacity: 0.2; transform: translateY(0); }
@@ -56,6 +56,16 @@ const useStyles = makeStyles()((theme) => ({
 		borderRadius: 10,
 		padding: '8px 14px',
 		marginBottom: 12
+	},
+	quotaLine: {
+		fontFamily: '"Rajdhani", "Noto Sans KR", sans-serif',
+		fontSize: '1.15rem',
+		color: 'rgba(0, 212, 255, 0.75)',
+		textAlign: 'right',
+		marginBottom: 8
+	},
+	quotaLineEmpty: {
+		color: '#ff6b6b'
 	},
 	topBar: {
 		display: 'flex',
@@ -316,6 +326,7 @@ const useStyles = makeStyles()((theme) => ({
 function AiChat() {
 	const { classes, cx } = useStyles();
 	const groupId = useSelector(state => state.auth.user?.reprGroup?.groupId);
+	const groupName = useSelector(state => state.auth.user?.reprGroup?.groupName) || '우리 그룹';
 	const isLoggedIn = Boolean(localStorage.getItem('camille_discord_token'));
 
 	const [messages, setMessages] = useState(() => {
@@ -329,11 +340,20 @@ function AiChat() {
 	});
 	const [input, setInput] = useState('');
 	const [loading, setLoading] = useState(false);
+	const [quota, setQuota] = useState(null);
 	const endRef = useRef(null);
 
 	useEffect(() => {
 		if (endRef.current) endRef.current.scrollIntoView({ behavior: 'smooth' });
 	}, [messages, loading]);
+
+	// 진입 시 오늘 남은 질문 횟수 조회(로그인 상태에서만, 카운트 소비 없음)
+	useEffect(() => {
+		if (!isLoggedIn) return;
+		getQuota()
+			.then(setQuota)
+			.catch(() => {});
+	}, [isLoggedIn]);
 
 	useEffect(() => {
 		try {
@@ -365,6 +385,9 @@ function AiChat() {
 		askAI(groupId, q, history)
 			.then(result => {
 				setMessages(prev => [...prev, { role: 'ai', text: result.answer }]);
+				if (result.limit != null) {
+					setQuota({ used: result.used, remaining: result.remaining, limit: result.limit });
+				}
 			})
 			.catch(() => {
 				setMessages(prev => [
@@ -398,6 +421,13 @@ function AiChat() {
 						&#x1F4A1;
 					</span>{' '}
 					로그인하면 &quot;나/내&quot; 같은 질문도 본인 기준으로 답해드려요.
+				</div>
+			)}
+
+			{isLoggedIn && quota?.limit > 0 && (
+				<div className={cx(classes.quotaLine, quota.remaining === 0 && classes.quotaLineEmpty)}>
+					오늘 남은 질문 {quota.remaining}/{quota.limit}
+					{quota.remaining === 0 && ' · 내일 다시 가능해요'}
 				</div>
 			)}
 
@@ -473,7 +503,7 @@ function AiChat() {
 			<div className={classes.inputRow}>
 				<TextField
 					className={classes.textField}
-					placeholder="내전에 대해 물어보세요 (Enter 전송, Shift+Enter 줄바꿈)"
+					placeholder={`${groupName}에 대해 물어보세요 😊 (Enter 전송, Shift+Enter 줄바꿈)`}
 					variant="outlined"
 					size="small"
 					multiline

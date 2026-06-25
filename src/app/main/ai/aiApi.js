@@ -21,5 +21,12 @@ export async function askAI(groupId, question, messages) {
 		{ groupId, question, history },
 		{ silentError: true, timeout: 60000 }
 	);
-	return res.data.result; // { answer, toolCalls }
+	return res.data.result; // { answer, toolCalls, used, remaining, limit }
+}
+
+// 카운트 소비 없이 오늘 남은 질문 횟수 조회. 미로그인(401)이면 호출 측에서 무시.
+// groupId 불필요 — puuid(세션) 기준이다. limit === 0이면 무제한(remaining은 null).
+export async function getQuota() {
+	const res = await createCamilleAxios().get('/api/ai/quota', { silentError: true });
+	return res.data.result; // { used, remaining, limit }
 }

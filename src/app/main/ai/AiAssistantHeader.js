@@ -1,6 +1,7 @@
 import React from 'react';
 import { Typography } from '@mui/material';
 import { makeStyles } from 'tss-react/mui';
+import { useSelector } from 'react-redux';
 
 const useStyles = makeStyles()((theme) => ({
 	root: {
@@ -48,6 +49,7 @@ const useStyles = makeStyles()((theme) => ({
 
 function AiAssistantHeader() {
 	const { classes } = useStyles();
+	const groupName = useSelector(state => state.auth.user?.reprGroup?.groupName) || '우리 그룹';
 
 	return (
 		<div className={classes.root}>
@@ -59,7 +61,7 @@ function AiAssistantHeader() {
 					AI 도우미
 				</Typography>
 			</div>
-			<Typography className={classes.subtitle}>내전 데이터에 자연어로 물어보세요</Typography>
+			<Typography className={classes.subtitle}>{groupName}에 대해 자유롭게 물어보세요!</Typography>
 		</div>
 	);
 }
