@@ -164,23 +164,23 @@ function MostChampions({ champions, mainPosition, mainPositionIcon, mainPosition
 				솔랭 모스트 챔피언
 				{mainPosition ? (
 					<span className={classes.positionInfo}>
+						<span className={classes.positionKind}>메인</span>
 						<PositionIcon
 							position={mainPositionIcon}
 							className={classes.positionIcon}
-							fallbackClassName={classes.positionKind}
+							fallbackClassName={classes.positionName}
 						/>
-						<span className={classes.positionKind}>메인</span>
 						<span className={classes.positionName}>{mainPosition}</span>
 						<span className={classes.positionRate}>{mainPositionRate}%</span>
 						{subPosition && (
 							<>
 								<span className={classes.positionDivider}>·</span>
+								<span className={classes.positionKind}>서브</span>
 								<PositionIcon
 									position={subPositionIcon}
 									className={classes.positionIcon}
-									fallbackClassName={classes.positionKind}
+									fallbackClassName={classes.positionName}
 								/>
-								<span className={classes.positionKind}>서브</span>
 								<span className={classes.positionName}>{subPosition}</span>
 								<span className={classes.positionRate}>{subPositionRate}%</span>
 							</>
