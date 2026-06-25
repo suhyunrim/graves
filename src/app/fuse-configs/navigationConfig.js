@@ -20,13 +20,6 @@ const navigationConfig = [
 				url: '/myinfo'
 			},
 			{
-				id: 'ai-assistant-component',
-				title: 'AI 도우미',
-				type: 'item',
-				icon: 'assistant',
-				url: '/ai'
-			},
-			{
 				id: 'ranking-component',
 				title: '랭킹',
 				type: 'item',
@@ -53,6 +46,13 @@ const navigationConfig = [
 				type: 'item',
 				icon: 'workspace_premium',
 				url: '/achievement-dashboard'
+			},
+			{
+				id: 'ai-assistant-component',
+				title: 'AI 도우미',
+				type: 'item',
+				icon: 'assistant',
+				url: '/ai'
 			},
 			{
 				id: 'challenge-component',
