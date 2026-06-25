@@ -23,7 +23,7 @@ const navigationConfig = [
 				id: 'ai-assistant-component',
 				title: 'AI 도우미',
 				type: 'item',
-				icon: 'smart_toy',
+				icon: 'assistant',
 				url: '/ai'
 			},
 			{
