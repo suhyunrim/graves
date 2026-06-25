@@ -199,7 +199,6 @@ const useStyles = makeStyles()((theme) => ({
 	cardsGrid: {
 		display: 'grid',
 		gridTemplateColumns: 'repeat(auto-fit, minmax(380px, 1fr))',
-		alignItems: 'start',
 		gap: 24,
 		marginBottom: 32,
 		[theme.breakpoints.down('sm')]: {
@@ -215,6 +214,8 @@ const useStyles = makeStyles()((theme) => ({
 	},
 	rankCard: {
 		position: 'relative',
+		display: 'flex',
+		flexDirection: 'column',
 		borderRadius: 20,
 		padding: 28,
 		overflow: 'hidden',
@@ -347,7 +348,10 @@ const useStyles = makeStyles()((theme) => ({
 		display: 'flex',
 		alignItems: 'center',
 		gap: 10,
-		marginTop: 14,
+		// 두 카드 높이를 맞추면(stretch) 솔로 카드가 내전 카드만큼 늘어남.
+		// 포지션 칩을 하단으로 밀어 빈 공간이 위쪽 여백으로 분산되게 한다.
+		marginTop: 'auto',
+		paddingTop: 14,
 		flexWrap: 'wrap'
 	},
 	soloPositionTag: {
