@@ -626,10 +626,13 @@ function MatchHistoryTable() {
 	};
 
 	useEffect(() => {
+		// 모바일 쿠키 세션 복원 중엔 reprGroup이 아직 없을 수 있다. 준비되면 user 변경으로 재실행.
+		if (!user?.reprGroup?.groupId) return;
 		dispatch(Actions.getMatchHistory(user.reprGroup.groupId, 1, rowsPerPage));
 	}, [dispatch, user]);
 
 	useEffect(() => {
+		if (!user?.reprGroup?.groupId) return undefined;
 		if (debounceTimer.current) clearTimeout(debounceTimer.current);
 		debounceTimer.current = setTimeout(() => {
 			dispatch(Actions.getMatchHistory(user.reprGroup.groupId, 1, rowsPerPage, searchText));

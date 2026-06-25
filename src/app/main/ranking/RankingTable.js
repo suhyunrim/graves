@@ -471,10 +471,12 @@ function RankingTable(props) {
 	};
 	const tierSteps = ['IV', 'III', 'II', 'I'];
 
-	const groupName = useSelector(state => state.auth.user.reprGroup.groupName);
-	const groupId = useSelector(state => state.auth.user.reprGroup.groupId);
+	const groupName = useSelector(state => state.auth.user.reprGroup?.groupName);
+	const groupId = useSelector(state => state.auth.user.reprGroup?.groupId);
 
 	useEffect(() => {
+		// 모바일 쿠키 세션 복원 중엔 reprGroup이 아직 없을 수 있다. 준비되면 deps 변경으로 재실행.
+		if (!groupId) return;
 		if (period === 'all') {
 			dispatch(Actions.getRanking(groupName));
 		} else {
