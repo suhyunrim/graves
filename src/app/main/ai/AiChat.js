@@ -4,6 +4,9 @@ import SendIcon from '@mui/icons-material/Send';
 import { makeStyles } from 'tss-react/mui';
 import { keyframes } from '@emotion/react';
 import { useSelector } from 'react-redux';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import remarkBreaks from 'remark-breaks';
 import { askAI, AI_QUESTION_MAX } from './aiApi';
 
 const blink = keyframes`
@@ -17,6 +20,14 @@ const EXAMPLE_QUESTIONS = [
 	'승률 1위는?',
 	'최근 가장 폼 좋은 사람은?'
 ];
+
+// remarkGfm: 표/취소선/자동링크, remarkBreaks: 단일 줄바꿈(\n)을 <br>로 유지(채팅 느낌).
+const MARKDOWN_PLUGINS = [remarkGfm, remarkBreaks];
+// 링크는 새 탭으로(SPA 이탈 방지). node prop은 DOM에 안 넘기게 제거.
+const MARKDOWN_COMPONENTS = {
+	// eslint-disable-next-line no-unused-vars
+	a: ({ node, ...props }) => <a {...props} target="_blank" rel="noopener noreferrer" />
+};
 
 const useStyles = makeStyles()((theme) => ({
 	root: {
@@ -115,7 +126,6 @@ const useStyles = makeStyles()((theme) => ({
 		fontFamily: '"Noto Sans KR", sans-serif',
 		fontSize: '1.35rem',
 		lineHeight: 1.6,
-		whiteSpace: 'pre-wrap',
 		wordBreak: 'break-word',
 		[theme.breakpoints.down('sm')]: {
 			fontSize: '1.25rem',
@@ -126,13 +136,79 @@ const useStyles = makeStyles()((theme) => ({
 		background: 'linear-gradient(135deg, #00d4ff 0%, #0099cc 100%)',
 		color: '#001018',
 		fontWeight: 500,
-		borderBottomRightRadius: 4
+		borderBottomRightRadius: 4,
+		whiteSpace: 'pre-wrap'
 	},
 	aiBubble: {
 		background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
 		color: 'rgba(255, 255, 255, 0.92)',
 		border: '1px solid rgba(0, 212, 255, 0.18)',
-		borderBottomLeftRadius: 4
+		borderBottomLeftRadius: 4,
+		// 마크다운 렌더 요소: 브라우저 기본 마진 제거 + 디자인 토큰(cyan) 적용
+		'& > :first-of-type': { marginTop: 0 },
+		'& > :last-child': { marginBottom: 0 },
+		'& p': { margin: '0 0 8px' },
+		'& ul, & ol': { margin: '4px 0', paddingLeft: '1.5em' },
+		'& li': { marginBottom: 2 },
+		'& li::marker': { color: 'rgba(0, 212, 255, 0.7)' },
+		'& strong': { fontWeight: 700, color: '#fff' },
+		'& em': { fontStyle: 'italic' },
+		'& del': { color: 'rgba(255, 255, 255, 0.5)' },
+		'& a': { color: '#00d4ff', textDecoration: 'underline' },
+		'& h1, & h2, & h3, & h4, & h5, & h6': {
+			fontFamily: '"Rajdhani", "Noto Sans KR", sans-serif',
+			fontWeight: 700,
+			color: '#fff',
+			margin: '10px 0 6px',
+			lineHeight: 1.3
+		},
+		'& h1': { fontSize: '1.6rem' },
+		'& h2': { fontSize: '1.5rem' },
+		'& h3': { fontSize: '1.4rem' },
+		'& h4, & h5, & h6': { fontSize: '1.35rem' },
+		'& code': {
+			fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Consolas, monospace',
+			background: 'rgba(0, 212, 255, 0.12)',
+			color: '#7fe3ff',
+			padding: '1px 6px',
+			borderRadius: 5,
+			fontSize: '0.9em'
+		},
+		'& pre': {
+			background: 'rgba(0, 0, 0, 0.35)',
+			border: '1px solid rgba(0, 212, 255, 0.15)',
+			borderRadius: 8,
+			padding: '10px 12px',
+			overflowX: 'auto',
+			margin: '6px 0'
+		},
+		'& pre code': {
+			background: 'none',
+			color: 'rgba(255, 255, 255, 0.9)',
+			padding: 0
+		},
+		'& blockquote': {
+			margin: '6px 0',
+			paddingLeft: 12,
+			borderLeft: '3px solid rgba(0, 212, 255, 0.4)',
+			color: 'rgba(255, 255, 255, 0.7)'
+		},
+		'& table': {
+			borderCollapse: 'collapse',
+			margin: '6px 0',
+			fontSize: '0.95em'
+		},
+		'& th, & td': {
+			border: '1px solid rgba(255, 255, 255, 0.18)',
+			padding: '4px 8px',
+			textAlign: 'left'
+		},
+		'& th': { background: 'rgba(0, 212, 255, 0.1)' },
+		'& hr': {
+			border: 'none',
+			borderTop: '1px solid rgba(255, 255, 255, 0.15)',
+			margin: '10px 0'
+		}
 	},
 	errorBubble: {
 		border: '1px solid rgba(255, 107, 107, 0.4)',
@@ -305,7 +381,13 @@ function AiChat() {
 									m.error && classes.errorBubble
 								)}
 							>
-								{m.text}
+								{m.role === 'user' ? (
+									m.text
+								) : (
+									<ReactMarkdown remarkPlugins={MARKDOWN_PLUGINS} components={MARKDOWN_COMPONENTS}>
+										{m.text}
+									</ReactMarkdown>
+								)}
 							</div>
 						</div>
 					))}
