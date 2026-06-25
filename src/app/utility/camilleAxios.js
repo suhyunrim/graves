@@ -47,7 +47,15 @@ const createCamilleAxios = () => {
 		error => {
 			applyRenewedToken(error.response);
 
-			if (error.response && error.response.status === 401 && camilleRiotAuthService.getDiscordToken()) {
+			// JWT 만료(401) → 로그아웃. 단 silentError(방문자 카운터 등 best-effort 호출)는 제외:
+			// 그런 비핵심 호출이 401이라고 세션을 통째로 날려 /login으로 튕기면 안 된다.
+			// (핵심 호출 getInfo 등은 silentError가 아니므로 만료 시 정상 로그아웃됨)
+			if (
+				error.response &&
+				error.response.status === 401 &&
+				camilleRiotAuthService.getDiscordToken() &&
+				!(error.config && error.config.silentError)
+			) {
 				camilleRiotAuthService.logout();
 				window.location.href = '/login';
 				return Promise.reject(error);
