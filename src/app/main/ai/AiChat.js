@@ -238,9 +238,11 @@ function AiChat() {
 			return;
 		}
 
+		// messages는 이번 질문을 push하기 전 상태(클로저) → history로 그대로 전달(현재 질문 제외).
+		const history = messages;
 		setMessages(prev => [...prev, { role: 'user', text: q }]);
 		setLoading(true);
-		askAI(groupId, q)
+		askAI(groupId, q, history)
 			.then(result => {
 				setMessages(prev => [...prev, { role: 'ai', text: result.answer }]);
 			})
