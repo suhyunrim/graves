@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { TextField, IconButton, Chip } from '@mui/material';
+import { TextField, IconButton, Chip, Button } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
+import AddCommentOutlinedIcon from '@mui/icons-material/AddCommentOutlined';
 import { makeStyles } from 'tss-react/mui';
 import { keyframes } from '@emotion/react';
 import { useSelector } from 'react-redux';
@@ -20,6 +21,9 @@ const EXAMPLE_QUESTIONS = [
 	'승률 1위는?',
 	'최근 가장 폼 좋은 사람은?'
 ];
+
+// 탭 세션 동안 대화 유지(페이지 이동/새로고침엔 보존, 탭 닫으면 정리).
+const CHAT_STORAGE_KEY = 'graves_ai_chat';
 
 // remarkGfm: 표/취소선/자동링크, remarkBreaks: 단일 줄바꿈(\n)을 <br>로 유지(채팅 느낌).
 const MARKDOWN_PLUGINS = [remarkGfm, remarkBreaks];
@@ -52,6 +56,30 @@ const useStyles = makeStyles()((theme) => ({
 		borderRadius: 10,
 		padding: '8px 14px',
 		marginBottom: 12
+	},
+	topBar: {
+		display: 'flex',
+		justifyContent: 'flex-end',
+		marginBottom: 8
+	},
+	newChatBtn: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.15rem',
+		textTransform: 'none',
+		color: 'rgba(255, 255, 255, 0.6)',
+		border: '1px solid rgba(0, 212, 255, 0.25)',
+		borderRadius: 9,
+		padding: '4px 14px',
+		minWidth: 0,
+		'&:hover': {
+			color: '#00d4ff',
+			borderColor: 'rgba(0, 212, 255, 0.5)',
+			background: 'rgba(0, 212, 255, 0.08)'
+		},
+		'&.Mui-disabled': {
+			color: 'rgba(255, 255, 255, 0.25)',
+			borderColor: 'rgba(255, 255, 255, 0.1)'
+		}
 	},
 	messages: {
 		flex: 1,
@@ -290,7 +318,15 @@ function AiChat() {
 	const groupId = useSelector(state => state.auth.user?.reprGroup?.groupId);
 	const isLoggedIn = Boolean(localStorage.getItem('camille_discord_token'));
 
-	const [messages, setMessages] = useState([]);
+	const [messages, setMessages] = useState(() => {
+		// 페이지 이동 후 복귀/새로고침 시 이전 대화 복원
+		try {
+			const saved = sessionStorage.getItem(CHAT_STORAGE_KEY);
+			return saved ? JSON.parse(saved) : [];
+		} catch (e) {
+			return [];
+		}
+	});
 	const [input, setInput] = useState('');
 	const [loading, setLoading] = useState(false);
 	const endRef = useRef(null);
@@ -298,6 +334,14 @@ function AiChat() {
 	useEffect(() => {
 		if (endRef.current) endRef.current.scrollIntoView({ behavior: 'smooth' });
 	}, [messages, loading]);
+
+	useEffect(() => {
+		try {
+			sessionStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(messages));
+		} catch (e) {
+			// 저장 실패(quota 등)는 무시 — 메모리 상태로만 동작
+		}
+	}, [messages]);
 
 	function send(text) {
 		const q = (text != null ? text : input).trim();
@@ -338,6 +382,12 @@ function AiChat() {
 		}
 	}
 
+	function clearChat() {
+		// setMessages([]) → 저장 useEffect가 sessionStorage도 비움
+		setMessages([]);
+		setInput('');
+	}
+
 	const over = input.length > AI_QUESTION_MAX;
 
 	return (
@@ -348,6 +398,19 @@ function AiChat() {
 						&#x1F4A1;
 					</span>{' '}
 					로그인하면 &quot;나/내&quot; 같은 질문도 본인 기준으로 답해드려요.
+				</div>
+			)}
+
+			{messages.length > 0 && (
+				<div className={classes.topBar}>
+					<Button
+						className={classes.newChatBtn}
+						onClick={clearChat}
+						disabled={loading}
+						startIcon={<AddCommentOutlinedIcon />}
+					>
+						새 대화
+					</Button>
 				</div>
 			)}
 
