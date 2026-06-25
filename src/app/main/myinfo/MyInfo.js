@@ -31,8 +31,24 @@ import Guestbook from './Guestbook';
 import StatusMessage from './StatusMessage';
 import TrophyCabinet from './TrophyCabinet';
 import MostChampions from './MostChampions';
+import PositionIcon from '../tournament/PositionIcon';
 import reducer from './store/reducers';
 import * as Actions from './store/actions';
+
+// Riot 표준 포지션 키 → 한글 라벨 + PositionIcon용 키(소문자).
+// 표시는 항상 탑 → 정글 → 미드 → 원딜 → 서폿 순서 고정.
+const POSITIONS = [
+	{ key: 'TOP', label: '탑', icon: 'top' },
+	{ key: 'JUNGLE', label: '정글', icon: 'jungle' },
+	{ key: 'MIDDLE', label: '미드', icon: 'mid' },
+	{ key: 'BOTTOM', label: '원딜', icon: 'adc' },
+	{ key: 'UTILITY', label: '서폿', icon: 'support' }
+];
+
+const POSITION_MAP = POSITIONS.reduce((acc, pos) => {
+	acc[pos.key] = pos;
+	return acc;
+}, {});
 
 const tierColors = {
 	IRON: { primary: '#5C5C5C', glow: 'rgba(92, 92, 92, 0.4)' },
@@ -323,6 +339,97 @@ const useStyles = makeStyles()((theme) => ({
 			height: 28,
 			background: 'linear-gradient(180deg, #00d4ff, #0066ff)',
 			borderRadius: 2
+		}
+	},
+	// 내전 포지션 승률 별도 섹션 (5칸 표)
+	sectionCaption: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.15rem',
+		color: 'rgba(255, 255, 255, 0.4)',
+		marginTop: -12,
+		marginBottom: 18
+	},
+	positionStatsSection: {
+		marginBottom: 32
+	},
+	positionStatsGrid: {
+		display: 'grid',
+		gridTemplateColumns: 'repeat(5, 1fr)',
+		gap: 12,
+		[theme.breakpoints.down('sm')]: {
+			gap: 6
+		}
+	},
+	positionStatCard: {
+		background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
+		borderRadius: 14,
+		border: '1px solid rgba(0, 212, 255, 0.15)',
+		padding: '18px 8px 16px',
+		display: 'flex',
+		flexDirection: 'column',
+		alignItems: 'center',
+		gap: 8,
+		animation: `${fadeInUp} 0.5s ease forwards`,
+		opacity: 0,
+		'&:nth-child(1)': { animationDelay: '0.1s' },
+		'&:nth-child(2)': { animationDelay: '0.15s' },
+		'&:nth-child(3)': { animationDelay: '0.2s' },
+		'&:nth-child(4)': { animationDelay: '0.25s' },
+		'&:nth-child(5)': { animationDelay: '0.3s' },
+		[theme.breakpoints.down('sm')]: {
+			borderRadius: 12,
+			padding: '12px 4px'
+		}
+	},
+	positionStatEmpty: {
+		opacity: 0.45
+	},
+	positionStatIcon: {
+		width: 32,
+		height: 32,
+		[theme.breakpoints.down('sm')]: {
+			width: 26,
+			height: 26
+		}
+	},
+	positionStatLabel: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.25rem',
+		fontWeight: 600,
+		color: 'rgba(255, 255, 255, 0.85)',
+		[theme.breakpoints.down('sm')]: {
+			fontSize: '1.1rem'
+		}
+	},
+	positionStatRate: {
+		fontFamily: '"Rajdhani", sans-serif',
+		fontSize: '1.9rem',
+		fontWeight: 700,
+		[theme.breakpoints.down('sm')]: {
+			fontSize: '1.5rem'
+		}
+	},
+	positionStatRateHigh: {
+		color: '#00ff7f'
+	},
+	positionStatRateLow: {
+		color: 'rgba(255, 255, 255, 0.5)'
+	},
+	positionStatRecord: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.1rem',
+		color: 'rgba(255, 255, 255, 0.55)',
+		[theme.breakpoints.down('sm')]: {
+			fontSize: '0.95rem'
+		}
+	},
+	positionStatDash: {
+		fontFamily: '"Rajdhani", sans-serif',
+		fontSize: '1.9rem',
+		fontWeight: 700,
+		color: 'rgba(255, 255, 255, 0.3)',
+		[theme.breakpoints.down('sm')]: {
+			fontSize: '1.5rem'
 		}
 	},
 	// 새로운 통계 섹션 스타일
@@ -781,6 +888,7 @@ function MyInfoPage(props) {
 	const subAccount = useSelector(({ MyInfo }) => MyInfo.myInfo.subAccount);
 	const tournamentChampionships = useSelector(({ MyInfo }) => MyInfo.myInfo.tournamentChampionships);
 	const mostChampions = useSelector(({ MyInfo }) => MyInfo.myInfo.mostChampions);
+	const positionStats = useSelector(({ MyInfo }) => MyInfo.myInfo.positionStats);
 
 	const [activeTab, setActiveTab] = useState(0);
 	const [subAccountInput, setSubAccountInput] = useState('');
@@ -937,6 +1045,14 @@ function MyInfoPage(props) {
 	const soloWinRate = calculateWinRate(summonerInfo.rankWin, summonerInfo.rankLose);
 	const customWinRate = calculateWinRate(scoreInfo.win, scoreInfo.lose);
 
+	// 솔랭 메인/서브 포지션 — 솔랭 모스트 챔피언 헤더에 표시
+	const mainPositionLabel = summonerInfo.mainPosition
+		? (POSITION_MAP[summonerInfo.mainPosition] || {}).label || summonerInfo.mainPosition
+		: null;
+	const subPositionLabel = summonerInfo.subPosition
+		? (POSITION_MAP[summonerInfo.subPosition] || {}).label || summonerInfo.subPosition
+		: null;
+
 	return (
 		<FusePageSimple
 			classes={{
@@ -1075,7 +1191,13 @@ function MyInfoPage(props) {
 							</div>
 							{mostChampions && mostChampions.length > 0 && (
 								<div className={classes.trophyCabinetWrap}>
-									<MostChampions champions={mostChampions} />
+									<MostChampions
+										champions={mostChampions}
+										mainPosition={mainPositionLabel}
+										mainPositionRate={summonerInfo.mainPosition ? Math.round(summonerInfo.mainPositionRate) : null}
+										subPosition={subPositionLabel}
+										subPositionRate={summonerInfo.subPosition ? Math.round(summonerInfo.subPositionRate) : null}
+									/>
 								</div>
 							)}
 
@@ -1101,6 +1223,49 @@ function MyInfoPage(props) {
 									</div>
 								</div>
 							</div>
+
+							{/* 내전 포지션 승률 — positionStats 없으면(완료 내전 없음/10인 포지션 매치 없음) 섹션 자체를 렌더하지 않음 */}
+							{positionStats && (
+								<div className={classes.positionStatsSection}>
+									<div className={classes.sectionTitle}>내전 포지션 승률</div>
+									<div className={classes.sectionCaption}>※ 10명 전원이 포지션을 정하고 진행한 내전만 집계됩니다.</div>
+									<div className={classes.positionStatsGrid}>
+										{POSITIONS.map(pos => {
+											const stat = positionStats[pos.key] || { games: 0, wins: 0, losses: 0, winRate: 0 };
+											const hasGames = stat.games > 0;
+											return (
+												<div
+													key={pos.key}
+													className={`${classes.positionStatCard} ${hasGames ? '' : classes.positionStatEmpty}`}
+												>
+													<PositionIcon
+														position={pos.icon}
+														className={classes.positionStatIcon}
+														fallbackClassName={classes.positionStatLabel}
+													/>
+													<div className={classes.positionStatLabel}>{pos.label}</div>
+													{hasGames ? (
+														<>
+															<div
+																className={`${classes.positionStatRate} ${
+																	stat.winRate >= 50 ? classes.positionStatRateHigh : classes.positionStatRateLow
+																}`}
+															>
+																{stat.winRate}%
+															</div>
+															<div className={classes.positionStatRecord}>
+																{stat.wins}승 {stat.losses}패
+															</div>
+														</>
+													) : (
+														<div className={classes.positionStatDash}>-</div>
+													)}
+												</div>
+											);
+										})}
+									</div>
+								</div>
+							)}
 
 							{/* 베스트/워스트 하이라이트 */}
 							<div className={classes.highlightSection}>

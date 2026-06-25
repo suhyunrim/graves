@@ -26,6 +26,9 @@ const myInfoReducer = (state = initialState, action) => {
 				bestOpponents: stats.bestOpponents || [],
 				worstOpponents: stats.worstOpponents || [],
 				ratingHistory: stats.ratingHistory || [],
+				// 그룹에 따라 없을 수 있음: detailedStats가 null이거나(완료 내전 없음)
+				// 10인 전원 포지션 지정 매치가 없으면 positionStats 자체가 null로 내려옴.
+				positionStats: stats.positionStats || null,
 				honorStats: action.payload.honorStats || null,
 				subAccount: action.payload.subAccount || null,
 				statusMessage: action.payload.statusMessage || null,

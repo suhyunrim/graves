@@ -22,6 +22,7 @@ const useStyles = makeStyles()((theme) => ({
 		textTransform: 'uppercase',
 		display: 'flex',
 		alignItems: 'center',
+		flexWrap: 'wrap',
 		gap: 12,
 		marginBottom: 16,
 		'&::before': {
@@ -41,6 +42,36 @@ const useStyles = makeStyles()((theme) => ({
 		fontSize: '1.1rem',
 		color: 'rgba(255, 255, 255, 0.5)',
 		fontWeight: 400
+	},
+	// 헤더 (5) 자리에 들어가는 솔랭 메인/서브 포지션
+	positionInfo: {
+		display: 'inline-flex',
+		alignItems: 'center',
+		gap: 5,
+		textTransform: 'none',
+		letterSpacing: 'normal',
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontWeight: 400,
+		fontSize: '1.2rem',
+		[theme.breakpoints.down('sm')]: {
+			fontSize: '1.05rem'
+		}
+	},
+	positionKind: {
+		color: 'rgba(255, 255, 255, 0.4)'
+	},
+	positionName: {
+		color: 'rgba(255, 255, 255, 0.85)',
+		fontWeight: 600
+	},
+	positionRate: {
+		fontFamily: '"Rajdhani", sans-serif',
+		fontWeight: 700,
+		color: '#00d4ff'
+	},
+	positionDivider: {
+		color: 'rgba(255, 255, 255, 0.25)',
+		margin: '0 3px'
 	},
 	grid: {
 		display: 'grid',
@@ -98,7 +129,7 @@ const useStyles = makeStyles()((theme) => ({
 	}
 }));
 
-function MostChampions({ champions }) {
+function MostChampions({ champions, mainPosition, mainPositionRate, subPosition, subPositionRate }) {
 	const { classes } = useStyles();
 	const [names, setNames] = useState({});
 
@@ -122,7 +153,23 @@ function MostChampions({ champions }) {
 		<div className={classes.root}>
 			<div className={classes.header}>
 				솔랭 모스트 챔피언
-				<span className={classes.count}>({list.length})</span>
+				{mainPosition ? (
+					<span className={classes.positionInfo}>
+						<span className={classes.positionKind}>메인</span>
+						<span className={classes.positionName}>{mainPosition}</span>
+						<span className={classes.positionRate}>{mainPositionRate}%</span>
+						{subPosition && (
+							<>
+								<span className={classes.positionDivider}>·</span>
+								<span className={classes.positionKind}>서브</span>
+								<span className={classes.positionName}>{subPosition}</span>
+								<span className={classes.positionRate}>{subPositionRate}%</span>
+							</>
+						)}
+					</span>
+				) : (
+					<span className={classes.count}>({list.length})</span>
+				)}
 			</div>
 			<div className={classes.grid}>
 				{list.map(c => {
