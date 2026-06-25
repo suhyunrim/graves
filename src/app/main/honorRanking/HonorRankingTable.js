@@ -287,12 +287,14 @@ function HonorRankingTable() {
 	const honorData = useSelector(({ HonorRanking }) => HonorRanking.honorRanking.data);
 	const searchText = useSelector(({ HonorRanking }) => HonorRanking.honorRanking.searchText);
 	const period = useSelector(({ HonorRanking }) => HonorRanking.honorRanking.period);
-	const groupId = useSelector(state => state.auth.user.reprGroup.groupId);
+	const groupId = useSelector(state => state.auth.user.reprGroup?.groupId);
 
 	const [page, setPage] = useState(0);
 	const rowsPerPage = 10;
 
 	useEffect(() => {
+		// 모바일 쿠키 세션 복원 중엔 reprGroup이 아직 없을 수 있다. 준비되면 groupId 변경으로 재실행.
+		if (!groupId) return;
 		const { since, until } = getPeriodDates(period);
 		dispatch(Actions.getHonorRanking(groupId, since, until));
 	}, [dispatch, groupId, period]);

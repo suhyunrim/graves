@@ -1018,6 +1018,10 @@ function MyInfoPage(props) {
 	};
 
 	useEffect(() => {
+		// 모바일 쿠키 세션 복원 시 user는 있지만 reprGroup(그룹 리스트)이 아직 안 채워진
+		// 윈도우가 있다. 가드 없이 user.reprGroup.groupId에 접근하면 throw → ErrorBoundary로
+		// 페이지가 튕긴다. reprGroup 준비되면 deps의 user 변경으로 effect가 재실행된다.
+		if (!user?.reprGroup?.groupId) return;
 		dispatch(Actions.getMyInfo(user.reprGroup.groupId, puuid));
 	}, [dispatch, user, puuid]);
 
