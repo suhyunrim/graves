@@ -14,6 +14,12 @@ export async function askAI(groupId, question, messages) {
 		.filter(m => !m.error)
 		.slice(-12)
 		.map(m => ({ role: m.role === 'ai' ? 'assistant' : 'user', content: m.text }));
-	const res = await createCamilleAxios().post('/api/ai/ask', { groupId, question, history }, { silentError: true });
+	// timeout: AI 응답은 도구 호출 루프로 인스턴스 기본값(15초)을 넘길 수 있어 이 호출만 60초로 둔다.
+	// (axios는 요청별 config가 인스턴스 기본을 덮어쓰므로 다른 API는 15초 유지)
+	const res = await createCamilleAxios().post(
+		'/api/ai/ask',
+		{ groupId, question, history },
+		{ silentError: true, timeout: 60000 }
+	);
 	return res.data.result; // { answer, toolCalls }
 }
