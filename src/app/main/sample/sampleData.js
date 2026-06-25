@@ -289,7 +289,11 @@ function getDefaultMyInfoData(puuid) {
 			summonerLevel: 350 + idx * 10,
 			rankTier: getTierStringFromRating(rating + 50),
 			rankWin: w + 50,
-			rankLose: l + 30
+			rankLose: l + 30,
+			mainPosition: 'UTILITY',
+			mainPositionRate: 98.94,
+			subPosition: 'TOP',
+			subPositionRate: 1.06
 		},
 		detailedStats: {
 			topTeammates,
@@ -302,7 +306,14 @@ function getDefaultMyInfoData(puuid) {
 			maxLoseStreak: 3 + Math.floor(idx / 8),
 			bestOpponent,
 			worstOpponent,
-			ratingHistory
+			ratingHistory,
+			positionStats: {
+				TOP: { games: 12, wins: 6, losses: 6, winRate: 50 },
+				JUNGLE: { games: 0, wins: 0, losses: 0, winRate: 0 },
+				MIDDLE: { games: 7, wins: 2, losses: 5, winRate: 29 },
+				BOTTOM: { games: 0, wins: 0, losses: 0, winRate: 0 },
+				UTILITY: { games: 18, wins: 9, losses: 9, winRate: 50 }
+			}
 		},
 		honorStats: {
 			received: 30 - idx,

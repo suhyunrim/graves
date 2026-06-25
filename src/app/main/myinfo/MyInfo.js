@@ -31,8 +31,24 @@ import Guestbook from './Guestbook';
 import StatusMessage from './StatusMessage';
 import TrophyCabinet from './TrophyCabinet';
 import MostChampions from './MostChampions';
+import PositionIcon from '../tournament/PositionIcon';
 import reducer from './store/reducers';
 import * as Actions from './store/actions';
+
+// Riot 표준 포지션 키 → 한글 라벨 + PositionIcon용 키(소문자).
+// 표시는 항상 탑 → 정글 → 미드 → 원딜 → 서폿 순서 고정.
+const POSITIONS = [
+	{ key: 'TOP', label: '탑', icon: 'top' },
+	{ key: 'JUNGLE', label: '정글', icon: 'jungle' },
+	{ key: 'MIDDLE', label: '미드', icon: 'mid' },
+	{ key: 'BOTTOM', label: '원딜', icon: 'adc' },
+	{ key: 'UTILITY', label: '서폿', icon: 'support' }
+];
+
+const POSITION_MAP = POSITIONS.reduce((acc, pos) => {
+	acc[pos.key] = pos;
+	return acc;
+}, {});
 
 const tierColors = {
 	IRON: { primary: '#5C5C5C', glow: 'rgba(92, 92, 92, 0.4)' },
@@ -183,6 +199,7 @@ const useStyles = makeStyles()((theme) => ({
 	cardsGrid: {
 		display: 'grid',
 		gridTemplateColumns: 'repeat(auto-fit, minmax(380px, 1fr))',
+		alignItems: 'start',
 		gap: 24,
 		marginBottom: 32,
 		[theme.breakpoints.down('sm')]: {
@@ -324,6 +341,110 @@ const useStyles = makeStyles()((theme) => ({
 			background: 'linear-gradient(180deg, #00d4ff, #0066ff)',
 			borderRadius: 2
 		}
+	},
+	// 솔로 랭크 카드 내 메인/서브 포지션
+	soloPositionRow: {
+		display: 'flex',
+		alignItems: 'center',
+		gap: 10,
+		marginTop: 14,
+		flexWrap: 'wrap'
+	},
+	soloPositionTag: {
+		display: 'flex',
+		alignItems: 'center',
+		gap: 7,
+		background: 'rgba(0, 0, 0, 0.25)',
+		borderRadius: 8,
+		padding: '5px 12px'
+	},
+	soloPositionIcon: {
+		width: 22,
+		height: 22
+	},
+	soloPositionKind: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.1rem',
+		color: 'rgba(255, 255, 255, 0.45)'
+	},
+	soloPositionName: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.3rem',
+		fontWeight: 600,
+		color: 'rgba(255, 255, 255, 0.9)'
+	},
+	soloPositionRate: {
+		fontFamily: '"Rajdhani", sans-serif',
+		fontSize: '1.3rem',
+		fontWeight: 700,
+		color: '#00d4ff'
+	},
+	// Custom Rating 카드 내 내전 포지션 승률
+	customPositionLabel: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.2rem',
+		fontWeight: 600,
+		color: 'rgba(255, 255, 255, 0.55)',
+		marginTop: 18,
+		marginBottom: 10
+	},
+	customPositionGrid: {
+		display: 'grid',
+		gridTemplateColumns: 'repeat(5, 1fr)',
+		gap: 8,
+		[theme.breakpoints.down('sm')]: {
+			gap: 6
+		}
+	},
+	customPositionCell: {
+		background: 'rgba(0, 0, 0, 0.22)',
+		borderRadius: 10,
+		padding: '10px 4px',
+		display: 'flex',
+		flexDirection: 'column',
+		alignItems: 'center',
+		gap: 5
+	},
+	customPositionCellEmpty: {
+		opacity: 0.4
+	},
+	customPositionIcon: {
+		width: 26,
+		height: 26
+	},
+	customPositionName: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.15rem',
+		fontWeight: 600,
+		color: 'rgba(255, 255, 255, 0.8)'
+	},
+	customPositionRate: {
+		fontFamily: '"Rajdhani", sans-serif',
+		fontSize: '1.7rem',
+		fontWeight: 700
+	},
+	customPositionRateHigh: {
+		color: '#00ff7f'
+	},
+	customPositionRateLow: {
+		color: 'rgba(255, 255, 255, 0.5)'
+	},
+	customPositionRecord: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1rem',
+		color: 'rgba(255, 255, 255, 0.5)'
+	},
+	customPositionDash: {
+		fontFamily: '"Rajdhani", sans-serif',
+		fontSize: '1.7rem',
+		fontWeight: 700,
+		color: 'rgba(255, 255, 255, 0.3)'
+	},
+	customPositionCaption: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1rem',
+		color: 'rgba(255, 255, 255, 0.4)',
+		marginTop: 10
 	},
 	// 새로운 통계 섹션 스타일
 	statsGrid: {
@@ -781,6 +902,7 @@ function MyInfoPage(props) {
 	const subAccount = useSelector(({ MyInfo }) => MyInfo.myInfo.subAccount);
 	const tournamentChampionships = useSelector(({ MyInfo }) => MyInfo.myInfo.tournamentChampionships);
 	const mostChampions = useSelector(({ MyInfo }) => MyInfo.myInfo.mostChampions);
+	const positionStats = useSelector(({ MyInfo }) => MyInfo.myInfo.positionStats);
 
 	const [activeTab, setActiveTab] = useState(0);
 	const [subAccountInput, setSubAccountInput] = useState('');
@@ -1041,6 +1163,36 @@ function MyInfoPage(props) {
 											<span className={`${classes.winRate} ${getWinRateClass(soloWinRate)}`}>{soloWinRate}%</span>
 										)}
 									</div>
+									{summonerInfo.mainPosition && (
+										<div className={classes.soloPositionRow}>
+											<div className={classes.soloPositionTag}>
+												<PositionIcon
+													position={(POSITION_MAP[summonerInfo.mainPosition] || {}).icon}
+													className={classes.soloPositionIcon}
+													fallbackClassName={classes.soloPositionName}
+												/>
+												<span className={classes.soloPositionKind}>메인</span>
+												<span className={classes.soloPositionName}>
+													{(POSITION_MAP[summonerInfo.mainPosition] || {}).label || summonerInfo.mainPosition}
+												</span>
+												<span className={classes.soloPositionRate}>{Math.round(summonerInfo.mainPositionRate)}%</span>
+											</div>
+											{summonerInfo.subPosition && (
+												<div className={classes.soloPositionTag}>
+													<PositionIcon
+														position={(POSITION_MAP[summonerInfo.subPosition] || {}).icon}
+														className={classes.soloPositionIcon}
+														fallbackClassName={classes.soloPositionName}
+													/>
+													<span className={classes.soloPositionKind}>서브</span>
+													<span className={classes.soloPositionName}>
+														{(POSITION_MAP[summonerInfo.subPosition] || {}).label || summonerInfo.subPosition}
+													</span>
+													<span className={classes.soloPositionRate}>{Math.round(summonerInfo.subPositionRate)}%</span>
+												</div>
+											)}
+										</div>
+									)}
 									<div className={classes.decorLine} style={{ color: soloTierColor.primary }} />
 								</div>
 
@@ -1070,6 +1222,48 @@ function MyInfoPage(props) {
 											<span className={`${classes.winRate} ${getWinRateClass(customWinRate)}`}>{customWinRate}%</span>
 										)}
 									</div>
+									{/* 내전 포지션 승률 — positionStats 없으면(완료 내전 없음/10인 포지션 매치 없음) 표 자체를 렌더하지 않음 */}
+									{positionStats && (
+										<>
+											<div className={classes.customPositionLabel}>포지션별 승률</div>
+											<div className={classes.customPositionGrid}>
+												{POSITIONS.map(pos => {
+													const stat = positionStats[pos.key] || { games: 0, wins: 0, losses: 0, winRate: 0 };
+													const hasGames = stat.games > 0;
+													return (
+														<div
+															key={pos.key}
+															className={`${classes.customPositionCell} ${hasGames ? '' : classes.customPositionCellEmpty}`}
+														>
+															<PositionIcon
+																position={pos.icon}
+																className={classes.customPositionIcon}
+																fallbackClassName={classes.customPositionName}
+															/>
+															<div className={classes.customPositionName}>{pos.label}</div>
+															{hasGames ? (
+																<>
+																	<div
+																		className={`${classes.customPositionRate} ${
+																			stat.winRate >= 50 ? classes.customPositionRateHigh : classes.customPositionRateLow
+																		}`}
+																	>
+																		{stat.winRate}%
+																	</div>
+																	<div className={classes.customPositionRecord}>
+																		{stat.wins}승 {stat.losses}패
+																	</div>
+																</>
+															) : (
+																<div className={classes.customPositionDash}>-</div>
+															)}
+														</div>
+													);
+												})}
+											</div>
+											<div className={classes.customPositionCaption}>※ 10인 전원 포지션 지정 내전만 집계</div>
+										</>
+									)}
 									<div className={classes.decorLine} style={{ color: '#00d4ff' }} />
 								</div>
 							</div>
