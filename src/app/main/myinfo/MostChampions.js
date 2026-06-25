@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { makeStyles } from 'tss-react/mui';
 import { getChampionIcon, loadChampionNames } from 'app/main/challenge/ddragonUtils';
+import PositionIcon from '../tournament/PositionIcon';
 
 const useStyles = makeStyles()((theme) => ({
 	root: {
@@ -55,6 +56,14 @@ const useStyles = makeStyles()((theme) => ({
 		fontSize: '1.2rem',
 		[theme.breakpoints.down('sm')]: {
 			fontSize: '1.05rem'
+		}
+	},
+	positionIcon: {
+		width: 16,
+		height: 16,
+		[theme.breakpoints.down('sm')]: {
+			width: 14,
+			height: 14
 		}
 	},
 	positionKind: {
@@ -129,7 +138,7 @@ const useStyles = makeStyles()((theme) => ({
 	}
 }));
 
-function MostChampions({ champions, mainPosition, mainPositionRate, subPosition, subPositionRate }) {
+function MostChampions({ champions, mainPosition, mainPositionIcon, mainPositionRate, subPosition, subPositionIcon, subPositionRate }) {
 	const { classes } = useStyles();
 	const [names, setNames] = useState({});
 
@@ -155,12 +164,22 @@ function MostChampions({ champions, mainPosition, mainPositionRate, subPosition,
 				솔랭 모스트 챔피언
 				{mainPosition ? (
 					<span className={classes.positionInfo}>
+						<PositionIcon
+							position={mainPositionIcon}
+							className={classes.positionIcon}
+							fallbackClassName={classes.positionKind}
+						/>
 						<span className={classes.positionKind}>메인</span>
 						<span className={classes.positionName}>{mainPosition}</span>
 						<span className={classes.positionRate}>{mainPositionRate}%</span>
 						{subPosition && (
 							<>
 								<span className={classes.positionDivider}>·</span>
+								<PositionIcon
+									position={subPositionIcon}
+									className={classes.positionIcon}
+									fallbackClassName={classes.positionKind}
+								/>
 								<span className={classes.positionKind}>서브</span>
 								<span className={classes.positionName}>{subPosition}</span>
 								<span className={classes.positionRate}>{subPositionRate}%</span>

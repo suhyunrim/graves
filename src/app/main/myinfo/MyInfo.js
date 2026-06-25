@@ -1198,8 +1198,10 @@ function MyInfoPage(props) {
 									<MostChampions
 										champions={mostChampions}
 										mainPosition={mainPositionLabel}
+										mainPositionIcon={(POSITION_MAP[summonerInfo.mainPosition] || {}).icon}
 										mainPositionRate={summonerInfo.mainPosition ? Math.round(summonerInfo.mainPositionRate) : null}
 										subPosition={subPositionLabel}
+										subPositionIcon={(POSITION_MAP[summonerInfo.subPosition] || {}).icon}
 										subPositionRate={summonerInfo.subPosition ? Math.round(summonerInfo.subPositionRate) : null}
 									/>
 								</div>
