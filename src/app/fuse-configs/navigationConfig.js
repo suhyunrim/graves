@@ -20,6 +20,13 @@ const navigationConfig = [
 				url: '/myinfo'
 			},
 			{
+				id: 'ai-assistant-component',
+				title: 'AI 도우미',
+				type: 'item',
+				icon: 'smart_toy',
+				url: '/ai'
+			},
+			{
 				id: 'ranking-component',
 				title: '랭킹',
 				type: 'item',
