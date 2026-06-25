@@ -199,6 +199,7 @@ const useStyles = makeStyles()((theme) => ({
 	cardsGrid: {
 		display: 'grid',
 		gridTemplateColumns: 'repeat(auto-fit, minmax(380px, 1fr))',
+		alignItems: 'start',
 		gap: 24,
 		marginBottom: 32,
 		[theme.breakpoints.down('sm')]: {
@@ -214,8 +215,6 @@ const useStyles = makeStyles()((theme) => ({
 	},
 	rankCard: {
 		position: 'relative',
-		display: 'flex',
-		flexDirection: 'column',
 		borderRadius: 20,
 		padding: 28,
 		overflow: 'hidden',
@@ -348,10 +347,7 @@ const useStyles = makeStyles()((theme) => ({
 		display: 'flex',
 		alignItems: 'center',
 		gap: 10,
-		// 두 카드 높이를 맞추면(stretch) 솔로 카드가 내전 카드만큼 늘어남.
-		// 포지션 칩을 하단으로 밀어 빈 공간이 위쪽 여백으로 분산되게 한다.
-		marginTop: 'auto',
-		paddingTop: 14,
+		marginTop: 14,
 		flexWrap: 'wrap'
 	},
 	soloPositionTag: {
@@ -383,14 +379,14 @@ const useStyles = makeStyles()((theme) => ({
 		fontWeight: 700,
 		color: '#00d4ff'
 	},
-	// Custom Rating 카드 내 내전 포지션 승률
+	// Custom Rating 카드 내 내전 포지션 승률 (컴팩트: 아이콘+라벨 한 줄 / 승률 한 줄)
 	customPositionLabel: {
 		fontFamily: '"Noto Sans KR", sans-serif',
 		fontSize: '1.2rem',
 		fontWeight: 600,
 		color: 'rgba(255, 255, 255, 0.55)',
-		marginTop: 18,
-		marginBottom: 10
+		marginTop: 16,
+		marginBottom: 8
 	},
 	customPositionGrid: {
 		display: 'grid',
@@ -403,28 +399,33 @@ const useStyles = makeStyles()((theme) => ({
 	customPositionCell: {
 		background: 'rgba(0, 0, 0, 0.22)',
 		borderRadius: 10,
-		padding: '10px 4px',
+		padding: '8px 4px',
 		display: 'flex',
 		flexDirection: 'column',
 		alignItems: 'center',
-		gap: 5
+		gap: 3
 	},
 	customPositionCellEmpty: {
 		opacity: 0.4
 	},
+	customPositionHead: {
+		display: 'flex',
+		alignItems: 'center',
+		gap: 4
+	},
 	customPositionIcon: {
-		width: 26,
-		height: 26
+		width: 18,
+		height: 18
 	},
 	customPositionName: {
 		fontFamily: '"Noto Sans KR", sans-serif',
-		fontSize: '1.15rem',
+		fontSize: '1.1rem',
 		fontWeight: 600,
-		color: 'rgba(255, 255, 255, 0.8)'
+		color: 'rgba(255, 255, 255, 0.75)'
 	},
 	customPositionRate: {
 		fontFamily: '"Rajdhani", sans-serif',
-		fontSize: '1.7rem',
+		fontSize: '1.5rem',
 		fontWeight: 700
 	},
 	customPositionRateHigh: {
@@ -433,14 +434,9 @@ const useStyles = makeStyles()((theme) => ({
 	customPositionRateLow: {
 		color: 'rgba(255, 255, 255, 0.5)'
 	},
-	customPositionRecord: {
-		fontFamily: '"Noto Sans KR", sans-serif',
-		fontSize: '1rem',
-		color: 'rgba(255, 255, 255, 0.5)'
-	},
 	customPositionDash: {
 		fontFamily: '"Rajdhani", sans-serif',
-		fontSize: '1.7rem',
+		fontSize: '1.5rem',
 		fontWeight: 700,
 		color: 'rgba(255, 255, 255, 0.3)'
 	},
@@ -448,7 +444,7 @@ const useStyles = makeStyles()((theme) => ({
 		fontFamily: '"Noto Sans KR", sans-serif',
 		fontSize: '1rem',
 		color: 'rgba(255, 255, 255, 0.4)',
-		marginTop: 10
+		marginTop: 8
 	},
 	// 새로운 통계 섹션 스타일
 	statsGrid: {
@@ -1238,26 +1234,24 @@ function MyInfoPage(props) {
 														<div
 															key={pos.key}
 															className={`${classes.customPositionCell} ${hasGames ? '' : classes.customPositionCellEmpty}`}
+															title={hasGames ? `${stat.wins}승 ${stat.losses}패` : '경기 없음'}
 														>
-															<PositionIcon
-																position={pos.icon}
-																className={classes.customPositionIcon}
-																fallbackClassName={classes.customPositionName}
-															/>
-															<div className={classes.customPositionName}>{pos.label}</div>
+															<div className={classes.customPositionHead}>
+																<PositionIcon
+																	position={pos.icon}
+																	className={classes.customPositionIcon}
+																	fallbackClassName={classes.customPositionName}
+																/>
+																<span className={classes.customPositionName}>{pos.label}</span>
+															</div>
 															{hasGames ? (
-																<>
-																	<div
-																		className={`${classes.customPositionRate} ${
-																			stat.winRate >= 50 ? classes.customPositionRateHigh : classes.customPositionRateLow
-																		}`}
-																	>
-																		{stat.winRate}%
-																	</div>
-																	<div className={classes.customPositionRecord}>
-																		{stat.wins}승 {stat.losses}패
-																	</div>
-																</>
+																<div
+																	className={`${classes.customPositionRate} ${
+																		stat.winRate >= 50 ? classes.customPositionRateHigh : classes.customPositionRateLow
+																	}`}
+																>
+																	{stat.winRate}%
+																</div>
 															) : (
 																<div className={classes.customPositionDash}>-</div>
 															)}
