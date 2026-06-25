@@ -319,7 +319,14 @@ function getDefaultMyInfoData(puuid) {
 			received: 30 - idx,
 			title: idx < 5 ? { emoji: ['👑', '⚔️', '🎯', '🛡️', '🔥'][idx], title: ['내전의 신', '킬각장인', '정확한 샷', '든든한 방패', '불꽃캐리'][idx] } : null
 		},
-		subAccount: null
+		subAccount: null,
+		mostChampions: [
+			{ championName: 'Thresh', games: 42, winRate: 57 },
+			{ championName: 'Leona', games: 31, winRate: 52 },
+			{ championName: 'Lux', games: 25, winRate: 48 },
+			{ championName: 'Graves', games: 18, winRate: 61 },
+			{ championName: 'Jhin', games: 12, winRate: 50 }
+		]
 	};
 }
 

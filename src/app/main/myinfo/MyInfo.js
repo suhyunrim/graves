@@ -199,7 +199,6 @@ const useStyles = makeStyles()((theme) => ({
 	cardsGrid: {
 		display: 'grid',
 		gridTemplateColumns: 'repeat(auto-fit, minmax(380px, 1fr))',
-		alignItems: 'start',
 		gap: 24,
 		marginBottom: 32,
 		[theme.breakpoints.down('sm')]: {
@@ -342,109 +341,96 @@ const useStyles = makeStyles()((theme) => ({
 			borderRadius: 2
 		}
 	},
-	// 솔로 랭크 카드 내 메인/서브 포지션
-	soloPositionRow: {
-		display: 'flex',
-		alignItems: 'center',
-		gap: 10,
-		marginTop: 14,
-		flexWrap: 'wrap'
-	},
-	soloPositionTag: {
-		display: 'flex',
-		alignItems: 'center',
-		gap: 7,
-		background: 'rgba(0, 0, 0, 0.25)',
-		borderRadius: 8,
-		padding: '5px 12px'
-	},
-	soloPositionIcon: {
-		width: 22,
-		height: 22
-	},
-	soloPositionKind: {
+	// 내전 포지션 승률 별도 섹션 (5칸 표)
+	sectionCaption: {
 		fontFamily: '"Noto Sans KR", sans-serif',
-		fontSize: '1.1rem',
-		color: 'rgba(255, 255, 255, 0.45)'
+		fontSize: '1.15rem',
+		color: 'rgba(255, 255, 255, 0.4)',
+		marginTop: -12,
+		marginBottom: 18
 	},
-	soloPositionName: {
-		fontFamily: '"Noto Sans KR", sans-serif',
-		fontSize: '1.3rem',
-		fontWeight: 600,
-		color: 'rgba(255, 255, 255, 0.9)'
+	positionStatsSection: {
+		marginBottom: 32
 	},
-	soloPositionRate: {
-		fontFamily: '"Rajdhani", sans-serif',
-		fontSize: '1.3rem',
-		fontWeight: 700,
-		color: '#00d4ff'
-	},
-	// Custom Rating 카드 내 내전 포지션 승률 (컴팩트: 아이콘+라벨 한 줄 / 승률 한 줄)
-	customPositionLabel: {
-		fontFamily: '"Noto Sans KR", sans-serif',
-		fontSize: '1.2rem',
-		fontWeight: 600,
-		color: 'rgba(255, 255, 255, 0.55)',
-		marginTop: 16,
-		marginBottom: 8
-	},
-	customPositionGrid: {
+	positionStatsGrid: {
 		display: 'grid',
 		gridTemplateColumns: 'repeat(5, 1fr)',
-		gap: 8,
+		gap: 12,
 		[theme.breakpoints.down('sm')]: {
 			gap: 6
 		}
 	},
-	customPositionCell: {
-		background: 'rgba(0, 0, 0, 0.22)',
-		borderRadius: 10,
-		padding: '8px 4px',
+	positionStatCard: {
+		background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
+		borderRadius: 14,
+		border: '1px solid rgba(0, 212, 255, 0.15)',
+		padding: '18px 8px 16px',
 		display: 'flex',
 		flexDirection: 'column',
 		alignItems: 'center',
-		gap: 3
+		gap: 8,
+		animation: `${fadeInUp} 0.5s ease forwards`,
+		opacity: 0,
+		'&:nth-child(1)': { animationDelay: '0.1s' },
+		'&:nth-child(2)': { animationDelay: '0.15s' },
+		'&:nth-child(3)': { animationDelay: '0.2s' },
+		'&:nth-child(4)': { animationDelay: '0.25s' },
+		'&:nth-child(5)': { animationDelay: '0.3s' },
+		[theme.breakpoints.down('sm')]: {
+			borderRadius: 12,
+			padding: '12px 4px'
+		}
 	},
-	customPositionCellEmpty: {
-		opacity: 0.4
+	positionStatEmpty: {
+		opacity: 0.45
 	},
-	customPositionHead: {
-		display: 'flex',
-		alignItems: 'center',
-		gap: 4
+	positionStatIcon: {
+		width: 32,
+		height: 32,
+		[theme.breakpoints.down('sm')]: {
+			width: 26,
+			height: 26
+		}
 	},
-	customPositionIcon: {
-		width: 18,
-		height: 18
-	},
-	customPositionName: {
+	positionStatLabel: {
 		fontFamily: '"Noto Sans KR", sans-serif',
-		fontSize: '1.1rem',
+		fontSize: '1.25rem',
 		fontWeight: 600,
-		color: 'rgba(255, 255, 255, 0.75)'
+		color: 'rgba(255, 255, 255, 0.85)',
+		[theme.breakpoints.down('sm')]: {
+			fontSize: '1.1rem'
+		}
 	},
-	customPositionRate: {
+	positionStatRate: {
 		fontFamily: '"Rajdhani", sans-serif',
-		fontSize: '1.5rem',
-		fontWeight: 700
+		fontSize: '1.9rem',
+		fontWeight: 700,
+		[theme.breakpoints.down('sm')]: {
+			fontSize: '1.5rem'
+		}
 	},
-	customPositionRateHigh: {
+	positionStatRateHigh: {
 		color: '#00ff7f'
 	},
-	customPositionRateLow: {
+	positionStatRateLow: {
 		color: 'rgba(255, 255, 255, 0.5)'
 	},
-	customPositionDash: {
-		fontFamily: '"Rajdhani", sans-serif',
-		fontSize: '1.5rem',
-		fontWeight: 700,
-		color: 'rgba(255, 255, 255, 0.3)'
-	},
-	customPositionCaption: {
+	positionStatRecord: {
 		fontFamily: '"Noto Sans KR", sans-serif',
-		fontSize: '1rem',
-		color: 'rgba(255, 255, 255, 0.4)',
-		marginTop: 8
+		fontSize: '1.1rem',
+		color: 'rgba(255, 255, 255, 0.55)',
+		[theme.breakpoints.down('sm')]: {
+			fontSize: '0.95rem'
+		}
+	},
+	positionStatDash: {
+		fontFamily: '"Rajdhani", sans-serif',
+		fontSize: '1.9rem',
+		fontWeight: 700,
+		color: 'rgba(255, 255, 255, 0.3)',
+		[theme.breakpoints.down('sm')]: {
+			fontSize: '1.5rem'
+		}
 	},
 	// 새로운 통계 섹션 스타일
 	statsGrid: {
@@ -1059,6 +1045,14 @@ function MyInfoPage(props) {
 	const soloWinRate = calculateWinRate(summonerInfo.rankWin, summonerInfo.rankLose);
 	const customWinRate = calculateWinRate(scoreInfo.win, scoreInfo.lose);
 
+	// 솔랭 메인/서브 포지션 — 솔랭 모스트 챔피언 헤더에 표시
+	const mainPositionLabel = summonerInfo.mainPosition
+		? (POSITION_MAP[summonerInfo.mainPosition] || {}).label || summonerInfo.mainPosition
+		: null;
+	const subPositionLabel = summonerInfo.subPosition
+		? (POSITION_MAP[summonerInfo.subPosition] || {}).label || summonerInfo.subPosition
+		: null;
+
 	return (
 		<FusePageSimple
 			classes={{
@@ -1163,36 +1157,6 @@ function MyInfoPage(props) {
 											<span className={`${classes.winRate} ${getWinRateClass(soloWinRate)}`}>{soloWinRate}%</span>
 										)}
 									</div>
-									{summonerInfo.mainPosition && (
-										<div className={classes.soloPositionRow}>
-											<div className={classes.soloPositionTag}>
-												<PositionIcon
-													position={(POSITION_MAP[summonerInfo.mainPosition] || {}).icon}
-													className={classes.soloPositionIcon}
-													fallbackClassName={classes.soloPositionName}
-												/>
-												<span className={classes.soloPositionKind}>메인</span>
-												<span className={classes.soloPositionName}>
-													{(POSITION_MAP[summonerInfo.mainPosition] || {}).label || summonerInfo.mainPosition}
-												</span>
-												<span className={classes.soloPositionRate}>{Math.round(summonerInfo.mainPositionRate)}%</span>
-											</div>
-											{summonerInfo.subPosition && (
-												<div className={classes.soloPositionTag}>
-													<PositionIcon
-														position={(POSITION_MAP[summonerInfo.subPosition] || {}).icon}
-														className={classes.soloPositionIcon}
-														fallbackClassName={classes.soloPositionName}
-													/>
-													<span className={classes.soloPositionKind}>서브</span>
-													<span className={classes.soloPositionName}>
-														{(POSITION_MAP[summonerInfo.subPosition] || {}).label || summonerInfo.subPosition}
-													</span>
-													<span className={classes.soloPositionRate}>{Math.round(summonerInfo.subPositionRate)}%</span>
-												</div>
-											)}
-										</div>
-									)}
 									<div className={classes.decorLine} style={{ color: soloTierColor.primary }} />
 								</div>
 
@@ -1222,52 +1186,18 @@ function MyInfoPage(props) {
 											<span className={`${classes.winRate} ${getWinRateClass(customWinRate)}`}>{customWinRate}%</span>
 										)}
 									</div>
-									{/* 내전 포지션 승률 — positionStats 없으면(완료 내전 없음/10인 포지션 매치 없음) 표 자체를 렌더하지 않음 */}
-									{positionStats && (
-										<>
-											<div className={classes.customPositionLabel}>포지션별 승률</div>
-											<div className={classes.customPositionGrid}>
-												{POSITIONS.map(pos => {
-													const stat = positionStats[pos.key] || { games: 0, wins: 0, losses: 0, winRate: 0 };
-													const hasGames = stat.games > 0;
-													return (
-														<div
-															key={pos.key}
-															className={`${classes.customPositionCell} ${hasGames ? '' : classes.customPositionCellEmpty}`}
-															title={hasGames ? `${stat.wins}승 ${stat.losses}패` : '경기 없음'}
-														>
-															<div className={classes.customPositionHead}>
-																<PositionIcon
-																	position={pos.icon}
-																	className={classes.customPositionIcon}
-																	fallbackClassName={classes.customPositionName}
-																/>
-																<span className={classes.customPositionName}>{pos.label}</span>
-															</div>
-															{hasGames ? (
-																<div
-																	className={`${classes.customPositionRate} ${
-																		stat.winRate >= 50 ? classes.customPositionRateHigh : classes.customPositionRateLow
-																	}`}
-																>
-																	{stat.winRate}%
-																</div>
-															) : (
-																<div className={classes.customPositionDash}>-</div>
-															)}
-														</div>
-													);
-												})}
-											</div>
-											<div className={classes.customPositionCaption}>※ 10인 전원 포지션 지정 내전만 집계</div>
-										</>
-									)}
 									<div className={classes.decorLine} style={{ color: '#00d4ff' }} />
 								</div>
 							</div>
 							{mostChampions && mostChampions.length > 0 && (
 								<div className={classes.trophyCabinetWrap}>
-									<MostChampions champions={mostChampions} />
+									<MostChampions
+										champions={mostChampions}
+										mainPosition={mainPositionLabel}
+										mainPositionRate={summonerInfo.mainPosition ? Math.round(summonerInfo.mainPositionRate) : null}
+										subPosition={subPositionLabel}
+										subPositionRate={summonerInfo.subPosition ? Math.round(summonerInfo.subPositionRate) : null}
+									/>
 								</div>
 							)}
 
@@ -1293,6 +1223,49 @@ function MyInfoPage(props) {
 									</div>
 								</div>
 							</div>
+
+							{/* 내전 포지션 승률 — positionStats 없으면(완료 내전 없음/10인 포지션 매치 없음) 섹션 자체를 렌더하지 않음 */}
+							{positionStats && (
+								<div className={classes.positionStatsSection}>
+									<div className={classes.sectionTitle}>내전 포지션 승률</div>
+									<div className={classes.sectionCaption}>※ 10명 전원이 포지션을 정하고 진행한 내전만 집계됩니다.</div>
+									<div className={classes.positionStatsGrid}>
+										{POSITIONS.map(pos => {
+											const stat = positionStats[pos.key] || { games: 0, wins: 0, losses: 0, winRate: 0 };
+											const hasGames = stat.games > 0;
+											return (
+												<div
+													key={pos.key}
+													className={`${classes.positionStatCard} ${hasGames ? '' : classes.positionStatEmpty}`}
+												>
+													<PositionIcon
+														position={pos.icon}
+														className={classes.positionStatIcon}
+														fallbackClassName={classes.positionStatLabel}
+													/>
+													<div className={classes.positionStatLabel}>{pos.label}</div>
+													{hasGames ? (
+														<>
+															<div
+																className={`${classes.positionStatRate} ${
+																	stat.winRate >= 50 ? classes.positionStatRateHigh : classes.positionStatRateLow
+																}`}
+															>
+																{stat.winRate}%
+															</div>
+															<div className={classes.positionStatRecord}>
+																{stat.wins}승 {stat.losses}패
+															</div>
+														</>
+													) : (
+														<div className={classes.positionStatDash}>-</div>
+													)}
+												</div>
+											);
+										})}
+									</div>
+								</div>
+							)}
 
 							{/* 베스트/워스트 하이라이트 */}
 							<div className={classes.highlightSection}>
