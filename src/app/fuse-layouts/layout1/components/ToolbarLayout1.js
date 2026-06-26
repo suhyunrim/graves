@@ -31,14 +31,16 @@ const useStyles = makeStyles()((theme) => ({
 			background: 'rgba(0, 212, 255, 0.1)'
 		}
 	},
-	// 모바일 햄버거 토글: iOS 인앱 웹뷰(디스코드/카톡)에서 탭이 간헐적으로 안 먹는 문제 대응.
-	// touch-action: manipulation → 더블탭 줌/300ms 지연/오버스크롤로 인한 click 취소를 방지.
-	// 최상단-좌측 코너의 제스처/오버스크롤 영역에서 살짝 안쪽으로 인셋 + 탭 하이라이트로 피드백.
+	// 모바일 햄버거 토글: iOS 인앱 웹뷰(디스코드/카톡)에서 좌상단 버튼이 안 눌리는 문제 대응.
+	// 근본 원인 = iOS가 화면 왼쪽 가장자리 ~20pt를 '엣지 스와이프(뒤로가기)' 제스처용으로 선점 →
+	//   그 띠에 걸친 햄버거 아이콘 탭이 제스처 인식기로 먹힌다(살짝 오른쪽을 누르면 정상).
+	// 해법: 버튼을 그 엣지 띠 밖으로 충분히(24px) 밀어넣어 아이콘 전체가 제스처 영역을 벗어나게 한다.
+	// touch-action/탭 하이라이트는 더블탭 지연·오버스크롤 케이스 보강용으로 함께 유지.
 	mobileToggle: {
 		touchAction: 'manipulation',
 		WebkitTapHighlightColor: 'rgba(0, 212, 255, 0.3)',
 		marginTop: 6,
-		marginLeft: 6
+		marginLeft: 24
 	}
 }));
 
