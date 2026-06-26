@@ -30,6 +30,15 @@ const useStyles = makeStyles()((theme) => ({
 			color: '#00d4ff',
 			background: 'rgba(0, 212, 255, 0.1)'
 		}
+	},
+	// 모바일 햄버거 토글: iOS 인앱 웹뷰(디스코드/카톡)에서 탭이 간헐적으로 안 먹는 문제 대응.
+	// touch-action: manipulation → 더블탭 줌/300ms 지연/오버스크롤로 인한 click 취소를 방지.
+	// 최상단-좌측 코너의 제스처/오버스크롤 영역에서 살짝 안쪽으로 인셋 + 탭 하이라이트로 피드백.
+	mobileToggle: {
+		touchAction: 'manipulation',
+		WebkitTapHighlightColor: 'rgba(0, 212, 255, 0.3)',
+		marginTop: 6,
+		marginLeft: 6
 	}
 }));
 
@@ -37,7 +46,7 @@ function ToolbarLayout1(props) {
 	const config = useSelector(({ fuse }) => fuse.settings.current.layout.config);
 	const toolbarTheme = useSelector(({ fuse }) => fuse.settings.toolbarTheme);
 
-	const { classes } = useStyles(props);
+	const { classes, cx } = useStyles(props);
 
 	return (
         <StyledEngineProvider injectFirst>
@@ -51,7 +60,7 @@ function ToolbarLayout1(props) {
                     <Toolbar className="p-0">
                         {config.navbar.display && config.navbar.position === 'left' && (
                             <Box sx={{ display: { lg: 'none' } }}>
-                                <NavbarMobileToggleButton className="w-64 h-64 p-0" />
+                                <NavbarMobileToggleButton className={cx('w-64 h-64 p-0', classes.mobileToggle)} />
                                 <div className={classes.separator} />
                             </Box>
                         )}
