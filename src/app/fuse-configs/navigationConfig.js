@@ -49,7 +49,7 @@ const navigationConfig = [
 			},
 			{
 				id: 'ai-assistant-component',
-				title: 'AI 도우미',
+				title: 'AI 도우미 (BETA)',
 				type: 'item',
 				icon: 'assistant',
 				url: '/ai'

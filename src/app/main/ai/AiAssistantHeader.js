@@ -35,6 +35,21 @@ const useStyles = makeStyles()((theme) => ({
 			fontSize: '2.2rem'
 		}
 	},
+	beta: {
+		fontFamily: '"Rajdhani", "Noto Sans KR", sans-serif',
+		fontSize: '1.1rem',
+		fontWeight: 700,
+		letterSpacing: '0.08em',
+		color: '#00d4ff',
+		background: 'rgba(0, 212, 255, 0.1)',
+		border: '1px solid rgba(0, 212, 255, 0.5)',
+		borderRadius: 6,
+		padding: '2px 8px',
+		alignSelf: 'center',
+		[theme.breakpoints.down('md')]: {
+			fontSize: '1rem'
+		}
+	},
 	subtitle: {
 		fontFamily: '"Noto Sans KR", sans-serif',
 		fontSize: '1.4rem',
@@ -60,6 +75,7 @@ function AiAssistantHeader() {
 				<Typography className={classes.title} variant="h4">
 					AI 도우미
 				</Typography>
+				<span className={classes.beta}>BETA</span>
 			</div>
 			<Typography className={classes.subtitle}>{groupName}에 대해 자유롭게 물어보세요!</Typography>
 		</div>
