@@ -25,6 +25,20 @@ const EXAMPLE_QUESTIONS = [
 // 탭 세션 동안 대화 유지(페이지 이동/새로고침엔 보존, 탭 닫으면 정리).
 const CHAT_STORAGE_KEY = 'graves_ai_chat';
 
+// 한도는 매일 KST(UTC+9) 자정에 리셋된다. 백엔드가 리셋 시각을 주지 않으므로
+// 클라이언트에서 다음 KST 자정까지 남은 시간을 계산해 표시한다(브라우저 타임존 무관).
+const KST_OFFSET_MS = 9 * 60 * 60 * 1000;
+function resetCountdownText(now) {
+	const kstNow = new Date(now.getTime() + KST_OFFSET_MS);
+	// KST 기준 '내일 0시'를 UTC ms로 만든 뒤 KST 오프셋을 빼 실제 리셋 시각(UTC instant)을 구한다.
+	const nextKstMidnightAsUtc = Date.UTC(kstNow.getUTCFullYear(), kstNow.getUTCMonth(), kstNow.getUTCDate() + 1);
+	const totalMin = Math.ceil((nextKstMidnightAsUtc - KST_OFFSET_MS - now.getTime()) / 60000);
+	if (totalMin <= 0) return '곧 리셋';
+	const h = Math.floor(totalMin / 60);
+	const m = totalMin % 60;
+	return h > 0 ? `리셋까지 ${h}시간 ${m}분` : `리셋까지 ${m}분`;
+}
+
 // remarkGfm: 표/취소선/자동링크, remarkBreaks: 단일 줄바꿈(\n)을 <br>로 유지(채팅 느낌).
 const MARKDOWN_PLUGINS = [remarkGfm, remarkBreaks];
 // 링크는 새 탭으로(SPA 이탈 방지). node prop은 DOM에 안 넘기게 제거.
@@ -341,6 +355,7 @@ function AiChat() {
 	const [input, setInput] = useState('');
 	const [loading, setLoading] = useState(false);
 	const [quota, setQuota] = useState(null);
+	const [now, setNow] = useState(() => new Date());
 	const endRef = useRef(null);
 
 	useEffect(() => {
@@ -354,6 +369,12 @@ function AiChat() {
 			.then(setQuota)
 			.catch(() => {});
 	}, [isLoggedIn]);
+
+	// 리셋 카운트다운 표시용: 1분마다 현재 시각 갱신
+	useEffect(() => {
+		const id = setInterval(() => setNow(new Date()), 60000);
+		return () => clearInterval(id);
+	}, []);
 
 	useEffect(() => {
 		try {
@@ -426,8 +447,7 @@ function AiChat() {
 
 			{isLoggedIn && quota?.limit > 0 && (
 				<div className={cx(classes.quotaLine, quota.remaining === 0 && classes.quotaLineEmpty)}>
-					오늘 남은 질문 {quota.remaining}/{quota.limit}
-					{quota.remaining === 0 && ' · 내일 다시 가능해요'}
+					오늘 남은 질문 {quota.remaining}/{quota.limit} · {resetCountdownText(now)}
 				</div>
 			)}
 
