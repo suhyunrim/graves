@@ -33,11 +33,14 @@ const useStyles = makeStyles()((theme) => ({
 			paddingLeft: 8,
 			paddingRight: 8
 		},
+		// iOS 왼쪽 엣지 스와이프(뒤로가기) 영역(~20pt)에 버튼(left:0, 24px)이 통째로 들어가
+		// 아이폰 인앱 웹뷰에서 탭이 OS 제스처로 먹히던 문제 수정:
+		//   가장자리에서 안쪽으로 빼고(left:16) 터치 영역을 키운다(width 24→40).
+		//   더 이상 엣지 부착이 아니므로 좌측 모서리도 둥글게(기존 사각 모서리 제거).
 		'&.left': {
-			borderBottomLeftRadius: 0,
-			borderTopLeftRadius: 0,
-			paddingLeft: 4,
-			left: 0
+			left: 16,
+			width: 40,
+			paddingLeft: 8
 		},
 
 		'&.right': {

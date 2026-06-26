@@ -40,7 +40,16 @@ const useStyles = makeStyles()((theme) => ({
 		background: 'transparent',
 		color: theme.palette.primary.contrastText,
 		backgroundSize: 'cover',
-		backgroundColor: 'transparent'
+		backgroundColor: 'transparent',
+		// 모바일(<lg)에선 좌상단 햄버거 Fab(NavbarMobileToggleFab)가 헤더 위에 떠 있다.
+		// 헤더 '배경(프레임)은 전폭 그대로' 두고, 안쪽 콘텐츠(헤더 컴포넌트 루트)의 좌측 패딩만
+		// 햄버거 폭(left16+width40=56)+여백만큼 키워 타이틀이 햄버거와 안 겹치게 한다.
+		// lg 이상은 Fab가 없으니(상단 네비 상시 노출) 그대로.
+		[theme.breakpoints.down('lg')]: {
+			'& > *': {
+				paddingLeft: '64px !important'
+			}
+		}
 	},
 	topBg: {
 		display: 'none'
