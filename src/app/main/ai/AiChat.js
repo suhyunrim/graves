@@ -8,11 +8,19 @@ import { useSelector } from 'react-redux';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import remarkBreaks from 'remark-breaks';
-import { askAI, getQuota, AI_QUESTION_MAX } from './aiApi';
+import { getQuota, AI_QUESTION_MAX } from './aiApi';
+import { useAiChat } from './AiChatContext';
 
 const blink = keyframes`
 	0%, 80%, 100% { opacity: 0.2; transform: translateY(0); }
 	40% { opacity: 1; transform: translateY(-3px); }
+`;
+
+// 알림 토스트로 진입했을 때 마지막 답변을 잠깐 강조하는 글로우
+const flash = keyframes`
+	0% { box-shadow: 0 0 0 0 rgba(0, 212, 255, 0); }
+	25% { box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.55), 0 0 22px rgba(0, 212, 255, 0.4); }
+	100% { box-shadow: 0 0 0 0 rgba(0, 212, 255, 0); }
 `;
 
 const EXAMPLE_QUESTIONS = [
@@ -21,9 +29,6 @@ const EXAMPLE_QUESTIONS = [
 	'승률 1위는?',
 	'최근 가장 폼 좋은 사람은?'
 ];
-
-// 탭 세션 동안 대화 유지(페이지 이동/새로고침엔 보존, 탭 닫으면 정리).
-const CHAT_STORAGE_KEY = 'graves_ai_chat';
 
 // 한도는 매일 KST(UTC+9) 자정에 리셋된다. 백엔드가 리셋 시각을 주지 않으므로
 // 클라이언트에서 다음 KST 자정까지 남은 시간을 계산해 표시한다(브라우저 타임존 무관).
@@ -266,6 +271,9 @@ const useStyles = makeStyles()((theme) => ({
 		border: '1px solid rgba(255, 107, 107, 0.4)',
 		color: '#ff9d9d'
 	},
+	highlight: {
+		animation: `${flash} 2.2s ease-out`
+	},
 	typing: {
 		display: 'inline-flex',
 		alignItems: 'center',
@@ -339,23 +347,16 @@ const useStyles = makeStyles()((theme) => ({
 
 function AiChat() {
 	const { classes, cx } = useStyles();
-	const groupId = useSelector(state => state.auth.user?.reprGroup?.groupId);
 	const groupName = useSelector(state => state.auth.user?.reprGroup?.groupName) || '우리 그룹';
 	const isLoggedIn = Boolean(localStorage.getItem('camille_discord_token'));
 
-	const [messages, setMessages] = useState(() => {
-		// 페이지 이동 후 복귀/새로고침 시 이전 대화 복원
-		try {
-			const saved = sessionStorage.getItem(CHAT_STORAGE_KEY);
-			return saved ? JSON.parse(saved) : [];
-		} catch (e) {
-			return [];
-		}
-	});
+	// 채팅 상태/요청은 전역 Provider에 있다(페이지를 떠나도 진행 중인 질문 유지).
+	const { messages, loading, quota, setQuota, send, clearChat, pendingFocus, consumeFocus } = useAiChat();
+
 	const [input, setInput] = useState('');
-	const [loading, setLoading] = useState(false);
-	const [quota, setQuota] = useState(null);
 	const [now, setNow] = useState(() => new Date());
+	// 알림 토스트로 진입했을 때 마지막 답변을 잠깐 강조
+	const [highlight, setHighlight] = useState(false);
 	const endRef = useRef(null);
 
 	useEffect(() => {
@@ -368,7 +369,7 @@ function AiChat() {
 		getQuota()
 			.then(setQuota)
 			.catch(() => {});
-	}, [isLoggedIn]);
+	}, [isLoggedIn, setQuota]);
 
 	// 리셋 카운트다운 표시용: 1분마다 현재 시각 갱신
 	useEffect(() => {
@@ -376,59 +377,37 @@ function AiChat() {
 		return () => clearInterval(id);
 	}, []);
 
+	// 알림 토스트 클릭으로 들어온 경우: 마지막 답변으로 점프 + 하이라이트 시작
 	useEffect(() => {
-		try {
-			sessionStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(messages));
-		} catch (e) {
-			// 저장 실패(quota 등)는 무시 — 메모리 상태로만 동작
-		}
-	}, [messages]);
+		if (!pendingFocus) return;
+		consumeFocus();
+		if (endRef.current) endRef.current.scrollIntoView({ behavior: 'auto' });
+		setHighlight(true);
+	}, [pendingFocus, consumeFocus]);
 
-	function send(text) {
-		const q = (text != null ? text : input).trim();
+	// 하이라이트는 잠시 후 해제(타이머를 pendingFocus와 분리해 매번 글로우가 재생되게).
+	useEffect(() => {
+		if (!highlight) return undefined;
+		const t = setTimeout(() => setHighlight(false), 2200);
+		return () => clearTimeout(t);
+	}, [highlight]);
+
+	function submitInput() {
+		const q = input.trim();
 		if (!q || loading || q.length > AI_QUESTION_MAX) return;
-
 		setInput('');
-
-		if (!groupId) {
-			setMessages(prev => [
-				...prev,
-				{ role: 'user', text: q },
-				{ role: 'ai', text: '로그인하고 그룹에 들어가야 답할 수 있어요.', error: true }
-			]);
-			return;
-		}
-
-		// messages는 이번 질문을 push하기 전 상태(클로저) → history로 그대로 전달(현재 질문 제외).
-		const history = messages;
-		setMessages(prev => [...prev, { role: 'user', text: q }]);
-		setLoading(true);
-		askAI(groupId, q, history)
-			.then(result => {
-				setMessages(prev => [...prev, { role: 'ai', text: result.answer }]);
-				if (result.limit != null) {
-					setQuota({ used: result.used, remaining: result.remaining, limit: result.limit });
-				}
-			})
-			.catch(() => {
-				setMessages(prev => [
-					...prev,
-					{ role: 'ai', text: '답변 생성에 실패했어요. 잠시 후 다시 시도해 주세요.', error: true }
-				]);
-			})
-			.finally(() => setLoading(false));
+		send(q);
 	}
 
 	function handleKeyDown(e) {
 		if (e.key === 'Enter' && !e.shiftKey) {
 			e.preventDefault();
-			send();
+			submitInput();
 		}
 	}
 
-	function clearChat() {
-		// setMessages([]) → 저장 useEffect가 sessionStorage도 비움
-		setMessages([]);
+	function handleNewChat() {
+		clearChat();
 		setInput('');
 	}
 
@@ -455,7 +434,7 @@ function AiChat() {
 				<div className={classes.topBar}>
 					<Button
 						className={classes.newChatBtn}
-						onClick={clearChat}
+						onClick={handleNewChat}
 						disabled={loading}
 						startIcon={<AddCommentOutlinedIcon />}
 					>
@@ -491,7 +470,8 @@ function AiChat() {
 								className={cx(
 									classes.bubble,
 									m.role === 'user' ? classes.userBubble : classes.aiBubble,
-									m.error && classes.errorBubble
+									m.error && classes.errorBubble,
+									highlight && m.role === 'ai' && i === messages.length - 1 && classes.highlight
 								)}
 							>
 								{m.role === 'user' ? (
@@ -536,7 +516,7 @@ function AiChat() {
 				/>
 				<IconButton
 					className={classes.sendBtn}
-					onClick={() => send()}
+					onClick={submitInput}
 					disabled={loading || !input.trim() || over}
 					aria-label="전송"
 				>

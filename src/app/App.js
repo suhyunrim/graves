@@ -12,6 +12,7 @@ import { Provider } from 'react-redux';
 import { BrowserRouter, useNavigate } from 'react-router-dom';
 import AppContext from './AppContext';
 import { Auth } from './auth';
+import { AiChatProvider } from './main/ai/AiChatContext';
 import routes from './fuse-configs/routesConfig';
 import store from './store';
 import './utility/getLatesetRiotDataVersion';
@@ -47,7 +48,9 @@ const App = () => {
 								<NavigationSetter />
 								<FuseAuthorization>
 									<FuseTheme>
-										<FuseLayout />
+										<AiChatProvider>
+											<FuseLayout />
+										</AiChatProvider>
 									</FuseTheme>
 								</FuseAuthorization>
 								<Analytics />
