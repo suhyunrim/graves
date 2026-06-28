@@ -9,9 +9,9 @@ import TableRow from '@mui/material/TableRow';
 import { makeStyles } from 'tss-react/mui';
 import { keyframes } from '@emotion/react';
 import { withStyles } from 'tss-react/mui';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { RankingTableSkeleton } from '../components/SkeletonLoaders';
 import * as Actions from './store/actions';
 import RankingTableHead from './RankingTableHeader';
@@ -448,9 +448,14 @@ function RankingTable(props) {
 	const period = useSelector(({ Ranking }) => Ranking.ranking.period);
 	const isRefreshingGroupRating = useSelector(({ Ranking }) => Ranking.ranking.isRefreshingGroupRating);
 
+	const [searchParams, setSearchParams] = useSearchParams();
 	const [data, setData] = useState(ranking);
-	const [page, setPage] = useState(0);
+	const [page, setPage] = useState(() => {
+		const p = parseInt(searchParams.get('page'), 10);
+		return Number.isNaN(p) || p < 1 ? 0 : p - 1;
+	});
 	const rowsPerPage = 10;
+	const didLoadRef = useRef(false);
 	const [order, setOrder] = useState({
 		direction: 'desc',
 		id: 'rating'
@@ -482,7 +487,21 @@ function RankingTable(props) {
 		} else {
 			dispatch(Actions.getPeriodRanking(groupId, period.startDate, period.endDate));
 		}
-		setPage(0);
+		// 첫 로드 땐 URL의 page를 보존(유저 상세 진입 후 뒤로가기 시 페이지 유지).
+		// 이후 period/그룹/리프레시 변경 시에만 1페이지로 리셋한다.
+		if (didLoadRef.current) {
+			setPage(0);
+			setSearchParams(
+				prev => {
+					const next = new URLSearchParams(prev);
+					next.delete('page');
+					return next;
+				},
+				{ replace: true }
+			);
+		} else {
+			didLoadRef.current = true;
+		}
 	}, [dispatch, groupName, groupId, period, isRefreshingGroupRating]);
 
 	useEffect(() => {
@@ -507,6 +526,15 @@ function RankingTable(props) {
 
 	function handleChangePage(event, value) {
 		setPage(value);
+		setSearchParams(
+			prev => {
+				const next = new URLSearchParams(prev);
+				if (value === 0) next.delete('page');
+				else next.set('page', String(value + 1));
+				return next;
+			},
+			{ replace: true }
+		);
 	}
 
 	function getTierName(rating) {
