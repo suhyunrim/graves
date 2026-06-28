@@ -23,7 +23,7 @@ function MyMatchHistory({ puuid }) {
 		if (!puuid) return undefined;
 
 		if (isSampleMode()) {
-			setData(getSampleMatchHistoryData(page, ROWS_PER_PAGE));
+			setData(getSampleMatchHistoryData(page, ROWS_PER_PAGE, puuid));
 			return undefined;
 		}
 

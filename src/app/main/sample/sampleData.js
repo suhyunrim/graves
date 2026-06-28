@@ -194,8 +194,15 @@ function getDefaultMatchHistoryData() {
 	return matches;
 }
 
-export function getSampleMatchHistoryData(page, limit) {
-	const allMatches = getSampleData('matchHistory') || getDefaultMatchHistoryData();
+export function getSampleMatchHistoryData(page, limit, puuid) {
+	let allMatches = getSampleData('matchHistory') || getDefaultMatchHistoryData();
+	if (puuid) {
+		allMatches = allMatches.filter(
+			m =>
+				m.team1.players.some(p => p.puuid === puuid) ||
+				m.team2.players.some(p => p.puuid === puuid)
+		);
+	}
 	const p = page || 1;
 	const l = limit || 10;
 	const start = (p - 1) * l;
