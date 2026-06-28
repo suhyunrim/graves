@@ -4,8 +4,9 @@ import { makeStyles } from 'tss-react/mui';
 import { Typography, Tooltip, IconButton } from '@mui/material';
 import { BalanceReportSkeleton } from '../components/SkeletonLoaders';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useSearchParams } from 'react-router-dom';
 import ChartCanvas from '../components/ChartCanvas';
 import {
 	Chart as ChartJS,
@@ -40,9 +41,10 @@ ChartJS.register(
 	Filler,
 	Legend
 );
-import { subMonths, format as formatDate } from 'date-fns';
+import { subMonths, format as formatDate, parse as parseDate } from 'date-fns';
 import reducer from './store/reducers';
 import * as Actions from './store/actions';
+import { patchSearchParams } from 'app/utility/searchParamUtils';
 
 const useStyles = makeStyles()((theme) => ({
 	layoutRoot: {
@@ -407,8 +409,15 @@ function BalanceReport() {
 	const user = useSelector(state => state.auth.user);
 	const groupId = user && user.reprGroup ? user.reprGroup.groupId : null;
 
-	const [startDate, setStartDate] = useState(subMonths(new Date(), 3));
-	const [endDate, setEndDate] = useState(new Date());
+	const [searchParams, setSearchParams] = useSearchParams();
+	const didLoadRef = useRef(false);
+	const parseDateParam = (key, fallback) => {
+		const raw = searchParams.get(key);
+		const d = raw ? parseDate(raw, 'yyyy-MM-dd', new Date()) : null;
+		return d && !Number.isNaN(d.getTime()) ? d : fallback;
+	};
+	const [startDate, setStartDate] = useState(() => parseDateParam('start', subMonths(new Date(), 3)));
+	const [endDate, setEndDate] = useState(() => parseDateParam('end', new Date()));
 
 	const fetchReport = useCallback(() => {
 		if (groupId) {
@@ -419,6 +428,18 @@ function BalanceReport() {
 	useEffect(() => {
 		fetchReport();
 	}, [fetchReport]);
+
+	useEffect(() => {
+		// 첫 마운트 땐 기본값을 URL에 박지 않는다(다른 화면과 일관). 날짜 변경 시에만 동기화.
+		if (!didLoadRef.current) {
+			didLoadRef.current = true;
+			return;
+		}
+		patchSearchParams(setSearchParams, {
+			start: formatDate(startDate, 'yyyy-MM-dd'),
+			end: formatDate(endDate, 'yyyy-MM-dd')
+		});
+	}, [startDate, endDate]);
 
 	function getBalanceColor(label) {
 		if (label === '좋음') return COLORS.green;

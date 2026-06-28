@@ -15,7 +15,9 @@ import CircularProgress from '@mui/material/CircularProgress';
 import { makeStyles } from 'tss-react/mui';
 import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useSearchParams } from 'react-router-dom';
 import { MatchHistorySkeleton } from '../components/SkeletonLoaders';
+import { patchSearchParams, getIntParam } from 'app/utility/searchParamUtils';
 import MatchList, { getTierIconName, getTierColor, getTierShortName } from '../components/MatchList';
 import useDialogStyles from '../components/dialogStyles';
 import * as Actions from './store/actions';
@@ -73,6 +75,7 @@ function MatchHistoryTable() {
 	const { classes, cx } = useStyles();
 	const { classes: dialogClasses } = useDialogStyles();
 	const dispatch = useDispatch();
+	const [searchParams, setSearchParams] = useSearchParams();
 
 	const user = useSelector(state => state.auth.user);
 	const matches = useSelector(({ MatchHistory }) => MatchHistory.matchHistory.matches);
@@ -84,6 +87,7 @@ function MatchHistoryTable() {
 
 	const rowsPerPage = 10;
 	const debounceTimer = useRef(null);
+	const didLoadRef = useRef(false);
 
 	// 복제 관련 상태
 	const [menuAnchorEl, setMenuAnchorEl] = useState(null);
@@ -164,22 +168,26 @@ function MatchHistoryTable() {
 	};
 
 	useEffect(() => {
-		// 모바일 쿠키 세션 복원 중엔 reprGroup이 아직 없을 수 있다. 준비되면 user 변경으로 재실행.
-		if (!user?.reprGroup?.groupId) return;
-		dispatch(Actions.getMatchHistory(user.reprGroup.groupId, 1, rowsPerPage));
-	}, [dispatch, user]);
-
-	useEffect(() => {
 		if (!user?.reprGroup?.groupId) return undefined;
+		// 첫 로드 땐 URL의 page를 그대로 불러온다(유저 상세 → 뒤로가기 시 페이지 유지).
+		if (!didLoadRef.current) {
+			didLoadRef.current = true;
+			const initialPage = getIntParam(searchParams, 'page', 1, { min: 1 });
+			dispatch(Actions.getMatchHistory(user.reprGroup.groupId, initialPage, rowsPerPage, searchText));
+			return undefined;
+		}
+		// 검색어 변경 → 1페이지부터 다시(디바운스), URL의 page는 제거.
 		if (debounceTimer.current) clearTimeout(debounceTimer.current);
 		debounceTimer.current = setTimeout(() => {
 			dispatch(Actions.getMatchHistory(user.reprGroup.groupId, 1, rowsPerPage, searchText));
+			patchSearchParams(setSearchParams, { page: null });
 		}, 400);
 		return () => clearTimeout(debounceTimer.current);
 	}, [searchText, dispatch, user]);
 
 	const handleChangePage = newPage => {
 		dispatch(Actions.getMatchHistory(user.reprGroup.groupId, newPage, rowsPerPage, searchText));
+		patchSearchParams(setSearchParams, { page: newPage <= 1 ? null : newPage });
 	};
 
 	if (!matches) {

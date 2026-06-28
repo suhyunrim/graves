@@ -10,10 +10,12 @@ import TableRow from '@mui/material/TableRow';
 import { makeStyles } from 'tss-react/mui';
 import { keyframes } from '@emotion/react';
 import { withStyles } from 'tss-react/mui';
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useRef, useState, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useSearchParams } from 'react-router-dom';
 import * as Actions from './store/actions';
 import { RankingTableSkeleton } from '../components/SkeletonLoaders';
+import { patchSearchParams, getIntParam } from 'app/utility/searchParamUtils';
 
 // keyframes 헬퍼로 애니메이션 정의 (tss-react는 JSS $ruleName 참조 미지원)
 const fadeIn = keyframes`
@@ -289,7 +291,9 @@ function HonorRankingTable() {
 	const period = useSelector(({ HonorRanking }) => HonorRanking.honorRanking.period);
 	const groupId = useSelector(state => state.auth.user.reprGroup?.groupId);
 
-	const [page, setPage] = useState(0);
+	const [searchParams, setSearchParams] = useSearchParams();
+	const [page, setPage] = useState(() => getIntParam(searchParams, 'page', 1, { min: 1 }) - 1);
+	const didLoadRef = useRef(false);
 	const rowsPerPage = 10;
 
 	useEffect(() => {
@@ -306,7 +310,13 @@ function HonorRankingTable() {
 	}, [honorData, searchText]);
 
 	useEffect(() => {
+		// 첫 로드 땐 URL의 page를 보존, 이후 검색/기간 변경 시에만 1페이지로 리셋.
+		if (!didLoadRef.current) {
+			didLoadRef.current = true;
+			return;
+		}
 		setPage(0);
+		patchSearchParams(setSearchParams, { page: null });
 	}, [searchText, period]);
 
 	const paginatedData = filteredData ? filteredData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage) : [];
@@ -436,7 +446,10 @@ function HonorRankingTable() {
 							page={page}
 							backIconButtonProps={{ 'aria-label': 'Previous Page' }}
 							nextIconButtonProps={{ 'aria-label': 'Next Page' }}
-							onPageChange={(event, value) => setPage(value)}
+							onPageChange={(event, value) => {
+								setPage(value);
+								patchSearchParams(setSearchParams, { page: value === 0 ? null : value + 1 });
+							}}
 						/>
 					</>
 				) : (

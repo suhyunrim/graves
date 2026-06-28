@@ -13,6 +13,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useSearchParams } from 'react-router-dom';
 import { RankingTableSkeleton } from '../components/SkeletonLoaders';
+import { patchSearchParams, getIntParam } from 'app/utility/searchParamUtils';
 import * as Actions from './store/actions';
 import RankingTableHead from './RankingTableHeader';
 
@@ -450,15 +451,13 @@ function RankingTable(props) {
 
 	const [searchParams, setSearchParams] = useSearchParams();
 	const [data, setData] = useState(ranking);
-	const [page, setPage] = useState(() => {
-		const p = parseInt(searchParams.get('page'), 10);
-		return Number.isNaN(p) || p < 1 ? 0 : p - 1;
-	});
+	const [page, setPage] = useState(() => getIntParam(searchParams, 'page', 1, { min: 1 }) - 1);
 	const rowsPerPage = 10;
 	const didLoadRef = useRef(false);
-	const [order, setOrder] = useState({
-		direction: 'desc',
-		id: 'rating'
+	const [order, setOrder] = useState(() => {
+		const id = searchParams.get('sort') || 'rating';
+		const direction = searchParams.get('dir') === 'asc' ? 'asc' : 'desc';
+		return { direction, id };
 	});
 
 	const tierNames = {
@@ -522,19 +521,16 @@ function RankingTable(props) {
 		}
 
 		setOrder({ direction, id });
+		const isDefaultSort = id === 'rating' && direction === 'desc';
+		patchSearchParams(setSearchParams, {
+			sort: isDefaultSort ? null : id,
+			dir: isDefaultSort ? null : direction
+		});
 	}
 
 	function handleChangePage(event, value) {
 		setPage(value);
-		setSearchParams(
-			prev => {
-				const next = new URLSearchParams(prev);
-				if (value === 0) next.delete('page');
-				else next.set('page', String(value + 1));
-				return next;
-			},
-			{ replace: true }
-		);
+		patchSearchParams(setSearchParams, { page: value === 0 ? null : value + 1 });
 	}
 
 	function getTierName(rating) {

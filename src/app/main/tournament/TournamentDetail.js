@@ -29,9 +29,10 @@ import StarIcon from '@mui/icons-material/Star';
 import UndoIcon from '@mui/icons-material/Undo';
 import React, { useEffect, useState, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate, Link, useSearchParams } from 'react-router-dom';
 import camilleRiotAuthService from 'app/services/camilleRiotAuthService/camilleRiotAuthService';
 import { getSocket } from 'app/utility/socketClient';
+import { patchSearchParams, getIntParam } from 'app/utility/searchParamUtils';
 import useDialogStyles from '../components/dialogStyles';
 import reducer from './store/reducers';
 import * as Actions from './store/actions';
@@ -751,7 +752,8 @@ function TournamentDetail() {
 	const [slotMappingOpen, setSlotMappingOpen] = useState(false);
 	const [matchEditTarget, setMatchEditTarget] = useState(null);
 	const [deleteTournamentOpen, setDeleteTournamentOpen] = useState(false);
-	const [activeTab, setActiveTab] = useState(0);
+	const [searchParams, setSearchParams] = useSearchParams();
+	const [activeTab, setActiveTab] = useState(() => getIntParam(searchParams, 'tab', 0, { min: 0, max: 2 }));
 	const [bracketVerbose, setBracketVerbose] = useState(false);
 	const [matchPredictionTarget, setMatchPredictionTarget] = useState(null);
 	const [editTournamentOpen, setEditTournamentOpen] = useState(false);
@@ -1117,7 +1119,10 @@ function TournamentDetail() {
 					{(isInProgress || isFinished) && (
 						<Tabs
 							value={activeTab}
-							onChange={(_, v) => setActiveTab(v)}
+							onChange={(_, v) => {
+								setActiveTab(v);
+								patchSearchParams(setSearchParams, { tab: v === 0 ? null : v });
+							}}
 							className={classes.tabs}
 						>
 							<Tab label="대진표" className={classes.tab} />

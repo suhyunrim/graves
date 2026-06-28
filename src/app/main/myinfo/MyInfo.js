@@ -16,10 +16,11 @@ import {
 } from '@mui/material';
 import useToast from 'app/utility/useToast';
 import { useDispatch, useSelector } from 'react-redux';
-import { useParams, useLocation } from 'react-router-dom';
+import { useParams, useLocation, useSearchParams } from 'react-router-dom';
 import withReducer from 'app/store/withReducer';
 import getLatesetRiotDataVersion from 'app/utility/getLatesetRiotDataVersion';
 import getApiErrorMessage from 'app/utility/getApiErrorMessage';
+import { patchSearchParams, getIntParam } from 'app/utility/searchParamUtils';
 import { MyInfoSkeleton } from '../components/SkeletonLoaders';
 import useDiscordLoginGate from '../components/useDiscordLoginGate';
 import AchievementContent from '../achievement/AchievementContent';
@@ -891,7 +892,8 @@ function MyInfoPage(props) {
 	const mostChampions = useSelector(({ MyInfo }) => MyInfo.myInfo.mostChampions);
 	const positionStats = useSelector(({ MyInfo }) => MyInfo.myInfo.positionStats);
 
-	const [activeTab, setActiveTab] = useState(0);
+	const [searchParams, setSearchParams] = useSearchParams();
+	const [activeTab, setActiveTab] = useState(() => getIntParam(searchParams, 'tab', 0, { min: 0, max: 3 }));
 	const [subAccountInput, setSubAccountInput] = useState('');
 	const [subAccountLoading, setSubAccountLoading] = useState(false);
 	const [removeDialogOpen, setRemoveDialogOpen] = useState(false);
@@ -1114,7 +1116,14 @@ function MyInfoPage(props) {
 						)}
 					</div>
 
-					<Tabs value={activeTab} onChange={(e, v) => setActiveTab(v)} className={classes.tabs}>
+					<Tabs
+						value={activeTab}
+						onChange={(e, v) => {
+							setActiveTab(v);
+							patchSearchParams(setSearchParams, { tab: v === 0 ? null : v });
+						}}
+						className={classes.tabs}
+					>
 						<Tab label="정보" className={classes.tab} />
 						<Tab label="업적" className={classes.tab} />
 						<Tab label="방명록" className={classes.tab} />
