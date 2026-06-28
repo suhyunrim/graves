@@ -28,6 +28,7 @@ import MyInfoHeader from './MyInfoHeader';
 import RatingChart from './RatingChart';
 import VisitorCounter from './VisitorCounter';
 import Guestbook from './Guestbook';
+import MyMatchHistory from './MyMatchHistory';
 import StatusMessage from './StatusMessage';
 import TrophyCabinet from './TrophyCabinet';
 import MostChampions from './MostChampions';
@@ -1117,6 +1118,7 @@ function MyInfoPage(props) {
 						<Tab label="정보" className={classes.tab} />
 						<Tab label="업적" className={classes.tab} />
 						<Tab label="방명록" className={classes.tab} />
+						<Tab label="내전 기록" className={classes.tab} />
 					</Tabs>
 
 					{activeTab === 1 && <AchievementContent />}
@@ -1124,6 +1126,8 @@ function MyInfoPage(props) {
 					{activeTab === 2 && user?.reprGroup?.groupId && (
 						<Guestbook groupId={user.reprGroup.groupId} puuid={puuid || myPuuid} />
 					)}
+
+					{activeTab === 3 && <MyMatchHistory key={puuid || myPuuid} puuid={puuid || myPuuid} />}
 
 					{activeTab === 0 && (
 						<>
