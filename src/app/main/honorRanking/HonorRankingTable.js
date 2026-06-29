@@ -12,7 +12,7 @@ import { keyframes } from '@emotion/react';
 import { withStyles } from 'tss-react/mui';
 import React, { useEffect, useRef, useState, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, Link } from 'react-router-dom';
 import * as Actions from './store/actions';
 import { RankingTableSkeleton } from '../components/SkeletonLoaders';
 import { patchSearchParams, getIntParam } from 'app/utility/searchParamUtils';
@@ -63,7 +63,13 @@ const useStyles = makeStyles()((theme) => ({
 		fontFamily: '"Noto Sans KR", sans-serif',
 		fontSize: '1.5rem',
 		fontWeight: 600,
-		color: '#fff'
+		color: '#fff',
+		textDecoration: 'none',
+		cursor: 'pointer',
+		transition: 'color 0.2s ease',
+		'&:hover': {
+			color: '#00d4ff'
+		}
 	},
 	titleCell: {
 		display: 'flex',
@@ -186,7 +192,15 @@ const useStyles = makeStyles()((theme) => ({
 		marginBottom: 2,
 		whiteSpace: 'nowrap',
 		overflow: 'hidden',
-		textOverflow: 'ellipsis'
+		textOverflow: 'ellipsis',
+		textDecoration: 'none',
+		display: 'inline-block',
+		maxWidth: '100%',
+		cursor: 'pointer',
+		transition: 'color 0.2s ease',
+		'&:hover': {
+			color: '#00d4ff'
+		}
 	},
 	mobileTitleRow: {
 		display: 'flex',
@@ -388,7 +402,7 @@ function HonorRankingTable() {
 														<span className={`${classes.rankingNumber} ${getRankClass(rank)}`}>{rank}</span>
 													</StyledTableCell>
 													<StyledTableCell>
-														<span className={classes.playerName}>{n.name}</span>
+														<Link to={`/userinfo/${n.puuid}`} className={classes.playerName}>{n.name}</Link>
 													</StyledTableCell>
 													<StyledTableCell>
 														{renderTitle(n.title)}
@@ -417,7 +431,7 @@ function HonorRankingTable() {
 											<div className={classes.mobileCardTop}>
 												<div className={`${classes.mobileRankBadge} ${getMobileRankClass(rank)}`}>{rank}</div>
 												<div className={classes.mobilePlayerInfo}>
-													<div className={classes.mobilePlayerName}>{n.name}</div>
+													<Link to={`/userinfo/${n.puuid}`} className={classes.mobilePlayerName}>{n.name}</Link>
 													{renderMobileTitle(n.title)}
 												</div>
 											</div>

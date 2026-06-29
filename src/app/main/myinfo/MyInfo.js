@@ -16,7 +16,7 @@ import {
 } from '@mui/material';
 import useToast from 'app/utility/useToast';
 import { useDispatch, useSelector } from 'react-redux';
-import { useParams, useLocation, useSearchParams } from 'react-router-dom';
+import { useParams, useLocation, useSearchParams, Link } from 'react-router-dom';
 import withReducer from 'app/store/withReducer';
 import getLatesetRiotDataVersion from 'app/utility/getLatesetRiotDataVersion';
 import getApiErrorMessage from 'app/utility/getApiErrorMessage';
@@ -562,7 +562,13 @@ const useStyles = makeStyles()((theme) => ({
 		fontSize: '1.35rem',
 		color: '#fff',
 		flex: 1,
-		marginLeft: 12
+		marginLeft: 12,
+		textDecoration: 'none',
+		cursor: 'pointer',
+		transition: 'color 0.2s ease',
+		'&:hover': {
+			color: '#00d4ff'
+		}
 	},
 	relationStats: {
 		display: 'flex',
@@ -629,7 +635,14 @@ const useStyles = makeStyles()((theme) => ({
 		fontFamily: '"Noto Sans KR", sans-serif',
 		fontSize: '1.5rem',
 		fontWeight: 600,
-		color: '#fff'
+		color: '#fff',
+		textDecoration: 'none',
+		display: 'inline-block',
+		cursor: 'pointer',
+		transition: 'color 0.2s ease',
+		'&:hover': {
+			color: '#00d4ff'
+		}
 	},
 	highlightStat: {
 		fontFamily: '"Rajdhani", sans-serif',
@@ -1297,7 +1310,7 @@ function MyInfoPage(props) {
 										</div>
 										<div className={classes.highlightContent}>
 											<div className={classes.highlightLabel}>함께하면 승률 최고</div>
-											<div className={classes.highlightName}>{bestTeammates[0].name}</div>
+											<Link to={`/userinfo/${bestTeammates[0].puuid}`} className={classes.highlightName}>{bestTeammates[0].name}</Link>
 											<div className={`${classes.highlightStat} ${classes.highlightBest}`}>
 												{bestTeammates[0].games}판 ({bestTeammates[0].wins}승 {bestTeammates[0].losses}패) {bestTeammates[0].winRate}%
 											</div>
@@ -1322,7 +1335,7 @@ function MyInfoPage(props) {
 										</div>
 										<div className={classes.highlightContent}>
 											<div className={classes.highlightLabel}>상대 전적 최고</div>
-											<div className={classes.highlightName}>{bestOpponents[0].name}</div>
+											<Link to={`/userinfo/${bestOpponents[0].puuid}`} className={classes.highlightName}>{bestOpponents[0].name}</Link>
 											<div className={`${classes.highlightStat} ${classes.highlightBest}`}>
 												{bestOpponents[0].games}판 ({bestOpponents[0].myWins}승 {bestOpponents[0].myLosses}패){' '}
 												{bestOpponents[0].winRate}%
@@ -1348,7 +1361,7 @@ function MyInfoPage(props) {
 										</div>
 										<div className={classes.highlightContent}>
 											<div className={classes.highlightLabel}>상대 전적 최악</div>
-											<div className={classes.highlightName}>{worstOpponents[0].name}</div>
+											<Link to={`/userinfo/${worstOpponents[0].puuid}`} className={classes.highlightName}>{worstOpponents[0].name}</Link>
 											<div className={`${classes.highlightStat} ${classes.highlightWorst}`}>
 												{worstOpponents[0].games}판 ({worstOpponents[0].myWins}승 {worstOpponents[0].myLosses}패){' '}
 												{worstOpponents[0].winRate}%
@@ -1390,7 +1403,7 @@ function MyInfoPage(props) {
 											{topTeammates.slice(0, 5).map((teammate, index) => (
 												<div key={teammate.puuid} className={classes.relationItem}>
 													<span className={classes.relationRank}>{index + 1}</span>
-													<span className={classes.relationName}>{teammate.name}</span>
+													<Link to={`/userinfo/${teammate.puuid}`} className={classes.relationName}>{teammate.name}</Link>
 													<div className={classes.relationStats}>
 														<span className={classes.relationGames}>
 															{teammate.games}판 ({teammate.wins}승 {teammate.games - teammate.wins}패)
@@ -1428,7 +1441,7 @@ function MyInfoPage(props) {
 											{topOpponents.slice(0, 5).map((opponent, index) => (
 												<div key={opponent.puuid} className={classes.relationItem}>
 													<span className={classes.relationRank}>{index + 1}</span>
-													<span className={classes.relationName}>{opponent.name}</span>
+													<Link to={`/userinfo/${opponent.puuid}`} className={classes.relationName}>{opponent.name}</Link>
 													<div className={classes.relationStats}>
 														<span className={classes.relationGames}>
 															{opponent.games}판 ({opponent.myWins}승 {opponent.myLosses}패)
@@ -1563,7 +1576,7 @@ function MyInfoPage(props) {
 										<span className={`${classes.relationRank} ${index < 3 ? classes.dialogRankTop3 : ''}`}>
 											{index + 1}
 										</span>
-										<span className={classes.relationName}>{item.name}</span>
+										<Link to={`/userinfo/${item.puuid}`} className={classes.relationName}>{item.name}</Link>
 										<div className={classes.relationStats}>
 											<span className={classes.relationGames}>
 												{listDialog.type === 'teammate'

@@ -118,16 +118,16 @@ function getDefaultDashboardData(month) {
 	return {
 		month: month || '2026-04',
 		totalMatches: 387,
-		mostGames: { name: '페이커', games: 123, wins: 89, losses: 34, winRate: 72.4 },
-		bestWinRate: { name: '쵸비', minGames: 5, winRate: 78.6, games: 42, wins: 33, losses: 9 },
-		longestWinStreak: { name: '제우스', streak: 12 },
-		bestDuo: { name1: '구마유시', name2: '케리아', minGames: 3, winRate: 78.9, games: 38, wins: 30, losses: 8 },
-		mostRivalry: { name1: '캐니언', name2: '오너', games: 54, player1Wins: 29, player2Wins: 25 },
-		topNewcomer: { name: '윌', games: 30, firstMatchDate: '2026-03-01' },
-		topRatingRiser: { name: '바이퍼', startRating: 450, endRating: 830, games: 95 },
-		nightOwl: { name: '도란', games: 75, lateNightGames: 48, lateNightRate: 64 },
-		darkHorse: { name: '피넛', games: 90, darkHorseGames: 28, darkHorseWins: 20, darkHorseWinRate: 71 },
-		honorKing: { name: '페이커', votes: 67, title: { emoji: '👑', title: '내전의 신' } }
+		mostGames: { name: '페이커', puuid: 'sample-puuid-01', games: 123, wins: 89, losses: 34, winRate: 72.4 },
+		bestWinRate: { name: '쵸비', puuid: 'sample-puuid-02', minGames: 5, winRate: 78.6, games: 42, wins: 33, losses: 9 },
+		longestWinStreak: { name: '제우스', puuid: 'sample-puuid-03', streak: 12 },
+		bestDuo: { name1: '구마유시', puuid1: 'sample-puuid-04', name2: '케리아', puuid2: 'sample-puuid-05', minGames: 3, winRate: 78.9, games: 38, wins: 30, losses: 8 },
+		mostRivalry: { name1: '캐니언', puuid1: 'sample-puuid-06', name2: '오너', puuid2: 'sample-puuid-12', games: 54, player1Wins: 29, player2Wins: 25 },
+		topNewcomer: { name: '윌', puuid: 'sample-puuid-36', games: 30, firstMatchDate: '2026-03-01' },
+		topRatingRiser: { name: '바이퍼', puuid: 'sample-puuid-08', startRating: 450, endRating: 830, games: 95 },
+		nightOwl: { name: '도란', puuid: 'sample-puuid-09', games: 75, lateNightGames: 48, lateNightRate: 64 },
+		darkHorse: { name: '피넛', puuid: 'sample-puuid-10', games: 90, darkHorseGames: 28, darkHorseWins: 20, darkHorseWinRate: 71 },
+		honorKing: { name: '페이커', puuid: 'sample-puuid-01', votes: 67, title: { emoji: '👑', title: '내전의 신' } }
 	};
 }
 

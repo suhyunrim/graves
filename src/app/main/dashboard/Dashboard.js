@@ -6,6 +6,7 @@ import IconButton from '@mui/material/IconButton';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { useDispatch, useSelector } from 'react-redux';
+import { Link } from 'react-router-dom';
 import withReducer from 'app/store/withReducer';
 import { DashboardSkeleton } from '../components/SkeletonLoaders';
 import DashboardHeader from './DashboardHeader';
@@ -204,6 +205,15 @@ const useStyles = makeStyles()((theme) => ({
 		letterSpacing: '0.02em',
 		textShadow: '0 2px 10px rgba(0,0,0,0.3)',
 		marginBottom: 14
+	},
+	nameLink: {
+		color: 'inherit',
+		textDecoration: 'none',
+		cursor: 'pointer',
+		transition: 'color 0.2s ease',
+		'&:hover': {
+			color: '#00d4ff'
+		}
 	},
 	duoNames: {
 		fontFamily: '"Rajdhani", "Noto Sans KR", sans-serif',
@@ -451,6 +461,15 @@ function Dashboard() {
 		return `${year}년 ${parseInt(month, 10)}월`;
 	};
 
+	const nameLink = (name, puuid) =>
+		puuid ? (
+			<Link to={`/userinfo/${puuid}`} className={classes.nameLink}>
+				{name}
+			</Link>
+		) : (
+			name
+		);
+
 	const renderMostGames = () => {
 		const item = data.mostGames;
 		return (
@@ -464,7 +483,7 @@ function Dashboard() {
 				</div>
 				{item ? (
 					<div className={classes.cardContent}>
-						<div className={classes.playerName}>{item.name}</div>
+						<div className={classes.playerName}>{nameLink(item.name, item.puuid)}</div>
 						<div className={classes.stats}>
 							<span className={`${classes.statHighlight} ${classes.highlightRed}`}>{item.games}판</span>
 							<span>{item.wins}승 {item.losses}패</span>
@@ -473,7 +492,7 @@ function Dashboard() {
 						{item.runnerUp && (
 							<div className={classes.runnerUpSection}>
 								<span className={classes.runnerUpBadge}>2위</span>
-								<span className={classes.runnerUpName}>{item.runnerUp.name}</span>
+								<span className={classes.runnerUpName}>{nameLink(item.runnerUp.name, item.runnerUp.puuid)}</span>
 								<span className={classes.runnerUpSep}>·</span>
 								<span>{item.runnerUp.games}판 ({item.runnerUp.winRate}%)</span>
 							</div>
@@ -500,7 +519,7 @@ function Dashboard() {
 				</div>
 				{item ? (
 					<div className={classes.cardContent}>
-						<div className={classes.playerName}>{item.name}</div>
+						<div className={classes.playerName}>{nameLink(item.name, item.puuid)}</div>
 						<div className={classes.stats}>
 							<span className={`${classes.statHighlight} ${classes.highlightGold}`}>{item.winRate}%</span>
 							<span>{item.games}판</span>
@@ -509,7 +528,7 @@ function Dashboard() {
 						{item.runnerUp && (
 							<div className={classes.runnerUpSection}>
 								<span className={classes.runnerUpBadge}>2위</span>
-								<span className={classes.runnerUpName}>{item.runnerUp.name}</span>
+								<span className={classes.runnerUpName}>{nameLink(item.runnerUp.name, item.runnerUp.puuid)}</span>
 								<span className={classes.runnerUpSep}>·</span>
 								<span>{item.runnerUp.winRate}% ({item.runnerUp.games}판)</span>
 							</div>
@@ -536,7 +555,7 @@ function Dashboard() {
 				</div>
 				{item ? (
 					<div className={classes.cardContent}>
-						<div className={classes.playerName}>{item.name}</div>
+						<div className={classes.playerName}>{nameLink(item.name, item.puuid)}</div>
 						<div className={classes.stats}>
 							<span className={classes.streakNumber}>{item.streak}</span>
 							<span className={classes.streakLabel}>연승</span>
@@ -544,7 +563,7 @@ function Dashboard() {
 						{item.runnerUp && (
 							<div className={classes.runnerUpSection}>
 								<span className={classes.runnerUpBadge}>2위</span>
-								<span className={classes.runnerUpName}>{item.runnerUp.name}</span>
+								<span className={classes.runnerUpName}>{nameLink(item.runnerUp.name, item.runnerUp.puuid)}</span>
 								<span className={classes.runnerUpSep}>·</span>
 								<span>{item.runnerUp.streak}연승</span>
 							</div>
@@ -572,9 +591,9 @@ function Dashboard() {
 				{item ? (
 					<div className={classes.cardContent}>
 						<div className={classes.duoNames}>
-							<span>{item.name1}</span>
+							<span>{nameLink(item.name1, item.puuid1)}</span>
 							<span className={classes.heart}>♥</span>
-							<span>{item.name2}</span>
+							<span>{nameLink(item.name2, item.puuid2)}</span>
 						</div>
 						<div className={classes.stats}>
 							<span className={`${classes.statHighlight} ${classes.highlightPink}`}>{item.winRate}%</span>
@@ -584,9 +603,9 @@ function Dashboard() {
 						{item.runnerUp && (
 							<div className={classes.runnerUpSection}>
 								<span className={classes.runnerUpBadge}>2위</span>
-								<span className={classes.runnerUpName}>{item.runnerUp.name1}</span>
+								<span className={classes.runnerUpName}>{nameLink(item.runnerUp.name1, item.runnerUp.puuid1)}</span>
 								<span className={classes.runnerUpDuoIcon}>♥</span>
-								<span className={classes.runnerUpName}>{item.runnerUp.name2}</span>
+								<span className={classes.runnerUpName}>{nameLink(item.runnerUp.name2, item.runnerUp.puuid2)}</span>
 								<span className={classes.runnerUpSep}>·</span>
 								<span>{item.runnerUp.winRate}% ({item.runnerUp.games}판)</span>
 							</div>
@@ -614,9 +633,9 @@ function Dashboard() {
 				{item ? (
 					<div className={classes.cardContent}>
 						<div className={classes.duoNames}>
-							<span>{item.name1}</span>
+							<span>{nameLink(item.name1, item.puuid1)}</span>
 							<span className={classes.versus}>↔</span>
-							<span>{item.name2}</span>
+							<span>{nameLink(item.name2, item.puuid2)}</span>
 						</div>
 						<div className={classes.stats}>
 							<span className={`${classes.statHighlight} ${classes.highlightPurple}`}>{item.games}판</span>
@@ -627,9 +646,9 @@ function Dashboard() {
 						{item.runnerUp && (
 							<div className={classes.runnerUpSection}>
 								<span className={classes.runnerUpBadge}>2위</span>
-								<span className={classes.runnerUpName}>{item.runnerUp.name1}</span>
+								<span className={classes.runnerUpName}>{nameLink(item.runnerUp.name1, item.runnerUp.puuid1)}</span>
 								<span className={classes.runnerUpVersusIcon}>↔</span>
-								<span className={classes.runnerUpName}>{item.runnerUp.name2}</span>
+								<span className={classes.runnerUpName}>{nameLink(item.runnerUp.name2, item.runnerUp.puuid2)}</span>
 								<span className={classes.runnerUpSep}>·</span>
 								<span>{item.runnerUp.games}판 ({item.runnerUp.player1Wins}:{item.runnerUp.player2Wins})</span>
 							</div>
@@ -702,7 +721,7 @@ function Dashboard() {
 				</div>
 				{item ? (
 					<div className={classes.cardContent}>
-						<div className={classes.playerName}>{item.name}</div>
+						<div className={classes.playerName}>{nameLink(item.name, item.puuid)}</div>
 						<div className={classes.stats}>
 							{renderTierBadge(item.startRating)}
 							<span className={classes.tierArrow}>→</span>
@@ -712,7 +731,7 @@ function Dashboard() {
 						{item.runnerUp && (
 							<div className={classes.runnerUpSection}>
 								<span className={classes.runnerUpBadge}>2위</span>
-								<span className={classes.runnerUpName}>{item.runnerUp.name}</span>
+								<span className={classes.runnerUpName}>{nameLink(item.runnerUp.name, item.runnerUp.puuid)}</span>
 								<span className={classes.runnerUpSep}>·</span>
 								{renderTierBadge(item.runnerUp.startRating, true)}
 								<span className={classes.runnerUpTierArrow}>→</span>
@@ -742,7 +761,7 @@ function Dashboard() {
 				</div>
 				{item ? (
 					<div className={classes.cardContent}>
-						<div className={classes.playerName}>{item.name}</div>
+						<div className={classes.playerName}>{nameLink(item.name, item.puuid)}</div>
 						<div className={classes.stats}>
 							<span className={`${classes.statHighlight} ${classes.highlightIndigo}`}>{item.lateNightRate}%</span>
 							<span>{item.games}판 중 {item.lateNightGames}판</span>
@@ -750,7 +769,7 @@ function Dashboard() {
 						{item.runnerUp && (
 							<div className={classes.runnerUpSection}>
 								<span className={classes.runnerUpBadge}>2위</span>
-								<span className={classes.runnerUpName}>{item.runnerUp.name}</span>
+								<span className={classes.runnerUpName}>{nameLink(item.runnerUp.name, item.runnerUp.puuid)}</span>
 								<span className={classes.runnerUpSep}>·</span>
 								<span>{item.runnerUp.lateNightRate}% ({item.runnerUp.lateNightGames}/{item.runnerUp.games}판)</span>
 							</div>
@@ -779,7 +798,7 @@ function Dashboard() {
 				</div>
 				{item ? (
 					<div className={classes.cardContent}>
-						<div className={classes.playerName}>{item.name}</div>
+						<div className={classes.playerName}>{nameLink(item.name, item.puuid)}</div>
 						<div className={classes.stats}>
 							<span className={`${classes.statHighlight} ${classes.highlightGold}`}>{item.votes}표</span>
 						{item.title && (
@@ -792,7 +811,7 @@ function Dashboard() {
 						{item.runnerUp && (
 							<div className={classes.runnerUpSection}>
 								<span className={classes.runnerUpBadge}>2위</span>
-								<span className={classes.runnerUpName}>{item.runnerUp.name}</span>
+								<span className={classes.runnerUpName}>{nameLink(item.runnerUp.name, item.runnerUp.puuid)}</span>
 								<span className={classes.runnerUpSep}>·</span>
 								<span>{item.runnerUp.votes}표</span>
 								{item.runnerUp.title && (
@@ -828,7 +847,7 @@ function Dashboard() {
 				</div>
 				{item ? (
 					<div className={classes.cardContent}>
-						<div className={classes.playerName}>{item.name}</div>
+						<div className={classes.playerName}>{nameLink(item.name, item.puuid)}</div>
 						<div className={classes.stats}>
 							<span className={`${classes.statHighlight} ${classes.highlightDarkGold}`}>{item.darkHorseWinRate}%</span>
 							<span>총 {item.games}판 중 {item.darkHorseGames}판 최저 레이팅 / {item.darkHorseWins}승 {item.darkHorseGames - item.darkHorseWins}패</span>
@@ -836,7 +855,7 @@ function Dashboard() {
 						{item.runnerUp && (
 							<div className={classes.runnerUpSection}>
 								<span className={classes.runnerUpBadge}>2위</span>
-								<span className={classes.runnerUpName}>{item.runnerUp.name}</span>
+								<span className={classes.runnerUpName}>{nameLink(item.runnerUp.name, item.runnerUp.puuid)}</span>
 								<span className={classes.runnerUpSep}>·</span>
 								<span>{item.runnerUp.darkHorseWinRate}% ({item.runnerUp.darkHorseWins}승/{item.runnerUp.darkHorseGames}판)</span>
 							</div>
@@ -869,7 +888,7 @@ function Dashboard() {
 				</div>
 				{item ? (
 					<div className={classes.cardContent}>
-						<div className={classes.playerName}>{item.name}</div>
+						<div className={classes.playerName}>{nameLink(item.name, item.puuid)}</div>
 						<div className={classes.stats}>
 							<span className={`${classes.statHighlight} ${classes.highlightGreen}`}>{item.games}판</span>
 							<span>첫 내전: {formatDate(item.firstMatchDate)}</span>
@@ -877,7 +896,7 @@ function Dashboard() {
 						{item.runnerUp && (
 							<div className={classes.runnerUpSection}>
 								<span className={classes.runnerUpBadge}>2위</span>
-								<span className={classes.runnerUpName}>{item.runnerUp.name}</span>
+								<span className={classes.runnerUpName}>{nameLink(item.runnerUp.name, item.runnerUp.puuid)}</span>
 								<span className={classes.runnerUpSep}>·</span>
 								<span>{item.runnerUp.games}판</span>
 								<span className={classes.runnerUpSep}>·</span>

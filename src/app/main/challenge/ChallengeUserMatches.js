@@ -390,7 +390,13 @@ const useStyles = makeStyles()((theme) => ({
 		padding: '2px 8px',
 		borderRadius: 6,
 		fontFamily: '"Noto Sans KR", sans-serif',
-		fontSize: '1rem'
+		fontSize: '1rem',
+		textDecoration: 'none',
+		cursor: 'pointer',
+		transition: 'filter 0.2s ease',
+		'&:hover': {
+			filter: 'brightness(1.3)'
+		}
 	},
 	allyChip: {
 		background: 'rgba(77, 171, 247, 0.1)',
@@ -487,6 +493,14 @@ const useStyles = makeStyles()((theme) => ({
 	teamNameBold: {
 		fontWeight: 700,
 		color: '#00d4ff'
+	},
+	teamNameLink: {
+		color: 'inherit',
+		textDecoration: 'none',
+		cursor: 'pointer',
+		'&:hover': {
+			textDecoration: 'underline'
+		}
 	},
 	teamKda: {
 		fontFamily: '"Rajdhani", sans-serif',
@@ -694,7 +708,13 @@ function ChallengeUserMatches() {
 							<img className={classes.teamSpellIcon} src={getSpellIcon(p.summoner1Id)} alt="" />
 							<img className={classes.teamSpellIcon} src={getSpellIcon(p.summoner2Id)} alt="" />
 							<span className={`${classes.teamName} ${isMe ? classes.teamNameBold : ''}`}>
-								{p.riotIdGameName || p.summonerName}
+								{isMe || isGroupMember ? (
+									<Link to={`/userinfo/${p.puuid}`} className={classes.teamNameLink}>
+										{p.riotIdGameName || p.summonerName}
+									</Link>
+								) : (
+									p.riotIdGameName || p.summonerName
+								)}
 								{isGroupMember && <span className={classes.groupBadge}>G</span>}
 							</span>
 							<span className={classes.teamKda}>{p.kills}/{p.deaths}/{p.assists}</span>
@@ -900,13 +920,14 @@ function ChallengeUserMatches() {
 										{match.groupMembers && match.groupMembers.length > 0 && !expanded && (
 											<div className={classes.groupMembersRow}>
 												{match.groupMembers.map(member => (
-													<div
+													<Link
 														key={member.puuid}
+														to={`/userinfo/${member.puuid}`}
 														className={`${classes.memberChip} ${member.sameTeam ? classes.allyChip : classes.enemyChip}`}
 													>
 														<img className={classes.memberIcon} src={getChampionIcon(member.championName)} alt="" />
 														{member.name}
-													</div>
+													</Link>
 												))}
 											</div>
 										)}
