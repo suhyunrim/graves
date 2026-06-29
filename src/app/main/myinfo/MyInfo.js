@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import FusePageSimple from '@fuse/core/FusePageSimple';
 import { makeStyles } from 'tss-react/mui';
-import { keyframes } from '@emotion/react';
+import { fadeInUp } from '../components/Reveal';
 import {
 	Button,
 	TextField,
@@ -67,15 +67,7 @@ const tierColors = {
 };
 
 // keyframes 헬퍼로 애니메이션 정의 (tss-react는 JSS $ruleName 참조 미지원)
-const fadeIn = keyframes`
-	0% { opacity: 0; transform: translateY(20px); }
-	100% { opacity: 1; transform: translateY(0); }
-`;
 
-const fadeInUp = keyframes`
-	0% { opacity: 0; transform: translateY(30px); }
-	100% { opacity: 1; transform: translateY(0); }
-`;
 
 const useStyles = makeStyles()((theme) => ({
 	layoutRoot: {
@@ -102,7 +94,7 @@ const useStyles = makeStyles()((theme) => ({
 		background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
 		borderRadius: 16,
 		border: '1px solid rgba(0, 212, 255, 0.2)',
-		animation: `${fadeIn} 0.5s ease`,
+		animation: `${fadeInUp} 0.5s ease`,
 		flexWrap: 'wrap',
 		[theme.breakpoints.down('sm')]: {
 			gap: 16,
@@ -335,6 +327,9 @@ const useStyles = makeStyles()((theme) => ({
 		display: 'flex',
 		alignItems: 'center',
 		gap: 12,
+		animation: `${fadeInUp} 0.6s ease forwards`,
+		opacity: 0,
+		animationDelay: '0.05s',
 		'&::before': {
 			content: '""',
 			width: 4,
@@ -349,7 +344,10 @@ const useStyles = makeStyles()((theme) => ({
 		fontSize: '1.15rem',
 		color: 'rgba(255, 255, 255, 0.4)',
 		marginTop: -12,
-		marginBottom: 18
+		marginBottom: 18,
+		animation: `${fadeInUp} 0.6s ease forwards`,
+		opacity: 0,
+		animationDelay: '0.1s'
 	},
 	positionStatsSection: {
 		marginBottom: 32

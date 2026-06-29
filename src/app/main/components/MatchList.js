@@ -9,7 +9,7 @@ import TableRow from '@mui/material/TableRow';
 import IconButton from '@mui/material/IconButton';
 import SettingsIcon from '@mui/icons-material/Settings';
 import { makeStyles, withStyles } from 'tss-react/mui';
-import { keyframes } from '@emotion/react';
+import { fadeInUp } from './Reveal';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -41,11 +41,6 @@ const tierThresholds = {
 
 const tierSteps = ['IV', 'III', 'II', 'I'];
 
-// keyframes 헬퍼로 애니메이션 정의 (tss-react는 JSS $ruleName 참조 미지원)
-const fadeIn = keyframes`
-	0% { opacity: 0; transform: translateY(20px); }
-	100% { opacity: 1; transform: translateY(0); }
-`;
 
 // 다이얼로그 프리뷰 등 외부에서도 재사용하는 tier 헬퍼
 export const getTierShortName = tier => {
@@ -134,7 +129,8 @@ const useStyles = makeStyles()(() => ({
 		borderRadius: 20,
 		border: '1px solid rgba(0, 212, 255, 0.2)',
 		overflow: 'hidden',
-		animation: `${fadeIn} 0.6s ease`
+		'--reveal-distance': '20px',
+		animation: `${fadeInUp} 0.6s ease`
 	},
 	headerCell: {
 		backgroundColor: 'rgba(0, 212, 255, 0.08)',

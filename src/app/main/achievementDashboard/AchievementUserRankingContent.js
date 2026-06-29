@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { makeStyles } from 'tss-react/mui';
 import { keyframes } from '@emotion/react';
+import { fadeInUp } from '../components/Reveal';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import TextField from '@mui/material/TextField';
@@ -11,10 +12,6 @@ import getLatesetRiotDataVersion from 'app/utility/getLatesetRiotDataVersion';
 import { AchievementUserRankingSkeleton } from '../components/SkeletonLoaders';
 import * as Actions from './store/actions';
 
-const fadeInUp = keyframes`
-	0% { opacity: 0; transform: translateY(12px); }
-	100% { opacity: 1; transform: translateY(0); }
-`;
 
 const shimmer = keyframes`
 	0% { background-position: -200% 0; }

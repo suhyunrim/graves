@@ -8,7 +8,7 @@ import TableHead from '@mui/material/TableHead';
 import TablePagination from '@mui/material/TablePagination';
 import TableRow from '@mui/material/TableRow';
 import { makeStyles } from 'tss-react/mui';
-import { keyframes } from '@emotion/react';
+import { fadeInUp } from '../components/Reveal';
 import { withStyles } from 'tss-react/mui';
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -16,11 +16,6 @@ import { getKDAColor, getWinRateColor } from 'app/utility/statisticsColor';
 import { ChampionTableSkeleton } from '../components/SkeletonLoaders';
 import * as Actions from './store/actions';
 
-// keyframes 헬퍼로 애니메이션 정의 (tss-react는 JSS $ruleName 참조 미지원)
-const fadeIn = keyframes`
-	0% { opacity: 0; transform: translateY(20px); }
-	100% { opacity: 1; transform: translateY(0); }
-`;
 
 const useStyles = makeStyles()((theme) => ({
 	tableContainer: {
@@ -29,7 +24,8 @@ const useStyles = makeStyles()((theme) => ({
 		border: '1px solid rgba(0, 212, 255, 0.2)',
 		padding: '24px 0',
 		marginTop: 0,
-		animation: `${fadeIn} 0.6s ease`,
+		'--reveal-distance': '20px',
+		animation: `${fadeInUp} 0.6s ease`,
 		animationDelay: '0.2s',
 		animationFillMode: 'backwards'
 	},

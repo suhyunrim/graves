@@ -24,6 +24,7 @@ import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutlineOutlined
 import SubdirectoryArrowRightIcon from '@mui/icons-material/SubdirectoryArrowRight';
 import { makeStyles } from 'tss-react/mui';
 import { keyframes } from '@emotion/react';
+import { fadeInUp } from '../components/Reveal';
 import { formatDistanceToNow } from 'date-fns';
 import koLocale from 'date-fns/locale/ko';
 import camilleRiotAuthService from 'app/services/camilleRiotAuthService';
@@ -41,10 +42,6 @@ import {
 import LikersDialog from './LikersDialog';
 import MentionContent from './MentionContent';
 
-const fadeIn = keyframes`
-	0% { opacity: 0; transform: translateY(8px); }
-	100% { opacity: 1; transform: translateY(0); }
-`;
 
 const flashHighlight = keyframes`
 	0%   { box-shadow: 0 0 0 2px rgba(0, 212, 255, 0.7), 0 0 30px rgba(0, 212, 255, 0.45); background: rgba(0, 212, 255, 0.18); }
@@ -319,7 +316,7 @@ const useStyles = makeStyles()(theme => ({
 		background: 'rgba(0, 0, 0, 0.22)',
 		borderRadius: 14,
 		border: '1px solid rgba(255, 255, 255, 0.05)',
-		animation: `${fadeIn} 0.3s ease`,
+		animation: `${fadeInUp} 0.3s ease`,
 		scrollMarginTop: 96,
 		[theme.breakpoints.down('sm')]: {
 			padding: '12px 14px',
@@ -566,7 +563,7 @@ const useStyles = makeStyles()(theme => ({
 		background: 'rgba(0, 0, 0, 0.32)',
 		borderRadius: 12,
 		border: '1px solid rgba(0, 212, 255, 0.15)',
-		animation: `${fadeIn} 0.2s ease`
+		animation: `${fadeInUp} 0.2s ease`
 	},
 }));
 

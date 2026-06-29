@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { makeStyles } from 'tss-react/mui';
-import { keyframes } from '@emotion/react';
+import { fadeInUp } from '../components/Reveal';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import Tooltip from '@mui/material/Tooltip';
@@ -9,10 +9,6 @@ import camilleRiotAuthService from 'app/services/camilleRiotAuthService';
 import * as Actions from './store/actions';
 import { CATEGORY_LABELS, TIER_COLORS } from './constants';
 
-const fadeInUp = keyframes`
-	0% { opacity: 0; transform: translateY(12px); }
-	100% { opacity: 1; transform: translateY(0); }
-`;
 
 const useStyles = makeStyles()((theme) => ({
 	container: {

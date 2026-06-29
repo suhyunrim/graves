@@ -16,7 +16,7 @@ import DeleteOutlineIcon from '@mui/icons-material/DeleteOutlineOutlined';
 import FormatQuoteIcon from '@mui/icons-material/FormatQuote';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutlined';
 import { makeStyles } from 'tss-react/mui';
-import { keyframes } from '@emotion/react';
+import { fadeInUp } from '../components/Reveal';
 import useToast from 'app/utility/useToast';
 import getApiErrorMessage from 'app/utility/getApiErrorMessage';
 import useDiscordLoginGate from '../components/useDiscordLoginGate';
@@ -25,10 +25,6 @@ import * as Actions from './store/actions';
 const MAX_LEN = 50;
 const sanitize = value => value.replace(/[\r\n]+/g, ' ');
 
-const fadeIn = keyframes`
-	0% { opacity: 0; transform: translateY(4px); }
-	100% { opacity: 1; transform: translateY(0); }
-`;
 
 const useStyles = makeStyles()(theme => ({
 	root: {
@@ -36,7 +32,8 @@ const useStyles = makeStyles()(theme => ({
 		alignItems: 'center',
 		gap: 10,
 		flexWrap: 'wrap',
-		animation: `${fadeIn} 0.3s ease`
+		'--reveal-distance': '4px',
+		animation: `${fadeInUp} 0.3s ease`
 	},
 	quoteWrapper: {
 		display: 'inline-flex',

@@ -13,16 +13,11 @@ import {
 } from 'chart.js';
 import { useSelector } from 'react-redux';
 import { makeStyles } from 'tss-react/mui';
-import { keyframes } from '@emotion/react';
+import { fadeInUp } from '../components/Reveal';
 import ChartCanvas from '../components/ChartCanvas';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, LineController, Title, Tooltip, Filler, Legend);
 
-// keyframes 헬퍼로 애니메이션 정의 (tss-react는 JSS $ruleName 참조 미지원)
-const fadeIn = keyframes`
-	0% { opacity: 0; transform: translateY(20px); }
-	100% { opacity: 1; transform: translateY(0); }
-`;
 
 const useStyles = makeStyles()((theme) => ({
 	chartCard: {
@@ -31,7 +26,8 @@ const useStyles = makeStyles()((theme) => ({
 		borderRadius: 20,
 		border: '1px solid rgba(0, 212, 255, 0.2)',
 		padding: 28,
-		animation: `${fadeIn} 0.6s ease`,
+		'--reveal-distance': '20px',
+		animation: `${fadeInUp} 0.6s ease`,
 		animationDelay: '0.3s',
 		animationFillMode: 'backwards',
 		[theme.breakpoints.down('sm')]: {

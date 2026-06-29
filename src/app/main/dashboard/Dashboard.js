@@ -12,6 +12,7 @@ import { DashboardSkeleton } from '../components/SkeletonLoaders';
 import DashboardHeader from './DashboardHeader';
 import reducer from './store/reducers';
 import * as Actions from './store/actions';
+import { RevealGroup } from '../components/Reveal';
 
 const fadeInUp = keyframes({
 	'0%': { opacity: 0, transform: 'translateY(30px)' },
@@ -930,7 +931,7 @@ function Dashboard() {
 							<ChevronRightIcon />
 						</IconButton>
 					</div>
-					<div className={classes.grid}>
+					<RevealGroup className={classes.grid}>
 						{renderHonorKing()}
 						{renderMostGames()}
 						{renderBestWinRate()}
@@ -941,7 +942,7 @@ function Dashboard() {
 						{renderRatingRiser()}
 						{renderNightOwl()}
 						{renderDarkHorse()}
-					</div>
+					</RevealGroup>
 				</div>
 			}
 		/>
