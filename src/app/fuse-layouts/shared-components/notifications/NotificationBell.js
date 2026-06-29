@@ -14,6 +14,7 @@ import * as Actions from 'app/store/actions';
 import camilleRiotAuthService from 'app/services/camilleRiotAuthService';
 import useNotifications from './useNotifications';
 import NotificationPanel from './NotificationPanel';
+import NotificationToast from './NotificationToast';
 import { getNavigationPath } from './notificationFormat';
 import { readNotification } from './notificationsApi';
 
@@ -67,6 +68,11 @@ function NotificationBell() {
 
 	const [anchorEl, setAnchorEl] = useState(null);
 	const [drawerOpen, setDrawerOpen] = useState(false);
+	const [toast, setToast] = useState(null); // { group, extraCount } | null
+
+	const handleArrival = useCallback((group, extraCount) => {
+		setToast({ group, extraCount });
+	}, []);
 
 	const {
 		unreadCount,
@@ -76,7 +82,7 @@ function NotificationBell() {
 		markAllRead,
 		pausePolling,
 		resumePolling
-	} = useNotifications({ enabled: isAuthenticated });
+	} = useNotifications({ enabled: isAuthenticated, onArrival: handleArrival });
 
 	const open = isMobile ? drawerOpen : Boolean(anchorEl);
 
@@ -113,6 +119,11 @@ function NotificationBell() {
 		dispatch(Actions.navbarCloseMobile());
 		if (path) navigate(path);
 	}, [handleClose, navigate, dispatch]);
+
+	const handleToastOpen = useCallback(() => {
+		if (toast?.group) handleItemClick(toast.group);
+		setToast(null);
+	}, [toast, handleItemClick]);
 
 	const handleReadAll = useCallback(() => {
 		markAllRead();
@@ -171,6 +182,12 @@ function NotificationBell() {
 					{panel}
 				</Popover>
 			)}
+			<NotificationToast
+				group={toast?.group}
+				extraCount={toast?.extraCount || 0}
+				onOpen={handleToastOpen}
+				onClose={() => setToast(null)}
+			/>
 		</>
 	);
 }
