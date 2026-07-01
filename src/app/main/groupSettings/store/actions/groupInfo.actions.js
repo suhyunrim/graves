@@ -110,7 +110,8 @@ export function getDiscordChannels(groupId) {
 		};
 	}
 	return dispatch => {
-		const request = createCamilleAxios().get(`/api/group/${groupId}/discord-channels`);
+		// silentError: 디스코드 미연결 등 실패 시 maintenance 리다이렉트 대신 호출부가 안내 처리.
+		const request = createCamilleAxios().get(`/api/group/${groupId}/discord-text-channels`, { silentError: true });
 
 		return request.then(response =>
 			dispatch({

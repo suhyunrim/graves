@@ -789,10 +789,10 @@ export function getSampleDiscordRolesData() {
 
 export function getSampleDiscordChannelsData() {
 	return [
-		{ id: 'ch-1', name: '공지' },
-		{ id: 'ch-2', name: '일반' },
-		{ id: 'ch-3', name: '내전-모집' },
-		{ id: 'ch-4', name: '봇-알림' }
+		{ id: 'ch-1', name: '공지', categoryId: 'cat-1' },
+		{ id: 'ch-2', name: '일반', categoryId: 'cat-1' },
+		{ id: 'ch-3', name: '내전-모집', categoryId: 'cat-2' },
+		{ id: 'ch-4', name: '봇-알림', categoryId: 'cat-2' }
 	];
 }
 

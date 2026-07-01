@@ -389,6 +389,17 @@ const useStyles = makeStyles()((theme) => ({
 			color: 'rgba(255, 255, 255, 0.5)'
 		}
 	},
+	channelNotice: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.1rem',
+		color: 'rgba(255, 215, 0, 0.8)',
+		background: 'rgba(255, 215, 0, 0.06)',
+		border: '1px solid rgba(255, 215, 0, 0.25)',
+		borderRadius: 8,
+		padding: '10px 14px',
+		maxWidth: 360,
+		lineHeight: 1.5
+	},
 	confirmDialogPaper: {
 		background: 'linear-gradient(135deg, #1a1a2e 0%, #0f0f1a 100%)',
 		color: '#fff',
@@ -422,6 +433,7 @@ function GroupInfoContent() {
 	const [nameValue, setNameValue] = useState('');
 	const [onboardingDialogOpen, setOnboardingDialogOpen] = useState(false);
 	const [resetConfirmOpen, setResetConfirmOpen] = useState(false);
+	const [channelsStatus, setChannelsStatus] = useState('loading'); // 'loading' | 'ready' | 'error'
 	const [isSaving, startSaveTransition] = useTransition();
 	const [isToggling, startToggleTransition] = useTransition();
 	const [isResetting, startResetTransition] = useTransition();
@@ -436,7 +448,10 @@ function GroupInfoContent() {
 	useEffect(() => {
 		if (groupId && isAdmin) {
 			dispatch(Actions.getGroupInfo(groupId));
-			dispatch(Actions.getDiscordChannels(groupId));
+			setChannelsStatus('loading');
+			dispatch(Actions.getDiscordChannels(groupId))
+				.then(() => setChannelsStatus('ready'))
+				.catch(() => setChannelsStatus('error'));
 		}
 	}, [dispatch, groupId, isAdmin]);
 
@@ -572,7 +587,8 @@ function GroupInfoContent() {
 	const storedNickChannel = optimisticSettings?.nicknameChangeChannelId || '';
 	const channelList = discordChannels || [];
 	const nickChannelKnown = channelList.some(c => c.id === storedNickChannel);
-	const nickChannelSelectValue = storedNickChannel ? storedNickChannel : NICK_CHANNEL_NONE;
+	// 저장된 채널이 목록에 없으면(삭제/권한 상실) "선택 안 함"으로 표시.
+	const nickChannelSelectValue = storedNickChannel && nickChannelKnown ? storedNickChannel : NICK_CHANNEL_NONE;
 
 	return (
 		<div className={classes.root}>
@@ -758,28 +774,31 @@ function GroupInfoContent() {
 						<div className={classes.settingLabel}>닉네임 변경 알림 채널</div>
 						<div className={classes.settingDesc}>
 							매일 새벽 감지된 소환사 닉네임 변경을 선택한 디스코드 채널로 &quot;이전닉 → 새닉&quot; 형태로 알립니다.
-							&apos;알림 안 함&apos;을 고르면 이 그룹은 알림을 보내지 않습니다.
+							&apos;선택 안 함&apos;을 고르면 이 그룹은 알림을 보내지 않습니다.
 						</div>
 					</div>
-					<TextField
-						className={classes.channelSelect}
-						select
-						fullWidth
-						variant="outlined"
-						size="small"
-						label="알림 채널"
-						value={nickChannelSelectValue}
-						onChange={handleChangeNickChannel}
-						disabled={isToggling}
-					>
-						<MenuItem value={NICK_CHANNEL_NONE}>알림 안 함</MenuItem>
-						{channelList.map(c => (
-							<MenuItem key={c.id} value={c.id}># {c.name}</MenuItem>
-						))}
-						{storedNickChannel && !nickChannelKnown && (
-							<MenuItem value={storedNickChannel}>알 수 없는 채널 ({storedNickChannel})</MenuItem>
-						)}
-					</TextField>
+					{channelsStatus === 'error' ? (
+						<div className={classes.channelNotice}>
+							디스코드 채널 목록을 불러오지 못했습니다. 봇의 디스코드 서버 연결 상태를 확인한 뒤 다시 시도해주세요.
+						</div>
+					) : (
+						<TextField
+							className={classes.channelSelect}
+							select
+							fullWidth
+							variant="outlined"
+							size="small"
+							label="알림 채널"
+							value={nickChannelSelectValue}
+							onChange={handleChangeNickChannel}
+							disabled={isToggling || channelsStatus === 'loading'}
+						>
+							<MenuItem value={NICK_CHANNEL_NONE}>선택 안 함</MenuItem>
+							{channelList.map(c => (
+								<MenuItem key={c.id} value={c.id}># {c.name}</MenuItem>
+							))}
+						</TextField>
+					)}
 				</div>
 			</div>
 
