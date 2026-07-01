@@ -1,10 +1,10 @@
 import React, { useState, useMemo } from 'react';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button } from '@mui/material';
 import { makeStyles } from 'tss-react/mui';
-import StarIcon from '@mui/icons-material/Star';
 import camilleRiotAuthService from 'app/services/camilleRiotAuthService/camilleRiotAuthService';
 import useDialogStyles from '../components/dialogStyles';
 import * as Actions from './store/actions';
+import TeamRosterCard from './TeamRosterCard';
 import { isValidMatch, getStageLabel, getTotalRoundsFromMatches } from './tournamentUtils';
 
 // 열린 매치(predictable)만 대상으로 초기 픽 맵 구성.
@@ -42,7 +42,7 @@ const useStyles = makeStyles()((theme) => ({
 	},
 	grid: {
 		display: 'grid',
-		gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
+		gridTemplateColumns: 'repeat(auto-fill, minmax(520px, 1fr))',
 		gap: 12,
 		[theme.breakpoints.down('sm')]: {
 			gridTemplateColumns: '1fr',
@@ -64,43 +64,53 @@ const useStyles = makeStyles()((theme) => ({
 		textAlign: 'center',
 		letterSpacing: '0.02em'
 	},
+	matchBody: {
+		display: 'flex',
+		alignItems: 'stretch',
+		[theme.breakpoints.down('sm')]: {
+			flexDirection: 'column'
+		}
+	},
 	teamSlot: {
-		padding: '10px 12px',
-		fontFamily: '"Noto Sans KR", sans-serif',
-		fontSize: '1.25rem',
-		color: 'rgba(255, 255, 255, 0.85)',
+		flex: 1,
+		minWidth: 0,
+		padding: '12px 14px',
 		cursor: 'pointer',
 		transition: 'background 0.15s ease',
-		borderTop: '1px solid rgba(0, 212, 255, 0.08)',
-		display: 'flex',
-		alignItems: 'center',
-		gap: 8,
-		minHeight: 42,
-		'&:first-of-type': { borderTop: 'none' },
-		'&:hover': { background: 'rgba(0, 212, 255, 0.1)' },
+		'&:hover': { background: 'rgba(0, 212, 255, 0.06)' },
 		[theme.breakpoints.down('sm')]: {
-			fontSize: '1.15rem',
-			padding: '8px 10px',
-			minHeight: 38
+			padding: '10px 12px'
 		}
 	},
 	teamSlotSelected: {
-		background: 'rgba(0, 212, 255, 0.18)',
-		color: '#00d4ff',
+		background: 'rgba(0, 212, 255, 0.12)',
+		'&:hover': { background: 'rgba(0, 212, 255, 0.16)' }
+	},
+	vsCol: {
+		display: 'flex',
+		alignItems: 'center',
+		justifyContent: 'center',
+		padding: '0 8px',
+		flexShrink: 0,
+		fontFamily: '"Rajdhani", sans-serif',
+		fontSize: '1.15rem',
 		fontWeight: 700,
-		'&:hover': { background: 'rgba(0, 212, 255, 0.24)' }
+		letterSpacing: '0.06em',
+		color: 'rgba(255, 255, 255, 0.3)',
+		borderLeft: '1px solid rgba(0, 212, 255, 0.1)',
+		borderRight: '1px solid rgba(0, 212, 255, 0.1)',
+		[theme.breakpoints.down('sm')]: {
+			borderLeft: 'none',
+			borderRight: 'none',
+			borderTop: '1px solid rgba(0, 212, 255, 0.1)',
+			borderBottom: '1px solid rgba(0, 212, 255, 0.1)',
+			padding: '3px 0'
+		}
 	},
-	teamName: {
-		flex: 1,
-		minWidth: 0,
-		overflow: 'hidden',
-		textOverflow: 'ellipsis',
-		whiteSpace: 'nowrap'
-	},
-	pickStar: {
-		fontSize: '1.3rem',
-		color: '#ffd700',
-		flexShrink: 0
+	teamNameFallback: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.25rem',
+		color: 'rgba(255, 255, 255, 0.6)'
 	},
 	contextLine: {
 		fontFamily: '"Noto Sans KR", sans-serif',
@@ -211,8 +221,11 @@ function RollingPredictionDialog({ open, onClose, onSuccess, tournamentId, match
 				className={cx(classes.teamSlot, isSelected && classes.teamSlotSelected)}
 				onClick={() => handleSelect(m.id, teamId)}
 			>
-				<span className={classes.teamName}>{team ? team.name : `팀#${teamId}`}</span>
-				{isSelected && <StarIcon className={classes.pickStar} />}
+				{team ? (
+					<TeamRosterCard team={team} selected={isSelected} />
+				) : (
+					<span className={classes.teamNameFallback}>팀#{teamId}</span>
+				)}
 			</div>
 		);
 	}
@@ -242,8 +255,11 @@ function RollingPredictionDialog({ open, onClose, onSuccess, tournamentId, match
 							return (
 								<div key={m.id} className={classes.matchCard}>
 									<div className={classes.matchHeader}>{stage} · 매치 {m.bracketSlot + 1}</div>
-									{renderSlot(m, m.team1Id)}
-									{renderSlot(m, m.team2Id)}
+									<div className={classes.matchBody}>
+										{renderSlot(m, m.team1Id)}
+										<div className={classes.vsCol}>VS</div>
+										{renderSlot(m, m.team2Id)}
+									</div>
 								</div>
 							);
 						})}
