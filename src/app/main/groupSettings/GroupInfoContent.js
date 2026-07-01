@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useTransition, useOptimistic } from 'react';
 import {
 	TextField,
+	MenuItem,
 	Switch,
 	IconButton,
 	Button,
@@ -38,6 +39,9 @@ const VOTE_MODE_DESCRIPTIONS = {
 	normal: '참가자 투표로 플랜을 결정합니다. 투표 현황이 실시간 공개됩니다.',
 	blind: '참가자 투표로 플랜을 결정합니다. 투표 현황은 확정 후 공개됩니다.'
 };
+
+// 닉네임 변경 알림 채널 드롭다운의 "알림 안 함" 항목 값(빈 값으로 저장).
+const NICK_CHANNEL_NONE = '__none__';
 
 const useStyles = makeStyles()((theme) => ({
 	root: {
@@ -349,6 +353,42 @@ const useStyles = makeStyles()((theme) => ({
 			background: 'rgba(255, 107, 107, 0.08)'
 		}
 	},
+	nickChannelRow: {
+		display: 'flex',
+		flexDirection: 'column',
+		gap: 12,
+		padding: '14px 0 4px'
+	},
+	channelSelect: {
+		maxWidth: 360,
+		alignSelf: 'flex-start',
+		'& .MuiInputBase-root': {
+			color: '#fff',
+			fontFamily: '"Noto Sans KR", sans-serif',
+			fontSize: '1.15rem',
+			background: 'rgba(255, 255, 255, 0.04)',
+			borderRadius: 8
+		},
+		'& .MuiInputLabel-root': {
+			color: 'rgba(255, 255, 255, 0.6)',
+			fontFamily: '"Noto Sans KR", sans-serif'
+		},
+		'& .MuiInputLabel-root.Mui-focused': {
+			color: '#00d4ff'
+		},
+		'& .MuiOutlinedInput-notchedOutline': {
+			borderColor: 'rgba(0, 212, 255, 0.3)'
+		},
+		'& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline': {
+			borderColor: 'rgba(0, 212, 255, 0.5)'
+		},
+		'& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline': {
+			borderColor: '#00d4ff'
+		},
+		'& .MuiSelect-icon': {
+			color: 'rgba(255, 255, 255, 0.5)'
+		}
+	},
 	confirmDialogPaper: {
 		background: 'linear-gradient(135deg, #1a1a2e 0%, #0f0f1a 100%)',
 		color: '#fff',
@@ -376,7 +416,7 @@ function GroupInfoContent() {
 	const theme = useTheme();
 	const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 	const user = useSelector(state => state.auth.user);
-	const { info, loading } = useSelector(({ GroupSettings }) => GroupSettings.groupInfo);
+	const { info, loading, discordChannels } = useSelector(({ GroupSettings }) => GroupSettings.groupInfo);
 
 	const [editingName, setEditingName] = useState(false);
 	const [nameValue, setNameValue] = useState('');
@@ -396,6 +436,7 @@ function GroupInfoContent() {
 	useEffect(() => {
 		if (groupId && isAdmin) {
 			dispatch(Actions.getGroupInfo(groupId));
+			dispatch(Actions.getDiscordChannels(groupId));
 		}
 	}, [dispatch, groupId, isAdmin]);
 
@@ -496,6 +537,21 @@ function GroupInfoContent() {
 		});
 	}
 
+	function handleChangeNickChannel(e) {
+		const raw = e.target.value;
+		const val = raw === NICK_CHANNEL_NONE ? '' : raw;
+		if (val === (info.settings?.nicknameChangeChannelId || '')) return;
+		startToggleTransition(async () => {
+			applyOptimisticSettings({ nicknameChangeChannelId: val });
+			try {
+				await dispatch(Actions.updateGroupSettings(groupId, { nicknameChangeChannelId: val }));
+				toast.success(val ? '닉네임 변경 알림 채널이 설정되었습니다.' : '닉네임 변경 알림을 끕니다.');
+			} catch {
+				toast.error('설정 변경에 실패했습니다.');
+			}
+		});
+	}
+
 	function handleConfirmReset() {
 		startResetTransition(async () => {
 			try {
@@ -512,6 +568,11 @@ function GroupInfoContent() {
 		const d = new Date(dateStr);
 		return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')}`;
 	}
+
+	const storedNickChannel = optimisticSettings?.nicknameChangeChannelId || '';
+	const channelList = discordChannels || [];
+	const nickChannelKnown = channelList.some(c => c.id === storedNickChannel);
+	const nickChannelSelectValue = storedNickChannel ? storedNickChannel : NICK_CHANNEL_NONE;
 
 	return (
 		<div className={classes.root}>
@@ -691,6 +752,34 @@ function GroupInfoContent() {
 							disabled={isToggling}
 						/>
 					</div>
+				</div>
+				<div className={classes.nickChannelRow}>
+					<div className={classes.settingInfo}>
+						<div className={classes.settingLabel}>닉네임 변경 알림 채널</div>
+						<div className={classes.settingDesc}>
+							매일 새벽 감지된 소환사 닉네임 변경을 선택한 디스코드 채널로 &quot;이전닉 → 새닉&quot; 형태로 알립니다.
+							&apos;알림 안 함&apos;을 고르면 이 그룹은 알림을 보내지 않습니다.
+						</div>
+					</div>
+					<TextField
+						className={classes.channelSelect}
+						select
+						fullWidth
+						variant="outlined"
+						size="small"
+						label="알림 채널"
+						value={nickChannelSelectValue}
+						onChange={handleChangeNickChannel}
+						disabled={isToggling}
+					>
+						<MenuItem value={NICK_CHANNEL_NONE}>알림 안 함</MenuItem>
+						{channelList.map(c => (
+							<MenuItem key={c.id} value={c.id}># {c.name}</MenuItem>
+						))}
+						{storedNickChannel && !nickChannelKnown && (
+							<MenuItem value={storedNickChannel}>알 수 없는 채널 ({storedNickChannel})</MenuItem>
+						)}
+					</TextField>
 				</div>
 			</div>
 

@@ -1,12 +1,17 @@
 import createCamilleAxios from 'app/utility/camilleAxios';
 import { isSampleMode } from 'app/main/sample/sampleStorage';
-import { getSampleGroupInfoData, getSampleDiscordRolesData } from 'app/main/sample/sampleData';
+import {
+	getSampleGroupInfoData,
+	getSampleDiscordRolesData,
+	getSampleDiscordChannelsData
+} from 'app/main/sample/sampleData';
 
 export const GET_GROUP_INFO = '[GROUP_INFO] GET INFO';
 export const GET_GROUP_INFO_LOADING = '[GROUP_INFO] LOADING';
 export const SET_GROUP_NAME = '[GROUP_INFO] SET NAME';
 export const SET_GROUP_SETTINGS = '[GROUP_INFO] SET SETTINGS';
 export const GET_DISCORD_ROLES = '[GROUP_INFO] GET DISCORD ROLES';
+export const GET_DISCORD_CHANNELS = '[GROUP_INFO] GET DISCORD CHANNELS';
 
 export function getGroupInfo(groupId) {
 	if (isSampleMode()) {
@@ -91,6 +96,25 @@ export function getDiscordRoles(groupId) {
 		return request.then(response =>
 			dispatch({
 				type: GET_DISCORD_ROLES,
+				payload: response.data
+			})
+		);
+	};
+}
+
+export function getDiscordChannels(groupId) {
+	if (isSampleMode()) {
+		return dispatch => {
+			dispatch({ type: GET_DISCORD_CHANNELS, payload: getSampleDiscordChannelsData() });
+			return Promise.resolve();
+		};
+	}
+	return dispatch => {
+		const request = createCamilleAxios().get(`/api/group/${groupId}/discord-channels`);
+
+		return request.then(response =>
+			dispatch({
+				type: GET_DISCORD_CHANNELS,
 				payload: response.data
 			})
 		);

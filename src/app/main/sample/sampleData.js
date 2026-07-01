@@ -787,6 +787,15 @@ export function getSampleDiscordRolesData() {
 	];
 }
 
+export function getSampleDiscordChannelsData() {
+	return [
+		{ id: 'ch-1', name: '공지' },
+		{ id: 'ch-2', name: '일반' },
+		{ id: 'ch-3', name: '내전-모집' },
+		{ id: 'ch-4', name: '봇-알림' }
+	];
+}
+
 function getDefaultAuditLogsData() {
 	const logs = [];
 	const templates = [
