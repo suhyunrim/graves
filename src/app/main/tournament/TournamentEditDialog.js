@@ -4,6 +4,8 @@ import { makeStyles } from 'tss-react/mui';
 import useDialogStyles from '../components/dialogStyles';
 import * as Actions from './store/actions';
 import TrophyTypeGrid from './TrophyTypeGrid';
+import PredictionModeField from './PredictionModeField';
+import { STATUS } from './tournamentUtils';
 
 const useStyles = makeStyles()((theme) => ({
 	paperWidth: {
@@ -56,8 +58,14 @@ function TournamentEditDialog({ open, onClose, onSuccess, tournament }) {
 
 	const [name, setName] = useState(tournament ? tournament.name : '');
 	const [trophyType, setTrophyType] = useState(tournament && tournament.trophyType ? tournament.trophyType : '');
+	const [predictionMode, setPredictionMode] = useState(
+		tournament && tournament.predictionMode ? tournament.predictionMode : 'bracket'
+	);
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState('');
+
+	// 예측 방식은 준비중일 때만 변경 가능 (백엔드도 그 외 상태면 409).
+	const canEditMode = tournament && tournament.status === STATUS.PREPARING;
 
 	function handleSubmit() {
 		if (!tournament) return;
@@ -67,6 +75,8 @@ function TournamentEditDialog({ open, onClose, onSuccess, tournament }) {
 		if (trimmed && trimmed !== tournament.name) body.name = trimmed;
 		const newTrophy = trophyType || null;
 		if (newTrophy !== (tournament.trophyType || null)) body.trophyType = newTrophy;
+		const curMode = tournament.predictionMode || 'bracket';
+		if (canEditMode && predictionMode !== curMode) body.predictionMode = predictionMode;
 		if (Object.keys(body).length === 0) {
 			onClose();
 			return;
@@ -115,6 +125,12 @@ function TournamentEditDialog({ open, onClose, onSuccess, tournament }) {
 					value={trophyType}
 					onChange={setTrophyType}
 					helperText="우승 시 표시되는 트로피. 미지정도 가능."
+				/>
+				<PredictionModeField
+					value={predictionMode}
+					onChange={setPredictionMode}
+					disabled={!canEditMode}
+					disabledReason="준비중인 토너먼트만 예측 방식을 변경할 수 있습니다."
 				/>
 				{error && <div className={classes.errorText}>{error}</div>}
 			</DialogContent>

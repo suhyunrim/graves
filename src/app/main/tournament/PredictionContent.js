@@ -9,6 +9,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
 import camilleRiotAuthService from 'app/services/camilleRiotAuthService/camilleRiotAuthService';
 import PredictionDialog from './PredictionDialog';
+import RollingPredictionDialog from './RollingPredictionDialog';
 import { STATUS, displayNameForPuuid, isValidMatch, getTotalRoundsFromMatches, getStageLabel } from './tournamentUtils';
 import useDiscordLoginGate from '../components/useDiscordLoginGate';
 
@@ -295,7 +296,7 @@ function formatAccuracy(correct, settled) {
 	return `${pct}% (${correct}/${settled})`;
 }
 
-function PredictionContent({ tournamentId, status, predictionsLocked, matches, teams, leaderboard, roundLabels, onMutated }) {
+function PredictionContent({ tournamentId, status, predictionMode = 'bracket', predictionsLocked, matches, teams, leaderboard, roundLabels, onMutated }) {
 	const { classes, cx } = useStyles();
 	const myPuuid = useMemo(() => camilleRiotAuthService.getAuthenticatedPuuid(), []);
 	const [dialogOpen, setDialogOpen] = useState(false);
@@ -348,17 +349,36 @@ function PredictionContent({ tournamentId, status, predictionsLocked, matches, t
 
 	const isPreparing = status === STATUS.PREPARING;
 	const isFinished = status === STATUS.FINISHED;
-	const canPredict = !isPreparing && !isFinished && !predictionsLocked;
+	const isRolling = predictionMode === 'rolling';
 
+	// rolling: 지금 예측 가능한(양팀 확정+미시작) 매치 수.
+	const openMatchCount = useMemo(
+		() => (isRolling ? predictableMatches.filter(m => m.predictable).length : 0),
+		[isRolling, predictableMatches]
+	);
+
+	let canPredict;
 	let notice = null;
-	if (isPreparing) {
-		notice = '토너먼트가 시작되면 예측이 가능합니다.';
-	} else if (predictionsLocked && !isFinished) {
-		notice = '첫 매치가 시작되어 예측이 마감되었습니다.';
-	} else if (isFinished) {
-		notice = '종료된 토너먼트입니다.';
+	if (isRolling) {
+		canPredict = openMatchCount > 0;
+		if (openMatchCount > 0) {
+			notice = `지금 예측할 수 있는 경기 ${openMatchCount}개 — 두 팀이 확정된 경기만 그때그때 예측할 수 있어요.`;
+		} else if (isFinished) {
+			notice = '종료된 토너먼트입니다.';
+		} else {
+			notice = '지금 예측할 수 있는 경기가 없습니다. 대진이 확정되면 예측할 수 있어요.';
+		}
 	} else {
-		notice = '첫 매치가 시작되기 전까지 자유롭게 변경할 수 있습니다.';
+		canPredict = !isPreparing && !isFinished && !predictionsLocked;
+		if (isPreparing) {
+			notice = '토너먼트가 시작되면 예측이 가능합니다.';
+		} else if (predictionsLocked && !isFinished) {
+			notice = '첫 매치가 시작되어 예측이 마감되었습니다.';
+		} else if (isFinished) {
+			notice = '종료된 토너먼트입니다.';
+		} else {
+			notice = '첫 매치가 시작되기 전까지 자유롭게 변경할 수 있습니다.';
+		}
 	}
 
 	function handleSuccess() {
@@ -494,14 +514,26 @@ function PredictionContent({ tournamentId, status, predictionsLocked, matches, t
 			</div>
 
 			{dialogOpen && (
-				<PredictionDialog
-					open
-					onClose={() => setDialogOpen(false)}
-					onSuccess={handleSuccess}
-					tournamentId={tournamentId}
-					matches={matches}
-					teams={teams}
-				/>
+				isRolling ? (
+					<RollingPredictionDialog
+						open
+						onClose={() => setDialogOpen(false)}
+						onSuccess={handleSuccess}
+						tournamentId={tournamentId}
+						matches={matches}
+						teams={teams}
+						roundLabels={roundLabels}
+					/>
+				) : (
+					<PredictionDialog
+						open
+						onClose={() => setDialogOpen(false)}
+						onSuccess={handleSuccess}
+						tournamentId={tournamentId}
+						matches={matches}
+						teams={teams}
+					/>
+				)
 			)}
 			{discordLoginGate}
 		</div>

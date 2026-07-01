@@ -26,6 +26,7 @@ import * as Actions from './store/actions';
 import { bestOfLabel, POSITIONS, POSITION_LABELS } from './tournamentUtils';
 import PositionIcon from './PositionIcon';
 import TrophyTypeGrid from './TrophyTypeGrid';
+import PredictionModeField from './PredictionModeField';
 
 const useStyles = makeStyles()((theme) => ({
 	paperWidth: {
@@ -245,6 +246,7 @@ function TournamentCreateDialog({ open, onClose, onSuccess, groupId }) {
 		heldAt: new Date()
 	});
 	const [type, setType] = useState('normal');
+	const [predictionMode, setPredictionMode] = useState('bracket');
 	const [allowSingleTeam, setAllowSingleTeam] = useState(false);
 	const [auction, setAuction] = useState(DEFAULT_AUCTION);
 	const [candidates, setCandidates] = useState(makeEmptyCandidates);
@@ -324,6 +326,7 @@ function TournamentCreateDialog({ open, onClose, onSuccess, groupId }) {
 			finalBestOf: form.finalBestOf,
 			trophyType: form.trophyType || null,
 			type,
+			predictionMode,
 			heldAt: format(form.heldAt, 'yyyy-MM-dd')
 		};
 		if (type === 'normal' && allowSingleTeam) {
@@ -525,6 +528,8 @@ function TournamentCreateDialog({ open, onClose, onSuccess, groupId }) {
 					onChange={v => setForm(prev => ({ ...prev, trophyType: v }))}
 					helperText="우승 시 표시되는 트로피. 미지정도 가능."
 				/>
+
+				<PredictionModeField value={predictionMode} onChange={setPredictionMode} />
 
 				{type === 'normal' && (
 					<>

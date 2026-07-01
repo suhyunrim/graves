@@ -1179,6 +1179,7 @@ function TournamentDetail() {
 							<PredictionContent
 								tournamentId={tournamentId}
 								status={detail.status}
+								predictionMode={detail.predictionMode}
 								predictionsLocked={detail.predictionsLocked}
 								matches={matches}
 								teams={teams}
@@ -1375,6 +1376,7 @@ function TournamentDetail() {
 							<PredictionContent
 								tournamentId={tournamentId}
 								status={detail.status}
+								predictionMode={detail.predictionMode}
 								predictionsLocked={detail.predictionsLocked}
 								matches={matches}
 								teams={teams}
