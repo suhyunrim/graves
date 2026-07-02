@@ -1267,9 +1267,9 @@ function AuctionStage({ tournament, teams, isAdmin, onChanged }) {
 
 	useEffect(() => {
 		if (tournament.groupId) {
-			dispatch(Actions.getActiveMembers(tournament.groupId));
+			dispatch(Actions.getActiveMembers(tournament.groupId, tournament.heldAt));
 		}
-	}, [dispatch, tournament.groupId]);
+	}, [dispatch, tournament.groupId, tournament.heldAt]);
 
 	const memberMap = useMemo(() => {
 		const m = new Map();

@@ -1,3 +1,4 @@
+import { isBefore, startOfDay } from 'date-fns';
 import createCamilleAxios from 'app/utility/camilleAxios';
 import { isSampleMode } from 'app/main/sample/sampleStorage';
 import {
@@ -58,9 +59,11 @@ export function clearTournamentDetail() {
 	return { type: CLEAR_TOURNAMENT_DETAIL };
 }
 
-// 토너먼트 팀원/후보 선택기는 현역 + outsider(과거 우승자) 전원이 필요하므로 all-members 사용.
+// 토너먼트 팀원/후보 선택기 멤버 풀 — 개최일(heldAt) 기준 분기.
+// 개최일이 과거(날짜 단위, 로컬 기준)면 과거 기록 소급 입력이므로 탈퇴자 포함 전원(all-members),
+// 오늘/미래 또는 heldAt 없음(레거시 row 방어)이면 현역만(active-members).
 // (멘션/태그 자동완성 등 다른 곳은 active-members 유지 — profileApi 참고.)
-export function getActiveMembers(groupId) {
+export function getActiveMembers(groupId, heldAt) {
 	if (isSampleMode()) {
 		return dispatch => {
 			const members = getSampleTournamentActiveMembersData();
@@ -68,9 +71,11 @@ export function getActiveMembers(groupId) {
 			return Promise.resolve(members);
 		};
 	}
+	const isPastTournament = Boolean(heldAt) && isBefore(startOfDay(new Date(heldAt)), startOfDay(new Date()));
+	const endpoint = isPastTournament ? 'all-members' : 'active-members';
 	return dispatch =>
 		createCamilleAxios()
-			.get(`/api/group/${groupId}/all-members`, { silentError: true })
+			.get(`/api/group/${groupId}/${endpoint}`, { silentError: true })
 			.then(response => {
 				dispatch({ type: SET_ACTIVE_MEMBERS, payload: response.data.result || [] });
 				return response.data.result;

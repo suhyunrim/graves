@@ -170,13 +170,15 @@ function TeamFormDialog({ open, onClose, onSuccess, tournamentId, groupId, team,
 	const [auctionCaptain, setAuctionCaptain] = useState(null);
 	const [auctionBudget, setAuctionBudget] = useState(1000);
 
+	const heldAt = tournament ? tournament.heldAt : null;
+
 	useEffect(() => {
-		// 팀 후보 목록(active-members)은 다이얼로그 열릴 때만 필요.
+		// 팀 후보 목록은 다이얼로그 열릴 때만 필요.
 		// 페이지 진입 시 미리 부르지 않고 여기서 lazy 로 가져온다.
 		if (groupId) {
-			dispatch(Actions.getActiveMembers(groupId));
+			dispatch(Actions.getActiveMembers(groupId, heldAt));
 		}
-	}, [dispatch, groupId]);
+	}, [dispatch, groupId, heldAt]);
 
 	const [name, setName] = useState(team ? team.name : '');
 	const [members, setMembers] = useState(() => {

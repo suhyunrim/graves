@@ -255,10 +255,11 @@ function TournamentCreateDialog({ open, onClose, onSuccess, groupId }) {
 
 	useEffect(() => {
 		// 경매 탭으로 전환되거나 다이얼로그가 열린 시점에 멤버 목록을 lazy 로드.
+		// 개최일이 과거로 선택되면 소급 입력이라 탈퇴자 포함 풀로 다시 불러온다.
 		if (open && type === 'auction' && groupId) {
-			dispatch(Actions.getActiveMembers(groupId));
+			dispatch(Actions.getActiveMembers(groupId, form.heldAt));
 		}
-	}, [dispatch, groupId, open, type]);
+	}, [dispatch, groupId, open, type, form.heldAt]);
 
 	const memberMap = useMemo(() => {
 		const m = new Map();
