@@ -94,11 +94,6 @@ const useStyles = makeStyles()(() => ({
 		fontWeight: 700,
 		color: 'rgba(255, 255, 255, 0.7)'
 	},
-	rating: {
-		fontFamily: '"Rajdhani", sans-serif',
-		fontSize: '1.15rem',
-		color: 'rgba(0, 212, 255, 0.8)'
-	},
 	leftBadge: {
 		fontFamily: '"Noto Sans KR", sans-serif',
 		fontSize: '1rem',
@@ -161,7 +156,6 @@ function FavoritesSection({ favorites, onRemove }) {
 											<span className={classes.tierLabel}>{getTierShortLabel(fav.rating)}</span>
 										</>
 									)}
-									{fav.rating != null && <span className={classes.rating}>{fav.rating}</span>}
 									{fav.leftGuildAt != null && <span className={classes.leftBadge}>탈퇴</span>}
 								</span>
 							</div>

@@ -974,6 +974,7 @@ function Dashboard() {
 							onToggleFavorite={canFavorite ? handleToggleFavorite : null}
 						/>
 					</div>
+					{canFavorite && <FavoritesSection favorites={favorites} onRemove={handleToggleFavorite} />}
 					<div className={classes.monthBadge}>
 						<IconButton className={classes.monthNavBtn} onClick={handlePrevMonth} size="small">
 							<ChevronLeftIcon />
@@ -984,7 +985,6 @@ function Dashboard() {
 							<ChevronRightIcon />
 						</IconButton>
 					</div>
-					{canFavorite && <FavoritesSection favorites={favorites} onRemove={handleToggleFavorite} />}
 					<RevealGroup className={classes.grid}>
 						{renderHonorKing()}
 						{renderMostGames()}
