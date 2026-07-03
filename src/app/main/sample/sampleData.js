@@ -309,6 +309,7 @@ function getDefaultMyInfoData(puuid) {
 			recentGames: 10,
 			recentWins: 7,
 			recentWinRate: 70,
+			recentResults: [true, false, true, true, false, true, true, false, true, true],
 			maxWinStreak: 8 - Math.floor(idx / 5),
 			maxLoseStreak: 3 + Math.floor(idx / 8),
 			bestOpponent,

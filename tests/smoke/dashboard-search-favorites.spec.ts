@@ -47,11 +47,13 @@ const FAKE_GET_INFO = {
 			topTeammates: [],
 			topOpponents: [],
 			bestTeammates: [],
-			recentGames: 0,
-			recentWins: 0,
-			recentWinRate: 0,
-			maxWinStreak: 0,
-			maxLoseStreak: 0,
+			recentGames: 10,
+			recentWins: 6,
+			recentWinRate: 60,
+			// 시간순 — 마지막 원소가 가장 최근. 화면에는 reverse되어 최신이 왼쪽.
+			recentResults: [true, false, true, false, true, true, false, true, true, false],
+			maxWinStreak: 4,
+			maxLoseStreak: 3,
 			bestOpponents: [],
 			worstOpponents: [],
 			ratingHistory: []
@@ -153,6 +155,11 @@ test('[대시보드] 검색 자동완성 — 부분 문자열 매칭 + 선택 �
 	await page.screenshot({ path: 'test-results/profile-favorite-star.png' });
 	await profileStar.click();
 	await expect(page.getByText('즐겨찾기에 추가했습니다.')).toBeVisible({ timeout: 5000 });
+
+	// 최근 10경기 OX 시퀀스 — recentResults를 reverse해 최신이 왼쪽
+	const oxRow = page.getByLabel('최근 10경기 승패 (최신순)');
+	await expect(oxRow).toBeVisible({ timeout: 10000 });
+	await expect(oxRow).toHaveText('XOOXOOXOXO');
 });
 
 test('[대시보드] 즐겨찾기 추가/제거 — 목록 즉시 반영', async ({ page }) => {

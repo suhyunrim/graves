@@ -497,6 +497,30 @@ const useStyles = makeStyles()((theme) => ({
 		color: 'rgba(255, 255, 255, 0.6)',
 		marginTop: 4
 	},
+	statValueRow: {
+		display: 'flex',
+		alignItems: 'baseline',
+		gap: 8,
+		flexWrap: 'wrap'
+	},
+	// statSubValue를 statValueRow 안에서 쓸 때 marginTop 제거용 (tss-react는 $ruleName 참조 미지원)
+	statSubValueInline: {
+		marginTop: 0
+	},
+	recentResultsRow: {
+		display: 'flex',
+		gap: 4,
+		marginTop: 6,
+		fontFamily: '"Rajdhani", sans-serif',
+		fontSize: '1.4rem',
+		fontWeight: 700
+	},
+	recentResultWin: {
+		color: '#00d4ff'
+	},
+	recentResultLose: {
+		color: '#ff6b6b'
+	},
 	recentWinRateHigh: {
 		color: '#00ff7f'
 	},
@@ -917,6 +941,7 @@ function MyInfoPage(props) {
 	const recentGames = useSelector(({ MyInfo }) => MyInfo.myInfo.recentGames);
 	const recentWins = useSelector(({ MyInfo }) => MyInfo.myInfo.recentWins);
 	const recentWinRate = useSelector(({ MyInfo }) => MyInfo.myInfo.recentWinRate);
+	const recentResults = useSelector(({ MyInfo }) => MyInfo.myInfo.recentResults);
 	const maxWinStreak = useSelector(({ MyInfo }) => MyInfo.myInfo.maxWinStreak);
 	const maxLoseStreak = useSelector(({ MyInfo }) => MyInfo.myInfo.maxLoseStreak);
 	const bestOpponents = useSelector(({ MyInfo }) => MyInfo.myInfo.bestOpponents);
@@ -1294,12 +1319,23 @@ function MyInfoPage(props) {
 								<div className={classes.statsGrid}>
 									<div className={classes.statCard}>
 										<div className={classes.statLabel}>최근 10경기</div>
-										<div className={`${classes.statValue} ${getRecentWinRateClass(recentWinRate)}`}>
-											{recentWinRate}%
+										<div className={classes.statValueRow}>
+											<div className={`${classes.statValue} ${getRecentWinRateClass(recentWinRate)}`}>
+												{recentWinRate}%
+											</div>
+											<div className={`${classes.statSubValue} ${classes.statSubValueInline}`}>
+												{recentWins}승 {recentGames - recentWins}패
+											</div>
 										</div>
-										<div className={classes.statSubValue}>
-											{recentWins}승 {recentGames - recentWins}패
-										</div>
+										{recentResults && recentResults.length > 0 && (
+											<div className={classes.recentResultsRow} aria-label="최근 10경기 승패 (최신순)">
+												{[...recentResults].reverse().map((won, i) => (
+													<span key={i} className={won ? classes.recentResultWin : classes.recentResultLose}>
+														{won ? 'O' : 'X'}
+													</span>
+												))}
+											</div>
+										)}
 									</div>
 									<div className={classes.statCard}>
 										<div className={classes.statLabel}>최다 연승</div>

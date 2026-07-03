@@ -21,6 +21,8 @@ const myInfoReducer = (state = initialState, action) => {
 				recentGames: stats.recentGames || 0,
 				recentWins: stats.recentWins || 0,
 				recentWinRate: stats.recentWinRate || 0,
+				// 최근 최대 10판 승패 boolean 배열 (시간순 — 마지막 원소가 가장 최근)
+				recentResults: stats.recentResults || [],
 				maxWinStreak: stats.maxWinStreak || 0,
 				maxLoseStreak: stats.maxLoseStreak || 0,
 				bestOpponents: stats.bestOpponents || [],
