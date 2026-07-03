@@ -11,10 +11,14 @@ import {
 	DialogContentText,
 	DialogActions,
 	CircularProgress,
+	IconButton,
 	Tabs,
 	Tab
 } from '@mui/material';
+import StarIcon from '@mui/icons-material/Star';
+import StarBorderIcon from '@mui/icons-material/StarBorder';
 import useToast from 'app/utility/useToast';
+import { fetchFavorites, addFavorite, removeFavorite } from 'app/utility/favoritesApi';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams, useLocation, useSearchParams, Link } from 'react-router-dom';
 import withReducer from 'app/store/withReducer';
@@ -141,6 +145,26 @@ const useStyles = makeStyles()((theme) => ({
 		[theme.breakpoints.down('sm')]: {
 			fontSize: '2.2rem'
 		}
+	},
+	favoriteBtn: {
+		marginLeft: 8,
+		verticalAlign: 'middle',
+		color: 'rgba(255, 255, 255, 0.35)',
+		'&:hover': {
+			color: '#ffd700',
+			background: 'rgba(255, 215, 0, 0.1)'
+		},
+		'& svg': {
+			fontSize: '2.4rem'
+		},
+		[theme.breakpoints.down('sm')]: {
+			'& svg': {
+				fontSize: '2rem'
+			}
+		}
+	},
+	favoriteBtnActive: {
+		color: '#ffd700'
 	},
 	summonerLevel: {
 		fontFamily: '"Noto Sans KR", sans-serif',
@@ -877,7 +901,7 @@ const useStyles = makeStyles()((theme) => ({
 }));
 
 function MyInfoPage(props) {
-	const { classes } = useStyles(props);
+	const { classes, cx } = useStyles(props);
 	const dispatch = useDispatch();
 
 	const { puuid } = useParams();
@@ -914,6 +938,29 @@ function MyInfoPage(props) {
 
 	const isMyPage = !puuid || puuid === myPuuid;
 	const isLoggedIn = Boolean(myPuuid);
+
+	// 타인 프로필 즐겨찾기 별 토글 — 로그인 유저별 + 그룹별 서버 저장. null이면 아직 조회 전(버튼 숨김).
+	const [isFavorite, setIsFavorite] = useState(null);
+	const favoriteGroupId = user?.reprGroup?.groupId;
+	const canFavorite = isOtherUser && isDiscordLoggedIn && Boolean(favoriteGroupId);
+
+	useEffect(() => {
+		setIsFavorite(null);
+		if (!isOtherUser || !isDiscordLoggedIn || !favoriteGroupId) return;
+		fetchFavorites(favoriteGroupId)
+			.then(list => setIsFavorite(list.some(f => f.puuid === puuid)))
+			.catch(() => {});
+	}, [isOtherUser, isDiscordLoggedIn, favoriteGroupId, puuid]);
+
+	function handleToggleFavorite() {
+		const request = isFavorite ? removeFavorite(favoriteGroupId, puuid) : addFavorite(favoriteGroupId, puuid);
+		request
+			.then(() => {
+				toast.success(isFavorite ? '즐겨찾기에서 제거했습니다.' : '즐겨찾기에 추가했습니다.');
+				setIsFavorite(!isFavorite);
+			})
+			.catch(err => toast.error(getApiErrorMessage(err, '즐겨찾기 처리에 실패했습니다.')));
+	}
 
 	function handleRegisterSubAccount() {
 		if (!subAccountInput.trim()) return;
@@ -1089,7 +1136,18 @@ function MyInfoPage(props) {
 					<div className={classes.profileSection}>
 						<img className={classes.profileIcon} src={getProfileIconURI()} alt="Profile Icon" />
 						<div className={classes.profileInfo}>
-							<div className={classes.summonerName}>{summonerInfo.name}</div>
+							<div className={classes.summonerName}>
+								{summonerInfo.name}
+								{canFavorite && isFavorite !== null && (
+									<IconButton
+										className={cx(classes.favoriteBtn, isFavorite && classes.favoriteBtnActive)}
+										onClick={handleToggleFavorite}
+										aria-label="즐겨찾기 토글"
+									>
+										{isFavorite ? <StarIcon /> : <StarBorderIcon />}
+									</IconButton>
+								)}
+							</div>
 							<div className={classes.summonerLevel}>
 								<span className={classes.levelBadge}>Lv. {summonerInfo.summonerLevel}</span>
 							</div>

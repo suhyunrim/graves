@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import FusePageSimple from '@fuse/core/FusePageSimple';
 import { makeStyles } from 'tss-react/mui';
 import { keyframes } from '@emotion/react';
@@ -8,8 +8,15 @@ import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import withReducer from 'app/store/withReducer';
+import camilleRiotAuthService from 'app/services/camilleRiotAuthService';
+import useToast from 'app/utility/useToast';
+import getApiErrorMessage from 'app/utility/getApiErrorMessage';
+import { fetchFavorites, addFavorite, removeFavorite } from 'app/utility/favoritesApi';
+import { isSampleMode } from 'app/main/sample/sampleStorage';
 import { DashboardSkeleton } from '../components/SkeletonLoaders';
 import DashboardHeader from './DashboardHeader';
+import UserSearchBar from './UserSearchBar';
+import FavoritesSection from './FavoritesSection';
 import reducer from './store/reducers';
 import * as Actions from './store/actions';
 import { RevealGroup } from '../components/Reveal';
@@ -33,6 +40,10 @@ const useStyles = makeStyles()((theme) => ({
 		padding: '24px',
 		maxWidth: 1400,
 		margin: '0 auto'
+	},
+	searchRow: {
+		display: 'flex',
+		justifyContent: 'center'
 	},
 	monthBadge: {
 		display: 'inline-flex',
@@ -411,6 +422,7 @@ const useStyles = makeStyles()((theme) => ({
 function Dashboard() {
 	const { classes } = useStyles();
 	const dispatch = useDispatch();
+	const toast = useToast();
 
 	const user = useSelector(state => state.auth.user);
 	const { data, loading } = useSelector(({ Dashboard: db }) => db.dashboard);
@@ -421,12 +433,46 @@ function Dashboard() {
 	};
 
 	const [month, setMonth] = useState(getCurrentMonth);
+	const [favorites, setFavorites] = useState([]);
+
+	const groupId = user?.reprGroup?.groupId;
+	// 즐겨찾기는 로그인 유저별 서버 저장이라 Discord 로그인 + 실제 그룹일 때만 노출.
+	const canFavorite = Boolean(groupId) && Boolean(camilleRiotAuthService.getDiscordToken()) && !isSampleMode();
 
 	useEffect(() => {
 		if (user?.reprGroup?.groupId) {
 			dispatch(Actions.getDashboard(user.reprGroup.groupId, month));
 		}
 	}, [dispatch, user, month]);
+
+	const loadFavorites = useCallback(() => {
+		if (!canFavorite) return;
+		fetchFavorites(groupId)
+			.then(list => setFavorites(list))
+			.catch(() => setFavorites([]));
+	}, [canFavorite, groupId]);
+
+	useEffect(() => {
+		// 그룹 전환 시 이전 그룹 목록이 잠깐 보이지 않게 비우고 다시 불러온다.
+		setFavorites([]);
+		loadFavorites();
+	}, [loadFavorites]);
+
+	const favoritePuuids = useMemo(() => new Set(favorites.map(f => f.puuid)), [favorites]);
+
+	const handleToggleFavorite = useCallback(
+		(member) => {
+			const isFav = favoritePuuids.has(member.puuid);
+			const request = isFav ? removeFavorite(groupId, member.puuid) : addFavorite(groupId, member.puuid);
+			request
+				.then(() => {
+					toast.success(isFav ? '즐겨찾기에서 제거했습니다.' : '즐겨찾기에 추가했습니다.');
+					loadFavorites();
+				})
+				.catch(err => toast.error(getApiErrorMessage(err, '즐겨찾기 처리에 실패했습니다.')));
+		},
+		[favoritePuuids, groupId, loadFavorites, toast]
+	);
 
 	const handlePrevMonth = useCallback(() => {
 		setMonth(prev => {
@@ -921,6 +967,13 @@ function Dashboard() {
 			header={<DashboardHeader />}
 			content={
 				<div className={classes.container}>
+					<div className={classes.searchRow}>
+						<UserSearchBar
+							groupId={groupId}
+							favoritePuuids={favoritePuuids}
+							onToggleFavorite={canFavorite ? handleToggleFavorite : null}
+						/>
+					</div>
 					<div className={classes.monthBadge}>
 						<IconButton className={classes.monthNavBtn} onClick={handlePrevMonth} size="small">
 							<ChevronLeftIcon />
@@ -931,6 +984,7 @@ function Dashboard() {
 							<ChevronRightIcon />
 						</IconButton>
 					</div>
+					{canFavorite && <FavoritesSection favorites={favorites} onRemove={handleToggleFavorite} />}
 					<RevealGroup className={classes.grid}>
 						{renderHonorKing()}
 						{renderMostGames()}
