@@ -1052,7 +1052,6 @@ function MyInfoPage(props) {
 
 	const getRatingLP = () => {
 		const rating = scoreInfo.defaultRating + scoreInfo.additionalRating;
-		const MASTER_BASE = 900; // 마스터+ 는 900 기준으로 LP 누적
 		const bases = [
 			['CHALLENGER', 1150],
 			['GRANDMASTER', 1000],
@@ -1065,6 +1064,7 @@ function MyInfoPage(props) {
 			['BRONZE', 300],
 			['IRON', 200]
 		];
+		const MASTER_BASE = bases.find(([name]) => name === 'MASTER')[1]; // 마스터+ 는 900 기준으로 LP 누적
 		for (const [name, base] of bases) {
 			if (rating >= base) {
 				if (['MASTER', 'GRANDMASTER', 'CHALLENGER'].includes(name)) {

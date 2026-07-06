@@ -41,8 +41,8 @@ const TIERS = [
 
 // 실제 prod 데이터 기반 래더 (상위권)
 const LADDER = [
-	{ rank: 1, name: '남 우서 연', tier: 'GRANDMASTER', sub: '376 LP', win: 12, loss: 9 },
-	{ rank: 2, name: 'O3Oa#KR1', tier: 'GRANDMASTER', sub: '28 LP', win: 70, loss: 52 },
+	{ rank: 1, name: '남 우서 연', tier: 'GRANDMASTER', sub: '776 LP', win: 12, loss: 9 },
+	{ rank: 2, name: 'O3Oa#KR1', tier: 'GRANDMASTER', sub: '428 LP', win: 70, loss: 52 },
 	{ rank: 3, name: '삼슐두꺼비뚜껍', tier: 'MASTER', sub: '376 LP', win: 76, loss: 52 },
 	{ rank: 4, name: '2일찔#217', tier: 'MASTER', sub: '300 LP', win: 42, loss: 31 },
 	{ rank: 5, name: '해 욥#KR1', tier: 'MASTER', sub: '216 LP', win: 8, loss: 5 }
