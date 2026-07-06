@@ -32,3 +32,9 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnp*
+
+# 로컬 전용 / 스크래치 (커밋 금지)
+/CLAUDE.local.md
+/.claude-screenshots/
+/record.js
+*.stackdump
