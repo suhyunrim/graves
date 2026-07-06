@@ -103,7 +103,7 @@ function RatingChart() {
 		for (const [name, config] of entries) {
 			if (rating >= config.base) {
 				if (['MASTER', 'GRANDMASTER', 'CHALLENGER'].includes(name)) {
-					return { tier: name, division: '', lp: Math.floor((rating - config.base) * 4) };
+					return { tier: name, division: '', lp: Math.floor((rating - tierConfig.MASTER.base) * 4) };
 				}
 				const divisionIndex = Math.floor((rating - config.base) / 25);
 				const divisions = ['IV', 'III', 'II', 'I'];
@@ -146,7 +146,7 @@ function RatingChart() {
 			const currentBase = tierConfig[tier].base;
 			const nextTierName = tierOrder[tierIndex + 1];
 			const nextBase = nextTierName ? tierConfig[nextTierName].base : currentBase + 200;
-			const lp = Math.round(subIndex * ((nextBase - currentBase) * 4) / 4);
+			const lp = Math.round((currentBase - tierConfig.MASTER.base) * 4 + subIndex * (nextBase - currentBase));
 			return `${tier} ${lp}LP`;
 		}
 		return `${tier} ${divisions[subIndex]}`;

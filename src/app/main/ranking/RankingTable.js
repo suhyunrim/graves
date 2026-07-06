@@ -548,7 +548,7 @@ function RankingTable(props) {
 		for (const [name, tierRating] of entries) {
 			if (rating >= tierRating) {
 				if (isNonStepTier(name)) {
-					return Math.floor((rating - tierRating) * 4);
+					return Math.floor((rating - tierNames.MASTER) * 4);
 				}
 				return Math.floor(((rating - tierRating) % 25) * 4);
 			}

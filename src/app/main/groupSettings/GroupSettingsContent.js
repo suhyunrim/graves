@@ -92,7 +92,7 @@ function getRatingTierShort(rating) {
 	const [name, threshold] = match;
 	const abbr = TIER_ABBR[name] || name.charAt(0);
 	if (isNonStepTier(name)) {
-		const lp = Math.floor((rating - threshold) * 4);
+		const lp = Math.floor((rating - TIER_THRESHOLDS.MASTER) * 4);
 		return `${abbr} ${lp}LP`;
 	}
 	const step = TIER_STEPS[Math.floor((rating - threshold) / 25)];
@@ -111,7 +111,7 @@ const TIER_OPTIONS = [];
 ['MASTER', 'GRANDMASTER', 'CHALLENGER'].forEach(tier => {
 	[0, 1, 2, 3].forEach(stepIdx => {
 		const rating = TIER_THRESHOLDS[tier] + stepIdx * 25;
-		const lp = stepIdx * 100;
+		const lp = Math.floor((rating - TIER_THRESHOLDS.MASTER) * 4);
 		const apiValue = `${TIER_ABBR[tier]}${4 - stepIdx}`;
 		TIER_OPTIONS.push({ label: `${TIER_ABBR[tier]} ${lp}LP`, tierName: tier, rating, apiValue });
 	});
