@@ -27,13 +27,6 @@ const navigationConfig = [
 				url: '/ranking'
 			},
 			{
-				id: 'position-ranking-component',
-				title: '포지션 랭킹',
-				type: 'item',
-				icon: 'leaderboard',
-				url: '/position-ranking'
-			},
-			{
 				id: 'match-history-component',
 				title: '내전 기록',
 				type: 'item',
