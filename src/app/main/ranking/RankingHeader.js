@@ -136,44 +136,6 @@ const useStyles = makeStyles()((theme) => ({
 			marginLeft: 0
 		}
 	},
-	positionRow: {
-		display: 'flex',
-		alignItems: 'center',
-		gap: 8,
-		marginTop: 10,
-		[theme.breakpoints.down('md')]: {
-			flexWrap: 'wrap'
-		}
-	},
-	positionRowLabel: {
-		fontFamily: '"Noto Sans KR", sans-serif',
-		fontSize: '1.15rem',
-		color: 'rgba(255, 255, 255, 0.5)',
-		marginRight: 4
-	},
-	positionChipIcon: {
-		width: 16,
-		height: 16,
-		marginRight: 5
-	},
-	// 칩에 이미 한글 라벨이 있으므로 아이콘 로드 실패 시 텍스트 fallback은 숨긴다
-	positionChipIconFallback: {
-		display: 'none'
-	},
-	positionInfoIcon: {
-		color: 'rgba(255,255,255,0.3)',
-		fontSize: '1.6rem',
-		padding: 2
-	},
-	positionTooltip: {
-		fontFamily: '"Noto Sans KR", sans-serif',
-		fontSize: '1.2rem',
-		lineHeight: 1.5,
-		padding: '8px 12px',
-		maxWidth: 280,
-		background: 'rgba(15, 15, 26, 0.95)',
-		border: '1px solid rgba(0, 212, 255, 0.3)'
-	},
 	filterChip: {
 		display: 'flex',
 		alignItems: 'center',
@@ -196,6 +158,66 @@ const useStyles = makeStyles()((theme) => ({
 		background: 'rgba(0, 212, 255, 0.2)',
 		borderColor: '#00d4ff',
 		color: '#00d4ff'
+	},
+	// 포지션 필터 행 — filterChip 패딩을 미디어쿼리로 덮어써야 하므로 filterChip보다 뒤에 정의(삽입 순서가 우선순위)
+	positionRow: {
+		display: 'flex',
+		alignItems: 'center',
+		gap: 8,
+		marginTop: 10,
+		// 모바일에선 한 줄 유지 — 칩을 아이콘만 남겨 압축하고, 초소형 화면은 가로 스크롤로 대응
+		[theme.breakpoints.down('md')]: {
+			gap: 4,
+			overflowX: 'auto',
+			'&::-webkit-scrollbar': {
+				display: 'none'
+			},
+			scrollbarWidth: 'none'
+		}
+	},
+	positionChip: {
+		flexShrink: 0,
+		[theme.breakpoints.down('md')]: {
+			padding: '5px 8px'
+		}
+	},
+	positionChipLabel: {
+		[theme.breakpoints.down('md')]: {
+			display: 'none'
+		}
+	},
+	positionChipIcon: {
+		width: 16,
+		height: 16,
+		marginRight: 5,
+		[theme.breakpoints.down('md')]: {
+			width: 18,
+			height: 18,
+			marginRight: 0
+		}
+	},
+	// 데스크톱은 칩에 한글 라벨이 있으므로 아이콘 로드 실패 시 fallback 텍스트를 숨기고,
+	// 라벨이 숨는 모바일에선 fallback 텍스트를 대신 노출한다
+	positionChipIconFallback: {
+		display: 'none',
+		[theme.breakpoints.down('md')]: {
+			display: 'inline'
+		}
+	},
+	positionInfoIcon: {
+		color: 'rgba(255,255,255,0.3)',
+		fontSize: '1.6rem',
+		padding: 2,
+		flexShrink: 0
+	},
+	positionTooltip: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.2rem',
+		lineHeight: 1.5,
+		padding: '8px 12px',
+		maxWidth: 280,
+		background: 'rgba(15, 15, 26, 0.95)',
+		border: '1px solid rgba(0, 212, 255, 0.3)'
 	},
 	calendarBtn: {
 		color: 'rgba(255, 255, 255, 0.7)',
@@ -623,9 +645,8 @@ function RankingHeader() {
 				</div>
 			</div>
 			<div className={classes.positionRow}>
-				<span className={classes.positionRowLabel}>포지션</span>
 				<div
-					className={`${classes.filterChip} ${!position ? classes.filterChipActive : ''}`}
+					className={`${classes.filterChip} ${classes.positionChip} ${!position ? classes.filterChipActive : ''}`}
 					onClick={() => handlePositionClick(null)}
 					role="button"
 					tabIndex={0}
@@ -636,7 +657,9 @@ function RankingHeader() {
 				{POSITIONS.map(pos => (
 					<div
 						key={pos.key}
-						className={`${classes.filterChip} ${position === pos.key ? classes.filterChipActive : ''}`}
+						className={`${classes.filterChip} ${classes.positionChip} ${
+							position === pos.key ? classes.filterChipActive : ''
+						}`}
 						onClick={() => handlePositionClick(pos.key)}
 						role="button"
 						tabIndex={0}
@@ -647,7 +670,7 @@ function RankingHeader() {
 							className={classes.positionChipIcon}
 							fallbackClassName={classes.positionChipIconFallback}
 						/>
-						{pos.label}
+						<span className={classes.positionChipLabel}>{pos.label}</span>
 					</div>
 				))}
 				<Tooltip
