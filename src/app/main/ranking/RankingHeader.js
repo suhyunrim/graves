@@ -1,15 +1,27 @@
 import React, { useState } from 'react';
-import { Typography, InputBase, Popover, IconButton } from '@mui/material';
+import { Typography, InputBase, Popover, IconButton, Tooltip } from '@mui/material';
 import { makeStyles } from 'tss-react/mui';
 import SearchIcon from '@mui/icons-material/Search';
 import DateRangeIcon from '@mui/icons-material/DateRange';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import { useDispatch, useSelector } from 'react-redux';
 import SeasonCountdownBadge from '../components/SeasonCountdownBadge';
+import PositionIcon from '../tournament/PositionIcon';
 import * as Actions from './store/actions';
 
 const DAYS = ['일', '월', '화', '수', '목', '금', '토'];
+
+// Riot 표준 포지션 키 → 한글 라벨 + PositionIcon용 키(소문자).
+// 표시는 항상 탑 → 정글 → 미드 → 원딜 → 서폿 순서 고정.
+const POSITIONS = [
+	{ key: 'TOP', label: '탑', icon: 'top' },
+	{ key: 'JUNGLE', label: '정글', icon: 'jungle' },
+	{ key: 'MIDDLE', label: '미드', icon: 'mid' },
+	{ key: 'BOTTOM', label: '원딜', icon: 'adc' },
+	{ key: 'UTILITY', label: '서폿', icon: 'support' }
+];
 
 function getDaysInMonth(year, month) {
 	return new Date(year, month + 1, 0).getDate();
@@ -123,6 +135,44 @@ const useStyles = makeStyles()((theme) => ({
 		[theme.breakpoints.down('md')]: {
 			marginLeft: 0
 		}
+	},
+	positionRow: {
+		display: 'flex',
+		alignItems: 'center',
+		gap: 8,
+		marginTop: 10,
+		[theme.breakpoints.down('md')]: {
+			flexWrap: 'wrap'
+		}
+	},
+	positionRowLabel: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.15rem',
+		color: 'rgba(255, 255, 255, 0.5)',
+		marginRight: 4
+	},
+	positionChipIcon: {
+		width: 16,
+		height: 16,
+		marginRight: 5
+	},
+	// 칩에 이미 한글 라벨이 있으므로 아이콘 로드 실패 시 텍스트 fallback은 숨긴다
+	positionChipIconFallback: {
+		display: 'none'
+	},
+	positionInfoIcon: {
+		color: 'rgba(255,255,255,0.3)',
+		fontSize: '1.6rem',
+		padding: 2
+	},
+	positionTooltip: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.2rem',
+		lineHeight: 1.5,
+		padding: '8px 12px',
+		maxWidth: 280,
+		background: 'rgba(15, 15, 26, 0.95)',
+		border: '1px solid rgba(0, 212, 255, 0.3)'
 	},
 	filterChip: {
 		display: 'flex',
@@ -489,6 +539,7 @@ function RankingHeader() {
 	const dispatch = useDispatch();
 	const searchText = useSelector(({ Ranking }) => Ranking.ranking.searchText);
 	const period = useSelector(({ Ranking }) => Ranking.ranking.period);
+	const position = useSelector(({ Ranking }) => Ranking.ranking.position);
 	const [calendarAnchor, setCalendarAnchor] = useState(null);
 
 	const isAll = period === 'all';
@@ -503,12 +554,24 @@ function RankingHeader() {
 	}
 
 	function handleCalendarConfirm(startDate, endDate) {
+		// 기간 랭킹 API는 포지션 필터를 지원하지 않으므로 상호 배타로 동작
+		if (position) {
+			dispatch(Actions.setPosition(null));
+		}
 		dispatch(Actions.setPeriod({ startDate, endDate }));
 		setCalendarAnchor(null);
 	}
 
 	function handleAllClick() {
 		dispatch(Actions.setPeriod('all'));
+	}
+
+	function handlePositionClick(key) {
+		// 포지션 필터는 전체 기간 랭킹에서만 지원 → 기간이 선택돼 있으면 전체로 되돌린다
+		if (key && period !== 'all') {
+			dispatch(Actions.setPeriod('all'));
+		}
+		dispatch(Actions.setPosition(key));
 	}
 
 	return (
@@ -558,6 +621,53 @@ function RankingHeader() {
 				<div className={classes.seasonBadgeWrap}>
 					<SeasonCountdownBadge />
 				</div>
+			</div>
+			<div className={classes.positionRow}>
+				<span className={classes.positionRowLabel}>포지션</span>
+				<div
+					className={`${classes.filterChip} ${!position ? classes.filterChipActive : ''}`}
+					onClick={() => handlePositionClick(null)}
+					role="button"
+					tabIndex={0}
+					onKeyDown={e => e.key === 'Enter' && handlePositionClick(null)}
+				>
+					전체
+				</div>
+				{POSITIONS.map(pos => (
+					<div
+						key={pos.key}
+						className={`${classes.filterChip} ${position === pos.key ? classes.filterChipActive : ''}`}
+						onClick={() => handlePositionClick(pos.key)}
+						role="button"
+						tabIndex={0}
+						onKeyDown={e => e.key === 'Enter' && handlePositionClick(pos.key)}
+					>
+						<PositionIcon
+							position={pos.icon}
+							className={classes.positionChipIcon}
+							fallbackClassName={classes.positionChipIconFallback}
+						/>
+						{pos.label}
+					</div>
+				))}
+				<Tooltip
+					title={
+						<>
+							선택한 포지션으로 내전을 5판 이상 플레이한 유저만 표시됩니다.
+							<br />
+							매칭 시 포지션이 기록된 내전만 반영됩니다.
+						</>
+					}
+					classes={{ tooltip: classes.positionTooltip }}
+					placement="bottom-start"
+					arrow
+					enterTouchDelay={0}
+					leaveTouchDelay={5000}
+				>
+					<IconButton className={classes.positionInfoIcon} size="small">
+						<InfoOutlinedIcon style={{ fontSize: 'inherit' }} />
+					</IconButton>
+				</Tooltip>
 			</div>
 			<CalendarPopover anchorEl={calendarAnchor} onClose={handleCalendarClose} onConfirm={handleCalendarConfirm} />
 		</div>

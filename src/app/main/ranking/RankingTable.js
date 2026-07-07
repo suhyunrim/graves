@@ -128,6 +128,25 @@ const useStyles = makeStyles()((theme) => ({
 	winRateLow: {
 		color: '#ff6b6b'
 	},
+	// 포지션 필터 모드의 전적 컬럼
+	recordText: {
+		fontFamily: '"Rajdhani", sans-serif',
+		fontSize: '1.5rem',
+		fontWeight: 600,
+		whiteSpace: 'nowrap'
+	},
+	recordTextMuted: {
+		fontFamily: '"Rajdhani", sans-serif',
+		fontSize: '1.4rem',
+		fontWeight: 500,
+		color: 'rgba(255, 255, 255, 0.55)',
+		whiteSpace: 'nowrap'
+	},
+	mobileOverallRecord: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '0.9rem',
+		color: 'rgba(255, 255, 255, 0.5)'
+	},
 	ratingChangeInline: {
 		fontFamily: '"Rajdhani", sans-serif',
 		fontWeight: 700,
@@ -443,6 +462,7 @@ function RankingTable(props) {
 	const rankingLoading = useSelector(({ Ranking }) => Ranking.ranking.loading);
 	const searchText = useSelector(({ Ranking }) => Ranking.ranking.searchText);
 	const period = useSelector(({ Ranking }) => Ranking.ranking.period);
+	const position = useSelector(({ Ranking }) => Ranking.ranking.position);
 	const isRefreshingGroupRating = useSelector(({ Ranking }) => Ranking.ranking.isRefreshingGroupRating);
 
 	const [searchParams, setSearchParams] = useSearchParams();
@@ -478,7 +498,7 @@ function RankingTable(props) {
 		// 모바일 쿠키 세션 복원 중엔 reprGroup이 아직 없을 수 있다. 준비되면 deps 변경으로 재실행.
 		if (!groupId) return;
 		if (period === 'all') {
-			dispatch(Actions.getRanking(groupName));
+			dispatch(Actions.getRanking(groupName, position));
 		} else {
 			dispatch(Actions.getPeriodRanking(groupId, period.startDate, period.endDate));
 		}
@@ -497,7 +517,7 @@ function RankingTable(props) {
 		} else {
 			didLoadRef.current = true;
 		}
-	}, [dispatch, groupName, groupId, period, isRefreshingGroupRating]);
+	}, [dispatch, groupName, groupId, period, position, isRefreshingGroupRating]);
 
 	useEffect(() => {
 		if (searchText.length !== 0) {
@@ -608,6 +628,72 @@ function RankingTable(props) {
 		return classes.winRateLow;
 	}
 
+	// 포지션 필터 모드 전적 표기: "15승 5패 (75%)"
+	function renderRecord(win, lose, rate) {
+		return (
+			<span className={classes.recordText}>
+				<span style={{ color: '#4dabf7' }}>{win}승</span> <span style={{ color: '#ff6b6b' }}>{lose}패</span>{' '}
+				<span className={getWinRateClass(rate)}>({rate}%)</span>
+			</span>
+		);
+	}
+
+	function renderOverallRecord(n) {
+		return (
+			<span className={classes.recordTextMuted}>
+				{n.win}승 {n.lose}패 ({n.winRate}%)
+			</span>
+		);
+	}
+
+	// 모바일 카드 하단 스탯 — 포지션 필터 시엔 포지션 전적을 보여준다
+	function renderMobileStats(n, games) {
+		if (isPosition) {
+			return (
+				<div className={classes.mobileStats}>
+					<div className={classes.mobileStatItem}>
+						<span className={classes.mobileStatLabel}>포지션 판수</span>
+						<span className={classes.mobileStatValue}>{n.positionGames}</span>
+					</div>
+					<div className={classes.mobileStatItem}>
+						<span className={classes.mobileStatLabel}>승</span>
+						<span className={`${classes.mobileStatValue} ${classes.mobileWinValue}`}>{n.positionWin}</span>
+					</div>
+					<div className={classes.mobileStatItem}>
+						<span className={classes.mobileStatLabel}>패</span>
+						<span className={`${classes.mobileStatValue} ${classes.mobileLoseValue}`}>{n.positionLose}</span>
+					</div>
+					<div className={classes.mobileStatItem}>
+						<span className={classes.mobileStatLabel}>승률</span>
+						<span className={`${classes.mobileWinRateValue} ${getWinRateClass(n.positionWinRate)}`}>
+							{n.positionWinRate}%
+						</span>
+					</div>
+				</div>
+			);
+		}
+		return (
+			<div className={classes.mobileStats}>
+				<div className={classes.mobileStatItem}>
+					<span className={classes.mobileStatLabel}>판수</span>
+					<span className={classes.mobileStatValue}>{games}</span>
+				</div>
+				<div className={classes.mobileStatItem}>
+					<span className={classes.mobileStatLabel}>승</span>
+					<span className={`${classes.mobileStatValue} ${classes.mobileWinValue}`}>{n.win}</span>
+				</div>
+				<div className={classes.mobileStatItem}>
+					<span className={classes.mobileStatLabel}>패</span>
+					<span className={`${classes.mobileStatValue} ${classes.mobileLoseValue}`}>{n.lose}</span>
+				</div>
+				<div className={classes.mobileStatItem}>
+					<span className={classes.mobileStatLabel}>승률</span>
+					<span className={`${classes.mobileWinRateValue} ${getWinRateClass(n.winRate)}`}>{n.winRate}%</span>
+				</div>
+			</div>
+		);
+	}
+
 	function handleMyRankingClick() {
 		if (!myRanking || myRanking.ranking == null) return;
 		const targetPage = Math.floor((myRanking.ranking - 1) / rowsPerPage);
@@ -687,22 +773,35 @@ function RankingTable(props) {
 						</span>
 					)}
 				</StyledTableCell>
-				<StyledTableCell>
-					<span className={classes.statNumber}>{games}</span>
-				</StyledTableCell>
-				<StyledTableCell>
-					<span className={classes.statNumber} style={{ color: '#4dabf7' }}>
-						{myRanking.win}
-					</span>
-				</StyledTableCell>
-				<StyledTableCell>
-					<span className={classes.statNumber} style={{ color: '#ff6b6b' }}>
-						{myRanking.lose}
-					</span>
-				</StyledTableCell>
-				<StyledTableCell>
-					<span className={`${classes.winRate} ${getWinRateClass(myRanking.winRate)}`}>{myRanking.winRate}%</span>
-				</StyledTableCell>
+				{isPosition ? (
+					<>
+						<StyledTableCell>
+							{renderRecord(myRanking.positionWin, myRanking.positionLose, myRanking.positionWinRate)}
+						</StyledTableCell>
+						<StyledTableCell>{renderOverallRecord(myRanking)}</StyledTableCell>
+					</>
+				) : (
+					<>
+						<StyledTableCell>
+							<span className={classes.statNumber}>{games}</span>
+						</StyledTableCell>
+						<StyledTableCell>
+							<span className={classes.statNumber} style={{ color: '#4dabf7' }}>
+								{myRanking.win}
+							</span>
+						</StyledTableCell>
+						<StyledTableCell>
+							<span className={classes.statNumber} style={{ color: '#ff6b6b' }}>
+								{myRanking.lose}
+							</span>
+						</StyledTableCell>
+						<StyledTableCell>
+							<span className={`${classes.winRate} ${getWinRateClass(myRanking.winRate)}`}>
+								{myRanking.winRate}%
+							</span>
+						</StyledTableCell>
+					</>
+				)}
 			</StyledTableRow>
 		);
 	}
@@ -751,6 +850,11 @@ function RankingTable(props) {
 								</span>
 							</div>
 						)}
+						{isPosition && (
+							<div className={classes.mobileOverallRecord}>
+								전체 {myRanking.win}승 {myRanking.lose}패 ({myRanking.winRate}%)
+							</div>
+						)}
 						{!isRanked && myRanking.reason && (
 							<div className={classes.myRankingReason}>
 								{isPeriod ? myRanking.reason : `${myRanking.reason}(으)로 랭킹에 미표시`}
@@ -758,26 +862,7 @@ function RankingTable(props) {
 						)}
 					</div>
 				</div>
-				<div className={classes.mobileStats}>
-					<div className={classes.mobileStatItem}>
-						<span className={classes.mobileStatLabel}>판수</span>
-						<span className={classes.mobileStatValue}>{games}</span>
-					</div>
-					<div className={classes.mobileStatItem}>
-						<span className={classes.mobileStatLabel}>승</span>
-						<span className={`${classes.mobileStatValue} ${classes.mobileWinValue}`}>{myRanking.win}</span>
-					</div>
-					<div className={classes.mobileStatItem}>
-						<span className={classes.mobileStatLabel}>패</span>
-						<span className={`${classes.mobileStatValue} ${classes.mobileLoseValue}`}>{myRanking.lose}</span>
-					</div>
-					<div className={classes.mobileStatItem}>
-						<span className={classes.mobileStatLabel}>승률</span>
-						<span className={`${classes.mobileWinRateValue} ${getWinRateClass(myRanking.winRate)}`}>
-							{myRanking.winRate}%
-						</span>
-					</div>
-				</div>
+				{renderMobileStats(myRanking, games)}
 			</>
 		);
 
@@ -800,6 +885,7 @@ function RankingTable(props) {
 	}
 
 	const isPeriod = period !== 'all';
+	const isPosition = Boolean(position);
 	const getSortValue = o => {
 		if (order.id === 'games') return o.win + o.lose;
 		if (order.id === 'rating') return o.rating != null ? o.rating : -Infinity;
@@ -823,7 +909,12 @@ function RankingTable(props) {
 						<Box sx={{ display: { xs: 'none', md: 'block' } }}>
 							<FuseScrollbars className="flex-grow overflow-x-auto">
 								<Table>
-									<RankingTableHead order={order} onRequestSort={handleRequestSort} rowCount={data.length} />
+									<RankingTableHead
+										order={order}
+										onRequestSort={handleRequestSort}
+										rowCount={data.length}
+										isPosition={isPosition}
+									/>
 									<TableBody>
 										{renderMyRankingRow()}
 										{sortedData.map((n, idx) => {
@@ -882,22 +973,35 @@ function RankingTable(props) {
 															</span>
 														)}
 													</StyledTableCell>
-													<StyledTableCell>
-														<span className={classes.statNumber}>{n.win + n.lose}</span>
-													</StyledTableCell>
-													<StyledTableCell>
-														<span className={classes.statNumber} style={{ color: '#4dabf7' }}>
-															{n.win}
-														</span>
-													</StyledTableCell>
-													<StyledTableCell>
-														<span className={classes.statNumber} style={{ color: '#ff6b6b' }}>
-															{n.lose}
-														</span>
-													</StyledTableCell>
-													<StyledTableCell>
-														<span className={`${classes.winRate} ${getWinRateClass(n.winRate)}`}>{n.winRate}%</span>
-													</StyledTableCell>
+													{isPosition ? (
+														<>
+															<StyledTableCell>
+																{renderRecord(n.positionWin, n.positionLose, n.positionWinRate)}
+															</StyledTableCell>
+															<StyledTableCell>{renderOverallRecord(n)}</StyledTableCell>
+														</>
+													) : (
+														<>
+															<StyledTableCell>
+																<span className={classes.statNumber}>{n.win + n.lose}</span>
+															</StyledTableCell>
+															<StyledTableCell>
+																<span className={classes.statNumber} style={{ color: '#4dabf7' }}>
+																	{n.win}
+																</span>
+															</StyledTableCell>
+															<StyledTableCell>
+																<span className={classes.statNumber} style={{ color: '#ff6b6b' }}>
+																	{n.lose}
+																</span>
+															</StyledTableCell>
+															<StyledTableCell>
+																<span className={`${classes.winRate} ${getWinRateClass(n.winRate)}`}>
+																	{n.winRate}%
+																</span>
+															</StyledTableCell>
+														</>
+													)}
 												</StyledTableRow>
 											);
 										})}
@@ -911,13 +1015,22 @@ function RankingTable(props) {
 							{/* Mobile Sort Bar */}
 							<div className={classes.mobileSortBar}>
 								<span className={classes.mobileSortLabel}>정렬:</span>
-								{[
-									{ id: 'rating', label: '티어' },
-									{ id: 'games', label: '판수' },
-									{ id: 'win', label: '승' },
-									{ id: 'lose', label: '패' },
-									{ id: 'winRate', label: '승률' }
-								].map(option => (
+								{(isPosition
+									? [
+											{ id: 'rating', label: '티어' },
+											{ id: 'positionGames', label: '판수' },
+											{ id: 'positionWin', label: '승' },
+											{ id: 'positionLose', label: '패' },
+											{ id: 'positionWinRate', label: '승률' }
+									  ]
+									: [
+											{ id: 'rating', label: '티어' },
+											{ id: 'games', label: '판수' },
+											{ id: 'win', label: '승' },
+											{ id: 'lose', label: '패' },
+											{ id: 'winRate', label: '승률' }
+									  ]
+								).map(option => (
 									<div
 										key={option.id}
 										className={`${classes.mobileSortChip} ${
@@ -971,28 +1084,14 @@ function RankingTable(props) {
 															</span>
 														</div>
 													)}
+													{isPosition && (
+														<div className={classes.mobileOverallRecord}>
+															전체 {n.win}승 {n.lose}패 ({n.winRate}%)
+														</div>
+													)}
 												</div>
 											</div>
-											<div className={classes.mobileStats}>
-												<div className={classes.mobileStatItem}>
-													<span className={classes.mobileStatLabel}>판수</span>
-													<span className={classes.mobileStatValue}>{n.win + n.lose}</span>
-												</div>
-												<div className={classes.mobileStatItem}>
-													<span className={classes.mobileStatLabel}>승</span>
-													<span className={`${classes.mobileStatValue} ${classes.mobileWinValue}`}>{n.win}</span>
-												</div>
-												<div className={classes.mobileStatItem}>
-													<span className={classes.mobileStatLabel}>패</span>
-													<span className={`${classes.mobileStatValue} ${classes.mobileLoseValue}`}>{n.lose}</span>
-												</div>
-												<div className={classes.mobileStatItem}>
-													<span className={classes.mobileStatLabel}>승률</span>
-													<span className={`${classes.mobileWinRateValue} ${getWinRateClass(n.winRate)}`}>
-														{n.winRate}%
-													</span>
-												</div>
-											</div>
+											{renderMobileStats(n, n.win + n.lose)}
 										</div>
 									);
 								})}
@@ -1018,7 +1117,9 @@ function RankingTable(props) {
 								🏆
 							</span>
 						</div>
-						<div className={classes.emptyText}>랭킹 데이터가 없습니다</div>
+						<div className={classes.emptyText}>
+							{isPosition ? '해당 포지션 기록이 있는 유저가 없습니다' : '랭킹 데이터가 없습니다'}
+						</div>
 					</div>
 				)}
 			</div>

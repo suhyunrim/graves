@@ -59,6 +59,45 @@ const rows = [
 	}
 ];
 
+// 포지션 필터 선택 시 컬럼 구성: 전적을 포지션/전체로 나눠 보여준다
+const positionRows = [
+	{
+		id: 'ranking',
+		align: 'left',
+		disablePadding: false,
+		label: '#',
+		sort: true
+	},
+	{
+		id: 'name',
+		align: 'left',
+		disablePadding: false,
+		label: '소환사',
+		sort: true
+	},
+	{
+		id: 'rating',
+		align: 'left',
+		disablePadding: false,
+		label: '티어',
+		sort: true
+	},
+	{
+		id: 'positionWinRate',
+		align: 'left',
+		disablePadding: false,
+		label: '포지션 전적',
+		sort: true
+	},
+	{
+		id: 'winRate',
+		align: 'left',
+		disablePadding: false,
+		label: '전체 전적',
+		sort: true
+	}
+];
+
 const useStyles = makeStyles()((theme) => ({
 	sortLabel: {
 		color: 'rgba(255, 255, 255, 0.7) !important',
@@ -101,10 +140,12 @@ function RankingTableHead(props) {
 		props.onRequestSort(event, property);
 	};
 
+	const headRows = props.isPosition ? positionRows : rows;
+
 	return (
 		<TableHead>
 			<StyledTableRow>
-				{rows.map(row => {
+				{headRows.map(row => {
 					return (
 						<StyledTableCell
 							key={row.id}

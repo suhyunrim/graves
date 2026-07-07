@@ -7,18 +7,23 @@ export const GET_RANKING = '[RANKING] GET RANKING';
 export const GET_RANKING_LOADING = '[RANKING] GET RANKING LOADING';
 export const SET_SEARCH_TEXT = '[RANKING] SET SEARCH TEXT';
 export const SET_PERIOD = '[RANKING] SET PERIOD';
+export const SET_POSITION = '[RANKING] SET POSITION';
 export const TRY_REFRESH_GROUP_RATING = '[RANKING] TRY REFRESH GROUP RATING';
 export const REFRESH_GROUP_RATING = '[RANKING] REFRESH GROUP RATING';
 
-export function getRanking(groupName) {
+export function getRanking(groupName, position) {
 	if (isSampleMode()) {
 		return dispatch => {
 			dispatch({ type: GET_RANKING_LOADING });
-			setTimeout(() => dispatch({ type: GET_RANKING, payload: getSampleRankingData() }), 300);
+			// 샘플 데이터엔 포지션 기록이 없으므로 필터 시 빈 결과
+			const payload = position ? [] : getSampleRankingData();
+			setTimeout(() => dispatch({ type: GET_RANKING, payload }), 300);
 		};
 	}
 
-	const request = createCamilleAxios().get('/api/group/ranking', { params: { groupName } });
+	const request = createCamilleAxios().get('/api/group/ranking', {
+		params: position ? { groupName, position } : { groupName }
+	});
 
 	return dispatch => {
 		dispatch({ type: GET_RANKING_LOADING });
@@ -58,6 +63,14 @@ export function setPeriod(period) {
 	return {
 		type: SET_PERIOD,
 		period
+	};
+}
+
+// position: 'TOP' | 'JUNGLE' | 'MIDDLE' | 'BOTTOM' | 'UTILITY' | null(전체)
+export function setPosition(position) {
+	return {
+		type: SET_POSITION,
+		position
 	};
 }
 

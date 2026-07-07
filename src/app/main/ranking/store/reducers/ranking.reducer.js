@@ -6,6 +6,7 @@ const initialState = {
 	loading: false,
 	searchText: '',
 	period: 'all',
+	position: null,
 	isRefreshingGroupRating: false
 };
 
@@ -35,6 +36,12 @@ const rankingReducer = (state = initialState, action) => {
 			return {
 				...state,
 				period: action.period
+			};
+		}
+		case Actions.SET_POSITION: {
+			return {
+				...state,
+				position: action.position
 			};
 		}
 		case Actions.TRY_REFRESH_GROUP_RATING: {
