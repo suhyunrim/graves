@@ -5,6 +5,7 @@ import authRoleExamplesConfigs from 'app/main/auth/authRoleExamplesConfigs';
 import DashboardConfig from 'app/main/dashboard/DashboardConfig';
 import MyInfoConfig from 'app/main/myinfo/MyInfoConfig';
 import RankingConfig from 'app/main/ranking/RankingConfig';
+import PositionRankingConfig from 'app/main/positionRanking/PositionRankingConfig';
 import MatchHistoryConfig from 'app/main/matchHistory/MatchHistoryConfig';
 import HonorRankingConfig from 'app/main/honorRanking/HonorRankingConfig';
 import GroupSettingsConfig from 'app/main/groupSettings/GroupSettingsConfig';
@@ -28,6 +29,7 @@ const routeConfigs = [
 	DashboardConfig,
 	MyInfoConfig,
 	RankingConfig,
+	PositionRankingConfig,
 	MatchHistoryConfig,
 	HonorRankingConfig,
 	GroupSettingsConfig,
