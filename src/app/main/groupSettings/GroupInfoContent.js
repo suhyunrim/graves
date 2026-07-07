@@ -43,6 +43,11 @@ const VOTE_MODE_DESCRIPTIONS = {
 // 닉네임 변경 알림 채널 드롭다운의 "알림 안 함" 항목 값(빈 값으로 저장).
 const NICK_CHANNEL_NONE = '__none__';
 
+const RANKING_POSITION_SOURCE_LABELS = {
+	solo: '솔로랭크 포지션',
+	internal: '내전 포지션'
+};
+
 const useStyles = makeStyles()((theme) => ({
 	root: {
 		padding: '24px 28px',
@@ -552,6 +557,20 @@ function GroupInfoContent() {
 		});
 	}
 
+	function handleChangeRankingPositionSource(e) {
+		const val = e.target.value;
+		if (val === (optimisticSettings?.rankingPositionSource || 'solo')) return;
+		startToggleTransition(async () => {
+			applyOptimisticSettings({ rankingPositionSource: val });
+			try {
+				await dispatch(Actions.updateGroupSettings(groupId, { rankingPositionSource: val }));
+				toast.success(`랭킹 포지션 기준이 '${RANKING_POSITION_SOURCE_LABELS[val]}'(으)로 변경되었습니다.`);
+			} catch {
+				toast.error('설정 변경에 실패했습니다.');
+			}
+		});
+	}
+
 	function handleChangeNickChannel(e) {
 		const raw = e.target.value;
 		const val = raw === NICK_CHANNEL_NONE ? '' : raw;
@@ -768,6 +787,28 @@ function GroupInfoContent() {
 							disabled={isToggling}
 						/>
 					</div>
+				</div>
+				<div className={classes.voteModeRow}>
+					<div className={classes.settingInfo}>
+						<div className={classes.settingLabel}>랭킹 포지션 기준</div>
+						<div className={classes.settingDesc}>
+							랭킹 페이지 포지션 필터가 유저를 분류하는 기준입니다. 내전 포지션은 매칭 시 포지션이 기록된
+							내전이 있는 경우에만 의미가 있습니다.
+						</div>
+					</div>
+					<TextField
+						className={classes.channelSelect}
+						select
+						fullWidth
+						variant="outlined"
+						size="small"
+						value={optimisticSettings?.rankingPositionSource || 'solo'}
+						onChange={handleChangeRankingPositionSource}
+						disabled={isToggling}
+					>
+						<MenuItem value="solo">솔로랭크 포지션(기본)</MenuItem>
+						<MenuItem value="internal">내전 포지션</MenuItem>
+					</TextField>
 				</div>
 				<div className={classes.nickChannelRow}>
 					<div className={classes.settingInfo}>

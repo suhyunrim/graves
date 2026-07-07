@@ -562,6 +562,7 @@ function RankingHeader() {
 	const searchText = useSelector(({ Ranking }) => Ranking.ranking.searchText);
 	const period = useSelector(({ Ranking }) => Ranking.ranking.period);
 	const position = useSelector(({ Ranking }) => Ranking.ranking.position);
+	const positionSource = useSelector(({ Ranking }) => Ranking.ranking.positionSource);
 	const [calendarAnchor, setCalendarAnchor] = useState(null);
 
 	const isAll = period === 'all';
@@ -675,11 +676,20 @@ function RankingHeader() {
 				))}
 				<Tooltip
 					title={
-						<>
-							선택한 포지션으로 내전을 5판 이상 플레이한 유저만 표시됩니다.
-							<br />
-							매칭 시 포지션이 기록된 내전만 반영됩니다.
-						</>
+						positionSource === 'internal' ? (
+							<>
+								내전에서 가장 많이 플레이한 포지션을 기준으로 분류되며, 해당 포지션 5판 이상인 유저만
+								표시됩니다.
+								<br />
+								매칭 시 포지션이 기록된 내전만 반영됩니다.
+							</>
+						) : (
+							<>
+								솔로랭크에서 가장 많이 플레이한 포지션을 기준으로 분류됩니다.
+								<br />
+								내전 5판 이상, 솔로랭크 포지션 데이터가 있는 유저만 표시됩니다.
+							</>
+						)
 					}
 					classes={{ tooltip: classes.positionTooltip }}
 					placement="bottom-start"

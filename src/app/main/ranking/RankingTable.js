@@ -147,6 +147,13 @@ const useStyles = makeStyles()((theme) => ({
 		fontSize: '0.9rem',
 		color: 'rgba(255, 255, 255, 0.5)'
 	},
+	// solo 기준 포지션 필터 시 소환사명 아래 보조 표시 (솔랭 주 포지션 플레이 비율)
+	mainPositionRate: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.05rem',
+		color: 'rgba(255, 255, 255, 0.4)',
+		marginTop: 2
+	},
 	ratingChangeInline: {
 		fontFamily: '"Rajdhani", sans-serif',
 		fontWeight: 700,
@@ -463,6 +470,7 @@ function RankingTable(props) {
 	const searchText = useSelector(({ Ranking }) => Ranking.ranking.searchText);
 	const period = useSelector(({ Ranking }) => Ranking.ranking.period);
 	const position = useSelector(({ Ranking }) => Ranking.ranking.position);
+	const positionSource = useSelector(({ Ranking }) => Ranking.ranking.positionSource);
 	const isRefreshingGroupRating = useSelector(({ Ranking }) => Ranking.ranking.isRefreshingGroupRating);
 
 	const [searchParams, setSearchParams] = useSearchParams();
@@ -646,9 +654,9 @@ function RankingTable(props) {
 		);
 	}
 
-	// 모바일 카드 하단 스탯 — 포지션 필터 시엔 포지션 전적을 보여준다
+	// 모바일 카드 하단 스탯 — internal 기준 포지션 필터 시엔 포지션 전적을 보여준다
 	function renderMobileStats(n, games) {
-		if (isPosition) {
+		if (isInternalPosition) {
 			return (
 				<div className={classes.mobileStats}>
 					<div className={classes.mobileStatItem}>
@@ -734,6 +742,9 @@ function RankingTable(props) {
 					<Link to={`/userinfo/${myRanking.puuid}`} className={classes.playerName} onClick={e => e.stopPropagation()}>
 						{myRanking.name}
 					</Link>
+					{isSoloPosition && myRanking.mainPositionRate != null && (
+						<div className={classes.mainPositionRate}>주 포지션 {myRanking.mainPositionRate}%</div>
+					)}
 					{!isRanked && myRanking.reason && (
 						<div className={classes.myRankingReason}>
 							{isPeriod ? myRanking.reason : `${myRanking.reason}(으)로 랭킹에 미표시`}
@@ -773,7 +784,7 @@ function RankingTable(props) {
 						</span>
 					)}
 				</StyledTableCell>
-				{isPosition ? (
+				{isInternalPosition ? (
 					<>
 						<StyledTableCell>
 							{renderRecord(myRanking.positionWin, myRanking.positionLose, myRanking.positionWinRate)}
@@ -850,10 +861,13 @@ function RankingTable(props) {
 								</span>
 							</div>
 						)}
-						{isPosition && (
+						{isInternalPosition && (
 							<div className={classes.mobileOverallRecord}>
 								전체 {myRanking.win}승 {myRanking.lose}패 ({myRanking.winRate}%)
 							</div>
+						)}
+						{isSoloPosition && myRanking.mainPositionRate != null && (
+							<div className={classes.mobileOverallRecord}>주 포지션 {myRanking.mainPositionRate}%</div>
 						)}
 						{!isRanked && myRanking.reason && (
 							<div className={classes.myRankingReason}>
@@ -886,6 +900,10 @@ function RankingTable(props) {
 
 	const isPeriod = period !== 'all';
 	const isPosition = Boolean(position);
+	// 포지션 필터 시 그룹 방설정(positionSource)에 따라 분기:
+	// internal = 포지션 전적 컬럼 표시, solo = 기존 컬럼 그대로 + 주 포지션 비율 보조 표시
+	const isInternalPosition = isPosition && positionSource === 'internal';
+	const isSoloPosition = isPosition && !isInternalPosition;
 	const getSortValue = o => {
 		if (order.id === 'games') return o.win + o.lose;
 		if (order.id === 'rating') return o.rating != null ? o.rating : -Infinity;
@@ -913,7 +931,7 @@ function RankingTable(props) {
 										order={order}
 										onRequestSort={handleRequestSort}
 										rowCount={data.length}
-										isPosition={isPosition}
+										isPosition={isInternalPosition}
 									/>
 									<TableBody>
 										{renderMyRankingRow()}
@@ -932,6 +950,9 @@ function RankingTable(props) {
 														<Link to={`/userinfo/${n.puuid}`} className={classes.playerName}>
 															{n.name}
 														</Link>
+														{isSoloPosition && n.mainPositionRate != null && (
+															<div className={classes.mainPositionRate}>주 포지션 {n.mainPositionRate}%</div>
+														)}
 													</StyledTableCell>
 													<StyledTableCell>
 														{hasRating ? (
@@ -973,7 +994,7 @@ function RankingTable(props) {
 															</span>
 														)}
 													</StyledTableCell>
-													{isPosition ? (
+													{isInternalPosition ? (
 														<>
 															<StyledTableCell>
 																{renderRecord(n.positionWin, n.positionLose, n.positionWinRate)}
@@ -1015,7 +1036,7 @@ function RankingTable(props) {
 							{/* Mobile Sort Bar */}
 							<div className={classes.mobileSortBar}>
 								<span className={classes.mobileSortLabel}>정렬:</span>
-								{(isPosition
+								{(isInternalPosition
 									? [
 											{ id: 'rating', label: '티어' },
 											{ id: 'positionGames', label: '판수' },
@@ -1084,10 +1105,13 @@ function RankingTable(props) {
 															</span>
 														</div>
 													)}
-													{isPosition && (
+													{isInternalPosition && (
 														<div className={classes.mobileOverallRecord}>
 															전체 {n.win}승 {n.lose}패 ({n.winRate}%)
 														</div>
+													)}
+													{isSoloPosition && n.mainPositionRate != null && (
+														<div className={classes.mobileOverallRecord}>주 포지션 {n.mainPositionRate}%</div>
 													)}
 												</div>
 											</div>

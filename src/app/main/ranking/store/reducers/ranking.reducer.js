@@ -7,6 +7,7 @@ const initialState = {
 	searchText: '',
 	period: 'all',
 	position: null,
+	positionSource: 'solo',
 	isRefreshingGroupRating: false
 };
 
@@ -23,6 +24,7 @@ const rankingReducer = (state = initialState, action) => {
 				...state,
 				data: action.payload,
 				myRanking: action.myRanking !== undefined ? action.myRanking : state.myRanking,
+				positionSource: action.positionSource !== undefined ? action.positionSource : state.positionSource,
 				loading: false
 			};
 		}

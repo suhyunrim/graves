@@ -31,7 +31,9 @@ export function getRanking(groupName, position) {
 			dispatch({
 				type: GET_RANKING,
 				payload: response.data.result,
-				myRanking: response.data.myRanking || null
+				myRanking: response.data.myRanking || null,
+				// 포지션 판정 기준(그룹 방설정). 백엔드 배포 전엔 필드가 없을 수 있으므로 solo 폴백
+				positionSource: response.data.positionSource ?? 'solo'
 			})
 		);
 	};
