@@ -83,10 +83,31 @@ const positionRows = [
 		sort: true
 	},
 	{
+		id: 'positionGames',
+		align: 'left',
+		disablePadding: false,
+		label: '판수',
+		sort: true
+	},
+	{
+		id: 'positionWin',
+		align: 'left',
+		disablePadding: false,
+		label: '승',
+		sort: true
+	},
+	{
+		id: 'positionLose',
+		align: 'left',
+		disablePadding: false,
+		label: '패',
+		sort: true
+	},
+	{
 		id: 'positionWinRate',
 		align: 'left',
 		disablePadding: false,
-		label: '포지션 전적',
+		label: '승률',
 		sort: true
 	},
 	{

@@ -128,13 +128,7 @@ const useStyles = makeStyles()((theme) => ({
 	winRateLow: {
 		color: '#ff6b6b'
 	},
-	// 포지션 필터 모드의 전적 컬럼
-	recordText: {
-		fontFamily: '"Rajdhani", sans-serif',
-		fontSize: '1.5rem',
-		fontWeight: 600,
-		whiteSpace: 'nowrap'
-	},
+	// 포지션 필터 모드의 전체 전적 컬럼
 	recordTextMuted: {
 		fontFamily: '"Rajdhani", sans-serif',
 		fontSize: '1.4rem',
@@ -636,16 +630,6 @@ function RankingTable(props) {
 		return classes.winRateLow;
 	}
 
-	// 포지션 필터 모드 전적 표기: "15승 5패 (75%)"
-	function renderRecord(win, lose, rate) {
-		return (
-			<span className={classes.recordText}>
-				<span style={{ color: '#4dabf7' }}>{win}승</span> <span style={{ color: '#ff6b6b' }}>{lose}패</span>{' '}
-				<span className={getWinRateClass(rate)}>({rate}%)</span>
-			</span>
-		);
-	}
-
 	function renderOverallRecord(n) {
 		return (
 			<span className={classes.recordTextMuted}>
@@ -787,7 +771,22 @@ function RankingTable(props) {
 				{isInternalPosition ? (
 					<>
 						<StyledTableCell>
-							{renderRecord(myRanking.positionWin, myRanking.positionLose, myRanking.positionWinRate)}
+							<span className={classes.statNumber}>{myRanking.positionGames}</span>
+						</StyledTableCell>
+						<StyledTableCell>
+							<span className={classes.statNumber} style={{ color: '#4dabf7' }}>
+								{myRanking.positionWin}
+							</span>
+						</StyledTableCell>
+						<StyledTableCell>
+							<span className={classes.statNumber} style={{ color: '#ff6b6b' }}>
+								{myRanking.positionLose}
+							</span>
+						</StyledTableCell>
+						<StyledTableCell>
+							<span className={`${classes.winRate} ${getWinRateClass(myRanking.positionWinRate)}`}>
+								{myRanking.positionWinRate}%
+							</span>
 						</StyledTableCell>
 						<StyledTableCell>{renderOverallRecord(myRanking)}</StyledTableCell>
 					</>
@@ -997,7 +996,22 @@ function RankingTable(props) {
 													{isInternalPosition ? (
 														<>
 															<StyledTableCell>
-																{renderRecord(n.positionWin, n.positionLose, n.positionWinRate)}
+																<span className={classes.statNumber}>{n.positionGames}</span>
+															</StyledTableCell>
+															<StyledTableCell>
+																<span className={classes.statNumber} style={{ color: '#4dabf7' }}>
+																	{n.positionWin}
+																</span>
+															</StyledTableCell>
+															<StyledTableCell>
+																<span className={classes.statNumber} style={{ color: '#ff6b6b' }}>
+																	{n.positionLose}
+																</span>
+															</StyledTableCell>
+															<StyledTableCell>
+																<span className={`${classes.winRate} ${getWinRateClass(n.positionWinRate)}`}>
+																	{n.positionWinRate}%
+																</span>
 															</StyledTableCell>
 															<StyledTableCell>{renderOverallRecord(n)}</StyledTableCell>
 														</>
