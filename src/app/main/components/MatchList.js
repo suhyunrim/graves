@@ -334,6 +334,7 @@ const useStyles = makeStyles()(() => ({
 	tierIcon: {
 		width: 28,
 		height: 28,
+		flexShrink: 0,
 		transition: 'transform 0.2s ease',
 		'&:hover': {
 			transform: 'scale(1.2)'
@@ -344,17 +345,23 @@ const useStyles = makeStyles()(() => ({
 		fontSize: '1.2rem',
 		fontWeight: 700,
 		minWidth: 40,
+		flexShrink: 0,
 		textAlign: 'center',
 		padding: '2px 6px',
 		borderRadius: 4,
 		background: 'rgba(255, 255, 255, 0.1)'
 	},
+	// 긴 닉네임은 두 줄로 깨지지 않게 한 줄 말줄임(…). 이름만 줄어들도록 minWidth:0.
 	playerName: {
 		fontFamily: '"Noto Sans KR", sans-serif',
 		fontSize: '1.4rem',
 		fontWeight: 500,
 		color: '#fff',
-		cursor: 'pointer'
+		cursor: 'pointer',
+		minWidth: 0,
+		overflow: 'hidden',
+		textOverflow: 'ellipsis',
+		whiteSpace: 'nowrap'
 	},
 	playerNameHighlight: {
 		fontFamily: '"Noto Sans KR", sans-serif',
@@ -365,7 +372,11 @@ const useStyles = makeStyles()(() => ({
 		padding: '2px 8px',
 		borderRadius: 4,
 		textShadow: '0 0 8px rgba(0, 212, 255, 0.5)',
-		cursor: 'pointer'
+		cursor: 'pointer',
+		minWidth: 0,
+		overflow: 'hidden',
+		textOverflow: 'ellipsis',
+		whiteSpace: 'nowrap'
 	},
 	teamLabel: {
 		display: 'flex',
@@ -533,7 +544,7 @@ const useStyles = makeStyles()(() => ({
 	},
 	mobilePlayerList: {
 		display: 'flex',
-		flexWrap: 'wrap',
+		flexDirection: 'column',
 		gap: 6
 	},
 	mobilePlayerChip: {
@@ -697,6 +708,7 @@ function MatchList({
 					</span>
 					<span
 						className={isPlayerHighlighted(player) ? classes.playerNameHighlight : classes.playerName}
+						title={player.name}
 						onClick={() => navigate(`/userinfo/${player.puuid}`)}
 					>
 						{player.name}
@@ -748,17 +760,17 @@ function MatchList({
 						{/* Desktop Table View */}
 						<Box sx={{ display: { xs: 'none', md: 'block' } }}>
 							<FuseScrollbars className="flex-grow overflow-x-auto">
-								<Table>
+								<Table sx={{ tableLayout: 'fixed' }}>
 									<TableHead>
 										<TableRow>
-											<TableCell className={classes.headerCell} align="center">
+											<TableCell className={classes.headerCell} align="center" style={{ width: 56 }}>
 												#
 											</TableCell>
-											<TableCell className={classes.headerCell}>날짜</TableCell>
-											<TableCell className={classes.headerCell} align="center">
+											<TableCell className={classes.headerCell} style={{ width: 112 }}>날짜</TableCell>
+											<TableCell className={classes.headerCell} align="center" style={{ width: 128 }}>
 												평균
 											</TableCell>
-											<TableCell className={classes.headerCell} style={{ width: '30%' }}>
+											<TableCell className={classes.headerCell}>
 												<span className={classes.teamLabel}>
 													<span role="img" aria-label="dog" className={classes.teamEmoji}>
 														🐶
@@ -766,10 +778,10 @@ function MatchList({
 													Team 1
 												</span>
 											</TableCell>
-											<TableCell className={classes.headerCell} align="center">
+											<TableCell className={classes.headerCell} align="center" style={{ width: 128 }}>
 												평균
 											</TableCell>
-											<TableCell className={classes.headerCell} style={{ width: '30%' }}>
+											<TableCell className={classes.headerCell}>
 												<span className={classes.teamLabel}>
 													<span role="img" aria-label="cat" className={classes.teamEmoji}>
 														🐱
