@@ -591,8 +591,11 @@ const useStyles = makeStyles()((theme) => ({
 			background: 'rgba(0, 212, 255, 0.1)'
 		},
 		[theme.breakpoints.down('sm')]: {
-			flexWrap: 'wrap',
-			gap: 4,
+			display: 'grid',
+			gridTemplateColumns: 'auto 1fr auto',
+			columnGap: 10,
+			rowGap: 2,
+			alignItems: 'center',
 			padding: '10px 12px'
 		}
 	},
@@ -601,7 +604,12 @@ const useStyles = makeStyles()((theme) => ({
 		fontSize: '1.4rem',
 		fontWeight: 700,
 		color: 'rgba(255, 255, 255, 0.4)',
-		width: 28
+		width: 28,
+		[theme.breakpoints.down('sm')]: {
+			gridColumn: 1,
+			gridRow: '1 / 3',
+			alignSelf: 'center'
+		}
 	},
 	relationName: {
 		fontFamily: '"Noto Sans KR", sans-serif',
@@ -614,24 +622,45 @@ const useStyles = makeStyles()((theme) => ({
 		transition: 'color 0.2s ease',
 		'&:hover': {
 			color: '#00d4ff'
+		},
+		[theme.breakpoints.down('sm')]: {
+			gridColumn: 2,
+			gridRow: 1,
+			marginLeft: 0,
+			minWidth: 0,
+			wordBreak: 'keep-all',
+			overflowWrap: 'anywhere'
 		}
 	},
 	relationStats: {
 		display: 'flex',
 		alignItems: 'center',
-		gap: 16
+		gap: 16,
+		[theme.breakpoints.down('sm')]: {
+			display: 'contents'
+		}
 	},
 	relationGames: {
 		fontFamily: '"Noto Sans KR", sans-serif',
 		fontSize: '1.2rem',
-		color: 'rgba(255, 255, 255, 0.6)'
+		color: 'rgba(255, 255, 255, 0.6)',
+		[theme.breakpoints.down('sm')]: {
+			gridColumn: 2,
+			gridRow: 2,
+			fontSize: '1.1rem'
+		}
 	},
 	relationWinRate: {
 		fontFamily: '"Rajdhani", sans-serif',
 		fontSize: '1.35rem',
 		fontWeight: 700,
 		padding: '4px 12px',
-		borderRadius: 6
+		borderRadius: 6,
+		[theme.breakpoints.down('sm')]: {
+			gridColumn: 3,
+			gridRow: 1,
+			justifySelf: 'end'
+		}
 	},
 	// 베스트/워스트 카드
 	highlightSection: {
@@ -772,8 +801,11 @@ const useStyles = makeStyles()((theme) => ({
 			borderColor: 'rgba(0, 212, 255, 0.2)'
 		},
 		[theme.breakpoints.down('sm')]: {
-			flexWrap: 'wrap',
-			gap: 4,
+			display: 'grid',
+			gridTemplateColumns: 'auto 1fr auto',
+			columnGap: 10,
+			rowGap: 2,
+			alignItems: 'center',
 			padding: '10px 12px'
 		}
 	},
