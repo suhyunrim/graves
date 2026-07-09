@@ -295,54 +295,50 @@ const useStyles = makeStyles()((theme) => ({
 		color: 'rgba(255, 255, 255, 0.5)',
 		whiteSpace: 'nowrap'
 	},
-	trophyList: {
-		display: 'flex',
-		flexDirection: 'column',
-		gap: 6,
-		flexShrink: 0,
-		maxWidth: 240,
-		[theme.breakpoints.down('sm')]: {
-			maxWidth: '100%',
-			width: '100%'
-		}
+	trophyInline: {
+		display: 'inline-flex',
+		alignItems: 'center',
+		flexWrap: 'wrap',
+		gap: 6
 	},
-	trophyListLabel: {
+	trophyInlineLabel: {
 		display: 'inline-flex',
 		alignItems: 'center',
 		gap: 4,
 		fontFamily: '"Noto Sans KR", sans-serif',
-		fontSize: '1.2rem',
+		fontSize: '1.25rem',
 		fontWeight: 700,
 		color: '#ffd700',
-		marginBottom: 2
+		whiteSpace: 'nowrap'
 	},
-	trophyListItem: {
+	trophyInlineSep: {
+		color: 'rgba(255, 255, 255, 0.3)'
+	},
+	trophyBadge: {
 		display: 'inline-flex',
 		alignItems: 'center',
-		gap: 8,
+		gap: 6,
 		background: 'rgba(255, 215, 0, 0.08)',
 		border: '1px solid rgba(255, 215, 0, 0.3)',
-		borderRadius: 10,
-		padding: '5px 12px 5px 6px'
+		borderRadius: 8,
+		padding: '3px 10px 3px 5px'
 	},
-	trophyListImg: {
-		width: 30,
-		height: 30,
+	trophyBadgeImg: {
+		width: 24,
+		height: 24,
 		objectFit: 'contain',
 		flexShrink: 0
 	},
-	trophyListFallback: {
-		fontSize: '1.8rem',
+	trophyBadgeFallback: {
+		fontSize: '1.5rem',
 		lineHeight: 1,
 		flexShrink: 0
 	},
-	trophyListName: {
+	trophyBadgeName: {
 		fontFamily: '"Noto Sans KR", sans-serif',
-		fontSize: '1.35rem',
+		fontSize: '1.25rem',
 		color: 'rgba(255, 215, 0, 0.95)',
 		fontWeight: 600,
-		overflow: 'hidden',
-		textOverflow: 'ellipsis',
 		whiteSpace: 'nowrap'
 	},
 	statTierShort: {
@@ -367,7 +363,7 @@ const useStyles = makeStyles()((theme) => ({
 		color: 'rgba(255, 255, 255, 0.25)'
 	},
 	statWin: {
-		color: '#00ff7f'
+		color: '#4dabf7'
 	},
 	statLose: {
 		color: '#ff6b6b'
@@ -1077,6 +1073,13 @@ function BidDialog({
 	);
 }
 
+// 승률 색상 — 랭킹 테이블(getWinRateClass)과 동일 규칙: 55%↑ 초록, 45~54% 노랑, 45%↓ 빨강.
+function winRateColor(rate) {
+	if (rate >= 55) return '#00ff7f';
+	if (rate >= 45) return '#ffd700';
+	return '#ff6b6b';
+}
+
 // ─── 티어 표시 (솔랭 / 내전 공용) ───────────────────────────
 function TierStat({ classes, label, icon, emblem, short, color, win, lose, rate }) {
 	const hasRecord = win != null || lose != null;
@@ -1104,7 +1107,7 @@ function TierStat({ classes, label, icon, emblem, short, color, win, lose, rate 
 							<span className={classes.statRecordSlash}>/</span>
 							<span
 								className={classes.statRate}
-								style={{ color: rate >= 50 ? '#00ff7f' : 'rgba(255, 255, 255, 0.55)' }}
+								style={{ color: winRateColor(rate) }}
 							>
 								{rate}%
 							</span>
@@ -1206,29 +1209,30 @@ function CandidatePlayerRow({ label, icon, desc, players, mode, classes }) {
 	);
 }
 
-// ─── CandidateTrophyList (우승 트로피 — 유저 정보 오른쪽 세로 리스트) ──────────
-function CandidateTrophyList({ championships, classes }) {
+// ─── CandidateTrophyInline (우승 트로피 — 포지션 오른쪽 가로 배지 행) ──────────
+function CandidateTrophyInline({ championships, classes }) {
 	const list = championships || [];
 	if (list.length === 0) return null;
 	return (
-		<div className={classes.trophyList}>
-			<span className={classes.trophyListLabel}>
+		<span className={classes.trophyInline}>
+			<span className={classes.trophyInlineLabel}>
 				<span role="img" aria-label="우승">🏆</span>우승 {list.length}회
 			</span>
+			<span className={classes.trophyInlineSep}>-</span>
 			{list.map(t => {
 				const icon = getTrophyIcon(t.trophyType);
 				return (
-					<span key={t.tournamentId} className={classes.trophyListItem}>
+					<span key={t.tournamentId} className={classes.trophyBadge}>
 						{icon ? (
-							<img className={classes.trophyListImg} src={icon} alt="" />
+							<img className={classes.trophyBadgeImg} src={icon} alt="" />
 						) : (
-							<span className={classes.trophyListFallback} role="img" aria-label="trophy">🏆</span>
+							<span className={classes.trophyBadgeFallback} role="img" aria-label="trophy">🏆</span>
 						)}
-						<span className={classes.trophyListName}>{t.tournamentName}</span>
+						<span className={classes.trophyBadgeName}>{t.tournamentName}</span>
 					</span>
 				);
 			})}
-		</div>
+		</span>
 	);
 }
 
@@ -1284,6 +1288,7 @@ function CandidateInfoCard({ candidate, classes }) {
 							/>
 							{positionLabel}
 						</span>
+						<CandidateTrophyInline championships={candidate.tournamentChampionships} classes={classes} />
 					</div>
 					<div className={classes.statRow}>
 						<TierStat
@@ -1310,7 +1315,6 @@ function CandidateInfoCard({ candidate, classes }) {
 						/>
 					</div>
 				</div>
-				<CandidateTrophyList championships={candidate.tournamentChampionships} classes={classes} />
 			</div>
 			<CandidateMostRow champions={candidate.mostChampions} classes={classes} />
 			<CandidatePlayerRow label="전생에 부부" icon="💞" desc="듀오 승률 최고" players={candidate.soulmates} mode="soulmate" classes={classes} />
