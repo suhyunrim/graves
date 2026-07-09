@@ -140,14 +140,20 @@ const getRatingTierName = rating => {
 	return `${name} ${tierSteps[Math.floor((rating - tierRating) / 25)]}`;
 };
 
-const formatDate = utcDateString => {
+// 날짜 문자열을 날짜/시간으로 분리. 데스크탑 날짜 컬럼은 두 줄로 나눠 폭을 줄인다.
+const formatDateParts = utcDateString => {
 	const date = new Date(utcDateString);
 	const year = String(date.getFullYear()).slice(-2);
 	const month = String(date.getMonth() + 1).padStart(2, '0');
 	const day = String(date.getDate()).padStart(2, '0');
 	const hours = String(date.getHours()).padStart(2, '0');
 	const minutes = String(date.getMinutes()).padStart(2, '0');
-	return `${year}-${month}-${day} ${hours}:${minutes}`;
+	return { day: `${year}-${month}-${day}`, time: `${hours}:${minutes}` };
+};
+
+const formatDate = utcDateString => {
+	const { day, time } = formatDateParts(utcDateString);
+	return `${day} ${time}`;
 };
 
 const useStyles = makeStyles()(() => ({
@@ -221,10 +227,20 @@ const useStyles = makeStyles()(() => ({
 		minWidth: 60
 	},
 	dateCell: {
-		fontFamily: '"Noto Sans KR", sans-serif',
+		display: 'flex',
+		flexDirection: 'column',
+		fontFamily: '"Rajdhani", "Noto Sans KR", sans-serif',
+		whiteSpace: 'nowrap',
+		lineHeight: 1.25
+	},
+	dateDay: {
 		fontSize: '1.3rem',
-		color: 'rgba(255, 255, 255, 0.7)',
-		whiteSpace: 'nowrap'
+		fontWeight: 600,
+		color: 'rgba(255, 255, 255, 0.85)'
+	},
+	dateTime: {
+		fontSize: '1.15rem',
+		color: 'rgba(255, 255, 255, 0.5)'
 	},
 	// 본인 관점(perspective) 승/패 배지 + 내 LP 칩
 	perspectiveRow: {
@@ -742,7 +758,7 @@ function MatchList({
 											<TableCell className={classes.headerCell} align="center">
 												평균
 											</TableCell>
-											<TableCell className={classes.headerCell}>
+											<TableCell className={classes.headerCell} style={{ width: '30%' }}>
 												<span className={classes.teamLabel}>
 													<span role="img" aria-label="dog" className={classes.teamEmoji}>
 														🐶
@@ -753,7 +769,7 @@ function MatchList({
 											<TableCell className={classes.headerCell} align="center">
 												평균
 											</TableCell>
-											<TableCell className={classes.headerCell}>
+											<TableCell className={classes.headerCell} style={{ width: '30%' }}>
 												<span className={classes.teamLabel}>
 													<span role="img" aria-label="cat" className={classes.teamEmoji}>
 														🐱
@@ -769,13 +785,17 @@ function MatchList({
 											const isTeam1Win = match.winTeam === 1;
 											const displayId = getDisplayId(index);
 											const persp = getPerspective(match);
+											const dateParts = formatDateParts(match.createdAt);
 											return (
 												<StyledTableRow key={match.gameId}>
 													<StyledTableCell>
 														<span className={classes.matchIdCell}>{displayId}</span>
 													</StyledTableCell>
 													<StyledTableCell>
-														<span className={classes.dateCell}>{formatDate(match.createdAt)}</span>
+														<div className={classes.dateCell}>
+															<span className={classes.dateDay}>{dateParts.day}</span>
+															<span className={classes.dateTime}>{dateParts.time}</span>
+														</div>
 														{persp && (
 															<div className={classes.perspectiveRow}>
 																<span
@@ -793,6 +813,12 @@ function MatchList({
 														className={isTeam1Win ? classes.winTeamCell : classes.loseTeamCell}
 													>
 														<div className={classes.avgRatingWrapper}>
+															<span
+																className={isTeam1Win ? classes.winBadge : classes.loseBadge}
+																style={{ marginBottom: 0 }}
+															>
+																{isTeam1Win ? 'WIN' : 'LOSE'}
+															</span>
 															<div className={classes.avgTierDisplay}>
 																<img
 																	className={classes.avgTierIcon}
@@ -817,11 +843,6 @@ function MatchList({
 														</div>
 													</StyledTableCell>
 													<StyledTableCell className={isTeam1Win ? classes.winTeamCell : classes.loseTeamCell}>
-														<div>
-															<span className={isTeam1Win ? classes.winBadge : classes.loseBadge}>
-																{isTeam1Win ? 'WIN' : 'LOSE'}
-															</span>
-														</div>
 														<div className={classes.playerList}>{renderPlayers(match.team1.players)}</div>
 													</StyledTableCell>
 													<StyledTableCell
@@ -829,6 +850,12 @@ function MatchList({
 														className={!isTeam1Win ? classes.winTeamCell : classes.loseTeamCell}
 													>
 														<div className={classes.avgRatingWrapper}>
+															<span
+																className={!isTeam1Win ? classes.winBadge : classes.loseBadge}
+																style={{ marginBottom: 0 }}
+															>
+																{!isTeam1Win ? 'WIN' : 'LOSE'}
+															</span>
 															<div className={classes.avgTierDisplay}>
 																<img
 																	className={classes.avgTierIcon}
@@ -853,11 +880,6 @@ function MatchList({
 														</div>
 													</StyledTableCell>
 													<StyledTableCell className={!isTeam1Win ? classes.winTeamCell : classes.loseTeamCell}>
-														<div>
-															<span className={!isTeam1Win ? classes.winBadge : classes.loseBadge}>
-																{!isTeam1Win ? 'WIN' : 'LOSE'}
-															</span>
-														</div>
 														<div className={classes.playerList}>{renderPlayers(match.team2.players)}</div>
 													</StyledTableCell>
 													{showAdmin && (
