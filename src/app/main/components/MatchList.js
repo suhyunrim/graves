@@ -12,6 +12,7 @@ import { makeStyles, withStyles } from 'tss-react/mui';
 import { fadeInUp } from './Reveal';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import PositionIcon from '../tournament/PositionIcon';
 
 const tierColors = {
 	IRON: '#5C5C5C',
@@ -40,6 +41,38 @@ const tierThresholds = {
 };
 
 const tierSteps = ['IV', 'III', 'II', 'I'];
+
+// Riot 표준 포지션 키(대문자) → 한글 라벨 + PositionIcon용 키(소문자).
+// 표시/정렬은 항상 탑 → 정글 → 미드 → 원딜 → 서폿 순서 고정 (RankingHeader/MyInfo 와 동일).
+const POSITIONS = [
+	{ key: 'TOP', label: '탑', icon: 'top' },
+	{ key: 'JUNGLE', label: '정글', icon: 'jungle' },
+	{ key: 'MIDDLE', label: '미드', icon: 'mid' },
+	{ key: 'BOTTOM', label: '원딜', icon: 'adc' },
+	{ key: 'UTILITY', label: '서폿', icon: 'support' }
+];
+
+const POSITION_ORDER = POSITIONS.reduce((acc, pos, i) => {
+	acc[pos.key] = i;
+	return acc;
+}, {});
+
+const POSITION_ICON_KEY = POSITIONS.reduce((acc, pos) => {
+	acc[pos.key] = pos.icon;
+	return acc;
+}, {});
+
+// 포지션 지정 플레이어를 먼저(탑→서폿 순), 미지정(null/undefined)은 뒤에서 레이팅 내림차순(기존 동작 유지).
+const sortPlayers = players =>
+	[...players].sort((a, b) => {
+		const ao = POSITION_ORDER[a.position];
+		const bo = POSITION_ORDER[b.position];
+		const aHas = ao !== undefined;
+		const bHas = bo !== undefined;
+		if (aHas && bHas) return ao - bo;
+		if (aHas !== bHas) return aHas ? -1 : 1;
+		return b.rating - a.rating;
+	});
 
 
 // 다이얼로그 프리뷰 등 외부에서도 재사용하는 tier 헬퍼
@@ -262,6 +295,26 @@ const useStyles = makeStyles()(() => ({
 		gap: 10,
 		padding: '4px 0'
 	},
+	// position 없는 플레이어도 빈 슬롯을 차지해 이름/티어 세로 정렬이 흔들리지 않게 함.
+	positionSlot: {
+		width: 20,
+		height: 20,
+		display: 'inline-flex',
+		alignItems: 'center',
+		justifyContent: 'center',
+		flexShrink: 0
+	},
+	positionIcon: {
+		width: 20,
+		height: 20,
+		objectFit: 'contain'
+	},
+	positionFallback: {
+		fontFamily: '"Rajdhani", sans-serif',
+		fontSize: '0.95rem',
+		fontWeight: 700,
+		color: 'rgba(255, 255, 255, 0.55)'
+	},
 	tierIcon: {
 		width: 28,
 		height: 28,
@@ -475,6 +528,19 @@ const useStyles = makeStyles()(() => ({
 		background: 'rgba(255, 255, 255, 0.06)',
 		borderRadius: 6
 	},
+	// 모바일은 칩(pill)이라 정렬용 빈 슬롯 불필요 — position 있을 때만 렌더.
+	mobilePositionIcon: {
+		width: 16,
+		height: 16,
+		objectFit: 'contain',
+		flexShrink: 0
+	},
+	mobilePositionFallback: {
+		fontFamily: '"Rajdhani", sans-serif',
+		fontSize: '0.85rem',
+		fontWeight: 700,
+		color: 'rgba(255, 255, 255, 0.55)'
+	},
 	mobilePlayerTierIcon: {
 		width: 18,
 		height: 18
@@ -590,48 +656,70 @@ function MatchList({
 	};
 
 	const renderPlayers = players => {
-		const sortedPlayers = [...players].sort((a, b) => b.rating - a.rating);
-		return sortedPlayers.map(player => (
-			<div key={player.puuid} className={classes.playerRow}>
-				<img
-					className={classes.tierIcon}
-					src={`/assets/images/ranked-emblems/Emblem_${getTierIconName(player.tier)}.webp`}
-					alt={player.tier}
-					style={{ filter: `drop-shadow(0 0 4px ${getTierColor(player.tier)}40)` }}
-				/>
-				<span className={classes.tierBadge} style={{ color: getTierColor(player.tier) }}>
-					{getTierShortName(player.tier)}
-				</span>
-				<span
-					className={isPlayerHighlighted(player) ? classes.playerNameHighlight : classes.playerName}
-					onClick={() => navigate(`/userinfo/${player.puuid}`)}
-				>
-					{player.name}
-				</span>
-			</div>
-		));
+		const sortedPlayers = sortPlayers(players);
+		return sortedPlayers.map(player => {
+			const posIconKey = POSITION_ICON_KEY[player.position];
+			return (
+				<div key={player.puuid} className={classes.playerRow}>
+					<span className={classes.positionSlot}>
+						{posIconKey && (
+							<PositionIcon
+								position={posIconKey}
+								className={classes.positionIcon}
+								fallbackClassName={classes.positionFallback}
+							/>
+						)}
+					</span>
+					<img
+						className={classes.tierIcon}
+						src={`/assets/images/ranked-emblems/Emblem_${getTierIconName(player.tier)}.webp`}
+						alt={player.tier}
+						style={{ filter: `drop-shadow(0 0 4px ${getTierColor(player.tier)}40)` }}
+					/>
+					<span className={classes.tierBadge} style={{ color: getTierColor(player.tier) }}>
+						{getTierShortName(player.tier)}
+					</span>
+					<span
+						className={isPlayerHighlighted(player) ? classes.playerNameHighlight : classes.playerName}
+						onClick={() => navigate(`/userinfo/${player.puuid}`)}
+					>
+						{player.name}
+					</span>
+				</div>
+			);
+		});
 	};
 
 	const renderMobilePlayers = players => {
-		const sortedPlayers = [...players].sort((a, b) => b.rating - a.rating);
-		return sortedPlayers.map(player => (
-			<div key={player.puuid} className={classes.mobilePlayerChip}>
-				<img
-					className={classes.mobilePlayerTierIcon}
-					src={`/assets/images/ranked-emblems/Emblem_${getTierIconName(player.tier)}.webp`}
-					alt={player.tier}
-				/>
-				<span className={classes.mobilePlayerTier} style={{ color: getTierColor(player.tier) }}>
-					{getTierShortName(player.tier)}
-				</span>
-				<span
-					className={isPlayerHighlighted(player) ? classes.mobilePlayerNameHighlight : classes.mobilePlayerName}
-					onClick={() => navigate(`/userinfo/${player.puuid}`)}
-				>
-					{player.name}
-				</span>
-			</div>
-		));
+		const sortedPlayers = sortPlayers(players);
+		return sortedPlayers.map(player => {
+			const posIconKey = POSITION_ICON_KEY[player.position];
+			return (
+				<div key={player.puuid} className={classes.mobilePlayerChip}>
+					{posIconKey && (
+						<PositionIcon
+							position={posIconKey}
+							className={classes.mobilePositionIcon}
+							fallbackClassName={classes.mobilePositionFallback}
+						/>
+					)}
+					<img
+						className={classes.mobilePlayerTierIcon}
+						src={`/assets/images/ranked-emblems/Emblem_${getTierIconName(player.tier)}.webp`}
+						alt={player.tier}
+					/>
+					<span className={classes.mobilePlayerTier} style={{ color: getTierColor(player.tier) }}>
+						{getTierShortName(player.tier)}
+					</span>
+					<span
+						className={isPlayerHighlighted(player) ? classes.mobilePlayerNameHighlight : classes.mobilePlayerName}
+						onClick={() => navigate(`/userinfo/${player.puuid}`)}
+					>
+						{player.name}
+					</span>
+				</div>
+			);
+		});
 	};
 
 	const getDisplayId = index => total - ((page - 1) * rowsPerPage + index);
