@@ -13,6 +13,8 @@ export const LOADING_DETAIL = '[TOURNAMENT] LOADING DETAIL';
 export const GET_TOURNAMENT_DETAIL = '[TOURNAMENT] GET TOURNAMENT DETAIL';
 export const CLEAR_TOURNAMENT_DETAIL = '[TOURNAMENT] CLEAR TOURNAMENT DETAIL';
 export const SET_ACTIVE_MEMBERS = '[TOURNAMENT] SET ACTIVE MEMBERS';
+export const SET_AUTO_ASSIGN = '[TOURNAMENT] SET AUTO ASSIGN';
+export const CLEAR_AUTO_ASSIGN = '[TOURNAMENT] CLEAR AUTO ASSIGN';
 
 export function getTournamentList(groupId) {
 	if (isSampleMode()) {
@@ -57,6 +59,17 @@ export function getTournamentDetail(tournamentId) {
 
 export function clearTournamentDetail() {
 	return { type: CLEAR_TOURNAMENT_DETAIL };
+}
+
+// 경매 "강제 0원 자동 낙찰" 연출 트리거. 어드민은 next-candidate 응답의 autoAssigned로,
+// 관전자는 소켓 'auction:auto-assign' 으로 동일 payload를 받아 같은 연출을 재생한다.
+// (리듀서에서 puuid 기준으로 중복 재생을 막는다.)
+export function showAutoAssign(payload) {
+	return { type: SET_AUTO_ASSIGN, payload };
+}
+
+export function clearAutoAssign() {
+	return { type: CLEAR_AUTO_ASSIGN };
 }
 
 // 토너먼트 팀원/후보 선택기 멤버 풀 — 개최일(heldAt) 기준 분기.

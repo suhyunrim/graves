@@ -831,12 +831,19 @@ function TournamentDetail() {
 			if (payload && payload.tournamentId != null && Number(payload.tournamentId) !== tid) return;
 			refresh();
 		};
+		// 강제 0원 자동 낙찰: 연출 이벤트를 띄우고 로스터 갱신을 위해 재로드.
+		const handleAutoAssign = (payload) => {
+			if (payload && payload.tournamentId != null && Number(payload.tournamentId) !== tid) return;
+			dispatch(Actions.showAutoAssign(payload));
+			refresh();
+		};
 		socket.on('auction:status', handleStatus);
 		socket.on('auction:bid', handleBid);
 		socket.on('auction:undo', handleUndo);
 		socket.on('auction:candidate', handleStatus);
 		socket.on('auction:bid-start', handleStatus);
 		socket.on('auction:bid-extend', handleStatus);
+		socket.on('auction:auto-assign', handleAutoAssign);
 
 		return () => {
 			socket.emit('tournament:leave', tid);
@@ -846,6 +853,7 @@ function TournamentDetail() {
 			socket.off('auction:candidate', handleStatus);
 			socket.off('auction:bid-start', handleStatus);
 			socket.off('auction:bid-extend', handleStatus);
+			socket.off('auction:auto-assign', handleAutoAssign);
 		};
 	}, [dispatch, tournamentId]);
 

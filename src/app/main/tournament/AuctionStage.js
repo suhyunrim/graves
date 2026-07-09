@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
 	Button,
 	TextField,
@@ -40,6 +40,18 @@ import { CATEGORY_LABELS, TIER_COLORS, TIER_RANK } from '../achievementDashboard
 const blink = keyframes({
 	'0%, 100%': { opacity: 1 },
 	'50%': { opacity: 0.35 }
+});
+
+// 강제 0원 자동 낙찰 연출용.
+const autoRevealIn = keyframes({
+	'0%': { opacity: 0, transform: 'translateY(12px) scale(0.96)' },
+	'100%': { opacity: 1, transform: 'translateY(0) scale(1)' }
+});
+
+const autoLockPop = keyframes({
+	'0%': { opacity: 0, transform: 'scale(0.7)' },
+	'60%': { opacity: 1, transform: 'scale(1.05)' },
+	'100%': { opacity: 1, transform: 'scale(1)' }
 });
 
 const useStyles = makeStyles()((theme) => ({
@@ -283,28 +295,52 @@ const useStyles = makeStyles()((theme) => ({
 		color: 'rgba(255, 255, 255, 0.5)',
 		whiteSpace: 'nowrap'
 	},
-	trophyChip: {
+	trophyList: {
+		display: 'flex',
+		flexDirection: 'column',
+		gap: 6,
+		flexShrink: 0,
+		maxWidth: 240,
+		[theme.breakpoints.down('sm')]: {
+			maxWidth: '100%',
+			width: '100%'
+		}
+	},
+	trophyListLabel: {
 		display: 'inline-flex',
 		alignItems: 'center',
-		gap: 6,
+		gap: 4,
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.2rem',
+		fontWeight: 700,
+		color: '#ffd700',
+		marginBottom: 2
+	},
+	trophyListItem: {
+		display: 'inline-flex',
+		alignItems: 'center',
+		gap: 8,
 		background: 'rgba(255, 215, 0, 0.08)',
 		border: '1px solid rgba(255, 215, 0, 0.3)',
-		borderRadius: 8,
-		padding: '3px 10px'
+		borderRadius: 10,
+		padding: '5px 12px 5px 6px'
 	},
-	trophyChipImg: {
-		width: 24,
-		height: 24,
-		objectFit: 'contain'
+	trophyListImg: {
+		width: 30,
+		height: 30,
+		objectFit: 'contain',
+		flexShrink: 0
 	},
-	trophyChipFallback: {
-		fontSize: '1.4rem'
+	trophyListFallback: {
+		fontSize: '1.8rem',
+		lineHeight: 1,
+		flexShrink: 0
 	},
-	trophyChipName: {
-		fontSize: '1.2rem',
-		color: 'rgba(255, 215, 0, 0.9)',
+	trophyListName: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.35rem',
+		color: 'rgba(255, 215, 0, 0.95)',
 		fontWeight: 600,
-		maxWidth: 140,
 		overflow: 'hidden',
 		textOverflow: 'ellipsis',
 		whiteSpace: 'nowrap'
@@ -316,9 +352,28 @@ const useStyles = makeStyles()((theme) => ({
 		color: '#fff',
 		lineHeight: 1
 	},
-	statWL: {
-		color: 'rgba(255, 255, 255, 0.6)',
-		fontSize: '1.3rem'
+	statRecord: {
+		display: 'inline-flex',
+		alignItems: 'center',
+		gap: 5,
+		fontSize: '1.4rem',
+		fontWeight: 600
+	},
+	statRecordSep: {
+		color: 'rgba(255, 255, 255, 0.3)',
+		margin: '0 2px'
+	},
+	statRecordSlash: {
+		color: 'rgba(255, 255, 255, 0.25)'
+	},
+	statWin: {
+		color: '#00ff7f'
+	},
+	statLose: {
+		color: '#ff6b6b'
+	},
+	statRate: {
+		fontWeight: 700
 	},
 	statSep: {
 		color: 'rgba(255, 255, 255, 0.2)'
@@ -784,6 +839,92 @@ const useStyles = makeStyles()((theme) => ({
 		},
 		'& .MuiSelect-icon': { color: 'rgba(255, 255, 255, 0.5)' },
 		'& .MuiFormHelperText-root': { color: 'rgba(255, 255, 255, 0.5)' }
+	},
+	// ── 강제 0원 자동 낙찰 오버레이 (일반 cyan 입찰과 구분되게 회색/자물쇠 톤) ──
+	autoOverlay: {
+		position: 'fixed',
+		inset: 0,
+		zIndex: 1400,
+		display: 'flex',
+		alignItems: 'center',
+		justifyContent: 'center',
+		padding: 16,
+		background: 'rgba(6, 8, 18, 0.72)',
+		backdropFilter: 'blur(3px)'
+	},
+	autoCard: {
+		width: '100%',
+		maxWidth: 620,
+		maxHeight: '90vh',
+		overflowY: 'auto',
+		display: 'flex',
+		flexDirection: 'column',
+		background: 'linear-gradient(135deg, #1a1a2e 0%, #0f0f1a 100%)',
+		border: '1px solid rgba(255, 255, 255, 0.18)',
+		borderRadius: 20,
+		boxShadow: '0 20px 60px rgba(0, 0, 0, 0.6)',
+		padding: 22,
+		animation: `${autoRevealIn} 0.4s ease`
+	},
+	autoBadge: {
+		display: 'inline-flex',
+		alignItems: 'center',
+		gap: 6,
+		alignSelf: 'flex-start',
+		padding: '4px 12px',
+		borderRadius: 999,
+		marginBottom: 14,
+		background: 'rgba(255, 255, 255, 0.1)',
+		border: '1px solid rgba(255, 255, 255, 0.22)',
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.15rem',
+		fontWeight: 700,
+		color: 'rgba(255, 255, 255, 0.85)'
+	},
+	autoBadgeIcon: {
+		width: 18,
+		height: 18
+	},
+	autoLock: {
+		marginTop: 16,
+		display: 'flex',
+		flexDirection: 'column',
+		alignItems: 'center',
+		gap: 10,
+		padding: '18px 16px',
+		borderRadius: 16,
+		background: 'linear-gradient(135deg, rgba(120, 130, 150, 0.28) 0%, rgba(66, 74, 92, 0.4) 100%)',
+		border: '1px solid rgba(255, 255, 255, 0.24)',
+		animation: `${autoLockPop} 0.45s ease`
+	},
+	autoLockChip: {
+		display: 'inline-flex',
+		alignItems: 'center',
+		gap: 6,
+		padding: '2px 12px',
+		borderRadius: 6,
+		background: 'rgba(255, 255, 255, 0.14)',
+		border: '1px solid rgba(255, 255, 255, 0.28)',
+		fontFamily: '"Rajdhani", "Noto Sans KR", sans-serif',
+		fontSize: '1.1rem',
+		fontWeight: 700,
+		letterSpacing: '0.08em',
+		color: 'rgba(255, 255, 255, 0.78)'
+	},
+	autoLockText: {
+		fontFamily: '"Rajdhani", "Noto Sans KR", sans-serif',
+		fontSize: '2rem',
+		fontWeight: 700,
+		color: '#fff',
+		textAlign: 'center'
+	},
+	autoLockTeam: {
+		color: '#ffd166'
+	},
+	autoLockSub: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.2rem',
+		color: 'rgba(255, 255, 255, 0.55)'
 	}
 }));
 
@@ -937,8 +1078,9 @@ function BidDialog({
 }
 
 // ─── 티어 표시 (솔랭 / 내전 공용) ───────────────────────────
-function TierStat({ classes, label, icon, emblem, short, wl, color }) {
-	if (!short && !wl) return null;
+function TierStat({ classes, label, icon, emblem, short, color, win, lose, rate }) {
+	const hasRecord = win != null || lose != null;
+	if (!short && !hasRecord) return null;
 	return (
 		<span className={classes.statBlock}>
 			<span className={classes.statLabel}>
@@ -951,7 +1093,25 @@ function TierStat({ classes, label, icon, emblem, short, wl, color }) {
 			</span>
 			{emblem && <img src={emblem} alt="" className={classes.statTierEmblem} />}
 			{short && <span className={classes.statTierShort} style={color ? { color } : undefined}>{short}</span>}
-			{wl && <span className={classes.statWL}>({wl})</span>}
+			{hasRecord && (
+				<span className={classes.statRecord}>
+					<span className={classes.statRecordSep}>-</span>
+					<span className={classes.statWin}>{win || 0}승</span>
+					<span className={classes.statRecordSlash}>/</span>
+					<span className={classes.statLose}>{lose || 0}패</span>
+					{rate != null && (
+						<>
+							<span className={classes.statRecordSlash}>/</span>
+							<span
+								className={classes.statRate}
+								style={{ color: rate >= 50 ? '#00ff7f' : 'rgba(255, 255, 255, 0.55)' }}
+							>
+								{rate}%
+							</span>
+						</>
+					)}
+				</span>
+			)}
 		</span>
 	);
 }
@@ -1046,28 +1206,28 @@ function CandidatePlayerRow({ label, icon, desc, players, mode, classes }) {
 	);
 }
 
-// ─── CandidateTrophyRow (우승 트로피) ─────────────────────────
-function CandidateTrophyRow({ championships, classes }) {
+// ─── CandidateTrophyList (우승 트로피 — 유저 정보 오른쪽 세로 리스트) ──────────
+function CandidateTrophyList({ championships, classes }) {
 	const list = championships || [];
 	if (list.length === 0) return null;
 	return (
-		<div className={classes.mostRow}>
-			<span className={classes.mostLabel}><span role="img" aria-label="우승" style={{ marginRight: 4, fontSize: '1.5rem' }}>🏆</span>우승</span>
-			<span className={classes.mostChips}>
-				{list.map(t => {
-					const icon = getTrophyIcon(t.trophyType);
-					return (
-						<span key={t.tournamentId} className={classes.trophyChip}>
-							{icon ? (
-								<img className={classes.trophyChipImg} src={icon} alt="" />
-							) : (
-								<span className={classes.trophyChipFallback} role="img" aria-label="trophy">🏆</span>
-							)}
-							<span className={classes.trophyChipName}>{t.tournamentName}</span>
-						</span>
-					);
-				})}
+		<div className={classes.trophyList}>
+			<span className={classes.trophyListLabel}>
+				<span role="img" aria-label="우승">🏆</span>우승 {list.length}회
 			</span>
+			{list.map(t => {
+				const icon = getTrophyIcon(t.trophyType);
+				return (
+					<span key={t.tournamentId} className={classes.trophyListItem}>
+						{icon ? (
+							<img className={classes.trophyListImg} src={icon} alt="" />
+						) : (
+							<span className={classes.trophyListFallback} role="img" aria-label="trophy">🏆</span>
+						)}
+						<span className={classes.trophyListName}>{t.tournamentName}</span>
+					</span>
+				);
+			})}
 		</div>
 	);
 }
@@ -1079,17 +1239,13 @@ function CandidateInfoCard({ candidate, classes }) {
 
 	const rank = parseRankTier(candidate.rankTier);
 	const rankTotal = (candidate.rankWin || 0) + (candidate.rankLose || 0);
-	const rankWL = (candidate.rankWin != null || candidate.rankLose != null)
-		? `${candidate.rankWin || 0}승 ${candidate.rankLose || 0}패${rankTotal > 0 ? ` ${Math.round(((candidate.rankWin || 0) / rankTotal) * 100)}%` : ''}`
-		: null;
+	const rankRate = rankTotal > 0 ? Math.round(((candidate.rankWin || 0) / rankTotal) * 100) : null;
 
 	const internalTierName = candidate.internalRating != null ? getTierName(candidate.internalRating) : null;
 	const internalEmblem = internalTierName ? getTierEmblemUrl(internalTierName) : null;
 	const internalLabel = candidate.internalRating != null ? getTierLabel(candidate.internalRating) : null;
 	const internalTotal = (candidate.win || 0) + (candidate.lose || 0);
-	const internalWL = (candidate.win != null || candidate.lose != null)
-		? `${candidate.win || 0}승 ${candidate.lose || 0}패${internalTotal > 0 ? ` ${Math.round(((candidate.win || 0) / internalTotal) * 100)}%` : ''}`
-		: null;
+	const internalRate = internalTotal > 0 ? Math.round(((candidate.win || 0) / internalTotal) * 100) : null;
 
 	const achievements = candidate.achievements || [];
 	const honor = candidate.honor;
@@ -1137,7 +1293,9 @@ function CandidateInfoCard({ candidate, classes }) {
 							emblem={rank ? rank.emblem : null}
 							short={rank ? candidate.rankTier : null}
 							color={rank ? (TIER_COLORS[rank.tier] || '#9aa4b2') : undefined}
-							wl={rankWL}
+							win={candidate.rankWin}
+							lose={candidate.rankLose}
+							rate={rankRate}
 						/>
 						<TierStat
 							classes={classes}
@@ -1146,15 +1304,17 @@ function CandidateInfoCard({ candidate, classes }) {
 							emblem={internalEmblem}
 							short={internalLabel}
 							color={internalTierName ? (TIER_COLORS[internalTierName] || '#9aa4b2') : undefined}
-							wl={internalWL}
+							win={candidate.win}
+							lose={candidate.lose}
+							rate={internalRate}
 						/>
 					</div>
 				</div>
+				<CandidateTrophyList championships={candidate.tournamentChampionships} classes={classes} />
 			</div>
 			<CandidateMostRow champions={candidate.mostChampions} classes={classes} />
 			<CandidatePlayerRow label="전생에 부부" icon="💞" desc="듀오 승률 최고" players={candidate.soulmates} mode="soulmate" classes={classes} />
 			<CandidatePlayerRow label="톰과제리" icon="😼" desc="상대 최다 판수" players={candidate.nemeses} mode="nemesis" classes={classes} />
-			<CandidateTrophyRow championships={candidate.tournamentChampionships} classes={classes} />
 			{(achievements.length > 0 || (honor && (honor.received != null || honorTitleText))) && (
 				<div className={classes.candidateExtras}>
 						{achievements.length > 0 && (() => {
@@ -1235,6 +1395,50 @@ function CandidateInfoCard({ candidate, classes }) {
 	);
 }
 
+// 강제 0원 자동 낙찰 연출 오버레이.
+// phase 'reveal'(~1.6s): 후보 카드를 매물처럼 노출 + "[포지션] 마지막 후보" 뱃지.
+// phase 'lock': "🔒 N팀에 0원 자동 낙찰" (회색/자물쇠 톤). ~3.6s 후 자동 종료.
+function AutoAssignOverlay({ event, classes, onDone }) {
+	const [phase, setPhase] = useState('reveal');
+	useEffect(() => {
+		const revealTimer = setTimeout(() => setPhase('lock'), 1600);
+		const doneTimer = setTimeout(() => onDone(), 3600);
+		return () => {
+			clearTimeout(revealTimer);
+			clearTimeout(doneTimer);
+		};
+	}, [event.puuid, onDone]);
+
+	const positionLabel = POSITION_LABELS[event.position] || event.position;
+	// candidate 상세엔 position 이 없을 수 있어 top-level position 으로 보강.
+	const candidate = event.candidate
+		? { ...event.candidate, position: event.candidate.position || event.position }
+		: null;
+
+	return (
+		<div className={classes.autoOverlay}>
+			<div className={classes.autoCard}>
+				<span className={classes.autoBadge}>
+					<PositionIcon position={event.position} className={classes.autoBadgeIcon} />
+					{positionLabel} 마지막 후보
+				</span>
+				<CandidateInfoCard candidate={candidate} classes={classes} />
+				{phase === 'lock' && (
+					<div className={classes.autoLock}>
+						<span className={classes.autoLockChip}>
+							<span role="img" aria-label="lock">🔒</span> 자동
+						</span>
+						<span className={classes.autoLockText}>
+							<span className={classes.autoLockTeam}>{event.teamName}</span>에 0원 자동 낙찰
+						</span>
+						<span className={classes.autoLockSub}>입찰 없이 확정 · 마지막 남은 팀</span>
+					</div>
+				)}
+			</div>
+		</div>
+	);
+}
+
 // ─── Main ─────────────────────────────────────────────────────
 function AuctionStage({ tournament, teams, isAdmin, onChanged }) {
 	const { classes, cx } = useStyles();
@@ -1242,12 +1446,19 @@ function AuctionStage({ tournament, teams, isAdmin, onChanged }) {
 	const toast = useToast();
 	const activeMembers = useSelector(({ Tournament }) => Tournament.tournament.activeMembers);
 	const currentCandidate = useSelector(({ Tournament }) => Tournament.tournament.currentCandidate);
+	const autoAssign = useSelector(({ Tournament }) => Tournament.tournament.autoAssign);
 
 	const auctionConfig = tournament.auctionConfig;
 	const tournamentId = tournament.id;
 	const minBid = (auctionConfig && auctionConfig.minBid) || 1;
 	const allowNegative = Boolean(auctionConfig && auctionConfig.allowNegative);
 	const bidDuration = (auctionConfig && auctionConfig.bidDurationSeconds) || 30;
+
+	// 강제 0원 자동 낙찰 연출 활성 여부 (이 토너먼트 대상일 때만).
+	const autoAssignActive = Boolean(
+		autoAssign && (autoAssign.tournamentId == null || Number(autoAssign.tournamentId) === Number(tournamentId))
+	);
+	const handleAutoAssignDone = useCallback(() => dispatch(Actions.clearAutoAssign()), [dispatch]);
 
 	const currentPuuid = tournament.currentAuctionPuuid;
 	const currentDeadline = tournament.currentAuctionDeadline;
@@ -1306,7 +1517,12 @@ function AuctionStage({ tournament, teams, isAdmin, onChanged }) {
 	function handleNextCandidate() {
 		setNextLoading(true);
 		Actions.nextAuctionCandidate(tournamentId)
-			.then(() => onChanged && onChanged())
+			.then(res => {
+				// 마지막 남은 후보면 서버가 0원 자동 낙찰 후 autoAssigned 를 내려준다 → 연출 재생.
+				const auto = res && res.data && res.data.autoAssigned;
+				if (auto) dispatch(Actions.showAutoAssign({ ...auto, tournamentId }));
+				return onChanged && onChanged();
+			})
 			.catch(err => {
 				const msg = err.response && err.response.data ? err.response.data.result : '다음 매물 선정 실패';
 				toast.error(msg);
@@ -1399,7 +1615,7 @@ function AuctionStage({ tournament, teams, isAdmin, onChanged }) {
 						className={classes.adminBtnSecondary}
 						startIcon={<SkipNextIcon />}
 						onClick={handleNextCandidate}
-						disabled={nextLoading}
+						disabled={nextLoading || autoAssignActive}
 					>
 						다음 매물
 					</Button>
@@ -1613,6 +1829,15 @@ function AuctionStage({ tournament, teams, isAdmin, onChanged }) {
 				onConfirm={handleBidConfirm}
 				classes={classes}
 			/>
+
+			{autoAssignActive && (
+				<AutoAssignOverlay
+					key={autoAssign.puuid}
+					event={autoAssign}
+					classes={classes}
+					onDone={handleAutoAssignDone}
+				/>
+			)}
 		</>
 	);
 }

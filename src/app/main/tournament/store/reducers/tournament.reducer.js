@@ -11,7 +11,10 @@ const initialState = {
 	leaderboard: [],
 	currentCandidate: null,
 	loadingDetail: false,
-	activeMembers: []
+	activeMembers: [],
+	// 경매 강제 0원 자동 낙찰 연출용 transient 이벤트 + 중복 재생 방지(재생한 puuid 기록).
+	autoAssign: null,
+	autoAssignSeen: {}
 };
 
 const tournamentReducer = (state = initialState, action) => {
@@ -57,11 +60,26 @@ const tournamentReducer = (state = initialState, action) => {
 				roundLabels: {},
 				leaderboard: [],
 				currentCandidate: null,
-				activeMembers: []
+				activeMembers: [],
+				autoAssign: null,
+				autoAssignSeen: {}
 			};
 		}
 		case Actions.SET_ACTIVE_MEMBERS: {
 			return { ...state, activeMembers: action.payload };
+		}
+		case Actions.SET_AUTO_ASSIGN: {
+			const puuid = action.payload && action.payload.puuid;
+			// puuid 없거나 이미 재생한 후보면 무시 (어드민 API 응답 + 소켓 이중 트리거 dedup).
+			if (!puuid || state.autoAssignSeen[puuid]) return state;
+			return {
+				...state,
+				autoAssign: action.payload,
+				autoAssignSeen: { ...state.autoAssignSeen, [puuid]: true }
+			};
+		}
+		case Actions.CLEAR_AUTO_ASSIGN: {
+			return { ...state, autoAssign: null };
 		}
 		default: {
 			return state;
