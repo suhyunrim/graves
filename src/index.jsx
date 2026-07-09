@@ -6,6 +6,7 @@ import './i18n';
 import './react-chartjs-2-defaults';
 import './styles/index.css';
 import App from 'app/App';
+import { installChunkReload } from 'app/utility/chunkReload';
 
 // __COMMIT_HASH__ 는 vite.config.js 의 define 으로 빌드 시 주입된다
 const commitHash = typeof __COMMIT_HASH__ !== 'undefined' ? __COMMIT_HASH__ : 'unknown';
@@ -23,5 +24,7 @@ if (import.meta.env.VITE_SENTRY_DSN) {
 		release: commitHash
 	});
 }
+
+installChunkReload();
 
 createRoot(document.getElementById('root')).render(<App />);
