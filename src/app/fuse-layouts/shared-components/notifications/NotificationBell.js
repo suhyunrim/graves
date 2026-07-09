@@ -144,6 +144,7 @@ function NotificationBell() {
 			onItemClick={handleItemClick}
 			onReadAll={handleReadAll}
 			hasUnread={unreadCount > 0}
+			onClose={handleClose}
 		/>
 	);
 

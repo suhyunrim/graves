@@ -1669,7 +1669,13 @@ function MyInfoPage(props) {
 										<span className={`${classes.relationRank} ${index < 3 ? classes.dialogRankTop3 : ''}`}>
 											{index + 1}
 										</span>
-										<Link to={`/userinfo/${item.puuid}`} className={classes.relationName}>{item.name}</Link>
+										<Link
+											to={`/userinfo/${item.puuid}`}
+											className={classes.relationName}
+											onClick={() => setListDialog(prev => ({ ...prev, open: false }))}
+										>
+											{item.name}
+										</Link>
 										<div className={classes.relationStats}>
 											<span className={classes.relationGames}>
 												{listDialog.type === 'teammate'

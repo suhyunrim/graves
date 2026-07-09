@@ -88,7 +88,7 @@ const useStyles = makeStyles()((theme) => ({
 	}
 }));
 
-function NotificationPanel({ groups, loading, onItemClick, onReadAll, hasUnread }) {
+function NotificationPanel({ groups, loading, onItemClick, onReadAll, hasUnread, onClose }) {
 	const { classes } = useStyles();
 
 	let content;
@@ -108,7 +108,7 @@ function NotificationPanel({ groups, loading, onItemClick, onReadAll, hasUnread 
 	} else {
 		content = groups.map((group, i) => (
 			<React.Fragment key={group.key || group.representativeId || i}>
-				<NotificationItem group={group} onClick={onItemClick} />
+				<NotificationItem group={group} onClick={onItemClick} onClose={onClose} />
 				{i < groups.length - 1 && <Divider className={classes.itemDivider} />}
 			</React.Fragment>
 		));

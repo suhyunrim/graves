@@ -114,7 +114,7 @@ const useStyles = makeStyles()((theme) => ({
 	}
 }));
 
-function NotificationItem({ group, onClick }) {
+function NotificationItem({ group, onClick, onClose }) {
 	const { classes } = useStyles();
 	const navigate = useNavigate();
 	const avatarUrl = getActorAvatar(group);
@@ -129,6 +129,7 @@ function NotificationItem({ group, onClick }) {
 		if (!avatarClickable) return;
 		e.stopPropagation();
 		const targetPuuid = primaryActor.puuid;
+		onClose?.();
 		if (targetPuuid === myPuuid) navigate('/myinfo');
 		else navigate(`/userinfo/${targetPuuid}`);
 	};
