@@ -63,7 +63,7 @@ const navigationConfig = [
 			},
 			{
 				id: 'tournament-component',
-				title: '멸망전',
+				title: '대회',
 				type: 'item',
 				icon: 'emoji_events',
 				url: '/tournament'
