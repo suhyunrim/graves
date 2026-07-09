@@ -2,10 +2,11 @@ import React, { useState } from 'react';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField } from '@mui/material';
 import { makeStyles } from 'tss-react/mui';
 import useDialogStyles from '../components/dialogStyles';
+import useToast from 'app/utility/useToast';
 import * as Actions from './store/actions';
 import TrophyTypeGrid from './TrophyTypeGrid';
 import PredictionModeField from './PredictionModeField';
-import { STATUS } from './tournamentUtils';
+import { STATUS, isAuctionTournament } from './tournamentUtils';
 
 const useStyles = makeStyles()((theme) => ({
 	paperWidth: {
@@ -55,12 +56,18 @@ const useStyles = makeStyles()((theme) => ({
 function TournamentEditDialog({ open, onClose, onSuccess, tournament }) {
 	const { classes, cx } = useStyles();
 	const { classes: dialogClasses } = useDialogStyles();
+	const toast = useToast();
+
+	// 경매 타입 토너먼트에서만 경매시간(초) 필드를 노출. 현재값은 auctionConfig.bidDurationSeconds.
+	const isAuction = isAuctionTournament(tournament);
+	const currentBidDuration = isAuction && tournament.auctionConfig ? tournament.auctionConfig.bidDurationSeconds : null;
 
 	const [name, setName] = useState(tournament ? tournament.name : '');
 	const [trophyType, setTrophyType] = useState(tournament && tournament.trophyType ? tournament.trophyType : '');
 	const [predictionMode, setPredictionMode] = useState(
 		tournament && tournament.predictionMode ? tournament.predictionMode : 'bracket'
 	);
+	const [bidDuration, setBidDuration] = useState(currentBidDuration != null ? String(currentBidDuration) : '');
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState('');
 
@@ -77,6 +84,15 @@ function TournamentEditDialog({ open, onClose, onSuccess, tournament }) {
 		if (newTrophy !== (tournament.trophyType || null)) body.trophyType = newTrophy;
 		const curMode = tournament.predictionMode || 'bracket';
 		if (canEditMode && predictionMode !== curMode) body.predictionMode = predictionMode;
+		// 경매 타입: 경매시간(초)은 양의 정수만 허용. 변경됐을 때만 body에 포함.
+		if (isAuction) {
+			const seconds = Number(bidDuration);
+			if (bidDuration.trim() === '' || !Number.isInteger(seconds) || seconds <= 0) {
+				setError('경매시간(초)은 0보다 큰 정수여야 합니다.');
+				return;
+			}
+			if (seconds !== currentBidDuration) body.bidDurationSeconds = seconds;
+		}
 		if (Object.keys(body).length === 0) {
 			onClose();
 			return;
@@ -95,7 +111,7 @@ function TournamentEditDialog({ open, onClose, onSuccess, tournament }) {
 			.catch(err => {
 				setLoading(false);
 				const msg = err.response && err.response.data ? err.response.data.result : '수정 실패';
-				setError(msg);
+				toast.error(msg);
 			});
 	}
 
@@ -132,6 +148,19 @@ function TournamentEditDialog({ open, onClose, onSuccess, tournament }) {
 					disabled={!canEditMode}
 					disabledReason="준비중인 토너먼트만 예측 방식을 변경할 수 있습니다."
 				/>
+				{isAuction && (
+					<TextField
+						className={classes.field}
+						label="경매시간(초)"
+						type="number"
+						value={bidDuration}
+						onChange={e => setBidDuration(e.target.value)}
+						variant="outlined"
+						fullWidth
+						inputProps={{ min: 1, step: 1 }}
+						helperText="다음 매물 입찰부터 적용됩니다. 진행 중인 타이머에는 영향이 없습니다."
+					/>
+				)}
 				{error && <div className={classes.errorText}>{error}</div>}
 			</DialogContent>
 			<DialogActions className={dialogClasses.actionsPad}>
