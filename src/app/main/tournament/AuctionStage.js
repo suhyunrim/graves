@@ -1893,7 +1893,7 @@ function AuctionStage({ tournament, teams, isAdmin, onChanged }) {
 							<div className={classes.passedHeader}>
 								<span className={classes.passedHeaderLabel}>유찰</span>
 								<span className={classes.passedHeaderCount}>{passedPuuids.length}</span>
-								<span className={classes.passedHeaderHint}>다음 패스에서 다시 매물로 나옵니다</span>
+								<span className={classes.passedHeaderHint}>유찰 매물들은 마지막에 다시 나옵니다</span>
 							</div>
 							<div className={classes.passedList}>
 								{passedPuuids.map(puuid => renderCandidateCard(puuid, true))}
