@@ -716,6 +716,10 @@ const useStyles = makeStyles()((theme) => ({
 		border: '1px solid rgba(0, 212, 255, 0.6)',
 		background: 'rgba(0, 212, 255, 0.1)'
 	},
+	candidateCardPassed: {
+		opacity: 0.72,
+		borderStyle: 'dashed'
+	},
 	smallAvatar: {
 		width: 32,
 		height: 32,
@@ -786,6 +790,44 @@ const useStyles = makeStyles()((theme) => ({
 		color: 'rgba(255, 255, 255, 0.3)',
 		textAlign: 'center',
 		padding: 12
+	},
+	passedSection: {
+		marginTop: 16,
+		paddingTop: 14,
+		borderTop: '1px solid rgba(255, 255, 255, 0.08)'
+	},
+	passedHeader: {
+		display: 'flex',
+		alignItems: 'center',
+		gap: 8,
+		marginBottom: 10
+	},
+	passedHeaderLabel: {
+		fontFamily: '"Rajdhani", "Noto Sans KR", sans-serif',
+		fontSize: '1.4rem',
+		fontWeight: 700,
+		color: 'rgba(255, 255, 255, 0.5)',
+		letterSpacing: '0.05em',
+		textTransform: 'uppercase'
+	},
+	passedHeaderCount: {
+		fontFamily: '"Rajdhani", sans-serif',
+		fontSize: '1.15rem',
+		color: 'rgba(255, 255, 255, 0.35)'
+	},
+	passedHeaderHint: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.05rem',
+		color: 'rgba(255, 255, 255, 0.3)',
+		marginLeft: 'auto'
+	},
+	passedList: {
+		display: 'grid',
+		gridTemplateColumns: 'repeat(auto-fill, minmax(190px, 1fr))',
+		gap: 8,
+		[theme.breakpoints.down('sm')]: {
+			gridTemplateColumns: '1fr'
+		}
 	},
 	dialogPaper: {
 		background: 'linear-gradient(135deg, #1a1a2e 0%, #0f0f1a 100%)',
@@ -1500,14 +1542,21 @@ function AuctionStage({ tournament, teams, isAdmin, onChanged }) {
 		return s;
 	}, [teams]);
 
+	// 유찰 — 이번 패스에 매물로 나왔지만 아직 미배정이고 현재 매물도 아닌 후보.
+	const passedPuuids = useMemo(() => {
+		const offered = Array.isArray(tournament.auctionOfferedPuuids) ? tournament.auctionOfferedPuuids : [];
+		return offered.filter(p => !assignedPuuids.has(p) && p !== currentPuuid);
+	}, [tournament.auctionOfferedPuuids, assignedPuuids, currentPuuid]);
+
 	const candidatesByPos = useMemo(() => {
+		const passedSet = new Set(passedPuuids);
 		const map = {};
 		POSITIONS.forEach(p => {
 			const all = (auctionConfig && auctionConfig.candidates && auctionConfig.candidates[p]) || [];
-			map[p] = all.filter(puuid => !assignedPuuids.has(puuid));
+			map[p] = all.filter(puuid => !assignedPuuids.has(puuid) && !passedSet.has(puuid));
 		});
 		return map;
-	}, [auctionConfig, assignedPuuids]);
+	}, [auctionConfig, assignedPuuids, passedPuuids]);
 
 	const [completeOpen, setCompleteOpen] = useState(false);
 	const [nextLoading, setNextLoading] = useState(false);
@@ -1699,7 +1748,7 @@ function AuctionStage({ tournament, teams, isAdmin, onChanged }) {
 		);
 	}
 
-	function renderCandidateCard(puuid) {
+	function renderCandidateCard(puuid, passed = false) {
 		const member = memberMap.get(puuid);
 		const name = member ? member.name : null;
 		const profileIconId = member ? member.profileIconId : null;
@@ -1714,7 +1763,14 @@ function AuctionStage({ tournament, teams, isAdmin, onChanged }) {
 		const isCurrent = puuid === currentPuuid;
 
 		return (
-			<div key={puuid} className={cx(classes.candidateCard, isCurrent && classes.candidateCardActive)}>
+			<div
+				key={puuid}
+				className={cx(
+					classes.candidateCard,
+					isCurrent && classes.candidateCardActive,
+					passed && classes.candidateCardPassed
+				)}
+			>
 				{profileIconId != null ? (
 					<img
 						className={classes.smallAvatar}
@@ -1802,6 +1858,18 @@ function AuctionStage({ tournament, teams, isAdmin, onChanged }) {
 							</div>
 						))}
 					</div>
+					{passedPuuids.length > 0 && (
+						<div className={classes.passedSection}>
+							<div className={classes.passedHeader}>
+								<span className={classes.passedHeaderLabel}>유찰</span>
+								<span className={classes.passedHeaderCount}>{passedPuuids.length}</span>
+								<span className={classes.passedHeaderHint}>다음 패스에서 다시 매물로 나옵니다</span>
+							</div>
+							<div className={classes.passedList}>
+								{passedPuuids.map(puuid => renderCandidateCard(puuid, true))}
+							</div>
+						</div>
+					)}
 				</div>
 			</div>
 
