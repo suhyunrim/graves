@@ -1376,7 +1376,7 @@ function CandidateInfoCard({ candidate, classes }) {
 							<span className={classes.honorGroup}>
 								<span role="img" aria-label="sparkles">✨</span>
 								<span>
-									<span className={classes.statValue}>{honor.received || 0}</span>표 받음
+									명예 - <span className={classes.statValue}>{honor.received || 0}</span>표 받음
 								</span>
 								{honorTitleText && (
 									<>
