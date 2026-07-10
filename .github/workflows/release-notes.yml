@@ -65,7 +65,7 @@ jobs:
             -d "$(node -e "
               const commits = process.argv[1];
               const payload = {
-                model: 'claude-haiku-4-5-20251001',
+                model: 'claude-sonnet-5',
                 max_tokens: 1024,
                 messages: [{
                   role: 'user',
@@ -132,7 +132,7 @@ jobs:
             -d "$(node -e "
               const changes = process.argv[1];
               const payload = {
-                model: 'claude-haiku-4-5-20251001',
+                model: 'claude-sonnet-5',
                 max_tokens: 100,
                 messages: [{
                   role: 'user',
