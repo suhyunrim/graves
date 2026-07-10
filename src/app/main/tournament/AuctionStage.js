@@ -979,6 +979,23 @@ const useStyles = makeStyles()((theme) => ({
 		fontFamily: '"Noto Sans KR", sans-serif',
 		fontSize: '1.2rem',
 		color: 'rgba(255, 255, 255, 0.55)'
+	},
+	autoCloseBtn: {
+		marginTop: 18,
+		alignSelf: 'center',
+		background: 'linear-gradient(135deg, #00d4ff 0%, #0099cc 100%)',
+		color: '#000',
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontWeight: 700,
+		fontSize: '1.25rem',
+		padding: '8px 34px',
+		borderRadius: 10,
+		textTransform: 'none',
+		boxShadow: '0 4px 18px rgba(0, 212, 255, 0.25)',
+		'&:hover': {
+			background: 'linear-gradient(135deg, #00bce0 0%, #0088bb 100%)',
+			boxShadow: '0 6px 22px rgba(0, 212, 255, 0.4)'
+		}
 	}
 }));
 
@@ -1459,17 +1476,14 @@ function CandidateInfoCard({ candidate, classes }) {
 
 // 강제 0원 자동 낙찰 연출 오버레이.
 // phase 'reveal'(~1.6s): 후보 카드를 매물처럼 노출 + "[포지션] 마지막 후보" 뱃지.
-// phase 'lock': "🔒 N팀에 0원 자동 낙찰" (회색/자물쇠 톤). ~3.6s 후 자동 종료.
+// phase 'lock': "🔒 N팀에 0원 자동 낙찰" (회색/자물쇠 톤). '확인' 버튼으로만 닫힘(자동 종료 없음).
 function AutoAssignOverlay({ event, classes, onDone }) {
 	const [phase, setPhase] = useState('reveal');
 	useEffect(() => {
+		// 자동 종료 없음 — 사용자가 '확인' 버튼으로만 닫는다(다 확인하고 닫기).
 		const revealTimer = setTimeout(() => setPhase('lock'), 1600);
-		const doneTimer = setTimeout(() => onDone(), 3600);
-		return () => {
-			clearTimeout(revealTimer);
-			clearTimeout(doneTimer);
-		};
-	}, [event.puuid, onDone]);
+		return () => clearTimeout(revealTimer);
+	}, [event.puuid]);
 
 	const positionLabel = POSITION_LABELS[event.position] || event.position;
 	// candidate 상세엔 position 이 없을 수 있어 top-level position 으로 보강.
@@ -1486,15 +1500,20 @@ function AutoAssignOverlay({ event, classes, onDone }) {
 				</span>
 				<CandidateInfoCard candidate={candidate} classes={classes} />
 				{phase === 'lock' && (
-					<div className={classes.autoLock}>
-						<span className={classes.autoLockChip}>
-							<span role="img" aria-label="lock">🔒</span> 자동
-						</span>
-						<span className={classes.autoLockText}>
-							<span className={classes.autoLockTeam}>{event.teamName}</span>에 0원 자동 낙찰
-						</span>
-						<span className={classes.autoLockSub}>입찰 없이 확정 · 마지막 남은 팀</span>
-					</div>
+					<>
+						<div className={classes.autoLock}>
+							<span className={classes.autoLockChip}>
+								<span role="img" aria-label="lock">🔒</span> 자동
+							</span>
+							<span className={classes.autoLockText}>
+								<span className={classes.autoLockTeam}>{event.teamName}</span>에 0원 자동 낙찰
+							</span>
+							<span className={classes.autoLockSub}>입찰 없이 확정 · 마지막 남은 팀</span>
+						</div>
+						<Button className={classes.autoCloseBtn} startIcon={<DoneAllIcon />} onClick={onDone}>
+							확인
+						</Button>
+					</>
 				)}
 			</div>
 		</div>
