@@ -741,6 +741,22 @@ const useStyles = makeStyles()((theme) => ({
 		textOverflow: 'ellipsis',
 		whiteSpace: 'nowrap'
 	},
+	smallPos: {
+		display: 'inline-flex',
+		alignItems: 'center',
+		gap: 4,
+		marginTop: 2,
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1rem',
+		fontWeight: 600,
+		color: 'rgba(0, 212, 255, 0.75)'
+	},
+	smallPosIcon: {
+		width: 13,
+		height: 13,
+		color: '#00d4ff',
+		flexShrink: 0
+	},
 	smallTierRow: {
 		display: 'flex',
 		flexDirection: 'column',
@@ -1558,6 +1574,14 @@ function AuctionStage({ tournament, teams, isAdmin, onChanged }) {
 		return map;
 	}, [auctionConfig, assignedPuuids, passedPuuids]);
 
+	// puuid → 포지션 역매핑 (유찰 카드에서 포지션 표기용).
+	const posByPuuid = useMemo(() => {
+		const map = {};
+		const cands = (auctionConfig && auctionConfig.candidates) || {};
+		POSITIONS.forEach(p => (cands[p] || []).forEach(puuid => { map[puuid] = p; }));
+		return map;
+	}, [auctionConfig]);
+
 	const [completeOpen, setCompleteOpen] = useState(false);
 	const [nextLoading, setNextLoading] = useState(false);
 	const [bidDialogOpen, setBidDialogOpen] = useState(false);
@@ -1784,6 +1808,12 @@ function AuctionStage({ tournament, teams, isAdmin, onChanged }) {
 					<span className={classes.smallName}>
 						{name || displayNameForPuuid(null, puuid)}
 					</span>
+					{passed && posByPuuid[puuid] && (
+						<span className={classes.smallPos}>
+							<PositionIcon position={posByPuuid[puuid]} className={classes.smallPosIcon} />
+							{POSITION_LABELS[posByPuuid[puuid]]}
+						</span>
+					)}
 				</div>
 				<div className={classes.smallTierRow}>
 					<span className={classes.smallTier}>
