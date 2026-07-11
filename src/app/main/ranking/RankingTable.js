@@ -12,6 +12,7 @@ import { withStyles } from 'tss-react/mui';
 import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useSearchParams } from 'react-router-dom';
+import CompareArrowsIcon from '@mui/icons-material/CompareArrows';
 import { RankingTableSkeleton } from '../components/SkeletonLoaders';
 import { patchSearchParams, getIntParam } from 'app/utility/searchParamUtils';
 import * as Actions from './store/actions';
@@ -78,6 +79,24 @@ const useStyles = makeStyles()((theme) => ({
 		transition: 'color 0.2s ease',
 		'&:hover': {
 			color: '#00d4ff'
+		}
+	},
+	compareLink: {
+		display: 'inline-flex',
+		alignItems: 'center',
+		justifyContent: 'center',
+		verticalAlign: 'middle',
+		marginLeft: 8,
+		color: 'rgba(0, 212, 255, 0.55)',
+		borderRadius: 6,
+		padding: 2,
+		transition: 'color 0.2s ease, background 0.2s ease',
+		'&:hover': {
+			color: '#00d4ff',
+			background: 'rgba(0, 212, 255, 0.12)'
+		},
+		'& svg': {
+			fontSize: '1.9rem'
 		}
 	},
 	tierWrapper: {
@@ -458,6 +477,7 @@ const StyledTableRow = withStyles(TableRow, (theme) => ({
 function RankingTable(props) {
 	const { classes } = useStyles();
 	const dispatch = useDispatch();
+	const myPuuid = localStorage.getItem('camille_riot_puuid');
 	const ranking = useSelector(({ Ranking }) => Ranking.ranking.data);
 	const myRanking = useSelector(({ Ranking }) => Ranking.ranking.myRanking);
 	const rankingLoading = useSelector(({ Ranking }) => Ranking.ranking.loading);
@@ -702,6 +722,10 @@ function RankingTable(props) {
 			}
 		}, 100);
 	}
+
+	// 로그인 상태면 본인 vs 해당 유저로 바로, 아니면 상대 선택 화면으로.
+	const compareHref = targetPuuid =>
+		myPuuid && myPuuid !== targetPuuid ? `/compare?a=${myPuuid}&b=${targetPuuid}` : `/compare?a=${targetPuuid}`;
 
 	function renderMyRankingRow() {
 		if (!myRanking) return null;
@@ -949,6 +973,14 @@ function RankingTable(props) {
 														<Link to={`/userinfo/${n.puuid}`} className={classes.playerName}>
 															{n.name}
 														</Link>
+														<Link
+															to={compareHref(n.puuid)}
+															className={classes.compareLink}
+															aria-label={`${n.name} VS 비교`}
+															title="VS 비교"
+														>
+															<CompareArrowsIcon />
+														</Link>
 														{isSoloPosition && n.mainPositionRate != null && (
 															<div className={classes.mainPositionRate}>주 포지션 {n.mainPositionRate}%</div>
 														)}
@@ -1128,6 +1160,15 @@ function RankingTable(props) {
 														<div className={classes.mobileOverallRecord}>주 포지션 {n.mainPositionRate}%</div>
 													)}
 												</div>
+												<Link
+													to={compareHref(n.puuid)}
+													className={classes.compareLink}
+													style={{ marginLeft: 'auto', alignSelf: 'flex-start' }}
+													aria-label={`${n.name} VS 비교`}
+													title="VS 비교"
+												>
+													<CompareArrowsIcon />
+												</Link>
 											</div>
 											{renderMobileStats(n, n.win + n.lose)}
 										</div>

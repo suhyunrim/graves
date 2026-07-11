@@ -17,6 +17,7 @@ import {
 } from '@mui/material';
 import StarIcon from '@mui/icons-material/Star';
 import StarBorderIcon from '@mui/icons-material/StarBorder';
+import CompareArrowsIcon from '@mui/icons-material/CompareArrows';
 import useToast from 'app/utility/useToast';
 import { fetchFavorites, addFavorite, removeFavorite } from 'app/utility/favoritesApi';
 import { useDispatch, useSelector } from 'react-redux';
@@ -165,6 +166,38 @@ const useStyles = makeStyles()((theme) => ({
 	},
 	favoriteBtnActive: {
 		color: '#ffd700'
+	},
+	compareBtn: {
+		display: 'inline-flex',
+		alignItems: 'center',
+		gap: 6,
+		marginLeft: 12,
+		verticalAlign: 'middle',
+		padding: '5px 14px',
+		borderRadius: 20,
+		background: 'rgba(0, 212, 255, 0.1)',
+		border: '1px solid rgba(0, 212, 255, 0.35)',
+		color: '#00d4ff',
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.3rem',
+		fontWeight: 600,
+		textDecoration: 'none',
+		transition: 'background 0.2s ease, border-color 0.2s ease',
+		'&:hover': {
+			background: 'rgba(0, 212, 255, 0.2)',
+			borderColor: '#00d4ff'
+		},
+		'& svg': {
+			fontSize: '1.8rem'
+		},
+		[theme.breakpoints.down('sm')]: {
+			fontSize: '1.15rem',
+			padding: '4px 10px',
+			marginLeft: 8,
+			'& svg': {
+				fontSize: '1.5rem'
+			}
+		}
 	},
 	summonerLevel: {
 		fontFamily: '"Noto Sans KR", sans-serif',
@@ -1204,6 +1237,16 @@ function MyInfoPage(props) {
 									>
 										{isFavorite ? <StarIcon /> : <StarBorderIcon />}
 									</IconButton>
+								)}
+								{(puuid || myPuuid) && user?.reprGroup?.groupId && (
+									<Link
+										to={`/compare?a=${puuid || myPuuid}`}
+										className={classes.compareBtn}
+										aria-label="VS 비교"
+									>
+										<CompareArrowsIcon />
+										VS 비교
+									</Link>
 								)}
 							</div>
 							<div className={classes.summonerLevel}>

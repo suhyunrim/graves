@@ -1,0 +1,1432 @@
+import React, { useEffect, useState } from 'react';
+import { makeStyles } from 'tss-react/mui';
+import { useSelector } from 'react-redux';
+import { useSearchParams } from 'react-router-dom';
+import { getTierName, getTierLabel, getTierEmblemUrl, parseRankTier } from 'app/main/tournament/tournamentUtils';
+import PositionIcon from '../tournament/PositionIcon';
+import { Reveal, RevealGroup } from '../components/Reveal';
+import OpponentPicker from './OpponentPicker';
+import RatingTrajectoryChart from './RatingTrajectoryChart';
+import { fetchCompare } from './compareApi';
+
+const A_COLOR = '#00d4ff';
+const B_COLOR = '#ff6b9a';
+const GOOD_COLOR = '#00ff7f';
+const BAD_COLOR = '#ff6b6b';
+
+// Riot 표준 포지션 키 → 한글 라벨 + PositionIcon용 키(소문자).
+const POSITION_META = {
+	TOP: { label: '탑', icon: 'top' },
+	JUNGLE: { label: '정글', icon: 'jungle' },
+	MIDDLE: { label: '미드', icon: 'mid' },
+	BOTTOM: { label: '원딜', icon: 'adc' },
+	UTILITY: { label: '서폿', icon: 'support' }
+};
+
+const RELATION_EMOJI = {
+	natural_enemy: '🩸',
+	fated_rivals: '⚔️',
+	fantastic_duo: '✨',
+	love_hate: '💢'
+};
+
+function fmtPct(v) {
+	return v == null ? '-' : `${v}%`;
+}
+
+function signed(v) {
+	if (v == null) return '-';
+	return v > 0 ? `+${v}` : `${v}`;
+}
+
+function toDate(v) {
+	if (!v) return null;
+	const d = new Date(v);
+	return Number.isNaN(d.getTime()) ? null : d;
+}
+
+function fmtDate(v) {
+	const d = toDate(v);
+	if (!d) return '-';
+	const mm = String(d.getMonth() + 1).padStart(2, '0');
+	const dd = String(d.getDate()).padStart(2, '0');
+	return `${d.getFullYear()}.${mm}.${dd}`;
+}
+
+function daysAgoLabel(v) {
+	const d = toDate(v);
+	if (!d) return null;
+	const diff = Math.floor((Date.now() - d.getTime()) / 86400000);
+	if (diff <= 0) return '오늘';
+	if (diff === 1) return '어제';
+	return `${diff}일 전`;
+}
+
+const useStyles = makeStyles()((theme) => ({
+	root: {
+		background: 'linear-gradient(180deg, #0f0f1a 0%, #1a1a2e 100%)',
+		minHeight: '100%',
+		padding: '28px 28px 60px',
+		[theme.breakpoints.down('sm')]: {
+			padding: '18px 12px 40px'
+		}
+	},
+	inner: {
+		maxWidth: 1080,
+		margin: '0 auto'
+	},
+	// ── VS 헤더 ──
+	vsHeader: {
+		display: 'grid',
+		gridTemplateColumns: '1fr auto 1fr',
+		alignItems: 'stretch',
+		gap: 16,
+		marginBottom: 28,
+		[theme.breakpoints.down('sm')]: {
+			gap: 8
+		}
+	},
+	playerCard: {
+		position: 'relative',
+		display: 'flex',
+		flexDirection: 'column',
+		alignItems: 'center',
+		textAlign: 'center',
+		padding: '26px 20px',
+		borderRadius: 20,
+		background: 'linear-gradient(135deg, #1a1a2e 0%, #0f0f1a 100%)',
+		border: '1px solid var(--pc-border)',
+		boxShadow: '0 8px 32px rgba(0, 0, 0, 0.5)',
+		overflow: 'hidden',
+		'&::before': {
+			content: '""',
+			position: 'absolute',
+			top: 0,
+			left: 0,
+			right: 0,
+			height: 3,
+			background: 'linear-gradient(90deg, transparent, var(--pc), transparent)'
+		},
+		[theme.breakpoints.down('sm')]: {
+			padding: '16px 8px',
+			borderRadius: 14
+		}
+	},
+	playerEmblem: {
+		width: 64,
+		height: 64,
+		marginBottom: 8,
+		[theme.breakpoints.down('sm')]: {
+			width: 44,
+			height: 44
+		}
+	},
+	playerName: {
+		fontFamily: '"Rajdhani", "Noto Sans KR", sans-serif',
+		fontSize: '1.9rem',
+		fontWeight: 700,
+		lineHeight: 1.1,
+		wordBreak: 'break-all',
+		[theme.breakpoints.down('sm')]: {
+			fontSize: '1.4rem'
+		}
+	},
+	playerRating: {
+		fontFamily: '"Rajdhani", sans-serif',
+		fontSize: '4.2rem',
+		fontWeight: 700,
+		lineHeight: 1,
+		margin: '6px 0 2px',
+		textShadow: '0 0 24px var(--pc-glow)',
+		[theme.breakpoints.down('sm')]: {
+			fontSize: '2.8rem'
+		}
+	},
+	playerTierLabel: {
+		fontFamily: '"Rajdhani", sans-serif',
+		fontSize: '1.3rem',
+		fontWeight: 600,
+		color: 'rgba(255, 255, 255, 0.6)',
+		letterSpacing: '0.04em'
+	},
+	soloChip: {
+		display: 'inline-flex',
+		alignItems: 'center',
+		gap: 5,
+		marginTop: 10,
+		padding: '3px 10px',
+		borderRadius: 20,
+		background: 'rgba(255, 255, 255, 0.06)',
+		border: '1px solid rgba(255, 255, 255, 0.1)',
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.1rem',
+		color: 'rgba(255, 255, 255, 0.7)'
+	},
+	soloChipEmblem: {
+		width: 18,
+		height: 18
+	},
+	playerBottom: {
+		display: 'flex',
+		flexDirection: 'column',
+		alignItems: 'center',
+		gap: 6,
+		marginTop: 14
+	},
+	posTag: {
+		display: 'inline-flex',
+		alignItems: 'center',
+		gap: 6,
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.2rem',
+		color: 'rgba(255, 255, 255, 0.75)'
+	},
+	posTagIcon: {
+		width: 20,
+		height: 20
+	},
+	recordTag: {
+		fontFamily: '"Rajdhani", "Noto Sans KR", sans-serif',
+		fontSize: '1.3rem',
+		fontWeight: 600,
+		color: 'rgba(255, 255, 255, 0.85)'
+	},
+	enemyBadge: {
+		position: 'absolute',
+		top: 10,
+		right: 10,
+		display: 'inline-flex',
+		alignItems: 'center',
+		gap: 4,
+		padding: '3px 9px',
+		borderRadius: 8,
+		background: 'rgba(255, 107, 107, 0.15)',
+		border: '1px solid rgba(255, 107, 107, 0.45)',
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.05rem',
+		fontWeight: 700,
+		color: '#ff8787'
+	},
+	vsCenter: {
+		display: 'flex',
+		flexDirection: 'column',
+		alignItems: 'center',
+		justifyContent: 'center',
+		gap: 12,
+		minWidth: 90,
+		[theme.breakpoints.down('sm')]: {
+			minWidth: 48,
+			gap: 6
+		}
+	},
+	vsText: {
+		fontFamily: '"Rajdhani", sans-serif',
+		fontSize: '3rem',
+		fontWeight: 700,
+		color: '#fff',
+		letterSpacing: '0.04em',
+		textShadow: '0 0 20px rgba(0, 212, 255, 0.35)',
+		[theme.breakpoints.down('sm')]: {
+			fontSize: '1.8rem'
+		}
+	},
+	relationBadges: {
+		display: 'flex',
+		flexDirection: 'column',
+		gap: 6,
+		alignItems: 'center'
+	},
+	relationBadge: {
+		display: 'inline-flex',
+		alignItems: 'center',
+		gap: 5,
+		padding: '4px 10px',
+		borderRadius: 20,
+		background: 'linear-gradient(135deg, rgba(0, 212, 255, 0.15), rgba(255, 107, 154, 0.15))',
+		border: '1px solid rgba(255, 255, 255, 0.15)',
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.05rem',
+		fontWeight: 600,
+		color: 'rgba(255, 255, 255, 0.9)',
+		whiteSpace: 'nowrap'
+	},
+	changeOpponentBtn: {
+		marginTop: 4,
+		background: 'none',
+		border: 'none',
+		cursor: 'pointer',
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.05rem',
+		color: 'rgba(255, 255, 255, 0.4)',
+		textDecoration: 'underline',
+		padding: 2,
+		'&:hover': {
+			color: '#00d4ff'
+		}
+	},
+	// ── 섹션 공통 ──
+	sections: {
+		display: 'flex',
+		flexDirection: 'column',
+		gap: 22
+	},
+	section: {
+		background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
+		border: '1px solid rgba(0, 212, 255, 0.15)',
+		borderRadius: 18,
+		padding: '22px 24px',
+		[theme.breakpoints.down('sm')]: {
+			padding: '16px 14px',
+			borderRadius: 14
+		}
+	},
+	sectionTitle: {
+		position: 'relative',
+		fontFamily: '"Rajdhani", "Noto Sans KR", sans-serif',
+		fontSize: '1.7rem',
+		fontWeight: 700,
+		color: '#fff',
+		letterSpacing: '0.03em',
+		paddingLeft: 14,
+		marginBottom: 18,
+		display: 'flex',
+		alignItems: 'center',
+		gap: 8,
+		'&::before': {
+			content: '""',
+			position: 'absolute',
+			left: 0,
+			top: 2,
+			bottom: 2,
+			width: 4,
+			borderRadius: 2,
+			background: 'linear-gradient(180deg, #00d4ff, #0066ff)'
+		}
+	},
+	sectionEmpty: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.25rem',
+		color: 'rgba(255, 255, 255, 0.4)',
+		padding: '10px 2px'
+	},
+	// ── 상대 전적 ──
+	h2hScoreRow: {
+		display: 'grid',
+		gridTemplateColumns: '1fr auto 1fr',
+		alignItems: 'center',
+		gap: 14,
+		marginBottom: 8
+	},
+	h2hSide: {
+		display: 'flex',
+		flexDirection: 'column',
+		alignItems: 'center',
+		gap: 2
+	},
+	h2hSideName: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.2rem',
+		color: 'rgba(255, 255, 255, 0.6)',
+		maxWidth: 160,
+		overflow: 'hidden',
+		textOverflow: 'ellipsis',
+		whiteSpace: 'nowrap'
+	},
+	h2hScore: {
+		fontFamily: '"Rajdhani", sans-serif',
+		fontSize: '4rem',
+		fontWeight: 700,
+		lineHeight: 1,
+		[theme.breakpoints.down('sm')]: {
+			fontSize: '2.8rem'
+		}
+	},
+	h2hColon: {
+		fontFamily: '"Rajdhani", sans-serif',
+		fontSize: '2.4rem',
+		fontWeight: 700,
+		color: 'rgba(255, 255, 255, 0.35)'
+	},
+	balanceBar: {
+		display: 'flex',
+		height: 12,
+		borderRadius: 6,
+		overflow: 'hidden',
+		background: 'rgba(255, 255, 255, 0.08)',
+		margin: '10px 0 6px'
+	},
+	balanceFill: {
+		height: '100%',
+		transition: 'width 0.4s ease'
+	},
+	balanceCaption: {
+		display: 'flex',
+		justifyContent: 'space-between',
+		fontFamily: '"Rajdhani", "Noto Sans KR", sans-serif',
+		fontSize: '1.15rem',
+		fontWeight: 600,
+		color: 'rgba(255, 255, 255, 0.6)'
+	},
+	dotsRow: {
+		display: 'flex',
+		alignItems: 'center',
+		flexWrap: 'wrap',
+		gap: 7,
+		marginTop: 18
+	},
+	dotsLabel: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.15rem',
+		color: 'rgba(255, 255, 255, 0.45)',
+		marginRight: 4
+	},
+	dot: {
+		width: 20,
+		height: 20,
+		borderRadius: '50%',
+		display: 'inline-flex',
+		alignItems: 'center',
+		justifyContent: 'center',
+		fontFamily: '"Rajdhani", sans-serif',
+		fontSize: '0.95rem',
+		fontWeight: 700,
+		color: '#0f0f1a'
+	},
+	dotLatest: {
+		boxShadow: '0 0 0 2px rgba(255, 255, 255, 0.85)'
+	},
+	streakText: {
+		marginTop: 16,
+		fontFamily: '"Rajdhani", "Noto Sans KR", sans-serif',
+		fontSize: '1.4rem',
+		fontWeight: 700,
+		display: 'flex',
+		alignItems: 'center',
+		gap: 6
+	},
+	// ── 점수 약탈전 ──
+	flowNet: {
+		fontFamily: '"Rajdhani", "Noto Sans KR", sans-serif',
+		fontSize: '1.6rem',
+		fontWeight: 700,
+		color: '#fff',
+		textAlign: 'center',
+		marginBottom: 14
+	},
+	flowBar: {
+		display: 'flex',
+		height: 30,
+		borderRadius: 8,
+		overflow: 'hidden',
+		background: 'rgba(255, 255, 255, 0.06)'
+	},
+	flowFill: {
+		height: '100%',
+		display: 'flex',
+		alignItems: 'center',
+		fontFamily: '"Rajdhani", sans-serif',
+		fontSize: '1.2rem',
+		fontWeight: 700,
+		color: '#0f0f1a',
+		transition: 'width 0.4s ease'
+	},
+	flowFillLeft: {
+		justifyContent: 'flex-start',
+		paddingLeft: 10
+	},
+	flowFillRight: {
+		justifyContent: 'flex-end',
+		paddingRight: 10
+	},
+	flowLegend: {
+		display: 'flex',
+		justifyContent: 'space-between',
+		marginTop: 8,
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.1rem',
+		color: 'rgba(255, 255, 255, 0.55)'
+	},
+	caption: {
+		marginTop: 12,
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.1rem',
+		color: 'rgba(255, 255, 255, 0.4)'
+	},
+	// ── 레이팅 궤적 ──
+	chartContainer: {
+		height: 340,
+		position: 'relative',
+		[theme.breakpoints.down('sm')]: {
+			height: 260
+		}
+	},
+	// ── 같은 팀 케미 ──
+	synergyHero: {
+		textAlign: 'center',
+		marginBottom: 16
+	},
+	synergyHeroValue: {
+		fontFamily: '"Rajdhani", sans-serif',
+		fontSize: '3.4rem',
+		fontWeight: 700,
+		lineHeight: 1,
+		[theme.breakpoints.down('sm')]: {
+			fontSize: '2.6rem'
+		}
+	},
+	synergyHeroLabel: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.3rem',
+		color: 'rgba(255, 255, 255, 0.6)',
+		marginTop: 6
+	},
+	synergyStats: {
+		display: 'flex',
+		justifyContent: 'center',
+		flexWrap: 'wrap',
+		gap: 24
+	},
+	statBlock: {
+		textAlign: 'center'
+	},
+	statBlockValue: {
+		fontFamily: '"Rajdhani", sans-serif',
+		fontSize: '1.9rem',
+		fontWeight: 700,
+		color: '#fff'
+	},
+	statBlockLabel: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.1rem',
+		color: 'rgba(255, 255, 255, 0.45)',
+		marginTop: 2
+	},
+	// ── 인연 타임라인 ──
+	timelineCards: {
+		display: 'grid',
+		gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+		gap: 14,
+		marginBottom: 18
+	},
+	milestone: {
+		background: 'rgba(255, 255, 255, 0.03)',
+		border: '1px solid rgba(255, 255, 255, 0.08)',
+		borderRadius: 12,
+		padding: '14px 16px'
+	},
+	milestoneLabel: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.1rem',
+		color: 'rgba(255, 255, 255, 0.45)',
+		marginBottom: 6
+	},
+	milestoneMain: {
+		fontFamily: '"Rajdhani", "Noto Sans KR", sans-serif',
+		fontSize: '1.5rem',
+		fontWeight: 700,
+		color: '#fff',
+		display: 'flex',
+		alignItems: 'center',
+		gap: 8,
+		flexWrap: 'wrap'
+	},
+	milestoneDate: {
+		fontFamily: '"Rajdhani", sans-serif',
+		fontSize: '1.15rem',
+		color: 'rgba(255, 255, 255, 0.5)',
+		marginTop: 4
+	},
+	milestoneSub: {
+		fontFamily: '"Rajdhani", sans-serif',
+		fontSize: '1.1rem',
+		color: 'rgba(255, 255, 255, 0.45)',
+		marginTop: 4
+	},
+	monthlyWrap: {
+		marginTop: 4
+	},
+	monthlyBars: {
+		display: 'flex',
+		alignItems: 'flex-end',
+		gap: 6,
+		height: 80,
+		marginTop: 8
+	},
+	monthlyCol: {
+		flex: 1,
+		display: 'flex',
+		flexDirection: 'column',
+		alignItems: 'center',
+		gap: 4,
+		minWidth: 0
+	},
+	monthlyBar: {
+		width: '100%',
+		maxWidth: 28,
+		borderRadius: '4px 4px 0 0',
+		background: 'linear-gradient(180deg, #00d4ff, #0066ff)',
+		minHeight: 3
+	},
+	monthlyLabel: {
+		fontFamily: '"Rajdhani", sans-serif',
+		fontSize: '0.95rem',
+		color: 'rgba(255, 255, 255, 0.4)',
+		whiteSpace: 'nowrap'
+	},
+	monthlyCount: {
+		fontFamily: '"Rajdhani", sans-serif',
+		fontSize: '1rem',
+		fontWeight: 700,
+		color: 'rgba(255, 255, 255, 0.7)'
+	},
+	// ── 맞라인 전적 ──
+	laneRow: {
+		display: 'grid',
+		gridTemplateColumns: '90px 1fr 90px',
+		alignItems: 'center',
+		gap: 12,
+		padding: '10px 0',
+		borderBottom: '1px solid rgba(255, 255, 255, 0.05)'
+	},
+	lanePos: {
+		display: 'flex',
+		alignItems: 'center',
+		gap: 8,
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.2rem',
+		color: 'rgba(255, 255, 255, 0.8)'
+	},
+	lanePosIcon: {
+		width: 22,
+		height: 22
+	},
+	laneScore: {
+		textAlign: 'right',
+		fontFamily: '"Rajdhani", sans-serif',
+		fontSize: '1.3rem',
+		fontWeight: 700,
+		color: 'rgba(255, 255, 255, 0.75)'
+	},
+	// ── 둘 다와의 시너지 ──
+	synergyCols: {
+		display: 'grid',
+		gridTemplateColumns: '1fr 1fr',
+		gap: 16,
+		[theme.breakpoints.down('sm')]: {
+			gridTemplateColumns: '1fr'
+		}
+	},
+	synergyColTitle: {
+		fontFamily: '"Rajdhani", "Noto Sans KR", sans-serif',
+		fontSize: '1.35rem',
+		fontWeight: 700,
+		marginBottom: 10,
+		display: 'flex',
+		alignItems: 'center',
+		gap: 6
+	},
+	mutualCard: {
+		background: 'rgba(255, 255, 255, 0.03)',
+		border: '1px solid rgba(255, 255, 255, 0.08)',
+		borderRadius: 12,
+		padding: '12px 14px',
+		marginBottom: 10
+	},
+	mutualHead: {
+		display: 'flex',
+		justifyContent: 'space-between',
+		alignItems: 'center',
+		marginBottom: 8
+	},
+	mutualName: {
+		fontFamily: '"Rajdhani", "Noto Sans KR", sans-serif',
+		fontSize: '1.4rem',
+		fontWeight: 700,
+		color: '#fff',
+		overflow: 'hidden',
+		textOverflow: 'ellipsis',
+		whiteSpace: 'nowrap'
+	},
+	mutualAvg: {
+		fontFamily: '"Rajdhani", sans-serif',
+		fontSize: '1.3rem',
+		fontWeight: 700,
+		padding: '2px 8px',
+		borderRadius: 8,
+		whiteSpace: 'nowrap'
+	},
+	mutualWith: {
+		display: 'flex',
+		justifyContent: 'space-between',
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.15rem',
+		color: 'rgba(255, 255, 255, 0.65)',
+		padding: '2px 0'
+	},
+	mutualEmpty: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.15rem',
+		color: 'rgba(255, 255, 255, 0.35)'
+	},
+	// ── 얽힌 경기 히스토리 ──
+	matchRow: {
+		display: 'flex',
+		alignItems: 'center',
+		gap: 12,
+		padding: '11px 0',
+		borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
+		[theme.breakpoints.down('sm')]: {
+			flexWrap: 'wrap',
+			gap: 8
+		}
+	},
+	matchBadge: {
+		flexShrink: 0,
+		padding: '3px 10px',
+		borderRadius: 8,
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.05rem',
+		fontWeight: 700
+	},
+	matchBadgeTeam: {
+		background: 'rgba(0, 212, 255, 0.12)',
+		border: '1px solid rgba(0, 212, 255, 0.4)',
+		color: '#00d4ff'
+	},
+	matchBadgeVs: {
+		background: 'rgba(255, 107, 154, 0.12)',
+		border: '1px solid rgba(255, 107, 154, 0.4)',
+		color: '#ff6b9a'
+	},
+	matchResult: {
+		flex: 1,
+		minWidth: 120,
+		fontFamily: '"Rajdhani", "Noto Sans KR", sans-serif',
+		fontSize: '1.3rem',
+		fontWeight: 700,
+		color: 'rgba(255, 255, 255, 0.9)'
+	},
+	matchPositions: {
+		display: 'flex',
+		alignItems: 'center',
+		gap: 5,
+		flexShrink: 0
+	},
+	matchPosIcon: {
+		width: 18,
+		height: 18
+	},
+	matchPosVs: {
+		fontFamily: '"Rajdhani", sans-serif',
+		fontSize: '1rem',
+		color: 'rgba(255, 255, 255, 0.35)'
+	},
+	matchRating: {
+		flexShrink: 0,
+		fontFamily: '"Rajdhani", sans-serif',
+		fontSize: '1.15rem',
+		color: 'rgba(255, 255, 255, 0.5)',
+		minWidth: 110,
+		textAlign: 'right'
+	},
+	matchDate: {
+		flexShrink: 0,
+		fontFamily: '"Rajdhani", sans-serif',
+		fontSize: '1.1rem',
+		color: 'rgba(255, 255, 255, 0.4)',
+		minWidth: 92,
+		textAlign: 'right'
+	},
+	// ── 상태 화면 ──
+	centerState: {
+		display: 'flex',
+		flexDirection: 'column',
+		alignItems: 'center',
+		justifyContent: 'center',
+		minHeight: 320,
+		textAlign: 'center',
+		gap: 14
+	},
+	stateIcon: {
+		fontSize: '4rem',
+		opacity: 0.5
+	},
+	stateText: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.5rem',
+		color: 'rgba(255, 255, 255, 0.6)'
+	},
+	stateBtn: {
+		background: 'linear-gradient(135deg, #00d4ff 0%, #0099cc 100%)',
+		color: '#000',
+		border: 'none',
+		cursor: 'pointer',
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontWeight: 700,
+		fontSize: '1.2rem',
+		padding: '8px 26px',
+		borderRadius: 10,
+		boxShadow: '0 4px 18px rgba(0, 212, 255, 0.25)',
+		'&:hover': {
+			background: 'linear-gradient(135deg, #00bce0 0%, #0088bb 100%)'
+		}
+	},
+	emptyBig: {
+		display: 'flex',
+		flexDirection: 'column',
+		alignItems: 'center',
+		gap: 12,
+		padding: '48px 20px',
+		textAlign: 'center'
+	}
+}));
+
+function Compare() {
+	const { classes, cx } = useStyles();
+	const [searchParams, setSearchParams] = useSearchParams();
+	const puuidA = searchParams.get('a');
+	const puuidB = searchParams.get('b');
+	const groupId = useSelector(state => state.auth.user?.reprGroup?.groupId);
+
+	const [state, setState] = useState({ loading: false, status: null, result: null });
+	const samePuuid = Boolean(puuidA && puuidB && puuidA === puuidB);
+
+	useEffect(() => {
+		if (!groupId || !puuidA || !puuidB || samePuuid) return undefined;
+		let cancelled = false;
+		setState({ loading: true, status: null, result: null });
+		fetchCompare(groupId, puuidA, puuidB)
+			.then(result => {
+				if (!cancelled) setState({ loading: false, status: 200, result });
+			})
+			.catch(err => {
+				if (!cancelled) setState({ loading: false, status: err?.response?.status || 0, result: null });
+			});
+		return () => {
+			cancelled = true;
+		};
+	}, [groupId, puuidA, puuidB, samePuuid]);
+
+	const selectOpponent = member => setSearchParams({ a: puuidA, b: member.puuid });
+	const resetOpponent = () => setSearchParams({ a: puuidA });
+
+	// ── 진입/상태 처리 ──
+	if (!puuidA) {
+		return (
+			<div className={classes.root}>
+				<div className={classes.centerState}>
+					<div className={classes.stateIcon}>
+						<span role="img" aria-label="compare">
+							⚔️
+						</span>
+					</div>
+					<div className={classes.stateText}>비교할 유저가 지정되지 않았습니다. 랭킹이나 프로필에서 시작해 주세요.</div>
+				</div>
+			</div>
+		);
+	}
+
+	if (!puuidB || samePuuid) {
+		return (
+			<div className={classes.root}>
+				{samePuuid && (
+					<div className={classes.centerState} style={{ minHeight: 0, marginBottom: -20 }}>
+						<div className={classes.stateText}>같은 유저는 비교할 수 없어요. 다른 상대를 선택해 주세요.</div>
+					</div>
+				)}
+				<OpponentPicker groupId={groupId} anchorPuuid={puuidA} onSelect={selectOpponent} />
+			</div>
+		);
+	}
+
+	if (state.loading) {
+		return (
+			<div className={classes.root}>
+				<div className={classes.centerState}>
+					<div className={classes.stateText}>비교 정보를 불러오는 중…</div>
+				</div>
+			</div>
+		);
+	}
+
+	if (state.status !== 200 || !state.result) {
+		let msg = '비교 정보를 불러오지 못했어요.';
+		if (state.status === 404) msg = '그룹에 등록되지 않은 유저예요.';
+		else if (state.status === 400) msg = '잘못된 요청이에요.';
+		return (
+			<div className={classes.root}>
+				<div className={classes.centerState}>
+					<div className={classes.stateIcon}>
+						<span role="img" aria-label="warning">
+							⚠️
+						</span>
+					</div>
+					<div className={classes.stateText}>{msg}</div>
+					<button type="button" className={classes.stateBtn} onClick={resetOpponent}>
+						상대 다시 선택
+					</button>
+				</div>
+			</div>
+		);
+	}
+
+	const result = state.result;
+	const { header, headToHead, together, ratingFlow, timeline, mutualSynergy, laneMatchup, relationTitles, ratingTrajectory, matches } = result;
+	const a = header.a;
+	const b = header.b;
+	const nameA = a.name;
+	const nameB = b.name;
+
+	const naturalEnemy = (relationTitles || []).find(t => t.key === 'natural_enemy');
+	const mutualTitles = (relationTitles || []).filter(t => t.key !== 'natural_enemy');
+
+	const renderPlayer = (p, color, glow, isEnemy, enemyLabel) => {
+		const tierName = getTierName(p.rating);
+		const rankParsed = parseRankTier(p.rankTier);
+		const pos = p.mainPosition ? POSITION_META[p.mainPosition] : null;
+		return (
+			<div
+				className={classes.playerCard}
+				style={{ '--pc': color, '--pc-glow': glow, '--pc-border': `${color}40` }}
+			>
+				{isEnemy && (
+					<span className={classes.enemyBadge}>
+						<span role="img" aria-label="natural enemy">
+							🩸
+						</span>
+						{enemyLabel || '천적'}
+					</span>
+				)}
+				{tierName && (
+					<img className={classes.playerEmblem} src={getTierEmblemUrl(tierName)} alt={tierName} />
+				)}
+				<div className={classes.playerName} style={{ color }}>
+					{p.name}
+				</div>
+				<div className={classes.playerRating} style={{ color }}>
+					{p.rating ?? '-'}
+				</div>
+				<div className={classes.playerTierLabel}>{getTierLabel(p.rating) || '언랭'}</div>
+				{rankParsed && (
+					<div className={classes.soloChip}>
+						<img className={classes.soloChipEmblem} src={rankParsed.emblem} alt={rankParsed.tier} />
+						솔랭 {rankParsed.short}
+					</div>
+				)}
+				<div className={classes.playerBottom}>
+					{pos && (
+						<span className={classes.posTag}>
+							<PositionIcon position={pos.icon} className={classes.posTagIcon} />
+							{pos.label}
+						</span>
+					)}
+					<span className={classes.recordTag}>
+						{p.wins}승 {p.losses}패 · {fmtPct(p.winRate)}
+					</span>
+				</div>
+			</div>
+		);
+	};
+
+	// ── 섹션 렌더러 (RevealGroup 직계 자식 → 자동 stagger) ──
+	const sectionHeadToHead = () => {
+		const h = headToHead;
+		const empty = !h || h.games === 0;
+		const total = empty ? 0 : h.aWins + h.bWins;
+		const aPct = total ? (h.aWins / total) * 100 : 50;
+		const streak = h && h.currentStreak;
+		const streakName = streak && streak.holder ? (streak.holder === 'A' ? nameA : nameB) : null;
+		const streakColor = streak && streak.holder === 'A' ? A_COLOR : B_COLOR;
+		return (
+			<div className={classes.section} key="h2h">
+				<div className={classes.sectionTitle}>
+					<span role="img" aria-label="swords">
+						⚔️
+					</span>
+					상대 전적
+				</div>
+				{empty ? (
+					<div className={classes.sectionEmpty}>아직 맞대결 기록이 없어요.</div>
+				) : (
+					<>
+						<div className={classes.h2hScoreRow}>
+							<div className={classes.h2hSide}>
+								<span className={classes.h2hSideName}>{nameA}</span>
+								<span className={classes.h2hScore} style={{ color: A_COLOR }}>
+									{h.aWins}
+								</span>
+							</div>
+							<span className={classes.h2hColon}>:</span>
+							<div className={classes.h2hSide}>
+								<span className={classes.h2hSideName}>{nameB}</span>
+								<span className={classes.h2hScore} style={{ color: B_COLOR }}>
+									{h.bWins}
+								</span>
+							</div>
+						</div>
+						<div className={classes.balanceBar}>
+							<div className={classes.balanceFill} style={{ width: `${aPct}%`, background: A_COLOR }} />
+							<div className={classes.balanceFill} style={{ width: `${100 - aPct}%`, background: B_COLOR }} />
+						</div>
+						<div className={classes.balanceCaption}>
+							<span>{h.games}전</span>
+							<span>{nameA} 승률 {fmtPct(h.aWinRate)}</span>
+						</div>
+						{h.recentResults && h.recentResults.length > 0 && (
+							<div className={classes.dotsRow}>
+								<span className={classes.dotsLabel}>최근</span>
+								{h.recentResults.map((r, i) => (
+									<span
+										key={`${i}-${r}`}
+										className={cx(classes.dot, i === h.recentResults.length - 1 && classes.dotLatest)}
+										style={{ background: r === 'A' ? A_COLOR : B_COLOR }}
+									>
+										{r}
+									</span>
+								))}
+							</div>
+						)}
+						{streakName && streak.count > 0 && (
+							<div className={classes.streakText} style={{ color: streakColor }}>
+								<span role="img" aria-label="fire">
+									🔥
+								</span>
+								현재 {streakName} {streak.count}연승 중
+							</div>
+						)}
+					</>
+				)}
+			</div>
+		);
+	};
+
+	const sectionRatingFlow = () => {
+		const rf = ratingFlow;
+		const empty = !rf || rf.computedGames === 0;
+		const total = empty ? 0 : rf.takenByA + rf.takenByB;
+		const aPct = total ? (rf.takenByA / total) * 100 : 50;
+		let netText = '서로 뺏은 점수가 같아요';
+		if (!empty && rf.net > 0) netText = `${nameA}가 ${nameB}에게서 순 +${rf.net}점`;
+		else if (!empty && rf.net < 0) netText = `${nameB}가 ${nameA}에게서 순 +${-rf.net}점`;
+		return (
+			<div className={classes.section} key="flow">
+				<div className={classes.sectionTitle}>
+					<span role="img" aria-label="crossed swords">
+						🗡️
+					</span>
+					점수 약탈전
+				</div>
+				{empty ? (
+					<div className={classes.sectionEmpty}>맞대결에서 주고받은 레이팅 기록이 없어요.</div>
+				) : (
+					<>
+						<div className={classes.flowNet}>{netText}</div>
+						<div className={classes.flowBar}>
+							<div
+								className={cx(classes.flowFill, classes.flowFillLeft)}
+								style={{ width: `${aPct}%`, background: A_COLOR }}
+							>
+								{rf.takenByA > 0 && rf.takenByA}
+							</div>
+							<div
+								className={cx(classes.flowFill, classes.flowFillRight)}
+								style={{ width: `${100 - aPct}%`, background: B_COLOR }}
+							>
+								{rf.takenByB > 0 && rf.takenByB}
+							</div>
+						</div>
+						<div className={classes.flowLegend}>
+							<span>{nameA}가 뺏음 {rf.takenByA}점</span>
+							<span>{rf.takenByB}점 {nameB}가 뺏음</span>
+						</div>
+						{rf.skippedGames > 0 && (
+							<div className={classes.caption}>{rf.skippedGames}판은 레이팅 기록이 없어 집계에서 제외됨</div>
+						)}
+					</>
+				)}
+			</div>
+		);
+	};
+
+	const sectionTrajectory = () => {
+		const rt = ratingTrajectory || {};
+		const hasTraj = (rt.a && rt.a.length > 0) || (rt.b && rt.b.length > 0);
+		return (
+			<div className={classes.section} key="traj">
+				<div className={classes.sectionTitle}>
+					<span role="img" aria-label="chart">
+						📈
+					</span>
+					레이팅 궤적
+				</div>
+				{!hasTraj ? (
+					<div className={classes.sectionEmpty}>레이팅 변동 기록이 없어요.</div>
+				) : (
+					<div className={classes.chartContainer}>
+						<RatingTrajectoryChart
+							a={rt.a}
+							b={rt.b}
+							nameA={nameA}
+							nameB={nameB}
+							colorA={A_COLOR}
+							colorB={B_COLOR}
+						/>
+					</div>
+				)}
+			</div>
+		);
+	};
+
+	const sectionTogether = () => {
+		const tg = together;
+		const empty = !tg || tg.games === 0;
+		const delta = empty ? null : tg.synergyDelta;
+		const deltaColor = delta == null ? '#fff' : delta > 0 ? GOOD_COLOR : delta < 0 ? BAD_COLOR : 'rgba(255,255,255,0.7)';
+		return (
+			<div className={classes.section} key="together">
+				<div className={classes.sectionTitle}>
+					<span role="img" aria-label="handshake">
+						🤝
+					</span>
+					같은 팀 케미
+				</div>
+				{empty ? (
+					<div className={classes.sectionEmpty}>아직 같은 팀으로 함께한 경기가 없어요.</div>
+				) : (
+					<>
+						{delta != null && (
+							<div className={classes.synergyHero}>
+								<div className={classes.synergyHeroValue} style={{ color: deltaColor }}>
+									{signed(delta)}%p
+								</div>
+								<div className={classes.synergyHeroLabel}>
+									둘이 만나면 개인 평균 승률 대비 {delta > 0 ? '올라가요' : delta < 0 ? '내려가요' : '그대로예요'}
+								</div>
+							</div>
+						)}
+						<div className={classes.synergyStats}>
+							<div className={classes.statBlock}>
+								<div className={classes.statBlockValue}>
+									{tg.wins}승 {tg.losses}패
+								</div>
+								<div className={classes.statBlockLabel}>같은 팀 전적</div>
+							</div>
+							<div className={classes.statBlock}>
+								<div className={classes.statBlockValue}>{fmtPct(tg.winRate)}</div>
+								<div className={classes.statBlockLabel}>실제 승률</div>
+							</div>
+							<div className={classes.statBlock}>
+								<div className={classes.statBlockValue}>{fmtPct(tg.expectedWinRate)}</div>
+								<div className={classes.statBlockLabel}>기대 승률</div>
+							</div>
+						</div>
+					</>
+				)}
+			</div>
+		);
+	};
+
+	const sectionTimeline = () => {
+		const t = timeline;
+		const fv = t.firstVs;
+		const ft = t.firstTogether;
+		const lastLabel = daysAgoLabel(t.lastMetAt);
+		const monthly = t.monthlyCounts || [];
+		const maxMonthly = Math.max(1, ...monthly.map(m => m.games));
+		return (
+			<div className={classes.section} key="timeline">
+				<div className={classes.sectionTitle}>
+					<span role="img" aria-label="hourglass">
+						⏳
+					</span>
+					인연 타임라인
+				</div>
+				<div className={classes.timelineCards}>
+					{fv && (
+						<div className={classes.milestone}>
+							<div className={classes.milestoneLabel}>첫 맞대결</div>
+							<div className={classes.milestoneMain}>
+								<span style={{ color: fv.winner === 'A' ? A_COLOR : B_COLOR }}>
+									{fv.winner === 'A' ? nameA : nameB} 승
+								</span>
+							</div>
+							<div className={classes.milestoneDate}>{fmtDate(fv.date)}</div>
+							<div className={classes.milestoneSub}>당시 {a.name} {fv.aRating} / {b.name} {fv.bRating}</div>
+						</div>
+					)}
+					{ft && (
+						<div className={classes.milestone}>
+							<div className={classes.milestoneLabel}>첫 같은 팀</div>
+							<div className={classes.milestoneMain}>{ft.won ? '함께 승리 🎉' : '함께 패배'}</div>
+							<div className={classes.milestoneDate}>{fmtDate(ft.date)}</div>
+							<div className={classes.milestoneSub}>당시 {a.name} {ft.aRating} / {b.name} {ft.bRating}</div>
+						</div>
+					)}
+					{t.lastMetAt && (
+						<div className={classes.milestone}>
+							<div className={classes.milestoneLabel}>마지막 만남</div>
+							<div className={classes.milestoneMain}>{lastLabel}</div>
+							<div className={classes.milestoneDate}>{fmtDate(t.lastMetAt)}</div>
+						</div>
+					)}
+					<div className={classes.milestone}>
+						<div className={classes.milestoneLabel}>누적</div>
+						<div className={classes.milestoneMain}>총 {t.totalGames}경기</div>
+						<div className={classes.milestoneSub}>맞대결 {t.vsGames} · 같은 팀 {t.togetherGames}</div>
+					</div>
+				</div>
+				{monthly.length > 0 && (
+					<div className={classes.monthlyWrap}>
+						<div className={classes.milestoneLabel}>월별 만남</div>
+						<div className={classes.monthlyBars}>
+							{monthly.map(m => (
+								<div className={classes.monthlyCol} key={m.month}>
+									<span className={classes.monthlyCount}>{m.games || ''}</span>
+									<div
+										className={classes.monthlyBar}
+										style={{ height: `${(m.games / maxMonthly) * 100}%` }}
+									/>
+									<span className={classes.monthlyLabel}>{m.month.slice(2)}</span>
+								</div>
+							))}
+						</div>
+					</div>
+				)}
+			</div>
+		);
+	};
+
+	const sectionLaneMatchup = () => {
+		const lm = laneMatchup;
+		if (!lm || lm.games === 0) return null;
+		const rows = (lm.byPosition || []).filter(p => p.games > 0);
+		return (
+			<div className={classes.section} key="lane">
+				<div className={classes.sectionTitle}>
+					<span role="img" aria-label="crossed flags">
+						🚩
+					</span>
+					맞라인 전적
+					<span style={{ fontSize: '1.2rem', fontWeight: 400, color: 'rgba(255,255,255,0.45)' }}>
+						{lm.games}경기 · {lm.aWins} : {lm.bWins}
+					</span>
+				</div>
+				{rows.map(row => {
+					const meta = POSITION_META[row.position];
+					const total = row.aWins + row.bWins;
+					const aPct = total ? (row.aWins / total) * 100 : 50;
+					return (
+						<div className={classes.laneRow} key={row.position}>
+							<span className={classes.lanePos}>
+								{meta && <PositionIcon position={meta.icon} className={classes.lanePosIcon} />}
+								{meta ? meta.label : row.position}
+							</span>
+							<div className={classes.balanceBar} style={{ margin: 0 }}>
+								<div className={classes.balanceFill} style={{ width: `${aPct}%`, background: A_COLOR }} />
+								<div
+									className={classes.balanceFill}
+									style={{ width: `${100 - aPct}%`, background: B_COLOR }}
+								/>
+							</div>
+							<span className={classes.laneScore}>
+								<span style={{ color: A_COLOR }}>{row.aWins}</span>
+								{' : '}
+								<span style={{ color: B_COLOR }}>{row.bWins}</span>
+							</span>
+						</div>
+					);
+				})}
+			</div>
+		);
+	};
+
+	const renderMutualCard = ms => (
+		<div className={classes.mutualCard} key={ms.puuid}>
+			<div className={classes.mutualHead}>
+				<span className={classes.mutualName}>{ms.name}</span>
+				<span
+					className={classes.mutualAvg}
+					style={{
+						color: ms.avgWinRate >= 50 ? GOOD_COLOR : BAD_COLOR,
+						background: ms.avgWinRate >= 50 ? 'rgba(0,255,127,0.1)' : 'rgba(255,107,107,0.1)'
+					}}
+				>
+					평균 {fmtPct(ms.avgWinRate)}
+				</span>
+			</div>
+			<div className={classes.mutualWith}>
+				<span style={{ color: A_COLOR }}>{nameA}와</span>
+				<span>{ms.withA.games}판 · {fmtPct(ms.withA.winRate)}</span>
+			</div>
+			<div className={classes.mutualWith}>
+				<span style={{ color: B_COLOR }}>{nameB}와</span>
+				<span>{ms.withB.games}판 · {fmtPct(ms.withB.winRate)}</span>
+			</div>
+		</div>
+	);
+
+	const sectionMutualSynergy = () => {
+		const ms = mutualSynergy || {};
+		const good = ms.goodWithBoth || [];
+		const bad = ms.badWithBoth || [];
+		const empty = good.length === 0 && bad.length === 0;
+		return (
+			<div className={classes.section} key="mutual">
+				<div className={classes.sectionTitle}>
+					<span role="img" aria-label="people">
+						👥
+					</span>
+					둘 다와의 시너지
+				</div>
+				{empty ? (
+					<div className={classes.sectionEmpty}>표본 부족 (각 {ms.minGames}판 이상 함께한 유저가 필요해요)</div>
+				) : (
+					<div className={classes.synergyCols}>
+						<div>
+							<div className={classes.synergyColTitle} style={{ color: GOOD_COLOR }}>
+								<span role="img" aria-label="up">
+									📈
+								</span>
+								둘 다와 잘 맞는
+							</div>
+							{good.length > 0 ? (
+								good.map(renderMutualCard)
+							) : (
+								<div className={classes.mutualEmpty}>해당 없음</div>
+							)}
+						</div>
+						<div>
+							<div className={classes.synergyColTitle} style={{ color: BAD_COLOR }}>
+								<span role="img" aria-label="down">
+									📉
+								</span>
+								둘 다와 안 맞는
+							</div>
+							{bad.length > 0 ? (
+								bad.map(renderMutualCard)
+							) : (
+								<div className={classes.mutualEmpty}>해당 없음</div>
+							)}
+						</div>
+					</div>
+				)}
+			</div>
+		);
+	};
+
+	const sectionMatches = () => {
+		const items = (matches && matches.items) || [];
+		if (items.length === 0) return null;
+		return (
+			<div className={classes.section} key="matches">
+				<div className={classes.sectionTitle}>
+					<span role="img" aria-label="scroll">
+						📜
+					</span>
+					얽힌 경기 히스토리
+					<span style={{ fontSize: '1.2rem', fontWeight: 400, color: 'rgba(255,255,255,0.45)' }}>
+						최근 {items.length}경기{matches.total > items.length ? ` (총 ${matches.total})` : ''}
+					</span>
+				</div>
+				{items.map(m => {
+					const posA = m.aPosition ? POSITION_META[m.aPosition] : null;
+					const posB = m.bPosition ? POSITION_META[m.bPosition] : null;
+					let resultText;
+					let resultColor = 'rgba(255,255,255,0.9)';
+					if (m.sameTeam) {
+						resultText = m.aWon ? '함께 승리' : '함께 패배';
+						resultColor = m.aWon ? GOOD_COLOR : BAD_COLOR;
+					} else {
+						resultText = m.aWon ? `${nameA} 승` : `${nameB} 승`;
+						resultColor = m.aWon ? A_COLOR : B_COLOR;
+					}
+					return (
+						<div className={classes.matchRow} key={m.gameId}>
+							<span
+								className={cx(
+									classes.matchBadge,
+									m.sameTeam ? classes.matchBadgeTeam : classes.matchBadgeVs
+								)}
+							>
+								{m.sameTeam ? '같은 팀' : '맞대결'}
+							</span>
+							<span className={classes.matchResult} style={{ color: resultColor }}>
+								{resultText}
+							</span>
+							{(posA || posB) && (
+								<span className={classes.matchPositions}>
+									{posA && <PositionIcon position={posA.icon} className={classes.matchPosIcon} />}
+									<span className={classes.matchPosVs}>vs</span>
+									{posB && <PositionIcon position={posB.icon} className={classes.matchPosIcon} />}
+								</span>
+							)}
+							<span className={classes.matchRating}>
+								{m.aRating} / {m.bRating}
+							</span>
+							<span className={classes.matchDate}>{fmtDate(m.date)}</span>
+						</div>
+					);
+				})}
+			</div>
+		);
+	};
+
+	const noGames = !timeline || timeline.totalGames === 0;
+
+	return (
+		<div className={classes.root}>
+			<div className={classes.inner}>
+				<Reveal>
+					<div className={classes.vsHeader}>
+						{renderPlayer(a, A_COLOR, 'rgba(0,212,255,0.4)', naturalEnemy && naturalEnemy.holder === 'A', naturalEnemy && naturalEnemy.label)}
+						<div className={classes.vsCenter}>
+							<div className={classes.vsText}>VS</div>
+							{mutualTitles.length > 0 && (
+								<div className={classes.relationBadges}>
+									{mutualTitles.map(t => (
+										<span className={classes.relationBadge} key={t.key}>
+											<span role="img" aria-label={t.key}>
+												{RELATION_EMOJI[t.key] || '🏷️'}
+											</span>
+											{t.label}
+										</span>
+									))}
+								</div>
+							)}
+							<button type="button" className={classes.changeOpponentBtn} onClick={resetOpponent}>
+								상대 변경
+							</button>
+						</div>
+						{renderPlayer(b, B_COLOR, 'rgba(255,107,154,0.4)', naturalEnemy && naturalEnemy.holder === 'B', naturalEnemy && naturalEnemy.label)}
+					</div>
+				</Reveal>
+
+				{noGames ? (
+					<div className={classes.section}>
+						<div className={classes.emptyBig}>
+							<div className={classes.stateIcon}>
+								<span role="img" aria-label="empty">
+									🌱
+								</span>
+							</div>
+							<div className={classes.stateText}>아직 함께한 내전이 없어요</div>
+						</div>
+					</div>
+				) : (
+					<RevealGroup className={classes.sections}>
+						{sectionHeadToHead()}
+						{sectionRatingFlow()}
+						{sectionTrajectory()}
+						{sectionTogether()}
+						{sectionTimeline()}
+						{sectionLaneMatchup()}
+						{sectionMutualSynergy()}
+						{sectionMatches()}
+					</RevealGroup>
+				)}
+			</div>
+		</div>
+	);
+}
+
+export default Compare;
