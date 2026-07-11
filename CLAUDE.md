@@ -162,6 +162,11 @@ yarn test:visual    # Playwright 시각 회귀
 - LP(League Points) 계산 로직 포함
 - 티어 엠블럼 이미지 표시
 
+### 레이팅 표시 규칙 (필수)
+- **레이팅 원시 숫자(예: 512)는 절대 화면에 표시하지 않는다.** 반드시 티어로 환산해서 보여준다.
+  - 티어 라벨: `tournamentUtils`의 `getTierName` / `getTierLabel`("GOLD II") / `getTierShortLabel`("G2"), 엠블럼: `getTierEmblemUrl`
+- **점수 증감(레이팅 delta)은 LP로 환산해 표시한다.** 환산 배수는 `4` (레이팅 1 = 4 LP). `RankingTable.js`의 `formatRatingChange`(`val * 4`), `getTierPoint` 참고.
+
 ## Code Style
 
 - **ESLint**: Airbnb 기반 (`.eslintrc`)

@@ -10,6 +10,7 @@ import {
 	Legend,
 	Filler
 } from 'chart.js';
+import { getTierLabel } from 'app/main/tournament/tournamentUtils';
 import ChartCanvas from '../components/ChartCanvas';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, LineController, Tooltip, Legend, Filler);
@@ -91,7 +92,7 @@ function RatingTrajectoryChart({ a, b, nameA, nameB, colorA, colorB }) {
 				cornerRadius: 8,
 				padding: 12,
 				callbacks: {
-					label: item => (item.parsed.y == null ? null : `${item.dataset.label}: ${item.parsed.y}p`)
+					label: item => (item.parsed.y == null ? null : `${item.dataset.label}: ${getTierLabel(item.parsed.y)}`)
 				}
 			}
 		},
@@ -110,7 +111,14 @@ function RatingTrajectoryChart({ a, b, nameA, nameB, colorA, colorB }) {
 				grid: { color: 'rgba(255, 255, 255, 0.05)' },
 				ticks: {
 					color: 'rgba(255, 255, 255, 0.6)',
-					font: { size: 13, family: '"Rajdhani", sans-serif' }
+					font: { size: 13, family: '"Rajdhani", sans-serif' },
+					maxTicksLimit: 6,
+					// 원시 레이팅 숫자 대신 티어 라벨로 표기. 인접 눈금이 같은 티어면 생략.
+					callback: (value, index, ticks) => {
+						const label = getTierLabel(value);
+						if (index > 0 && getTierLabel(ticks[index - 1].value) === label) return '';
+						return label;
+					}
 				}
 			}
 		}

@@ -2,7 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { makeStyles } from 'tss-react/mui';
 import { useSelector } from 'react-redux';
 import { useSearchParams } from 'react-router-dom';
-import { getTierName, getTierLabel, getTierEmblemUrl, parseRankTier } from 'app/main/tournament/tournamentUtils';
+import {
+	getTierName,
+	getTierLabel,
+	getTierShortLabel,
+	getTierEmblemUrl,
+	parseRankTier
+} from 'app/main/tournament/tournamentUtils';
 import PositionIcon from '../tournament/PositionIcon';
 import { Reveal, RevealGroup } from '../components/Reveal';
 import OpponentPicker from './OpponentPicker';
@@ -13,6 +19,8 @@ const A_COLOR = '#00d4ff';
 const B_COLOR = '#ff6b9a';
 const GOOD_COLOR = '#00ff7f';
 const BAD_COLOR = '#ff6b6b';
+// 레이팅 delta → 점(LP) 환산 배수. RankingTable의 formatRatingChange(val*4)/getTierPoint과 동일.
+const LP_PER_RATING = 4;
 
 // Riot 표준 포지션 키 → 한글 라벨 + PositionIcon용 키(소문자).
 const POSITION_META = {
@@ -131,23 +139,17 @@ const useStyles = makeStyles()((theme) => ({
 			fontSize: '1.4rem'
 		}
 	},
-	playerRating: {
-		fontFamily: '"Rajdhani", sans-serif',
-		fontSize: '4.2rem',
-		fontWeight: 700,
-		lineHeight: 1,
-		margin: '6px 0 2px',
-		textShadow: '0 0 24px var(--pc-glow)',
-		[theme.breakpoints.down('sm')]: {
-			fontSize: '2.8rem'
-		}
-	},
 	playerTierLabel: {
 		fontFamily: '"Rajdhani", sans-serif',
-		fontSize: '1.3rem',
-		fontWeight: 600,
-		color: 'rgba(255, 255, 255, 0.6)',
-		letterSpacing: '0.04em'
+		fontSize: '2.4rem',
+		fontWeight: 700,
+		lineHeight: 1.1,
+		margin: '8px 0 2px',
+		letterSpacing: '0.03em',
+		textShadow: '0 0 24px var(--pc-glow)',
+		[theme.breakpoints.down('sm')]: {
+			fontSize: '1.7rem'
+		}
 	},
 	soloChip: {
 		display: 'inline-flex',
@@ -880,6 +882,15 @@ function Compare() {
 	const naturalEnemy = (relationTitles || []).find(t => t.key === 'natural_enemy');
 	const mutualTitles = (relationTitles || []).filter(t => t.key !== 'natural_enemy');
 
+	// 당시 레이팅은 원시 숫자 대신 티어로 환산해 표시한다.
+	const renderThenTiers = (aRating, bRating) => (
+		<>
+			당시 <span style={{ color: A_COLOR }}>{getTierLabel(aRating) || '-'}</span>
+			{' vs '}
+			<span style={{ color: B_COLOR }}>{getTierLabel(bRating) || '-'}</span>
+		</>
+	);
+
 	const renderPlayer = (p, color, glow, isEnemy, enemyLabel) => {
 		const tierName = getTierName(p.rating);
 		const rankParsed = parseRankTier(p.rankTier);
@@ -903,10 +914,9 @@ function Compare() {
 				<div className={classes.playerName} style={{ color }}>
 					{p.name}
 				</div>
-				<div className={classes.playerRating} style={{ color }}>
-					{p.rating ?? '-'}
+				<div className={classes.playerTierLabel} style={{ color }}>
+					{getTierLabel(p.rating) || '언랭'}
 				</div>
-				<div className={classes.playerTierLabel}>{getTierLabel(p.rating) || '언랭'}</div>
 				{rankParsed && (
 					<div className={classes.soloChip}>
 						<img className={classes.soloChipEmblem} src={rankParsed.emblem} alt={rankParsed.tier} />
@@ -1003,21 +1013,24 @@ function Compare() {
 	const sectionRatingFlow = () => {
 		const rf = ratingFlow;
 		const empty = !rf || rf.computedGames === 0;
-		const total = empty ? 0 : rf.takenByA + rf.takenByB;
-		const aPct = total ? (rf.takenByA / total) * 100 : 50;
-		let netText = '서로 뺏은 점수가 같아요';
-		if (!empty && rf.net > 0) netText = `${nameA}가 ${nameB}에게서 순 +${rf.net}점`;
-		else if (!empty && rf.net < 0) netText = `${nameB}가 ${nameA}에게서 순 +${-rf.net}점`;
+		const takenA = empty ? 0 : rf.takenByA * LP_PER_RATING;
+		const takenB = empty ? 0 : rf.takenByB * LP_PER_RATING;
+		const netPts = empty ? 0 : rf.net * LP_PER_RATING;
+		const total = takenA + takenB;
+		const aPct = total ? (takenA / total) * 100 : 50;
+		let netText = `${nameA} · ${nameB} 주고받은 점수 같음`;
+		if (netPts > 0) netText = `${nameA}가 ${nameB}로부터 +${netPts}점 얻음`;
+		else if (netPts < 0) netText = `${nameA}가 ${nameB}에게 ${-netPts}점 뺏김`;
 		return (
 			<div className={classes.section} key="flow">
 				<div className={classes.sectionTitle}>
 					<span role="img" aria-label="crossed swords">
 						🗡️
 					</span>
-					점수 약탈전
+					점수 약탈
 				</div>
 				{empty ? (
-					<div className={classes.sectionEmpty}>맞대결에서 주고받은 레이팅 기록이 없어요.</div>
+					<div className={classes.sectionEmpty}>맞대결에서 주고받은 점수 기록이 없어요.</div>
 				) : (
 					<>
 						<div className={classes.flowNet}>{netText}</div>
@@ -1026,21 +1039,21 @@ function Compare() {
 								className={cx(classes.flowFill, classes.flowFillLeft)}
 								style={{ width: `${aPct}%`, background: A_COLOR }}
 							>
-								{rf.takenByA > 0 && rf.takenByA}
+								{takenA > 0 && takenA}
 							</div>
 							<div
 								className={cx(classes.flowFill, classes.flowFillRight)}
 								style={{ width: `${100 - aPct}%`, background: B_COLOR }}
 							>
-								{rf.takenByB > 0 && rf.takenByB}
+								{takenB > 0 && takenB}
 							</div>
 						</div>
 						<div className={classes.flowLegend}>
-							<span>{nameA}가 뺏음 {rf.takenByA}점</span>
-							<span>{rf.takenByB}점 {nameB}가 뺏음</span>
+							<span>{nameA}가 뺏음 {takenA}점</span>
+							<span>{takenB}점 {nameB}가 뺏음</span>
 						</div>
 						{rf.skippedGames > 0 && (
-							<div className={classes.caption}>{rf.skippedGames}판은 레이팅 기록이 없어 집계에서 제외됨</div>
+							<div className={classes.caption}>{rf.skippedGames}판은 점수 기록이 없어 집계에서 제외됨</div>
 						)}
 					</>
 				)}
@@ -1151,15 +1164,26 @@ function Compare() {
 								</span>
 							</div>
 							<div className={classes.milestoneDate}>{fmtDate(fv.date)}</div>
-							<div className={classes.milestoneSub}>당시 {a.name} {fv.aRating} / {b.name} {fv.bRating}</div>
+							<div className={classes.milestoneSub}>{renderThenTiers(fv.aRating, fv.bRating)}</div>
 						</div>
 					)}
 					{ft && (
 						<div className={classes.milestone}>
 							<div className={classes.milestoneLabel}>첫 같은 팀</div>
-							<div className={classes.milestoneMain}>{ft.won ? '함께 승리 🎉' : '함께 패배'}</div>
+							<div className={classes.milestoneMain}>
+								{ft.won ? (
+									<>
+										함께 승리{' '}
+										<span role="img" aria-label="celebrate">
+											🎉
+										</span>
+									</>
+								) : (
+									'함께 패배'
+								)}
+							</div>
 							<div className={classes.milestoneDate}>{fmtDate(ft.date)}</div>
-							<div className={classes.milestoneSub}>당시 {a.name} {ft.aRating} / {b.name} {ft.bRating}</div>
+							<div className={classes.milestoneSub}>{renderThenTiers(ft.aRating, ft.bRating)}</div>
 						</div>
 					)}
 					{t.lastMetAt && (
@@ -1361,7 +1385,9 @@ function Compare() {
 								</span>
 							)}
 							<span className={classes.matchRating}>
-								{m.aRating} / {m.bRating}
+								<span style={{ color: A_COLOR }}>{getTierShortLabel(m.aRating) || '-'}</span>
+								{' / '}
+								<span style={{ color: B_COLOR }}>{getTierShortLabel(m.bRating) || '-'}</span>
 							</span>
 							<span className={classes.matchDate}>{fmtDate(m.date)}</span>
 						</div>
