@@ -33,6 +33,8 @@ const POSITION_META = {
 	UTILITY: { label: '서폿', icon: 'support' }
 };
 
+const posLabel = pos => (POSITION_META[pos] ? POSITION_META[pos].label : pos);
+
 const RELATION_EMOJI = {
 	natural_enemy: '🩸',
 	fated_rivals: '⚔️',
@@ -432,6 +434,13 @@ const useStyles = makeStyles()((theme) => ({
 		alignItems: 'center',
 		gap: 6
 	},
+	maxStreakText: {
+		marginTop: 8,
+		fontFamily: '"Rajdhani", "Noto Sans KR", sans-serif',
+		fontSize: '1.2rem',
+		fontWeight: 600,
+		color: 'rgba(255, 255, 255, 0.55)'
+	},
 	// ── 점수 약탈전 ──
 	flowNet: {
 		fontFamily: '"Rajdhani", "Noto Sans KR", sans-serif',
@@ -528,6 +537,36 @@ const useStyles = makeStyles()((theme) => ({
 		fontSize: '1.1rem',
 		color: 'rgba(255, 255, 255, 0.45)',
 		marginTop: 2
+	},
+	combos: {
+		marginTop: 18,
+		borderTop: '1px solid rgba(255, 255, 255, 0.06)',
+		paddingTop: 14
+	},
+	combosTitle: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.15rem',
+		color: 'rgba(255, 255, 255, 0.45)',
+		marginBottom: 8
+	},
+	comboRow: {
+		display: 'flex',
+		justifyContent: 'space-between',
+		alignItems: 'center',
+		gap: 12,
+		padding: '5px 0',
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.2rem'
+	},
+	comboPair: {
+		fontWeight: 600,
+		color: 'rgba(255, 255, 255, 0.85)'
+	},
+	comboStat: {
+		fontFamily: '"Rajdhani", sans-serif',
+		fontWeight: 700,
+		color: 'rgba(255, 255, 255, 0.6)',
+		whiteSpace: 'nowrap'
 	},
 	// ── 인연 타임라인 ──
 	timelineCards: {
@@ -669,6 +708,113 @@ const useStyles = makeStyles()((theme) => ({
 		fontFamily: '"Noto Sans KR", sans-serif',
 		fontSize: '1.15rem',
 		color: 'rgba(255, 255, 255, 0.35)'
+	},
+	crossBlock: {
+		marginTop: 20,
+		borderTop: '1px solid rgba(255, 255, 255, 0.06)',
+		paddingTop: 16
+	},
+	crossTitle: {
+		fontFamily: '"Rajdhani", "Noto Sans KR", sans-serif',
+		fontSize: '1.35rem',
+		fontWeight: 700,
+		color: 'rgba(255, 255, 255, 0.85)',
+		display: 'flex',
+		alignItems: 'center',
+		gap: 6,
+		marginBottom: 12
+	},
+	// ── 토너먼트 인연 ──
+	champBox: {
+		display: 'flex',
+		flexDirection: 'column',
+		gap: 10,
+		marginBottom: 16
+	},
+	champRow: {
+		display: 'flex',
+		alignItems: 'center',
+		gap: 10,
+		padding: '12px 14px',
+		borderRadius: 12,
+		background: 'linear-gradient(135deg, rgba(255, 215, 0, 0.12), rgba(255, 215, 0, 0.04))',
+		border: '1px solid rgba(255, 215, 0, 0.35)'
+	},
+	champTrophy: {
+		fontSize: '1.6rem',
+		flexShrink: 0
+	},
+	champText: {
+		flex: 1,
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.25rem',
+		color: 'rgba(255, 255, 255, 0.9)'
+	},
+	champDate: {
+		fontFamily: '"Rajdhani", sans-serif',
+		fontSize: '1.15rem',
+		color: 'rgba(255, 255, 255, 0.5)',
+		flexShrink: 0
+	},
+	tnList: {
+		marginBottom: 16
+	},
+	tnListTitle: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.15rem',
+		color: 'rgba(255, 255, 255, 0.45)',
+		marginBottom: 8
+	},
+	tnRow: {
+		display: 'flex',
+		alignItems: 'center',
+		gap: 10,
+		padding: '7px 0',
+		borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.2rem'
+	},
+	tnName: {
+		flex: 1,
+		color: 'rgba(255, 255, 255, 0.85)',
+		overflow: 'hidden',
+		textOverflow: 'ellipsis',
+		whiteSpace: 'nowrap'
+	},
+	tnTeam: {
+		color: '#00d4ff',
+		flexShrink: 0
+	},
+	tnDate: {
+		fontFamily: '"Rajdhani", sans-serif',
+		fontSize: '1.1rem',
+		color: 'rgba(255, 255, 255, 0.4)',
+		flexShrink: 0,
+		minWidth: 90,
+		textAlign: 'right'
+	},
+	tnVs: {
+		display: 'flex',
+		alignItems: 'center',
+		justifyContent: 'center',
+		gap: 12,
+		marginTop: 4,
+		padding: '12px 0 4px'
+	},
+	tnVsLabel: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.2rem',
+		color: 'rgba(255, 255, 255, 0.6)'
+	},
+	tnVsScore: {
+		fontFamily: '"Rajdhani", sans-serif',
+		fontSize: '2rem',
+		fontWeight: 700
+	},
+	tnVsGames: {
+		fontFamily: '"Rajdhani", sans-serif',
+		fontSize: '1.15rem',
+		color: 'rgba(255, 255, 255, 0.45)'
 	},
 	// ── 상태 화면 ──
 	centerState: {
@@ -824,7 +970,7 @@ function Compare() {
 	}
 
 	const result = state.result;
-	const { header, headToHead, together, ratingFlow, timeline, mutualSynergy, laneMatchup, relationTitles, ratingTrajectory } = result;
+	const { header, headToHead, together, ratingFlow, timeline, mutualSynergy, laneMatchup, relationTitles, ratingTrajectory, tournament } = result;
 	const a = header.a;
 	const b = header.b;
 	const nameA = a.name;
@@ -973,6 +1119,13 @@ function Compare() {
 								현재 {streakName} {streak.count}연승 중
 							</div>
 						)}
+						{h.maxStreak && (h.maxStreak.a > 0 || h.maxStreak.b > 0) && (
+							<div className={classes.maxStreakText}>
+								<span style={{ color: A_COLOR }}>{nameA} 최다 {h.maxStreak.a}연승</span>
+								{' · '}
+								<span style={{ color: B_COLOR }}>{nameB} 최다 {h.maxStreak.b}연승</span>
+							</div>
+						)}
 					</>
 				)}
 			</div>
@@ -1102,6 +1255,23 @@ function Compare() {
 								<div className={classes.statBlockLabel}>기대 승률</div>
 							</div>
 						</div>
+						{tg.positionCombos && tg.positionCombos.length > 0 && (
+							<div className={classes.combos}>
+								<div className={classes.combosTitle}>자주 선 포지션 조합</div>
+								{tg.positionCombos.map((c, i) => (
+									<div className={classes.comboRow} key={`${c.aPosition}-${c.bPosition}-${i}`}>
+										<span className={classes.comboPair}>
+											<span style={{ color: A_COLOR }}>{nameA} {posLabel(c.aPosition)}</span>
+											{' + '}
+											<span style={{ color: B_COLOR }}>{nameB} {posLabel(c.bPosition)}</span>
+										</span>
+										<span className={classes.comboStat}>
+											{c.games}판 {c.wins}승 ({fmtPct(c.winRate)})
+										</span>
+									</div>
+								))}
+							</div>
+						)}
 					</>
 				)}
 			</div>
@@ -1239,11 +1409,31 @@ function Compare() {
 		</div>
 	);
 
+	// 엇갈린 궁합 — 한쪽엔 승요, 다른 쪽엔 패요. 평균 대신 각 유저별 수치를 대비해 보여준다.
+	const renderCrossCard = ms => (
+		<div className={classes.mutualCard} key={ms.puuid}>
+			<div className={classes.mutualName} style={{ marginBottom: 6 }}>
+				{ms.name}
+			</div>
+			<div className={classes.mutualWith}>
+				<span style={{ color: A_COLOR }}>{nameA}와</span>
+				<span>{ms.withA.games}판 · {fmtPct(ms.withA.winRate)}</span>
+			</div>
+			<div className={classes.mutualWith}>
+				<span style={{ color: B_COLOR }}>{nameB}와</span>
+				<span>{ms.withB.games}판 · {fmtPct(ms.withB.winRate)}</span>
+			</div>
+		</div>
+	);
+
 	const sectionMutualSynergy = () => {
 		const ms = mutualSynergy || {};
 		const good = ms.goodWithBoth || [];
 		const bad = ms.badWithBoth || [];
-		const empty = good.length === 0 && bad.length === 0;
+		const crossAB = ms.goodForABadForB || [];
+		const crossBA = ms.goodForBBadForA || [];
+		const bothEmpty = good.length === 0 && bad.length === 0;
+		const crossEmpty = crossAB.length === 0 && crossBA.length === 0;
 		const gateA = ms.minGamesA ?? ms.minGames ?? 5;
 		const gateB = ms.minGamesB ?? ms.minGames ?? 5;
 		const gateText = gateA === gateB ? `각 ${gateA}판` : `${nameA}와 ${gateA}판·${nameB}와 ${gateB}판`;
@@ -1255,36 +1445,133 @@ function Compare() {
 					</span>
 					둘 다와의 시너지
 				</div>
-				{empty ? (
+				{bothEmpty && crossEmpty ? (
 					<div className={classes.sectionEmpty}>표본 부족 ({gateText} 이상 함께한 유저가 필요해요)</div>
 				) : (
-					<div className={classes.synergyCols}>
-						<div>
-							<div className={classes.synergyColTitle} style={{ color: GOOD_COLOR }}>
-								<span role="img" aria-label="up">
-									📈
-								</span>
-								둘 다와 잘 맞는
+					<>
+						{!bothEmpty && (
+							<div className={classes.synergyCols}>
+								<div>
+									<div className={classes.synergyColTitle} style={{ color: GOOD_COLOR }}>
+										<span role="img" aria-label="up">
+											📈
+										</span>
+										둘 다와 잘 맞는
+									</div>
+									{good.length > 0 ? (
+										good.map(renderMutualCard)
+									) : (
+										<div className={classes.mutualEmpty}>해당 없음</div>
+									)}
+								</div>
+								<div>
+									<div className={classes.synergyColTitle} style={{ color: BAD_COLOR }}>
+										<span role="img" aria-label="down">
+											📉
+										</span>
+										둘 다와 안 맞는
+									</div>
+									{bad.length > 0 ? (
+										bad.map(renderMutualCard)
+									) : (
+										<div className={classes.mutualEmpty}>해당 없음</div>
+									)}
+								</div>
 							</div>
-							{good.length > 0 ? (
-								good.map(renderMutualCard)
-							) : (
-								<div className={classes.mutualEmpty}>해당 없음</div>
-							)}
-						</div>
-						<div>
-							<div className={classes.synergyColTitle} style={{ color: BAD_COLOR }}>
-								<span role="img" aria-label="down">
-									📉
-								</span>
-								둘 다와 안 맞는
+						)}
+						{!crossEmpty && (
+							<div className={classes.crossBlock}>
+								<div className={classes.crossTitle}>
+									<span role="img" aria-label="split">
+										🔀
+									</span>
+									엇갈린 궁합
+								</div>
+								<div className={classes.synergyCols}>
+									<div>
+										<div className={classes.synergyColTitle} style={{ color: A_COLOR }}>
+											{nameA}에겐 승요 · {nameB}에겐 패요
+										</div>
+										{crossAB.length > 0 ? (
+											crossAB.map(renderCrossCard)
+										) : (
+											<div className={classes.mutualEmpty}>해당 없음</div>
+										)}
+									</div>
+									<div>
+										<div className={classes.synergyColTitle} style={{ color: B_COLOR }}>
+											{nameB}에겐 승요 · {nameA}에겐 패요
+										</div>
+										{crossBA.length > 0 ? (
+											crossBA.map(renderCrossCard)
+										) : (
+											<div className={classes.mutualEmpty}>해당 없음</div>
+										)}
+									</div>
+								</div>
 							</div>
-							{bad.length > 0 ? (
-								bad.map(renderMutualCard)
-							) : (
-								<div className={classes.mutualEmpty}>해당 없음</div>
-							)}
-						</div>
+						)}
+					</>
+				)}
+			</div>
+		);
+	};
+
+	const sectionTournament = () => {
+		const tn = tournament;
+		if (!tn) return null;
+		const champs = tn.togetherChampionships || [];
+		const sameTeam = tn.sameTeam || [];
+		const vs = tn.vs || {};
+		const hasVs = (vs.matches || 0) > 0;
+		if (champs.length === 0 && sameTeam.length === 0 && !hasVs) return null;
+		// 우승 대회는 트로피 쪽에만 표기 — sameTeam 목록에서 우승 대회는 제외한다.
+		const champIds = new Set(champs.map(c => c.tournamentId));
+		const sameOnly = sameTeam.filter(s => !champIds.has(s.tournamentId));
+		return (
+			<div className={classes.section} key="tournament">
+				<div className={classes.sectionTitle}>
+					<span role="img" aria-label="trophy">
+						🏆
+					</span>
+					토너먼트에서의 인연
+				</div>
+				{champs.length > 0 && (
+					<div className={classes.champBox}>
+						{champs.map(c => (
+							<div className={classes.champRow} key={c.tournamentId}>
+								<span role="img" aria-label="trophy" className={classes.champTrophy}>
+									🏆
+								</span>
+								<span className={classes.champText}>
+									<b>{c.name}</b> · <b style={{ color: '#ffd700' }}>{c.teamName}</b>(으)로 함께 우승
+								</span>
+								<span className={classes.champDate}>{fmtDate(c.heldAt)}</span>
+							</div>
+						))}
+					</div>
+				)}
+				{sameOnly.length > 0 && (
+					<div className={classes.tnList}>
+						<div className={classes.tnListTitle}>같은 팀으로 참가</div>
+						{sameOnly.map(s => (
+							<div className={classes.tnRow} key={s.tournamentId}>
+								<span className={classes.tnName}>{s.name}</span>
+								<span className={classes.tnTeam}>{s.teamName}</span>
+								<span className={classes.tnDate}>{fmtDate(s.heldAt)}</span>
+							</div>
+						))}
+					</div>
+				)}
+				{hasVs && (
+					<div className={classes.tnVs}>
+						<span className={classes.tnVsLabel}>토너먼트 맞대결</span>
+						<span className={classes.tnVsScore}>
+							<span style={{ color: A_COLOR }}>{vs.aWins}</span>
+							{' : '}
+							<span style={{ color: B_COLOR }}>{vs.bWins}</span>
+						</span>
+						<span className={classes.tnVsGames}>{vs.matches}시리즈</span>
 					</div>
 				)}
 			</div>
@@ -1336,6 +1623,7 @@ function Compare() {
 						{sectionTrajectory()}
 						{sectionTogether()}
 						{sectionTimeline()}
+						{sectionTournament()}
 						{sectionLaneMatchup()}
 						{sectionMutualSynergy()}
 						<EntangledMatches
