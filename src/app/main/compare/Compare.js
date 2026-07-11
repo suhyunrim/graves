@@ -825,11 +825,80 @@ const useStyles = makeStyles()((theme) => ({
 	tnVsWrap: {
 		marginTop: 4
 	},
-	tnVsRowScore: {
-		fontFamily: '"Rajdhani", sans-serif',
-		fontSize: '1.4rem',
+	tnVsList: {
+		marginTop: 8,
+		display: 'flex',
+		flexDirection: 'column',
+		gap: 4
+	},
+	tnVsItem: {
+		padding: '9px 0',
+		borderTop: '1px solid rgba(255, 255, 255, 0.05)'
+	},
+	tnVsItemName: {
+		display: 'inline-block',
+		marginBottom: 6,
+		fontFamily: '"Rajdhani", "Noto Sans KR", sans-serif',
+		fontSize: '1.2rem',
 		fontWeight: 700,
-		flexShrink: 0
+		color: '#00d4ff',
+		textDecoration: 'none',
+		'&:hover': { textDecoration: 'underline' }
+	},
+	tnVsItemBody: {
+		display: 'grid',
+		gridTemplateColumns: '1fr auto 1fr',
+		alignItems: 'center',
+		gap: 10,
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.2rem'
+	},
+	tnVsTeamLeft: {
+		textAlign: 'right',
+		minWidth: 0,
+		overflow: 'hidden',
+		textOverflow: 'ellipsis',
+		whiteSpace: 'nowrap'
+	},
+	tnVsTeamRight: {
+		textAlign: 'left',
+		minWidth: 0,
+		overflow: 'hidden',
+		textOverflow: 'ellipsis',
+		whiteSpace: 'nowrap'
+	},
+	tnVsTeam: {
+		fontWeight: 600
+	},
+	tnVsWho: {
+		fontSize: '1.0rem',
+		color: 'rgba(255, 255, 255, 0.4)'
+	},
+	tnVsNums: {
+		fontFamily: '"Rajdhani", sans-serif',
+		fontSize: '1.5rem',
+		fontWeight: 700,
+		whiteSpace: 'nowrap'
+	},
+	tnVsColon: {
+		color: 'rgba(255, 255, 255, 0.35)'
+	},
+	tnVsWin: {
+		fontWeight: 800,
+		textShadow: '0 0 10px currentColor'
+	},
+	moreBtn: {
+		alignSelf: 'center',
+		marginTop: 6,
+		background: 'none',
+		border: 'none',
+		cursor: 'pointer',
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.15rem',
+		fontWeight: 600,
+		color: 'rgba(0, 212, 255, 0.8)',
+		padding: '4px 8px',
+		'&:hover': { color: '#00d4ff', textDecoration: 'underline' }
 	},
 	tnVsScore: {
 		fontFamily: '"Rajdhani", sans-serif',
@@ -894,6 +963,7 @@ function Compare() {
 
 	const [state, setState] = useState({ loading: false, status: null, result: null });
 	const [changing, setChanging] = useState(null); // 변경 다이얼로그 대상 'A' | 'B'
+	const [vsExpanded, setVsExpanded] = useState(false); // 토너먼트 대회별 맞대결 더보기
 	const myPuuid = localStorage.getItem('camille_riot_puuid');
 	const samePuuid = Boolean(puuidA && puuidB && puuidA === puuidB);
 
@@ -1607,27 +1677,65 @@ function Compare() {
 				{hasVs && (
 					<div className={classes.tnVsWrap}>
 						<div className={classes.tnListTitle}>토너먼트 맞대결</div>
-						{vsByTournament.length > 0 ? (
-							vsByTournament.map(v => (
-								<div className={classes.tnRow} key={v.tournamentId}>
-									<Link to={`/tournament/${v.tournamentId}`} className={classes.tnNameLink}>
-										{v.name}
-									</Link>
-									<span className={classes.tnVsRowScore}>
-										<span style={{ color: A_COLOR }}>{v.aWins}</span>
-										{' : '}
-										<span style={{ color: B_COLOR }}>{v.bWins}</span>
-									</span>
-								</div>
-							))
-						) : (
-							<div className={classes.tnVs}>
-								<span className={classes.tnVsScore}>
-									<span style={{ color: A_COLOR }}>{vs.aWins}</span>
-									{' : '}
-									<span style={{ color: B_COLOR }}>{vs.bWins}</span>
-								</span>
-								<span className={classes.tnVsGames}>{vs.matches}시리즈</span>
+						<div className={classes.tnVs}>
+							<span className={classes.tnVsScore}>
+								<span style={{ color: A_COLOR }}>{vs.aWins}</span>
+								{' : '}
+								<span style={{ color: B_COLOR }}>{vs.bWins}</span>
+							</span>
+							<span className={classes.tnVsGames}>{vs.matches}시리즈</span>
+						</div>
+						{vsByTournament.length > 0 && (
+							<div className={classes.tnVsList}>
+								{(vsExpanded ? vsByTournament : vsByTournament.slice(0, 5)).map(v => {
+									const aWin = v.aWins > v.bWins;
+									const bWin = v.bWins > v.aWins;
+									return (
+										<div className={classes.tnVsItem} key={v.tournamentId}>
+											<Link to={`/tournament/${v.tournamentId}`} className={classes.tnVsItemName}>
+												{v.name}
+											</Link>
+											<div className={classes.tnVsItemBody}>
+												<span className={classes.tnVsTeamLeft}>
+													<span
+														className={cx(classes.tnVsTeam, aWin && classes.tnVsWin)}
+														style={{ color: A_COLOR }}
+													>
+														{v.aTeamName}
+													</span>
+													<span className={classes.tnVsWho}> ({nameA})</span>
+												</span>
+												<span className={classes.tnVsNums}>
+													<span className={cx(aWin && classes.tnVsWin)} style={{ color: A_COLOR }}>
+														{v.aWins}
+													</span>
+													<span className={classes.tnVsColon}> : </span>
+													<span className={cx(bWin && classes.tnVsWin)} style={{ color: B_COLOR }}>
+														{v.bWins}
+													</span>
+												</span>
+												<span className={classes.tnVsTeamRight}>
+													<span
+														className={cx(classes.tnVsTeam, bWin && classes.tnVsWin)}
+														style={{ color: B_COLOR }}
+													>
+														{v.bTeamName}
+													</span>
+													<span className={classes.tnVsWho}> ({nameB})</span>
+												</span>
+											</div>
+										</div>
+									);
+								})}
+								{vsByTournament.length > 5 && (
+									<button
+										type="button"
+										className={classes.moreBtn}
+										onClick={() => setVsExpanded(x => !x)}
+									>
+										{vsExpanded ? '접기' : `더보기 (${vsByTournament.length - 5})`}
+									</button>
+								)}
 							</div>
 						)}
 					</div>
