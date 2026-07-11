@@ -7,7 +7,8 @@ import {
 	getTierLabel,
 	getTierShortLabel,
 	getTierEmblemUrl,
-	displayNameForPuuid
+	displayNameForPuuid,
+	sortByPosition
 } from './tournamentUtils';
 import { getProfileIconUrl } from 'app/main/challenge/ddragonUtils';
 
@@ -158,7 +159,7 @@ function TeamRosterCard({ team, selected = false }) {
 				</div>
 			)}
 			<div className={classes.memberList}>
-				{(team.members || []).map(m => {
+				{sortByPosition(team.members).map(m => {
 					const displayName = displayNameForPuuid(m.name, m.puuid);
 					const avatarUrl = m.profileIconId ? getProfileIconUrl(m.profileIconId) : null;
 					const memberTierName = getTierName(m.rating);

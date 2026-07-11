@@ -53,7 +53,8 @@ import {
 	getTotalRoundsFromMatches,
 	getTeamStanding,
 	getStandingBadgeLabel,
-	getStandingSortKey
+	getStandingSortKey,
+	sortByPosition
 } from './tournamentUtils';
 import { CATEGORY_LABELS } from '../achievementDashboard/constants';
 import PositionIcon from './PositionIcon';
@@ -1306,7 +1307,7 @@ function TournamentDetail() {
 												</div>
 											)}
 											<div className={classes.memberList}>
-												{(t.members || []).map(m => {
+												{sortByPosition(t.members).map(m => {
 													const displayName = displayNameForPuuid(m.name, m.puuid);
 													const avatarUrl = m.profileIconId ? getProfileIconUrl(m.profileIconId) : null;
 													const memberTierName = getTierName(m.rating);

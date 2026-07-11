@@ -67,6 +67,15 @@ export const POSITION_LABELS = {
 	support: '서폿'
 };
 
+// 팀 멤버를 탑→정글→미드→원딜→서폿 순으로 정렬. 포지션 미상(null 등)은 뒤로.
+export function sortByPosition(members) {
+	const rank = pos => {
+		const i = POSITIONS.indexOf(pos);
+		return i === -1 ? POSITIONS.length : i;
+	};
+	return [...(members || [])].sort((a, b) => rank(a.position) - rank(b.position));
+}
+
 // 브래킷 connector 라인 색 — 진행 중은 cyan, 종료된 매치는 녹색
 export const BRACKET_LINE_COLOR = 'rgba(0, 212, 255, 0.3)';
 export const BRACKET_LINE_COLOR_FINISHED = 'rgba(0, 255, 127, 0.6)';

@@ -19,7 +19,8 @@ import {
 	getMatchLoserLabel,
 	getTotalRoundsFromMatches,
 	BRACKET_LINE_COLOR,
-	BRACKET_LINE_COLOR_FINISHED
+	BRACKET_LINE_COLOR_FINISHED,
+	sortByPosition
 } from './tournamentUtils';
 import PositionIcon from './PositionIcon';
 import useBracketLines, { buildLinePath } from './useBracketLines';
@@ -591,7 +592,7 @@ function TournamentBracket({
 						팀 평균 {tierShort}
 					</div>
 				)}
-				{(team.members || []).map(m => {
+				{sortByPosition(team.members).map(m => {
 					const url = m.profileIconId ? getProfileIconUrl(m.profileIconId) : null;
 					const name = displayNameForPuuid(m.name, m.puuid);
 					const memberShort = m.rating != null ? getTierShortLabel(m.rating) : null;
