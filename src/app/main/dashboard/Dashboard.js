@@ -19,7 +19,7 @@ import UserSearchBar from './UserSearchBar';
 import FavoritesSection from './FavoritesSection';
 import reducer from './store/reducers';
 import * as Actions from './store/actions';
-import { RevealGroup } from '../components/Reveal';
+import { Reveal, RevealGroup } from '../components/Reveal';
 
 const fadeInUp = keyframes({
 	'0%': { opacity: 0, transform: 'translateY(30px)' },
@@ -967,24 +967,28 @@ function Dashboard() {
 			header={<DashboardHeader />}
 			content={
 				<div className={classes.container}>
-					<div className={classes.searchRow}>
-						<UserSearchBar
-							groupId={groupId}
-							favoritePuuids={favoritePuuids}
-							onToggleFavorite={canFavorite ? handleToggleFavorite : null}
-						/>
-					</div>
+					<Reveal>
+						<div className={classes.searchRow}>
+							<UserSearchBar
+								groupId={groupId}
+								favoritePuuids={favoritePuuids}
+								onToggleFavorite={canFavorite ? handleToggleFavorite : null}
+							/>
+						</div>
+					</Reveal>
 					{canFavorite && <FavoritesSection favorites={favorites} onRemove={handleToggleFavorite} />}
-					<div className={classes.monthBadge}>
-						<IconButton className={classes.monthNavBtn} onClick={handlePrevMonth} size="small">
-							<ChevronLeftIcon />
-						</IconButton>
-						<span className={classes.monthText}>{formatMonth(data.month)}</span>
-						<span className={classes.totalMatches}>총 {data.totalMatches}판</span>
-						<IconButton className={classes.monthNavBtn} onClick={handleNextMonth} size="small" disabled={isCurrentMonth}>
-							<ChevronRightIcon />
-						</IconButton>
-					</div>
+					<Reveal delay={0.06}>
+						<div className={classes.monthBadge}>
+							<IconButton className={classes.monthNavBtn} onClick={handlePrevMonth} size="small">
+								<ChevronLeftIcon />
+							</IconButton>
+							<span className={classes.monthText}>{formatMonth(data.month)}</span>
+							<span className={classes.totalMatches}>총 {data.totalMatches}판</span>
+							<IconButton className={classes.monthNavBtn} onClick={handleNextMonth} size="small" disabled={isCurrentMonth}>
+								<ChevronRightIcon />
+							</IconButton>
+						</div>
+					</Reveal>
 					<RevealGroup className={classes.grid}>
 						{renderHonorKing()}
 						{renderMostGames()}

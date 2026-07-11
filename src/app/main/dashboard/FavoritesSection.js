@@ -5,7 +5,7 @@ import IconButton from '@mui/material/IconButton';
 import StarIcon from '@mui/icons-material/Star';
 import { getProfileIconUrl } from 'app/main/challenge/ddragonUtils';
 import { getTierName, getTierShortLabel, getTierEmblemUrl } from 'app/main/tournament/tournamentUtils';
-import { RevealGroup } from '../components/Reveal';
+import { Reveal, RevealGroup } from '../components/Reveal';
 
 const useStyles = makeStyles()(() => ({
 	section: {
@@ -127,15 +127,19 @@ function FavoritesSection({ favorites, onRemove }) {
 
 	return (
 		<div className={classes.section}>
-			<div className={classes.sectionTitle}>
-				<span role="img" aria-label="star">⭐</span>
-				즐겨찾기
-				{favorites.length > 0 && <span className={classes.count}>({favorites.length}/10)</span>}
-			</div>
-			{favorites.length === 0 ? (
-				<div className={classes.emptyText}>
-					유저 검색에서 ★를 눌러 자주 보는 유저를 등록해 보세요 (최대 10명)
+			<Reveal>
+				<div className={classes.sectionTitle}>
+					<span role="img" aria-label="star">⭐</span>
+					즐겨찾기
+					{favorites.length > 0 && <span className={classes.count}>({favorites.length}/10)</span>}
 				</div>
+			</Reveal>
+			{favorites.length === 0 ? (
+				<Reveal delay={0.06}>
+					<div className={classes.emptyText}>
+						유저 검색에서 ★를 눌러 자주 보는 유저를 등록해 보세요 (최대 10명)
+					</div>
+				</Reveal>
 			) : (
 				<RevealGroup className={classes.cards}>
 					{favorites.map(fav => (
