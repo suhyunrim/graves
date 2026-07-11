@@ -35,6 +35,9 @@ const POSITION_META = {
 
 const posLabel = pos => (POSITION_META[pos] ? POSITION_META[pos].label : pos);
 
+// 닉네임#태그(Riot ID)에서 #태그(tagLine) 제거. 최상단 두 유저 카드 외 하위 섹션 표기용.
+const stripTag = name => (name ? name.split('#')[0] : name);
+
 const RELATION_EMOJI = {
 	natural_enemy: '🩸',
 	fated_rivals: '⚔️',
@@ -1068,8 +1071,8 @@ function Compare() {
 	const { header, headToHead, together, ratingFlow, timeline, mutualSynergy, laneMatchup, relationTitles, ratingTrajectory, tournament } = result;
 	const a = header.a;
 	const b = header.b;
-	const nameA = a.name;
-	const nameB = b.name;
+	const nameA = stripTag(a.name);
+	const nameB = stripTag(b.name);
 
 	const naturalEnemy = (relationTitles || []).find(t => t.key === 'natural_enemy');
 	const mutualTitles = (relationTitles || []).filter(t => t.key !== 'natural_enemy');
@@ -1496,7 +1499,7 @@ function Compare() {
 	const renderMutualCard = ms => (
 		<div className={classes.mutualCard} key={ms.puuid}>
 			<div className={classes.mutualHead}>
-				<span className={classes.mutualName}>{ms.name}</span>
+				<span className={classes.mutualName}>{stripTag(ms.name)}</span>
 				<span
 					className={classes.mutualAvg}
 					style={{
@@ -1516,7 +1519,7 @@ function Compare() {
 	const renderCrossCard = ms => (
 		<div className={classes.mutualCard} key={ms.puuid}>
 			<div className={classes.mutualName} style={{ marginBottom: 6 }}>
-				{ms.name}
+				{stripTag(ms.name)}
 			</div>
 			{renderWith(`${nameA}와`, A_COLOR, ms.withA)}
 			{renderWith(`${nameB}와`, B_COLOR, ms.withB)}

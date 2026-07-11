@@ -19,6 +19,8 @@ const posRank = pos => {
 	const i = POSITION_ORDER.indexOf(pos);
 	return i === -1 ? POSITION_ORDER.length : i;
 };
+// 닉네임#태그(Riot ID)에서 #태그(tagLine) 제거.
+const stripTag = name => (name ? name.split('#')[0] : name);
 
 function fmtDate(v) {
 	if (!v) return '-';
@@ -341,7 +343,7 @@ function EntangledMatches({ groupId, puuidA, puuidB, nameA, nameB, className, st
 										className={classes.playerName}
 										style={hi ? { color: hi, fontWeight: 700 } : undefined}
 									>
-										{pl.name}
+										{stripTag(pl.name)}
 									</span>
 									<span className={classes.playerTierWrap}>
 										{plTierName && (
