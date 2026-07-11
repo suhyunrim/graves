@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { makeStyles } from 'tss-react/mui';
 import Dialog from '@mui/material/Dialog';
 import { useSelector } from 'react-redux';
-import { useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import {
 	getTierName,
 	getTierLabel,
@@ -724,6 +724,17 @@ const useStyles = makeStyles()((theme) => ({
 		gap: 6,
 		marginBottom: 12
 	},
+	crossColTitle: {
+		fontFamily: '"Rajdhani", "Noto Sans KR", sans-serif',
+		fontSize: '1.25rem',
+		fontWeight: 700,
+		marginBottom: 10,
+		lineHeight: 1.4,
+		color: 'rgba(255, 255, 255, 0.75)'
+	},
+	crossColSep: {
+		color: 'rgba(255, 255, 255, 0.35)'
+	},
 	// ── 토너먼트 인연 ──
 	champBox: {
 		display: 'flex',
@@ -750,6 +761,12 @@ const useStyles = makeStyles()((theme) => ({
 		fontSize: '1.25rem',
 		color: 'rgba(255, 255, 255, 0.9)'
 	},
+	champLink: {
+		color: '#fff',
+		fontWeight: 700,
+		textDecoration: 'none',
+		'&:hover': { color: '#00d4ff', textDecoration: 'underline' }
+	},
 	champDate: {
 		fontFamily: '"Rajdhani", sans-serif',
 		fontSize: '1.15rem',
@@ -774,12 +791,16 @@ const useStyles = makeStyles()((theme) => ({
 		fontFamily: '"Noto Sans KR", sans-serif',
 		fontSize: '1.2rem'
 	},
-	tnName: {
+	tnNameLink: {
 		flex: 1,
-		color: 'rgba(255, 255, 255, 0.85)',
+		minWidth: 0,
 		overflow: 'hidden',
 		textOverflow: 'ellipsis',
-		whiteSpace: 'nowrap'
+		whiteSpace: 'nowrap',
+		color: '#00d4ff',
+		textDecoration: 'none',
+		fontWeight: 700,
+		'&:hover': { textDecoration: 'underline' }
 	},
 	tnTeam: {
 		color: '#00d4ff',
@@ -801,10 +822,14 @@ const useStyles = makeStyles()((theme) => ({
 		marginTop: 4,
 		padding: '12px 0 4px'
 	},
-	tnVsLabel: {
-		fontFamily: '"Noto Sans KR", sans-serif',
-		fontSize: '1.2rem',
-		color: 'rgba(255, 255, 255, 0.6)'
+	tnVsWrap: {
+		marginTop: 4
+	},
+	tnVsRowScore: {
+		fontFamily: '"Rajdhani", sans-serif',
+		fontSize: '1.4rem',
+		fontWeight: 700,
+		flexShrink: 0
 	},
 	tnVsScore: {
 		fontFamily: '"Rajdhani", sans-serif',
@@ -1384,6 +1409,20 @@ function Compare() {
 		);
 	};
 
+	// withStat 한 줄: "{라벨} · N판 W승 L패 · 승률". 라벨은 상대(A/B) 색, 승률은 승패 색.
+	const renderWith = (label, labelColor, w) => (
+		<div className={classes.mutualWith}>
+			<span style={{ color: labelColor }}>{label}</span>
+			<span>
+				{w.games}판 {w.wins}승 {w.games - w.wins}패
+				{' · '}
+				<span style={{ color: w.winRate >= 50 ? GOOD_COLOR : BAD_COLOR, fontWeight: 700 }}>
+					{fmtPct(w.winRate)}
+				</span>
+			</span>
+		</div>
+	);
+
 	const renderMutualCard = ms => (
 		<div className={classes.mutualCard} key={ms.puuid}>
 			<div className={classes.mutualHead}>
@@ -1398,31 +1437,19 @@ function Compare() {
 					평균 {fmtPct(ms.avgWinRate)}
 				</span>
 			</div>
-			<div className={classes.mutualWith}>
-				<span style={{ color: A_COLOR }}>{nameA}와</span>
-				<span>{ms.withA.games}판 · {fmtPct(ms.withA.winRate)}</span>
-			</div>
-			<div className={classes.mutualWith}>
-				<span style={{ color: B_COLOR }}>{nameB}와</span>
-				<span>{ms.withB.games}판 · {fmtPct(ms.withB.winRate)}</span>
-			</div>
+			{renderWith(`${nameA}와`, A_COLOR, ms.withA)}
+			{renderWith(`${nameB}와`, B_COLOR, ms.withB)}
 		</div>
 	);
 
-	// 엇갈린 궁합 — 한쪽엔 승요, 다른 쪽엔 패요. 평균 대신 각 유저별 수치를 대비해 보여준다.
+	// 엇갈린 궁합 — 한쪽엔 승리 요정, 다른 쪽엔 패배 요정. 평균 대신 각 유저별 수치를 대비해 보여준다.
 	const renderCrossCard = ms => (
 		<div className={classes.mutualCard} key={ms.puuid}>
 			<div className={classes.mutualName} style={{ marginBottom: 6 }}>
 				{ms.name}
 			</div>
-			<div className={classes.mutualWith}>
-				<span style={{ color: A_COLOR }}>{nameA}와</span>
-				<span>{ms.withA.games}판 · {fmtPct(ms.withA.winRate)}</span>
-			</div>
-			<div className={classes.mutualWith}>
-				<span style={{ color: B_COLOR }}>{nameB}와</span>
-				<span>{ms.withB.games}판 · {fmtPct(ms.withB.winRate)}</span>
-			</div>
+			{renderWith(`${nameA}와`, A_COLOR, ms.withA)}
+			{renderWith(`${nameB}와`, B_COLOR, ms.withB)}
 		</div>
 	);
 
@@ -1489,8 +1516,12 @@ function Compare() {
 								</div>
 								<div className={classes.synergyCols}>
 									<div>
-										<div className={classes.synergyColTitle} style={{ color: A_COLOR }}>
-											{nameA}에겐 승요 · {nameB}에겐 패요
+										<div className={classes.crossColTitle}>
+											<span style={{ color: A_COLOR }}>{nameA}</span>에겐{' '}
+											<span style={{ color: GOOD_COLOR }}>승리 요정</span>
+											<span className={classes.crossColSep}> · </span>
+											<span style={{ color: B_COLOR }}>{nameB}</span>에겐{' '}
+											<span style={{ color: BAD_COLOR }}>패배 요정</span>
 										</div>
 										{crossAB.length > 0 ? (
 											crossAB.map(renderCrossCard)
@@ -1499,8 +1530,12 @@ function Compare() {
 										)}
 									</div>
 									<div>
-										<div className={classes.synergyColTitle} style={{ color: B_COLOR }}>
-											{nameB}에겐 승요 · {nameA}에겐 패요
+										<div className={classes.crossColTitle}>
+											<span style={{ color: B_COLOR }}>{nameB}</span>에겐{' '}
+											<span style={{ color: GOOD_COLOR }}>승리 요정</span>
+											<span className={classes.crossColSep}> · </span>
+											<span style={{ color: A_COLOR }}>{nameA}</span>에겐{' '}
+											<span style={{ color: BAD_COLOR }}>패배 요정</span>
 										</div>
 										{crossBA.length > 0 ? (
 											crossBA.map(renderCrossCard)
@@ -1523,7 +1558,8 @@ function Compare() {
 		const champs = tn.togetherChampionships || [];
 		const sameTeam = tn.sameTeam || [];
 		const vs = tn.vs || {};
-		const hasVs = (vs.matches || 0) > 0;
+		const vsByTournament = vs.byTournament || [];
+		const hasVs = vsByTournament.length > 0 || (vs.matches || 0) > 0;
 		if (champs.length === 0 && sameTeam.length === 0 && !hasVs) return null;
 		// 우승 대회는 트로피 쪽에만 표기 — sameTeam 목록에서 우승 대회는 제외한다.
 		const champIds = new Set(champs.map(c => c.tournamentId));
@@ -1544,7 +1580,10 @@ function Compare() {
 									🏆
 								</span>
 								<span className={classes.champText}>
-									<b>{c.name}</b> · <b style={{ color: '#ffd700' }}>{c.teamName}</b>(으)로 함께 우승
+									<Link to={`/tournament/${c.tournamentId}`} className={classes.champLink}>
+										{c.name}
+									</Link>{' '}
+									· <b style={{ color: '#ffd700' }}>{c.teamName}</b>(으)로 함께 우승
 								</span>
 								<span className={classes.champDate}>{fmtDate(c.heldAt)}</span>
 							</div>
@@ -1556,7 +1595,9 @@ function Compare() {
 						<div className={classes.tnListTitle}>같은 팀으로 참가</div>
 						{sameOnly.map(s => (
 							<div className={classes.tnRow} key={s.tournamentId}>
-								<span className={classes.tnName}>{s.name}</span>
+								<Link to={`/tournament/${s.tournamentId}`} className={classes.tnNameLink}>
+									{s.name}
+								</Link>
 								<span className={classes.tnTeam}>{s.teamName}</span>
 								<span className={classes.tnDate}>{fmtDate(s.heldAt)}</span>
 							</div>
@@ -1564,14 +1605,31 @@ function Compare() {
 					</div>
 				)}
 				{hasVs && (
-					<div className={classes.tnVs}>
-						<span className={classes.tnVsLabel}>토너먼트 맞대결</span>
-						<span className={classes.tnVsScore}>
-							<span style={{ color: A_COLOR }}>{vs.aWins}</span>
-							{' : '}
-							<span style={{ color: B_COLOR }}>{vs.bWins}</span>
-						</span>
-						<span className={classes.tnVsGames}>{vs.matches}시리즈</span>
+					<div className={classes.tnVsWrap}>
+						<div className={classes.tnListTitle}>토너먼트 맞대결</div>
+						{vsByTournament.length > 0 ? (
+							vsByTournament.map(v => (
+								<div className={classes.tnRow} key={v.tournamentId}>
+									<Link to={`/tournament/${v.tournamentId}`} className={classes.tnNameLink}>
+										{v.name}
+									</Link>
+									<span className={classes.tnVsRowScore}>
+										<span style={{ color: A_COLOR }}>{v.aWins}</span>
+										{' : '}
+										<span style={{ color: B_COLOR }}>{v.bWins}</span>
+									</span>
+								</div>
+							))
+						) : (
+							<div className={classes.tnVs}>
+								<span className={classes.tnVsScore}>
+									<span style={{ color: A_COLOR }}>{vs.aWins}</span>
+									{' : '}
+									<span style={{ color: B_COLOR }}>{vs.bWins}</span>
+								</span>
+								<span className={classes.tnVsGames}>{vs.matches}시리즈</span>
+							</div>
+						)}
 					</div>
 				)}
 			</div>
