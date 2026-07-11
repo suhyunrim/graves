@@ -13,6 +13,12 @@ const PAGE_SIZE = 10;
 
 // Riot 표준 포지션 키(대문자) → PositionIcon용 소문자 키.
 const POSITION_ICON = { TOP: 'top', JUNGLE: 'jungle', MIDDLE: 'mid', BOTTOM: 'adc', UTILITY: 'support' };
+// 로스터 정렬 순서(탑→정글→미드→원딜→서폿). 포지션 미상은 뒤로.
+const POSITION_ORDER = ['TOP', 'JUNGLE', 'MIDDLE', 'BOTTOM', 'UTILITY'];
+const posRank = pos => {
+	const i = POSITION_ORDER.indexOf(pos);
+	return i === -1 ? POSITION_ORDER.length : i;
+};
 
 function fmtDate(v) {
 	if (!v) return '-';
@@ -92,24 +98,6 @@ const useStyles = makeStyles()((theme) => ({
 			flexWrap: 'wrap',
 			gap: 8
 		}
-	},
-	badge: {
-		flexShrink: 0,
-		padding: '3px 10px',
-		borderRadius: 8,
-		fontFamily: '"Noto Sans KR", sans-serif',
-		fontSize: '1.05rem',
-		fontWeight: 700
-	},
-	badgeTeam: {
-		background: 'rgba(0, 212, 255, 0.12)',
-		border: '1px solid rgba(0, 212, 255, 0.4)',
-		color: '#00d4ff'
-	},
-	badgeVs: {
-		background: 'rgba(255, 107, 154, 0.12)',
-		border: '1px solid rgba(255, 107, 154, 0.4)',
-		color: '#ff6b9a'
 	},
 	result: {
 		flex: 1,
@@ -219,8 +207,13 @@ const useStyles = makeStyles()((theme) => ({
 		textOverflow: 'ellipsis',
 		whiteSpace: 'nowrap'
 	},
+	playerTierWrap: {
+		display: 'inline-flex',
+		alignItems: 'center',
+		gap: 4,
+		flexShrink: 0
+	},
 	playerTier: {
-		flexShrink: 0,
 		fontFamily: '"Rajdhani", sans-serif',
 		fontSize: '1.1rem',
 		fontWeight: 700,
@@ -325,9 +318,10 @@ function EntangledMatches({ groupId, puuidA, puuidB, nameA, nameB, className, st
 						<div className={classes.teamHeader} style={{ color: team.won ? GOOD_COLOR : BAD_COLOR }}>
 							{team.won ? '승리 팀' : '패배 팀'}
 						</div>
-						{team.players.map(pl => {
+						{[...team.players].sort((p1, p2) => posRank(p1.position) - posRank(p2.position)).map(pl => {
 							const icon = pl.position ? POSITION_ICON[pl.position] : null;
 							const hi = pl.isA ? A_COLOR : pl.isB ? B_COLOR : null;
+							const plTierName = getTierName(pl.rating);
 							return (
 								<div
 									className={cx(classes.player, hi && classes.playerHi)}
@@ -349,7 +343,16 @@ function EntangledMatches({ groupId, puuidA, puuidB, nameA, nameB, className, st
 									>
 										{pl.name}
 									</span>
-									<span className={classes.playerTier}>{getTierShortLabel(pl.rating) || '-'}</span>
+									<span className={classes.playerTierWrap}>
+										{plTierName && (
+											<img
+												className={classes.tierEmblem}
+												src={getTierEmblemUrl(plTierName)}
+												alt={plTierName}
+											/>
+										)}
+										<span className={classes.playerTier}>{getTierShortLabel(pl.rating) || '-'}</span>
+									</span>
 								</div>
 							);
 						})}
@@ -381,9 +384,6 @@ function EntangledMatches({ groupId, puuidA, puuidB, nameA, nameB, className, st
 					onClick={() => setExpandedId(open ? null : item.gameId)}
 					aria-expanded={open}
 				>
-					<span className={cx(classes.badge, item.sameTeam ? classes.badgeTeam : classes.badgeVs)}>
-						{item.sameTeam ? '같은 팀' : '맞대결'}
-					</span>
 					<span className={classes.result} style={{ color: resultColor }}>
 						{resultText}
 					</span>

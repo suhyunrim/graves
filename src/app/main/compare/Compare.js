@@ -570,6 +570,17 @@ const useStyles = makeStyles()((theme) => ({
 		color: 'rgba(255, 255, 255, 0.45)',
 		marginTop: 4
 	},
+	thenTier: {
+		display: 'inline-flex',
+		alignItems: 'center',
+		gap: 3,
+		verticalAlign: 'middle',
+		fontWeight: 700
+	},
+	thenEmblem: {
+		width: 16,
+		height: 16
+	},
 	// ── 맞라인 전적 ──
 	laneRow: {
 		display: 'grid',
@@ -823,11 +834,20 @@ function Compare() {
 	const mutualTitles = (relationTitles || []).filter(t => t.key !== 'natural_enemy');
 
 	// 당시 레이팅은 원시 숫자 대신 티어로 환산해 표시한다.
+	const renderThenTier = (rating, color) => {
+		const tierName = getTierName(rating);
+		return (
+			<span className={classes.thenTier} style={{ color }}>
+				{tierName && <img className={classes.thenEmblem} src={getTierEmblemUrl(tierName)} alt={tierName} />}
+				{getTierLabel(rating) || '-'}
+			</span>
+		);
+	};
 	const renderThenTiers = (aRating, bRating) => (
 		<>
-			당시 <span style={{ color: A_COLOR }}>{getTierLabel(aRating) || '-'}</span>
+			당시 {renderThenTier(aRating, A_COLOR)}
 			{' vs '}
-			<span style={{ color: B_COLOR }}>{getTierLabel(bRating) || '-'}</span>
+			{renderThenTier(bRating, B_COLOR)}
 		</>
 	);
 
