@@ -140,6 +140,20 @@ export function getTierShortLabel(rating) {
 	return 'I4';
 }
 
+// 내전 레이팅의 티어 내 LP (레이팅 1 = 4LP). 마스터+ 는 마스터 베이스 기준 누적 LP.
+// RankingTable.getTierPoint / RatingChart 와 동일 규칙.
+export function getTierPoint(rating) {
+	if (rating == null) return null;
+	const masterBase = TIER_BASES.find(([name]) => name === 'MASTER')[1];
+	for (const [name, base] of TIER_BASES) {
+		if (rating >= base) {
+			if (isNonStepTier(name)) return Math.floor((rating - masterBase) * 4);
+			return Math.floor(((rating - base) % 25) * 4);
+		}
+	}
+	return 0;
+}
+
 export function getTierEmblemUrl(tierName) {
 	if (!tierName) return null;
 	return `/assets/images/ranked-emblems/Emblem_${tierName}.webp`;

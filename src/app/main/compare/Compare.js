@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { makeStyles } from 'tss-react/mui';
+import Dialog from '@mui/material/Dialog';
 import { useSelector } from 'react-redux';
 import { useSearchParams } from 'react-router-dom';
 import {
 	getTierName,
 	getTierLabel,
+	getTierPoint,
 	getTierEmblemUrl,
 	parseRankTier
 } from 'app/main/tournament/tournamentUtils';
@@ -252,19 +254,29 @@ const useStyles = makeStyles()((theme) => ({
 		color: 'rgba(255, 255, 255, 0.9)',
 		whiteSpace: 'nowrap'
 	},
-	changeOpponentBtn: {
-		marginTop: 4,
-		background: 'none',
-		border: 'none',
+	changeBtn: {
+		marginTop: 14,
+		background: 'rgba(255, 255, 255, 0.06)',
+		border: '1px solid rgba(255, 255, 255, 0.15)',
+		color: 'rgba(255, 255, 255, 0.7)',
+		borderRadius: 20,
+		padding: '5px 18px',
 		cursor: 'pointer',
 		fontFamily: '"Noto Sans KR", sans-serif',
-		fontSize: '1.05rem',
-		color: 'rgba(255, 255, 255, 0.4)',
-		textDecoration: 'underline',
-		padding: 2,
+		fontSize: '1.15rem',
+		fontWeight: 600,
+		transition: 'all 0.2s ease',
 		'&:hover': {
-			color: '#00d4ff'
+			borderColor: '#00d4ff',
+			color: '#00d4ff',
+			background: 'rgba(0, 212, 255, 0.08)'
 		}
+	},
+	dialogPaper: {
+		background: 'linear-gradient(135deg, #1a1a2e 0%, #0f0f1a 100%)',
+		border: '1px solid rgba(0, 212, 255, 0.25)',
+		borderRadius: '20px !important',
+		boxShadow: '0 8px 32px rgba(0, 0, 0, 0.5), 0 0 60px rgba(0, 212, 255, 0.08)'
 	},
 	// ── 섹션 공통 ──
 	sections: {
@@ -685,6 +697,8 @@ function Compare() {
 	const groupId = useSelector(state => state.auth.user?.reprGroup?.groupId);
 
 	const [state, setState] = useState({ loading: false, status: null, result: null });
+	const [changing, setChanging] = useState(null); // 변경 다이얼로그 대상 'A' | 'B'
+	const myPuuid = localStorage.getItem('camille_riot_puuid');
 	const samePuuid = Boolean(puuidA && puuidB && puuidA === puuidB);
 
 	useEffect(() => {
@@ -703,20 +717,38 @@ function Compare() {
 		};
 	}, [groupId, puuidA, puuidB, samePuuid]);
 
+	// 파라미터 없이 진입(좌측 메뉴 등)하면 본인을 A로 기본 지정.
+	useEffect(() => {
+		if (!puuidA && myPuuid) setSearchParams({ a: myPuuid }, { replace: true });
+	}, [puuidA, myPuuid, setSearchParams]);
+
 	const selectOpponent = member => setSearchParams({ a: puuidA, b: member.puuid });
 	const resetOpponent = () => setSearchParams({ a: puuidA });
+	const handleChangeSelect = member => {
+		if (changing === 'A') setSearchParams({ a: member.puuid, b: puuidB });
+		else if (changing === 'B') setSearchParams({ a: puuidA, b: member.puuid });
+		setChanging(null);
+	};
 
 	// ── 진입/상태 처리 ──
 	if (!puuidA) {
 		return (
 			<div className={classes.root}>
 				<div className={classes.centerState}>
-					<div className={classes.stateIcon}>
-						<span role="img" aria-label="compare">
-							⚔️
-						</span>
-					</div>
-					<div className={classes.stateText}>비교할 유저가 지정되지 않았습니다. 랭킹이나 프로필에서 시작해 주세요.</div>
+					{myPuuid ? (
+						<div className={classes.stateText}>불러오는 중…</div>
+					) : (
+						<>
+							<div className={classes.stateIcon}>
+								<span role="img" aria-label="compare">
+									⚔️
+								</span>
+							</div>
+							<div className={classes.stateText}>
+								비교할 유저가 지정되지 않았습니다. 랭킹이나 프로필에서 시작해 주세요.
+							</div>
+						</>
+					)}
 				</div>
 			</div>
 		);
@@ -785,10 +817,16 @@ function Compare() {
 		</>
 	);
 
-	const renderPlayer = (p, color, glow, isEnemy, enemyLabel) => {
+	const renderPlayer = (p, color, glow, isEnemy, enemyLabel, side) => {
 		const tierName = getTierName(p.rating);
 		const rankParsed = parseRankTier(p.rankTier);
 		const pos = p.mainPosition ? POSITION_META[p.mainPosition] : null;
+		// 마스터+ 는 디비전이 없어 티어명만 나오므로 LP를 함께 표기 (예: MASTER 87LP).
+		const isMasterPlus = tierName === 'MASTER' || tierName === 'GRANDMASTER' || tierName === 'CHALLENGER';
+		const tierDisplay =
+			isMasterPlus && p.rating != null
+				? `${getTierLabel(p.rating)} ${getTierPoint(p.rating)}LP`
+				: getTierLabel(p.rating) || '언랭';
 		return (
 			<div
 				className={classes.playerCard}
@@ -809,7 +847,7 @@ function Compare() {
 					{p.name}
 				</div>
 				<div className={classes.playerTierLabel} style={{ color }}>
-					{getTierLabel(p.rating) || '언랭'}
+					{tierDisplay}
 				</div>
 				{rankParsed && (
 					<div className={classes.soloChip}>
@@ -828,6 +866,9 @@ function Compare() {
 						{p.wins}승 {p.losses}패 · {fmtPct(p.winRate)}
 					</span>
 				</div>
+				<button type="button" className={classes.changeBtn} onClick={() => setChanging(side)}>
+					변경
+				</button>
 			</div>
 		);
 	};
@@ -1223,7 +1264,7 @@ function Compare() {
 			<div className={classes.inner}>
 				<Reveal>
 					<div className={classes.vsHeader}>
-						{renderPlayer(a, A_COLOR, 'rgba(0,212,255,0.4)', naturalEnemy && naturalEnemy.holder === 'A', naturalEnemy && naturalEnemy.label)}
+						{renderPlayer(a, A_COLOR, 'rgba(0,212,255,0.4)', naturalEnemy && naturalEnemy.holder === 'A', naturalEnemy && naturalEnemy.label, 'A')}
 						<div className={classes.vsCenter}>
 							<div className={classes.vsText}>VS</div>
 							{mutualTitles.length > 0 && (
@@ -1238,11 +1279,8 @@ function Compare() {
 									))}
 								</div>
 							)}
-							<button type="button" className={classes.changeOpponentBtn} onClick={resetOpponent}>
-								상대 변경
-							</button>
 						</div>
-						{renderPlayer(b, B_COLOR, 'rgba(255,107,154,0.4)', naturalEnemy && naturalEnemy.holder === 'B', naturalEnemy && naturalEnemy.label)}
+						{renderPlayer(b, B_COLOR, 'rgba(255,107,154,0.4)', naturalEnemy && naturalEnemy.holder === 'B', naturalEnemy && naturalEnemy.label, 'B')}
 					</div>
 				</Reveal>
 
@@ -1276,6 +1314,21 @@ function Compare() {
 					</RevealGroup>
 				)}
 			</div>
+			<Dialog
+				open={changing !== null}
+				onClose={() => setChanging(null)}
+				fullWidth
+				maxWidth="sm"
+				PaperProps={{ className: classes.dialogPaper }}
+			>
+				{changing && (
+					<OpponentPicker
+						groupId={groupId}
+						anchorPuuid={changing === 'A' ? puuidB : puuidA}
+						onSelect={handleChangeSelect}
+					/>
+				)}
+			</Dialog>
 		</div>
 	);
 }

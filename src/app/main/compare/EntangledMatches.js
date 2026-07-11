@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { makeStyles } from 'tss-react/mui';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { getTierShortLabel } from 'app/main/tournament/tournamentUtils';
+import { getTierName, getTierShortLabel, getTierEmblemUrl } from 'app/main/tournament/tournamentUtils';
 import PositionIcon from '../tournament/PositionIcon';
 import { fetchEntangledMatches } from './compareApi';
 
@@ -131,6 +131,10 @@ const useStyles = makeStyles()((theme) => ({
 		gap: 4
 	},
 	posIcon: {
+		width: 18,
+		height: 18
+	},
+	tierEmblem: {
 		width: 18,
 		height: 18
 	},
@@ -297,9 +301,11 @@ function EntangledMatches({ groupId, puuidA, puuidB, nameA, nameB, className, st
 	const renderSide = (player, color) => {
 		if (!player) return null;
 		const icon = player.position ? POSITION_ICON[player.position] : null;
+		const tierName = getTierName(player.rating);
 		return (
 			<span className={classes.pvpSide}>
 				{icon && <PositionIcon position={icon} className={classes.posIcon} />}
+				{tierName && <img className={classes.tierEmblem} src={getTierEmblemUrl(tierName)} alt={tierName} />}
 				{renderTierText(player.rating, color)}
 			</span>
 		);
