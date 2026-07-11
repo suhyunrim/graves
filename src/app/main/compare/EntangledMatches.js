@@ -97,36 +97,58 @@ const useStyles = makeStyles()((theme) => ({
 			background: 'rgba(255, 255, 255, 0.03)'
 		},
 		[theme.breakpoints.down('sm')]: {
-			flexWrap: 'wrap',
-			gap: 8
+			flexWrap: 'nowrap',
+			gap: 6,
+			padding: '10px 2px'
 		}
 	},
 	result: {
 		flex: 1,
 		minWidth: 110,
+		overflow: 'hidden',
+		textOverflow: 'ellipsis',
+		whiteSpace: 'nowrap',
 		fontFamily: '"Rajdhani", "Noto Sans KR", sans-serif',
 		fontSize: '1.3rem',
 		fontWeight: 700,
-		color: 'rgba(255, 255, 255, 0.9)'
+		color: 'rgba(255, 255, 255, 0.9)',
+		[theme.breakpoints.down('sm')]: {
+			minWidth: 0,
+			fontSize: '1.05rem'
+		}
 	},
 	pvp: {
 		display: 'flex',
 		alignItems: 'center',
 		gap: 6,
-		flexShrink: 0
+		flexShrink: 0,
+		[theme.breakpoints.down('sm')]: {
+			gap: 3
+		}
 	},
 	pvpSide: {
 		display: 'flex',
 		alignItems: 'center',
-		gap: 4
+		gap: 4,
+		[theme.breakpoints.down('sm')]: {
+			gap: 2
+		}
 	},
 	posIcon: {
 		width: 18,
-		height: 18
+		height: 18,
+		[theme.breakpoints.down('sm')]: {
+			width: 14,
+			height: 14
+		}
 	},
 	tierEmblem: {
 		width: 18,
-		height: 18
+		height: 18,
+		[theme.breakpoints.down('sm')]: {
+			width: 14,
+			height: 14
+		}
 	},
 	posFallback: {
 		fontFamily: '"Noto Sans KR", sans-serif',
@@ -136,12 +158,18 @@ const useStyles = makeStyles()((theme) => ({
 	tierText: {
 		fontFamily: '"Rajdhani", sans-serif',
 		fontSize: '1.15rem',
-		fontWeight: 700
+		fontWeight: 700,
+		[theme.breakpoints.down('sm')]: {
+			fontSize: '1rem'
+		}
 	},
 	pvpDivider: {
 		fontFamily: '"Rajdhani", sans-serif',
 		fontSize: '1rem',
-		color: 'rgba(255, 255, 255, 0.3)'
+		color: 'rgba(255, 255, 255, 0.3)',
+		[theme.breakpoints.down('sm')]: {
+			fontSize: '0.85rem'
+		}
 	},
 	date: {
 		flexShrink: 0,
@@ -149,13 +177,20 @@ const useStyles = makeStyles()((theme) => ({
 		fontSize: '1.1rem',
 		color: 'rgba(255, 255, 255, 0.4)',
 		minWidth: 90,
-		textAlign: 'right'
+		textAlign: 'right',
+		[theme.breakpoints.down('sm')]: {
+			minWidth: 0,
+			fontSize: '0.9rem'
+		}
 	},
 	chevron: {
 		flexShrink: 0,
 		color: 'rgba(255, 255, 255, 0.35)',
 		transition: 'transform 0.2s ease',
-		'& svg': { fontSize: '2rem' }
+		'& svg': { fontSize: '2rem' },
+		[theme.breakpoints.down('sm')]: {
+			'& svg': { fontSize: '1.5rem' }
+		}
 	},
 	chevronOpen: {
 		transform: 'rotate(180deg)',
