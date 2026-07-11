@@ -274,9 +274,23 @@ const useStyles = makeStyles()((theme) => ({
 	},
 	dialogPaper: {
 		background: 'linear-gradient(135deg, #1a1a2e 0%, #0f0f1a 100%)',
+		// MUI Paper가 다크 모드에서 elevation 오버레이(backgroundImage)를 덧씌워 프레임 톤이 뜨는 것을 막음
+		backgroundImage: 'linear-gradient(135deg, #1a1a2e 0%, #0f0f1a 100%)',
+		color: '#fff',
 		border: '1px solid rgba(0, 212, 255, 0.25)',
 		borderRadius: '20px !important',
-		boxShadow: '0 8px 32px rgba(0, 0, 0, 0.5), 0 0 60px rgba(0, 212, 255, 0.08)'
+		boxShadow: '0 8px 32px rgba(0, 0, 0, 0.5), 0 0 60px rgba(0, 212, 255, 0.08)',
+		overflow: 'hidden',
+		position: 'relative',
+		'&::before': {
+			content: '""',
+			position: 'absolute',
+			top: 0,
+			left: 0,
+			right: 0,
+			height: 1,
+			background: 'linear-gradient(90deg, transparent, rgba(0, 212, 255, 0.5), transparent)'
+		}
 	},
 	// ── 섹션 공통 ──
 	sections: {
