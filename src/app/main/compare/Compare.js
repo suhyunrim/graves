@@ -5,7 +5,6 @@ import { useSearchParams } from 'react-router-dom';
 import {
 	getTierName,
 	getTierLabel,
-	getTierShortLabel,
 	getTierEmblemUrl,
 	parseRankTier
 } from 'app/main/tournament/tournamentUtils';
@@ -13,6 +12,7 @@ import PositionIcon from '../tournament/PositionIcon';
 import { Reveal, RevealGroup } from '../components/Reveal';
 import OpponentPicker from './OpponentPicker';
 import RatingTrajectoryChart from './RatingTrajectoryChart';
+import EntangledMatches from './EntangledMatches';
 import { fetchCompare } from './compareApi';
 
 const A_COLOR = '#00d4ff';
@@ -544,43 +544,6 @@ const useStyles = makeStyles()((theme) => ({
 		color: 'rgba(255, 255, 255, 0.45)',
 		marginTop: 4
 	},
-	monthlyWrap: {
-		marginTop: 4
-	},
-	monthlyBars: {
-		display: 'flex',
-		alignItems: 'flex-end',
-		gap: 6,
-		height: 80,
-		marginTop: 8
-	},
-	monthlyCol: {
-		flex: 1,
-		display: 'flex',
-		flexDirection: 'column',
-		alignItems: 'center',
-		gap: 4,
-		minWidth: 0
-	},
-	monthlyBar: {
-		width: '100%',
-		maxWidth: 28,
-		borderRadius: '4px 4px 0 0',
-		background: 'linear-gradient(180deg, #00d4ff, #0066ff)',
-		minHeight: 3
-	},
-	monthlyLabel: {
-		fontFamily: '"Rajdhani", sans-serif',
-		fontSize: '0.95rem',
-		color: 'rgba(255, 255, 255, 0.4)',
-		whiteSpace: 'nowrap'
-	},
-	monthlyCount: {
-		fontFamily: '"Rajdhani", sans-serif',
-		fontSize: '1rem',
-		fontWeight: 700,
-		color: 'rgba(255, 255, 255, 0.7)'
-	},
 	// ── 맞라인 전적 ──
 	laneRow: {
 		display: 'grid',
@@ -669,75 +632,6 @@ const useStyles = makeStyles()((theme) => ({
 		fontFamily: '"Noto Sans KR", sans-serif',
 		fontSize: '1.15rem',
 		color: 'rgba(255, 255, 255, 0.35)'
-	},
-	// ── 얽힌 경기 히스토리 ──
-	matchRow: {
-		display: 'flex',
-		alignItems: 'center',
-		gap: 12,
-		padding: '11px 0',
-		borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
-		[theme.breakpoints.down('sm')]: {
-			flexWrap: 'wrap',
-			gap: 8
-		}
-	},
-	matchBadge: {
-		flexShrink: 0,
-		padding: '3px 10px',
-		borderRadius: 8,
-		fontFamily: '"Noto Sans KR", sans-serif',
-		fontSize: '1.05rem',
-		fontWeight: 700
-	},
-	matchBadgeTeam: {
-		background: 'rgba(0, 212, 255, 0.12)',
-		border: '1px solid rgba(0, 212, 255, 0.4)',
-		color: '#00d4ff'
-	},
-	matchBadgeVs: {
-		background: 'rgba(255, 107, 154, 0.12)',
-		border: '1px solid rgba(255, 107, 154, 0.4)',
-		color: '#ff6b9a'
-	},
-	matchResult: {
-		flex: 1,
-		minWidth: 120,
-		fontFamily: '"Rajdhani", "Noto Sans KR", sans-serif',
-		fontSize: '1.3rem',
-		fontWeight: 700,
-		color: 'rgba(255, 255, 255, 0.9)'
-	},
-	matchPositions: {
-		display: 'flex',
-		alignItems: 'center',
-		gap: 5,
-		flexShrink: 0
-	},
-	matchPosIcon: {
-		width: 18,
-		height: 18
-	},
-	matchPosVs: {
-		fontFamily: '"Rajdhani", sans-serif',
-		fontSize: '1rem',
-		color: 'rgba(255, 255, 255, 0.35)'
-	},
-	matchRating: {
-		flexShrink: 0,
-		fontFamily: '"Rajdhani", sans-serif',
-		fontSize: '1.15rem',
-		color: 'rgba(255, 255, 255, 0.5)',
-		minWidth: 110,
-		textAlign: 'right'
-	},
-	matchDate: {
-		flexShrink: 0,
-		fontFamily: '"Rajdhani", sans-serif',
-		fontSize: '1.1rem',
-		color: 'rgba(255, 255, 255, 0.4)',
-		minWidth: 92,
-		textAlign: 'right'
 	},
 	// ── 상태 화면 ──
 	centerState: {
@@ -873,7 +767,7 @@ function Compare() {
 	}
 
 	const result = state.result;
-	const { header, headToHead, together, ratingFlow, timeline, mutualSynergy, laneMatchup, relationTitles, ratingTrajectory, matches } = result;
+	const { header, headToHead, together, ratingFlow, timeline, mutualSynergy, laneMatchup, relationTitles, ratingTrajectory } = result;
 	const a = header.a;
 	const b = header.b;
 	const nameA = a.name;
@@ -1144,8 +1038,6 @@ function Compare() {
 		const fv = t.firstVs;
 		const ft = t.firstTogether;
 		const lastLabel = daysAgoLabel(t.lastMetAt);
-		const monthly = t.monthlyCounts || [];
-		const maxMonthly = Math.max(1, ...monthly.map(m => m.games));
 		return (
 			<div className={classes.section} key="timeline">
 				<div className={classes.sectionTitle}>
@@ -1199,23 +1091,6 @@ function Compare() {
 						<div className={classes.milestoneSub}>맞대결 {t.vsGames} · 같은 팀 {t.togetherGames}</div>
 					</div>
 				</div>
-				{monthly.length > 0 && (
-					<div className={classes.monthlyWrap}>
-						<div className={classes.milestoneLabel}>월별 만남</div>
-						<div className={classes.monthlyBars}>
-							{monthly.map(m => (
-								<div className={classes.monthlyCol} key={m.month}>
-									<span className={classes.monthlyCount}>{m.games || ''}</span>
-									<div
-										className={classes.monthlyBar}
-										style={{ height: `${(m.games / maxMonthly) * 100}%` }}
-									/>
-									<span className={classes.monthlyLabel}>{m.month.slice(2)}</span>
-								</div>
-							))}
-						</div>
-					</div>
-				)}
 			</div>
 		);
 	};
@@ -1294,6 +1169,9 @@ function Compare() {
 		const good = ms.goodWithBoth || [];
 		const bad = ms.badWithBoth || [];
 		const empty = good.length === 0 && bad.length === 0;
+		const gateA = ms.minGamesA ?? ms.minGames ?? 5;
+		const gateB = ms.minGamesB ?? ms.minGames ?? 5;
+		const gateText = gateA === gateB ? `각 ${gateA}판` : `${nameA}와 ${gateA}판·${nameB}와 ${gateB}판`;
 		return (
 			<div className={classes.section} key="mutual">
 				<div className={classes.sectionTitle}>
@@ -1303,7 +1181,7 @@ function Compare() {
 					둘 다와의 시너지
 				</div>
 				{empty ? (
-					<div className={classes.sectionEmpty}>표본 부족 (각 {ms.minGames}판 이상 함께한 유저가 필요해요)</div>
+					<div className={classes.sectionEmpty}>표본 부족 ({gateText} 이상 함께한 유저가 필요해요)</div>
 				) : (
 					<div className={classes.synergyCols}>
 						<div>
@@ -1334,65 +1212,6 @@ function Compare() {
 						</div>
 					</div>
 				)}
-			</div>
-		);
-	};
-
-	const sectionMatches = () => {
-		const items = (matches && matches.items) || [];
-		if (items.length === 0) return null;
-		return (
-			<div className={classes.section} key="matches">
-				<div className={classes.sectionTitle}>
-					<span role="img" aria-label="scroll">
-						📜
-					</span>
-					얽힌 경기 히스토리
-					<span style={{ fontSize: '1.2rem', fontWeight: 400, color: 'rgba(255,255,255,0.45)' }}>
-						최근 {items.length}경기{matches.total > items.length ? ` (총 ${matches.total})` : ''}
-					</span>
-				</div>
-				{items.map(m => {
-					const posA = m.aPosition ? POSITION_META[m.aPosition] : null;
-					const posB = m.bPosition ? POSITION_META[m.bPosition] : null;
-					let resultText;
-					let resultColor = 'rgba(255,255,255,0.9)';
-					if (m.sameTeam) {
-						resultText = m.aWon ? '함께 승리' : '함께 패배';
-						resultColor = m.aWon ? GOOD_COLOR : BAD_COLOR;
-					} else {
-						resultText = m.aWon ? `${nameA} 승` : `${nameB} 승`;
-						resultColor = m.aWon ? A_COLOR : B_COLOR;
-					}
-					return (
-						<div className={classes.matchRow} key={m.gameId}>
-							<span
-								className={cx(
-									classes.matchBadge,
-									m.sameTeam ? classes.matchBadgeTeam : classes.matchBadgeVs
-								)}
-							>
-								{m.sameTeam ? '같은 팀' : '맞대결'}
-							</span>
-							<span className={classes.matchResult} style={{ color: resultColor }}>
-								{resultText}
-							</span>
-							{(posA || posB) && (
-								<span className={classes.matchPositions}>
-									{posA && <PositionIcon position={posA.icon} className={classes.matchPosIcon} />}
-									<span className={classes.matchPosVs}>vs</span>
-									{posB && <PositionIcon position={posB.icon} className={classes.matchPosIcon} />}
-								</span>
-							)}
-							<span className={classes.matchRating}>
-								<span style={{ color: A_COLOR }}>{getTierShortLabel(m.aRating) || '-'}</span>
-								{' / '}
-								<span style={{ color: B_COLOR }}>{getTierShortLabel(m.bRating) || '-'}</span>
-							</span>
-							<span className={classes.matchDate}>{fmtDate(m.date)}</span>
-						</div>
-					);
-				})}
 			</div>
 		);
 	};
@@ -1447,7 +1266,13 @@ function Compare() {
 						{sectionTimeline()}
 						{sectionLaneMatchup()}
 						{sectionMutualSynergy()}
-						{sectionMatches()}
+						<EntangledMatches
+							groupId={groupId}
+							puuidA={puuidA}
+							puuidB={puuidB}
+							nameA={nameA}
+							nameB={nameB}
+						/>
 					</RevealGroup>
 				)}
 			</div>

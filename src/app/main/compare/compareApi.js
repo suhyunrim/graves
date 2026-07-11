@@ -12,4 +12,15 @@ export function fetchCompare(groupId, puuidA, puuidB) {
 		.then(res => res.data.result);
 }
 
+// 두 유저가 얽힌 경기 히스토리 페이징 + 양 팀 10명 로스터.
+// page: 0-based, size: 기본 20 / 최대 50. 400(누락·동일)·404(그룹 밖)는 status로 분기.
+export function fetchEntangledMatches(groupId, puuidA, puuidB, page, size) {
+	return createCamilleAxios()
+		.get('/api/user/compare/matches', {
+			params: { groupId, puuidA, puuidB, page, size },
+			silentError: true
+		})
+		.then(res => res.data.result);
+}
+
 export default fetchCompare;
