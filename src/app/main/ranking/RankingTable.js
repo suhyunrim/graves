@@ -478,6 +478,7 @@ function RankingTable(props) {
 	const { classes } = useStyles();
 	const dispatch = useDispatch();
 	const myPuuid = localStorage.getItem('camille_riot_puuid');
+	const isLoggedIn = Boolean(localStorage.getItem('camille_discord_token'));
 	const ranking = useSelector(({ Ranking }) => Ranking.ranking.data);
 	const myRanking = useSelector(({ Ranking }) => Ranking.ranking.myRanking);
 	const rankingLoading = useSelector(({ Ranking }) => Ranking.ranking.loading);
@@ -973,14 +974,16 @@ function RankingTable(props) {
 														<Link to={`/userinfo/${n.puuid}`} className={classes.playerName}>
 															{n.name}
 														</Link>
-														<Link
-															to={compareHref(n.puuid)}
-															className={classes.compareLink}
-															aria-label={`${n.name} VS 비교`}
-															title="VS 비교"
-														>
-															<CompareArrowsIcon />
-														</Link>
+														{isLoggedIn && (
+															<Link
+																to={compareHref(n.puuid)}
+																className={classes.compareLink}
+																aria-label={`${n.name} VS 비교`}
+																title="VS 비교"
+															>
+																<CompareArrowsIcon />
+															</Link>
+														)}
 														{isSoloPosition && n.mainPositionRate != null && (
 															<div className={classes.mainPositionRate}>주 포지션 {n.mainPositionRate}%</div>
 														)}
@@ -1160,15 +1163,17 @@ function RankingTable(props) {
 														<div className={classes.mobileOverallRecord}>주 포지션 {n.mainPositionRate}%</div>
 													)}
 												</div>
-												<Link
-													to={compareHref(n.puuid)}
-													className={classes.compareLink}
-													style={{ marginLeft: 'auto', alignSelf: 'flex-start' }}
-													aria-label={`${n.name} VS 비교`}
-													title="VS 비교"
-												>
-													<CompareArrowsIcon />
-												</Link>
+												{isLoggedIn && (
+													<Link
+														to={compareHref(n.puuid)}
+														className={classes.compareLink}
+														style={{ marginLeft: 'auto', alignSelf: 'flex-start' }}
+														aria-label={`${n.name} VS 비교`}
+														title="VS 비교"
+													>
+														<CompareArrowsIcon />
+													</Link>
+												)}
 											</div>
 											{renderMobileStats(n, n.win + n.lose)}
 										</div>

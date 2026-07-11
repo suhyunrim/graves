@@ -27,6 +27,13 @@ const navigationConfig = [
 				url: '/ranking'
 			},
 			{
+				id: 'compare-component',
+				title: 'VS 비교',
+				type: 'item',
+				icon: 'compare_arrows',
+				url: '/compare'
+			},
+			{
 				id: 'match-history-component',
 				title: '내전 기록',
 				type: 'item',

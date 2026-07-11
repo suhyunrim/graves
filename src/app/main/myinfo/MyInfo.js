@@ -1238,7 +1238,7 @@ function MyInfoPage(props) {
 										{isFavorite ? <StarIcon /> : <StarBorderIcon />}
 									</IconButton>
 								)}
-								{(puuid || myPuuid) && user?.reprGroup?.groupId && (
+								{isDiscordLoggedIn && (puuid || myPuuid) && user?.reprGroup?.groupId && (
 									<Link
 										to={`/compare?a=${puuid || myPuuid}`}
 										className={classes.compareBtn}
