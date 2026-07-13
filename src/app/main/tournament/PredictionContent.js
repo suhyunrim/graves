@@ -129,6 +129,22 @@ const useStyles = makeStyles()((theme) => ({
 		textOverflow: 'ellipsis',
 		whiteSpace: 'nowrap'
 	},
+	aiBadge: {
+		display: 'inline-flex',
+		alignItems: 'center',
+		gap: 3,
+		marginLeft: 6,
+		padding: '1px 7px',
+		borderRadius: 8,
+		fontFamily: '"Rajdhani", "Noto Sans KR", sans-serif',
+		fontSize: '0.95rem',
+		fontWeight: 700,
+		letterSpacing: '0.03em',
+		color: '#00d4ff',
+		background: 'rgba(0, 212, 255, 0.12)',
+		border: '1px solid rgba(0, 212, 255, 0.35)',
+		verticalAlign: 'middle'
+	},
 	scoreCell: {
 		fontFamily: '"Rajdhani", "Noto Sans KR", sans-serif',
 		fontWeight: 700,
@@ -439,6 +455,11 @@ function PredictionContent({ tournamentId, status, predictionMode = 'bracket', p
 									</span>
 									<span className={classes.nameCell}>
 										{displayNameForPuuid(row.summonerName, row.userPuuid)}
+										{row.isAi && (
+											<span className={classes.aiBadge}>
+												<span role="img" aria-label="robot">🤖</span> AI
+											</span>
+										)}
 									</span>
 									<span className={classes.scoreCell}>{row.correctCount}</span>
 									<span className={classes.accuracyCell}>

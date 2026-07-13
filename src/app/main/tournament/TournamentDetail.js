@@ -1415,6 +1415,7 @@ function TournamentDetail() {
 						<MatchPredictionDialog
 							open={Boolean(matchPredictionTarget)}
 							onClose={() => setMatchPredictionTarget(null)}
+							tournamentId={tournamentId}
 							match={matchPredictionTarget}
 							team1={teamMap.get(matchPredictionTarget.team1Id)}
 							team2={teamMap.get(matchPredictionTarget.team2Id)}

@@ -232,3 +232,12 @@ export function putPredictions(tournamentId, predictions) {
 		{ silentError: true }
 	);
 }
+
+// AI 승부예측 조회 — 저장된 기록만 읽는 가벼운 API. 매치 시작 전까지 서버가
+// 스크림 반영으로 갱신하므로 클라이언트 캐시 없이 팝업 열 때마다 호출한다.
+export function getAiPrediction(tournamentId, matchId) {
+	return createCamilleAxios().get(
+		`/api/tournament/${tournamentId}/matches/${matchId}/ai-prediction`,
+		{ silentError: true }
+	);
+}
