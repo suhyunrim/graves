@@ -382,18 +382,21 @@ function MatchPredictionDialog({ open, onClose, tournamentId, match, team1, team
 			if (match.team1Id != null && p.predictedTeamId === match.team1Id) t1.push(p);
 			else if (match.team2Id != null && p.predictedTeamId === match.team2Id) t2.push(p);
 		});
-		// 브래킷 일관성 통과한 표를 먼저, 성립 불가 표를 아래로. isValid=null (비활성 매치)
-		// 은 가운데 묶여 보이도록 둔다.
-		const sortByValid = (a, b) => {
+		// 내 표는 항상 맨 위. 그 다음 브래킷 일관성 통과한 표, 성립 불가 표는 아래로.
+		// isValid=null (비활성 매치) 은 가운데 묶여 보이도록 둔다.
+		const sortVoters = (a, b) => {
+			const aMine = Boolean(myPuuid) && a.userPuuid === myPuuid;
+			const bMine = Boolean(myPuuid) && b.userPuuid === myPuuid;
+			if (aMine !== bMine) return aMine ? -1 : 1;
 			if (a.isValid === b.isValid) return 0;
 			if (a.isValid === false) return 1;
 			if (b.isValid === false) return -1;
 			return 0;
 		};
-		t1.sort(sortByValid);
-		t2.sort(sortByValid);
+		t1.sort(sortVoters);
+		t2.sort(sortVoters);
 		return { team1Voters: t1, team2Voters: t2 };
-	}, [match]);
+	}, [match, myPuuid]);
 
 	if (!match) return null;
 
