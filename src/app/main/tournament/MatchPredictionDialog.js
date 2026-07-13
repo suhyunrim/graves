@@ -382,9 +382,10 @@ function MatchPredictionDialog({ open, onClose, tournamentId, match, team1, team
 			if (match.team1Id != null && p.predictedTeamId === match.team1Id) t1.push(p);
 			else if (match.team2Id != null && p.predictedTeamId === match.team2Id) t2.push(p);
 		});
-		// 내 표는 항상 맨 위. 그 다음 브래킷 일관성 통과한 표, 성립 불가 표는 아래로.
+		// AI 표가 최우선, 그 다음 내 표. 이후 브래킷 일관성 통과한 표, 성립 불가 표는 아래로.
 		// isValid=null (비활성 매치) 은 가운데 묶여 보이도록 둔다.
 		const sortVoters = (a, b) => {
+			if (Boolean(a.isAi) !== Boolean(b.isAi)) return a.isAi ? -1 : 1;
 			const aMine = Boolean(myPuuid) && a.userPuuid === myPuuid;
 			const bMine = Boolean(myPuuid) && b.userPuuid === myPuuid;
 			if (aMine !== bMine) return aMine ? -1 : 1;
@@ -563,12 +564,12 @@ function MatchPredictionDialog({ open, onClose, tournamentId, match, team1, team
 									)}
 								>
 									{isMine && <StarIcon className={classes.mineStar} />}
-									<span>{displayNameForPuuid(v.summonerName, v.userPuuid)}</span>
 									{v.isAi && (
 										<span className={classes.aiBadge}>
 											<span role="img" aria-label="robot">🤖</span> AI
 										</span>
 									)}
+									<span>{displayNameForPuuid(v.summonerName, v.userPuuid)}</span>
 									{isInvalid && <span className={classes.voterInvalidTag}>성립 불가</span>}
 								</div>
 							);

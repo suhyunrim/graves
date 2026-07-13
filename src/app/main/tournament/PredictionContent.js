@@ -133,7 +133,7 @@ const useStyles = makeStyles()((theme) => ({
 		display: 'inline-flex',
 		alignItems: 'center',
 		gap: 3,
-		marginLeft: 6,
+		marginRight: 6,
 		padding: '1px 7px',
 		borderRadius: 8,
 		fontFamily: '"Rajdhani", "Noto Sans KR", sans-serif',
@@ -454,12 +454,12 @@ function PredictionContent({ tournamentId, status, predictionMode = 'bracket', p
 										{rank}
 									</span>
 									<span className={classes.nameCell}>
-										{displayNameForPuuid(row.summonerName, row.userPuuid)}
 										{row.isAi && (
 											<span className={classes.aiBadge}>
 												<span role="img" aria-label="robot">🤖</span> AI
 											</span>
 										)}
+										{displayNameForPuuid(row.summonerName, row.userPuuid)}
 									</span>
 									<span className={classes.scoreCell}>{row.correctCount}</span>
 									<span className={classes.accuracyCell}>
