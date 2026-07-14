@@ -30,7 +30,8 @@ import {
 	getTierName,
 	getTierShortLabel,
 	getTierEmblemUrl,
-	displayNameForPuuid
+	displayNameForPuuid,
+	sortByPosition
 } from './tournamentUtils';
 import PositionIcon from './PositionIcon';
 import ScrimFormDialog from './ScrimFormDialog';
@@ -712,7 +713,7 @@ function ScrimContent({ tournamentId, teams, scrims, onMutated }) {
 									</div>
 									{team && (team.members || []).length > 0 && (
 										<div className={classes.mobileMembers}>
-											{(team.members || []).map(m => {
+											{sortByPosition(team.members).map(m => {
 												const url = m.profileIconId ? getProfileIconUrl(m.profileIconId) : null;
 												const name = displayNameForPuuid(m.name, m.puuid);
 												const memberShort = m.rating != null ? getTierShortLabel(m.rating) : null;
@@ -821,7 +822,7 @@ function ScrimContent({ tournamentId, teams, scrims, onMutated }) {
 																	}
 																	return (
 																		<div className={classes.expandMembers}>
-																			{members.map(m => {
+																			{sortByPosition(members).map(m => {
 																				const url = m.profileIconId ? getProfileIconUrl(m.profileIconId) : null;
 																				const name = displayNameForPuuid(m.name, m.puuid);
 																				const memberShort = m.rating != null ? getTierShortLabel(m.rating) : null;
