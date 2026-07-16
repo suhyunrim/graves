@@ -166,13 +166,11 @@ const useStyles = makeStyles()((theme) => ({
 		color: 'rgba(255, 255, 255, 0.45)'
 	},
 	profileVisitor: {
-		marginLeft: 'auto',
-		[theme.breakpoints.down('sm')]: {
-			marginLeft: 0,
-			width: '100%',
-			display: 'flex',
-			justifyContent: 'flex-end'
-		}
+		marginLeft: 'auto'
+	},
+	// 모바일: 레벨 배지 줄 우측에 방문자수 배치
+	levelVisitor: {
+		marginLeft: 'auto'
 	},
 	profileIcon: {
 		width: 120,
@@ -1311,6 +1309,11 @@ function MyInfoPage(props) {
 		</div>
 	);
 
+	// 방문자수. 데스크톱은 섹션 우상단, 모바일은 레벨 배지와 같은 줄 우측 정렬.
+	const visitorCounter = user?.reprGroup?.groupId ? (
+		<VisitorCounter groupId={user.reprGroup.groupId} puuid={puuid || myPuuid} isLoggedIn={isDiscordLoggedIn} />
+	) : null;
+
 	return (
 		<FusePageSimple
 			classes={{
@@ -1353,19 +1356,12 @@ function MyInfoPage(props) {
 							</div>
 							<div className={classes.summonerLevel}>
 								<span className={classes.levelBadge}>Lv. {summonerInfo.summonerLevel}</span>
+								{isMobile && visitorCounter && <div className={classes.levelVisitor}>{visitorCounter}</div>}
 							</div>
 							{!isMobile && profileSubInfo}
 						</div>
 						{isMobile && profileSubInfo}
-						{user?.reprGroup?.groupId && (
-							<div className={classes.profileVisitor}>
-								<VisitorCounter
-									groupId={user.reprGroup.groupId}
-									puuid={puuid || myPuuid}
-									isLoggedIn={isDiscordLoggedIn}
-								/>
-							</div>
-						)}
+						{!isMobile && visitorCounter && <div className={classes.profileVisitor}>{visitorCounter}</div>}
 					</div>
 
 					<Tabs
