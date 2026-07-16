@@ -146,6 +146,10 @@ const useStyles = makeStyles()((theme) => ({
 		gap: 24,
 		alignItems: 'stretch',
 		marginBottom: 24,
+		// grid 아이템 기본 min-width:auto가 내용 폭만큼 커져 모바일에서 잘리는 것 방지
+		'& > *': {
+			minWidth: 0
+		},
 		[theme.breakpoints.down('md')]: {
 			gridTemplateColumns: '1fr',
 			gap: 16
@@ -1065,6 +1069,11 @@ const useStyles = makeStyles()((theme) => ({
 		minWidth: 100,
 		'&.Mui-selected': {
 			color: '#00d4ff'
+		},
+		// 모바일: 탭 5개 × minWidth 100 = 500px이 페이지 최소 폭을 밀어올리는 것 방지
+		[theme.breakpoints.down('sm')]: {
+			minWidth: 0,
+			padding: '12px 10px'
 		}
 	}
 }));
@@ -1414,6 +1423,9 @@ function MyInfoPage(props) {
 							patchSearchParams(setSearchParams, { tab: v === 0 ? null : v });
 						}}
 						className={classes.tabs}
+						variant="scrollable"
+						scrollButtons="auto"
+						allowScrollButtonsMobile
 					>
 						<Tab label="내전" className={classes.tab} />
 						<Tab label="스탯" className={classes.tab} />

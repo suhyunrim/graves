@@ -191,7 +191,12 @@ const useStyles = makeStyles()((theme) => ({
 		alignItems: 'center',
 		gap: 12,
 		flex: '1 1 auto',
-		minWidth: 0
+		minWidth: 0,
+		// 모바일: 지표 블록들이 줄바꿈되어 행이 뷰포트보다 넓어지지 않게
+		[theme.breakpoints.down('sm')]: {
+			flexWrap: 'wrap',
+			rowGap: 8
+		}
 	},
 	champImg: {
 		width: 52,
