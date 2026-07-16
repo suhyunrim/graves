@@ -16,12 +16,13 @@ const POSITION_FILTERS = [
 ];
 
 // score(승률 베이지안 보정 점수) → 티어 등급. 50이 평균 승률 근처.
+// tint는 행 배경에 깔아 등급 그룹이 한눈에 구분되게 (뱃지 색만으로는 약함)
 const getTier = score => {
-	if (score >= 58) return { label: 'S', color: '#ffd700' };
-	if (score >= 53) return { label: 'A', color: '#00d4ff' };
-	if (score >= 48) return { label: 'B', color: '#00ff7f' };
-	if (score >= 43) return { label: 'C', color: 'rgba(255, 255, 255, 0.75)' };
-	return { label: 'D', color: '#ff6b6b' };
+	if (score >= 58) return { label: 'S', color: '#ffd700', tint: 'rgba(255, 215, 0, 0.08)' };
+	if (score >= 53) return { label: 'A', color: '#00d4ff', tint: 'rgba(0, 212, 255, 0.08)' };
+	if (score >= 48) return { label: 'B', color: '#00ff7f', tint: 'rgba(0, 255, 127, 0.07)' };
+	if (score >= 43) return { label: 'C', color: 'rgba(255, 255, 255, 0.75)', tint: 'rgba(255, 255, 255, 0.03)' };
+	return { label: 'D', color: '#ff6b6b', tint: 'rgba(255, 107, 107, 0.07)' };
 };
 
 const useStyles = makeStyles()((theme) => ({
@@ -288,7 +289,14 @@ function ChampionTierlist() {
 							{champions.map((c, i) => {
 								const tier = getTier(c.score);
 								return (
-									<div key={c.championId} className={classes.row}>
+									<div
+										key={c.championId}
+										className={classes.row}
+										style={{
+											background: `linear-gradient(0deg, ${tier.tint}, ${tier.tint}), linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)`,
+											borderLeft: `3px solid ${tier.color}`
+										}}
+									>
 										<div className={classes.rankCol}>
 											<span className={classes.rank}>{i + 1}</span>
 											<span className={classes.tierBadge} style={{ color: tier.color }}>
