@@ -176,9 +176,24 @@ const useStyles = makeStyles()((theme) => ({
 		fontWeight: 700,
 		color: 'rgba(255, 255, 255, 0.55)'
 	},
-	posStatValue: {
+	// 포지션 대표 지표 전용 컬럼 (가운데 공백 활용, KDA 컬럼과 동급 크기)
+	posStatCol: {
+		display: 'flex',
+		flexDirection: 'column',
+		alignItems: 'center',
+		gap: 1,
+		minWidth: 110,
+		flexShrink: 0,
+		[theme.breakpoints.down('sm')]: {
+			display: 'none'
+		}
+	},
+	posStatBig: {
+		fontFamily: '"Rajdhani", sans-serif',
+		fontSize: '1.3rem',
 		fontWeight: 700,
-		color: 'rgba(255, 255, 255, 0.75)'
+		color: 'rgba(255, 255, 255, 0.85)',
+		whiteSpace: 'nowrap'
 	},
 	nameCol: {
 		display: 'flex',
@@ -300,21 +315,23 @@ function InternalChampions({ champions, totalGames }) {
 										</span>
 									))}
 								</div>
-								<span className={classes.subLine}>
-									{posStats.length > 0
-										? posStats.map((s, i) => (
-												<React.Fragment key={s.label}>
-													{i > 0 && ' · '}
-													<span title={s.title}>
-														{s.label}{' '}
-														<span className={classes.posStatValue} style={s.color ? { color: s.color } : undefined}>
-															{s.value}
-														</span>
-													</span>
-												</React.Fragment>
-										  ))
-										: c.csPerMin != null && `CS/분 ${c.csPerMin}`}
-								</span>
+								<span className={classes.subLine}>{c.csPerMin != null ? `CS/분 ${c.csPerMin}` : ''}</span>
+							</div>
+							<div className={classes.posStatCol}>
+								{posStats.length > 0 && (
+									<>
+										<span
+											className={classes.posStatBig}
+											style={posStats[0].color ? { color: posStats[0].color } : undefined}
+											title={posStats[0].title}
+										>
+											{posStats[0].value}
+										</span>
+										<span className={classes.subLine} title={posStats[0].title}>
+											{posStats[0].label}
+										</span>
+									</>
+								)}
 							</div>
 							<div className={classes.kdaCol}>
 								<span
