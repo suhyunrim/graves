@@ -148,7 +148,54 @@ const useStyles = makeStyles()((theme) => ({
 		color: '#00ff7f'
 	},
 	scrollX: {
-		overflowX: 'auto'
+		overflowX: 'auto',
+		// 모바일은 가로 스크롤 테이블 대신 세로 스택(mList)으로 대체
+		[theme.breakpoints.down('sm')]: {
+			display: 'none'
+		}
+	},
+	// ===== 모바일 컴팩트 목록 (sm 미만) =====
+	mList: {
+		display: 'none',
+		[theme.breakpoints.down('sm')]: {
+			display: 'flex',
+			flexDirection: 'column'
+		}
+	},
+	mRow: {
+		padding: '8px 0',
+		borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
+		'&:last-of-type': {
+			borderBottom: 'none'
+		}
+	},
+	mTop: {
+		display: 'flex',
+		alignItems: 'center',
+		flexWrap: 'wrap',
+		gap: 8
+	},
+	mGames: {
+		marginLeft: 'auto',
+		flexShrink: 0,
+		fontFamily: '"Rajdhani", sans-serif',
+		fontSize: '1.2rem',
+		fontWeight: 600,
+		color: 'rgba(255, 255, 255, 0.85)'
+	},
+	mStats: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1rem',
+		color: 'rgba(255, 255, 255, 0.55)',
+		lineHeight: 1.6,
+		paddingLeft: 24,
+		marginTop: 2
+	},
+	mStatValue: {
+		fontFamily: '"Rajdhani", sans-serif',
+		fontSize: '1.1rem',
+		fontWeight: 700,
+		color: 'rgba(255, 255, 255, 0.85)'
 	},
 	cancelBtn: {
 		color: 'rgba(255, 255, 255, 0.5)',
@@ -250,6 +297,83 @@ function InternalChampionsDialog({ open, onClose, champions, totalGames }) {
 							})}
 						</tbody>
 					</table>
+				</div>
+				<div className={classes.mList}>
+					{list.map(c => {
+						const name = c.championKoName || c.championName;
+						const badges = getChampBadges(c, totalGames);
+						const posKey = POSITION_ICON_KEY[c.mainPosition];
+						return (
+							<div key={c.championId} className={classes.mRow}>
+								<div className={classes.mTop}>
+									<span className={classes.posSlot}>
+										{posKey && (
+											<PositionIcon
+												position={posKey}
+												className={classes.posIcon}
+												fallbackClassName={classes.posFallback}
+											/>
+										)}
+									</span>
+									<img
+										className={classes.champImg}
+										src={getChampionIcon(c.championName)}
+										alt={name}
+										onError={e => {
+											e.currentTarget.style.visibility = 'hidden';
+										}}
+									/>
+									<span className={classes.champName} title={name}>
+										{name}
+									</span>
+									{badges.map(b => (
+										<span key={b.key} className={classes.badge} style={{ color: b.color }}>
+											{b.label}
+										</span>
+									))}
+									<span className={classes.mGames}>
+										{c.games}판 · <span className={c.winRate >= 50 ? classes.winHigh : undefined}>{c.winRate}%</span>
+									</span>
+								</div>
+								<div className={classes.mStats}>
+									KDA{' '}
+									<span className={classes.mStatValue}>{typeof c.kda === 'number' ? c.kda.toFixed(2) : '-'}</span>{' '}
+									({c.kills} / {c.deaths} / {c.assists})
+									{c.killParticipation != null && (
+										<>
+											{' · 킬관여 '}
+											<span
+												className={classes.mStatValue}
+												style={{ color: getMetricColor('killParticipation', c.killParticipation) }}
+											>
+												{c.killParticipation}%
+											</span>
+										</>
+									)}
+									{c.dpm != null && (
+										<>
+											{' · DPM '}
+											<span className={classes.mStatValue} style={{ color: getMetricColor('dpm', c.dpm) }}>
+												{c.dpm}
+											</span>
+										</>
+									)}
+									{c.gpm != null && (
+										<>
+											{' · GPM '}
+											<span className={classes.mStatValue}>{c.gpm}</span>
+										</>
+									)}
+									{c.csPerMin != null && (
+										<>
+											{' · CS/분 '}
+											<span className={classes.mStatValue}>{c.csPerMin}</span>
+										</>
+									)}
+								</div>
+							</div>
+						);
+					})}
 				</div>
 			</div>
 			<div className={classes.dialogActions}>
