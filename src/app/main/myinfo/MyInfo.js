@@ -13,7 +13,8 @@ import {
 	CircularProgress,
 	IconButton,
 	Tabs,
-	Tab
+	Tab,
+	useMediaQuery
 } from '@mui/material';
 import StarIcon from '@mui/icons-material/Star';
 import StarBorderIcon from '@mui/icons-material/StarBorder';
@@ -98,7 +99,8 @@ const useStyles = makeStyles()((theme) => ({
 		animation: `${fadeInUp} 0.5s ease`,
 		flexWrap: 'wrap',
 		[theme.breakpoints.down('sm')]: {
-			gap: 16,
+			columnGap: 16,
+			rowGap: 10,
 			padding: 16
 		}
 	},
@@ -281,6 +283,12 @@ const useStyles = makeStyles()((theme) => ({
 		// honorStats 없고 StatusMessage가 null 반환할 때 빈 div가 marginTop만 남기는 케이스 방지
 		'&:empty': {
 			display: 'none'
+		},
+		// 모바일: profileSection의 직계 자식(전체 폭 행)으로 배치됨 — 행 간격은 rowGap이 담당
+		[theme.breakpoints.down('sm')]: {
+			width: '100%',
+			marginTop: 0,
+			gap: 8
 		}
 	},
 	honorInfo: {
@@ -1054,6 +1062,8 @@ const useStyles = makeStyles()((theme) => ({
 function MyInfoPage(props) {
 	const { classes, cx } = useStyles(props);
 	const dispatch = useDispatch();
+	// 모바일: 칭호/명예/한마디 행을 아이콘 오른쪽 컬럼 밖(전체 폭)으로 옮겨 좌측 공백 제거
+	const isMobile = useMediaQuery(theme => theme.breakpoints.down('sm'));
 
 	const { puuid } = useParams();
 	const myPuuid = localStorage.getItem('camille_riot_puuid');
@@ -1275,6 +1285,32 @@ function MyInfoPage(props) {
 		  }
 		: undefined;
 
+	// 칭호/명예 포인트 + 한마디 행. 데스크톱은 이름 아래(아이콘 오른쪽 컬럼), 모바일은 섹션 전체 폭 행으로 배치.
+	const profileSubInfo = (
+		<div className={classes.subInfoRow}>
+			{honorStats && (
+				<div className={classes.honorInfo}>
+					{honorStats.title && (
+						<span className={classes.honorTitle}>
+							<span role="img" aria-label="honor title">
+								{honorStats.title.emoji}
+							</span>{' '}
+							{honorStats.title.title}
+						</span>
+					)}
+					<span className={classes.honorPoints}>명예 포인트: {honorStats.received}</span>
+				</div>
+			)}
+			{user?.reprGroup?.groupId && (puuid || myPuuid) && (
+				<StatusMessage
+					groupId={user.reprGroup.groupId}
+					puuid={puuid || myPuuid}
+					editable={isDiscordLoggedIn && isMyPage && !scoreInfo.primaryPuuid}
+				/>
+			)}
+		</div>
+	);
+
 	return (
 		<FusePageSimple
 			classes={{
@@ -1318,29 +1354,9 @@ function MyInfoPage(props) {
 							<div className={classes.summonerLevel}>
 								<span className={classes.levelBadge}>Lv. {summonerInfo.summonerLevel}</span>
 							</div>
-							<div className={classes.subInfoRow}>
-								{honorStats && (
-									<div className={classes.honorInfo}>
-										{honorStats.title && (
-											<span className={classes.honorTitle}>
-												<span role="img" aria-label="honor title">
-													{honorStats.title.emoji}
-												</span>{' '}
-												{honorStats.title.title}
-											</span>
-										)}
-										<span className={classes.honorPoints}>명예 포인트: {honorStats.received}</span>
-									</div>
-								)}
-								{user?.reprGroup?.groupId && (puuid || myPuuid) && (
-									<StatusMessage
-										groupId={user.reprGroup.groupId}
-										puuid={puuid || myPuuid}
-										editable={isDiscordLoggedIn && isMyPage && !scoreInfo.primaryPuuid}
-									/>
-								)}
-							</div>
+							{!isMobile && profileSubInfo}
 						</div>
+						{isMobile && profileSubInfo}
 						{user?.reprGroup?.groupId && (
 							<div className={classes.profileVisitor}>
 								<VisitorCounter
