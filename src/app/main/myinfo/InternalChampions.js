@@ -253,13 +253,19 @@ const useStyles = makeStyles()((theme) => ({
 		alignItems: 'center',
 		gap: 1,
 		minWidth: 96,
-		flexShrink: 0
+		flexShrink: 0,
+		[theme.breakpoints.down('sm')]: {
+			minWidth: 78
+		}
 	},
 	kdaRatio: {
 		fontFamily: '"Rajdhani", sans-serif',
 		fontSize: '1.25rem',
 		fontWeight: 700,
-		whiteSpace: 'nowrap'
+		whiteSpace: 'nowrap',
+		[theme.breakpoints.down('sm')]: {
+			fontSize: '1.1rem'
+		}
 	},
 	wrCol: {
 		display: 'flex',
@@ -267,7 +273,10 @@ const useStyles = makeStyles()((theme) => ({
 		alignItems: 'flex-end',
 		gap: 1,
 		minWidth: 62,
-		flexShrink: 0
+		flexShrink: 0,
+		[theme.breakpoints.down('sm')]: {
+			minWidth: 48
+		}
 	},
 	winRate: {
 		fontFamily: '"Rajdhani", sans-serif',
