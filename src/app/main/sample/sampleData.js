@@ -343,6 +343,47 @@ export function getSampleMyInfoData(puuid) {
 	return getSampleData(key) || getDefaultMyInfoData(puuid);
 }
 
+export function getSampleInternalStats(puuid) {
+	return {
+		puuid: puuid || MY_PUUID,
+		totalGames: 42,
+		wins: 25,
+		champions: [
+			{ championId: 412, championName: 'Thresh', championKoName: '쓰레쉬', games: 14, wins: 8, winRate: 57.1, kills: 2.1, deaths: 4.3, assists: 15.2, kda: 4.02, csPerMin: 1.1 },
+			{ championId: 89, championName: 'Leona', championKoName: '레오나', games: 10, wins: 6, winRate: 60.0, kills: 1.8, deaths: 4.9, assists: 13.7, kda: 3.16, csPerMin: 0.9 },
+			{ championId: 99, championName: 'Lux', championKoName: '럭스', games: 8, wins: 4, winRate: 50.0, kills: 6.5, deaths: 4.1, assists: 9.8, kda: 3.98, csPerMin: 5.2 },
+			{ championId: 104, championName: 'Graves', championKoName: '그레이브즈', games: 6, wins: 4, winRate: 66.7, kills: 7.2, deaths: 4.0, assists: 5.1, kda: 3.08, csPerMin: 6.8 },
+			{ championId: 202, championName: 'Jhin', championKoName: '진', games: 4, wins: 3, winRate: 75.0, kills: 8.0, deaths: 3.2, assists: 7.5, kda: 4.84, csPerMin: 7.9 }
+		],
+		positions: [
+			{ position: 'UTILITY', games: 24, wins: 14, winRate: 58.3, kda: 3.6, csPerMin: 1.0, dpm: 320, laneGames: 22, csDiffAvg: -2.1, goldDiffAvg: 180, damageDiffAvg: 900 },
+			{ position: 'TOP', games: 10, wins: 5, winRate: 50.0, kda: 2.4, csPerMin: 6.9, dpm: 480, laneGames: 9, csDiffAvg: 5.4, goldDiffAvg: 320, damageDiffAvg: 1500 },
+			{ position: 'MIDDLE', games: 8, wins: 6, winRate: 75.0, kda: 4.1, csPerMin: 7.2, dpm: 620, laneGames: 7, csDiffAvg: 8.2, goldDiffAvg: 540, damageDiffAvg: 2300 }
+		]
+	};
+}
+
+const SAMPLE_TIERLIST = [
+	{ championId: 64, championName: 'LeeSin', championKoName: '리 신', games: 22, wins: 14, winRate: 63.6, pickRate: 27.5, banCount: 8, banRate: 10.0, kda: 3.2, score: 61.3 },
+	{ championId: 131, championName: 'Diana', championKoName: '다이애나', games: 18, wins: 11, winRate: 61.1, pickRate: 22.5, banCount: 5, banRate: 6.3, kda: 3.6, score: 58.1 },
+	{ championId: 92, championName: 'Riven', championKoName: '리븐', games: 16, wins: 9, winRate: 56.3, pickRate: 20.0, banCount: 12, banRate: 15.0, kda: 2.8, score: 55.0 },
+	{ championId: 412, championName: 'Thresh', championKoName: '쓰레쉬', games: 24, wins: 13, winRate: 54.2, pickRate: 30.0, banCount: 2, banRate: 2.5, kda: 4.1, score: 53.4 },
+	{ championId: 222, championName: 'Jinx', championKoName: '징크스', games: 15, wins: 8, winRate: 53.3, pickRate: 18.8, banCount: 3, banRate: 3.8, kda: 3.0, score: 51.2 },
+	{ championId: 157, championName: 'Yasuo', championKoName: '야스오', games: 20, wins: 10, winRate: 50.0, pickRate: 25.0, banCount: 15, banRate: 18.8, kda: 2.4, score: 49.5 },
+	{ championId: 254, championName: 'Vi', championKoName: '바이', games: 12, wins: 6, winRate: 50.0, pickRate: 15.0, banCount: 1, banRate: 1.3, kda: 2.9, score: 48.0 },
+	{ championId: 99, championName: 'Lux', championKoName: '럭스', games: 14, wins: 6, winRate: 42.9, pickRate: 17.5, banCount: 0, banRate: 0.0, kda: 2.6, score: 44.1 },
+	{ championId: 86, championName: 'Garen', championKoName: '가렌', games: 11, wins: 4, winRate: 36.4, pickRate: 13.8, banCount: 0, banRate: 0.0, kda: 1.9, score: 40.2 }
+];
+
+export function getSampleTierlist(position) {
+	return {
+		totalGames: 80,
+		minGames: 5,
+		position: position || null,
+		champions: SAMPLE_TIERLIST
+	};
+}
+
 // ============================================================
 // 명예 랭킹 데이터 (36명)
 // ============================================================

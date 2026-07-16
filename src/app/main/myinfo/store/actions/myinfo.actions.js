@@ -1,9 +1,10 @@
 import createCamilleAxios from 'app/utility/camilleAxios';
 import { isSampleMode } from 'app/main/sample/sampleStorage';
-import { getSampleMyInfoData } from 'app/main/sample/sampleData';
+import { getSampleMyInfoData, getSampleInternalStats } from 'app/main/sample/sampleData';
 
 
 export const GET_MYINFO = '[MYINFO] GET MYINFO';
+export const GET_INTERNAL_STATS = '[MYINFO] GET INTERNAL STATS';
 export const REFRESH_CHAMPION_SCORES = '[MYINFO] REFRESH CHAMPION SCORES';
 export const TRY_REFRESH_CHAMPION_SCORES = '[MYINFO] TRY REFRESH CHAMPION SCORES';
 export const SET_SUB_ACCOUNT = '[MYINFO] SET SUB ACCOUNT';
@@ -67,6 +68,36 @@ export function getMyInfo(groupId, puuid) {
 				payload: result
 			});
 		});
+}
+
+// 내전 상세(챔피언/KDA/라인전) 통계. 헬퍼 수집분만 집계되어 표본이 적거나 없을 수 있고,
+// 데이터가 없으면 조용히 null로 둔다(빈 상태는 화면에서 처리). getMyInfo와 별개 API.
+export function getInternalStats(groupId, puuid) {
+	if (isSampleMode()) {
+		return dispatch => {
+			dispatch({ type: GET_INTERNAL_STATS, payload: getSampleInternalStats(puuid) });
+		};
+	}
+
+	const params = { groupId };
+	if (puuid) params.puuid = puuid;
+	const request = createCamilleAxios().get('/api/user/internal-stats', {
+		params,
+		silentError: true
+	});
+
+	return dispatch =>
+		request
+			.then(response => {
+				if (response.status !== 200) {
+					dispatch({ type: GET_INTERNAL_STATS, payload: null });
+					return;
+				}
+				dispatch({ type: GET_INTERNAL_STATS, payload: response.data.result });
+			})
+			.catch(() => {
+				dispatch({ type: GET_INTERNAL_STATS, payload: null });
+			});
 }
 
 export function registerSubAccount(riotId, groupId) {

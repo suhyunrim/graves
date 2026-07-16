@@ -76,6 +76,13 @@ const navigationConfig = [
 				url: '/compare'
 			},
 			{
+				id: 'champion-tierlist-component',
+				title: '챔피언 티어',
+				type: 'item',
+				icon: 'leaderboard',
+				url: '/champion-tierlist'
+			},
+			{
 				id: 'balance-report-component',
 				title: '밸런스 리포트',
 				type: 'item',

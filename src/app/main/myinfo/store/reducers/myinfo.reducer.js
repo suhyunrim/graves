@@ -3,7 +3,8 @@ import * as Actions from '../actions';
 const initialState = {
 	scoreInfo: null,
 	isRefreshingChampionScores: false,
-	statusMessage: null
+	statusMessage: null,
+	internalStats: null
 };
 
 const myInfoReducer = (state = initialState, action) => {
@@ -36,6 +37,12 @@ const myInfoReducer = (state = initialState, action) => {
 				statusMessage: action.payload.statusMessage || null,
 				tournamentChampionships: action.payload.tournamentChampionships || [],
 				mostChampions: action.payload.mostChampions || []
+			};
+		}
+		case Actions.GET_INTERNAL_STATS: {
+			return {
+				...state,
+				internalStats: action.payload
 			};
 		}
 		case Actions.SET_SUB_ACCOUNT: {
