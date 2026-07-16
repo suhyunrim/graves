@@ -1,19 +1,14 @@
-import FuseScrollbars from '@fuse/core/FuseScrollbars';
-import Box from '@mui/material/Box';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableHead from '@mui/material/TableHead';
 import TablePagination from '@mui/material/TablePagination';
-import TableRow from '@mui/material/TableRow';
 import IconButton from '@mui/material/IconButton';
 import SettingsIcon from '@mui/icons-material/Settings';
-import { makeStyles, withStyles } from 'tss-react/mui';
-import { fadeInUp } from './Reveal';
-import React from 'react';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import { makeStyles } from 'tss-react/mui';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { RevealGroup } from './Reveal';
 import PositionIcon from '../tournament/PositionIcon';
 import { getChampionIcon } from '../challenge/ddragonUtils';
+import MatchDetail from './MatchDetail';
 
 const tierColors = {
 	IRON: '#5C5C5C',
@@ -28,14 +23,14 @@ const tierColors = {
 	CHALLENGER: '#F0E68C'
 };
 
-// Riot 표준 포지션 키(대문자) → 한글 라벨 + PositionIcon용 키(소문자).
+// Riot 표준 포지션 키(대문자) → PositionIcon용 키(소문자).
 // 표시/정렬은 항상 탑 → 정글 → 미드 → 원딜 → 서폿 순서 고정 (RankingHeader/MyInfo 와 동일).
 const POSITIONS = [
-	{ key: 'TOP', label: '탑', icon: 'top' },
-	{ key: 'JUNGLE', label: '정글', icon: 'jungle' },
-	{ key: 'MIDDLE', label: '미드', icon: 'mid' },
-	{ key: 'BOTTOM', label: '원딜', icon: 'adc' },
-	{ key: 'UTILITY', label: '서폿', icon: 'support' }
+	{ key: 'TOP', icon: 'top' },
+	{ key: 'JUNGLE', icon: 'jungle' },
+	{ key: 'MIDDLE', icon: 'mid' },
+	{ key: 'BOTTOM', icon: 'adc' },
+	{ key: 'UTILITY', icon: 'support' }
 ];
 
 const POSITION_ORDER = POSITIONS.reduce((acc, pos, i) => {
@@ -59,7 +54,6 @@ const sortPlayers = players =>
 		if (aHas !== bHas) return aHas ? -1 : 1;
 		return b.rating - a.rating;
 	});
-
 
 // 다이얼로그 프리뷰 등 외부에서도 재사용하는 tier 헬퍼
 export const getTierShortName = tier => {
@@ -119,119 +113,159 @@ const formatDateParts = utcDateString => {
 	return { day: `${year}-${month}-${day}`, time: `${hours}:${minutes}` };
 };
 
-const formatDate = utcDateString => {
-	const { day, time } = formatDateParts(utcDateString);
-	return `${day} ${time}`;
-};
-
-const useStyles = makeStyles()(() => ({
+const useStyles = makeStyles()(theme => ({
 	container: {
 		padding: '28px',
-		maxWidth: 1600,
+		maxWidth: 1200,
 		margin: '0 auto',
-		width: '100%'
+		width: '100%',
+		[theme.breakpoints.down('sm')]: {
+			padding: '16px'
+		}
 	},
-	tableWrapper: {
+	cardList: {
+		display: 'flex',
+		flexDirection: 'column',
+		gap: 14
+	},
+	matchCard: {
 		background: 'linear-gradient(135deg, #1a1a2e 0%, #0f0f1a 100%)',
-		borderRadius: 20,
-		border: '1px solid rgba(0, 212, 255, 0.2)',
+		borderRadius: 16,
+		border: '1px solid rgba(0, 212, 255, 0.15)',
 		overflow: 'hidden',
-		'--reveal-distance': '20px',
-		animation: `${fadeInUp} 0.6s ease`
+		transition: 'border-color 0.2s ease'
 	},
-	headerCell: {
-		backgroundColor: 'rgba(0, 212, 255, 0.08)',
-		color: 'rgba(255, 255, 255, 0.9)',
-		fontFamily: '"Rajdhani", "Noto Sans KR", sans-serif',
-		fontSize: '1.4rem',
-		fontWeight: 700,
-		textTransform: 'uppercase',
-		letterSpacing: '0.08em',
-		borderBottom: '2px solid rgba(0, 212, 255, 0.3)',
-		padding: '20px 16px'
+	matchCardClickable: {
+		cursor: 'pointer',
+		'&:hover': {
+			borderColor: 'rgba(0, 212, 255, 0.45)'
+		}
 	},
-	winTeamCell: {
-		borderLeft: '5px solid #00c853',
-		backgroundColor: 'rgba(0, 200, 83, 0.35) !important'
-	},
-	loseTeamCell: {
-		borderLeft: '5px solid #ff5252',
-		backgroundColor: 'rgba(255, 82, 82, 0.3) !important'
-	},
-	winBadge: {
-		display: 'inline-block',
-		padding: '4px 12px',
-		borderRadius: 6,
-		background: 'linear-gradient(135deg, #00c853 0%, #00e676 100%)',
-		color: '#fff',
-		fontFamily: '"Rajdhani", sans-serif',
-		fontSize: '1.1rem',
-		fontWeight: 700,
-		textTransform: 'uppercase',
-		letterSpacing: '0.05em',
-		marginBottom: 8,
-		boxShadow: '0 2px 8px rgba(0, 200, 83, 0.4)'
-	},
-	loseBadge: {
-		display: 'inline-block',
-		padding: '4px 12px',
-		borderRadius: 6,
-		background: 'linear-gradient(135deg, #ff5252 0%, #ff1744 100%)',
-		color: '#fff',
-		fontFamily: '"Rajdhani", sans-serif',
-		fontSize: '1.1rem',
-		fontWeight: 700,
-		textTransform: 'uppercase',
-		letterSpacing: '0.05em',
-		marginBottom: 8,
-		boxShadow: '0 2px 8px rgba(255, 82, 82, 0.4)'
-	},
-	// 매치별 날짜 스트립 (팀 셀 위에 좌측 정렬로 표시)
-	dateRowCell: {
-		borderBottom: 'none',
-		padding: '14px 16px 8px',
-		fontFamily: '"Rajdhani", "Noto Sans KR", sans-serif',
-		whiteSpace: 'nowrap'
-	},
-	dateRowInner: {
+	cardHeader: {
 		display: 'flex',
 		alignItems: 'center',
-		gap: 8
+		gap: 10,
+		padding: '10px 16px',
+		background: 'rgba(0, 0, 0, 0.25)',
+		borderBottom: '1px solid rgba(255, 255, 255, 0.06)',
+		[theme.breakpoints.down('sm')]: {
+			padding: '8px 12px'
+		}
 	},
 	dateDay: {
+		fontFamily: '"Rajdhani", sans-serif',
 		fontSize: '1.3rem',
 		fontWeight: 600,
-		color: 'rgba(255, 255, 255, 0.85)'
+		color: 'rgba(255, 255, 255, 0.85)',
+		whiteSpace: 'nowrap'
 	},
 	dateTime: {
+		fontFamily: '"Rajdhani", sans-serif',
 		fontSize: '1.15rem',
-		color: 'rgba(255, 255, 255, 0.5)'
+		color: 'rgba(255, 255, 255, 0.45)',
+		whiteSpace: 'nowrap'
 	},
-	// 팀 셀 상단: WIN/LOSE 배지 + 팀 LP 변동 (멤버 리스트 위)
-	teamCellHeader: {
+	perspResult: {
+		fontFamily: '"Rajdhani", sans-serif',
+		fontSize: '1.15rem',
+		fontWeight: 700
+	},
+	headerRight: {
+		marginLeft: 'auto',
+		display: 'flex',
+		alignItems: 'center',
+		gap: 6
+	},
+	expandHint: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1rem',
+		color: 'rgba(255, 255, 255, 0.35)',
+		[theme.breakpoints.down('sm')]: {
+			display: 'none'
+		}
+	},
+	expandIcon: {
+		color: 'rgba(255, 255, 255, 0.35)',
+		transition: 'transform 0.25s ease',
+		flexShrink: 0
+	},
+	expandIconOpen: {
+		transform: 'rotate(180deg)'
+	},
+	teamsGrid: {
+		display: 'grid',
+		gridTemplateColumns: '1fr auto 1fr',
+		alignItems: 'stretch',
+		[theme.breakpoints.down('md')]: {
+			gridTemplateColumns: '1fr'
+		}
+	},
+	vsDivider: {
+		alignSelf: 'center',
+		fontFamily: '"Rajdhani", sans-serif',
+		fontSize: '1.3rem',
+		fontWeight: 700,
+		color: 'rgba(255, 255, 255, 0.18)',
+		padding: '0 14px',
+		[theme.breakpoints.down('md')]: {
+			textAlign: 'center',
+			padding: '2px 0'
+		}
+	},
+	teamBlock: {
+		padding: '12px 16px',
+		borderLeft: '4px solid transparent',
+		[theme.breakpoints.down('sm')]: {
+			padding: '10px 12px'
+		}
+	},
+	teamBlockWin: {
+		borderLeftColor: '#00c853',
+		background: 'rgba(0, 200, 83, 0.07)'
+	},
+	teamBlockLose: {
+		borderLeftColor: '#ff5252',
+		background: 'rgba(255, 82, 82, 0.06)'
+	},
+	teamHeader: {
 		display: 'flex',
 		alignItems: 'center',
 		gap: 8,
-		marginBottom: 10
+		marginBottom: 8
+	},
+	teamEmoji: {
+		fontSize: '1.3rem'
+	},
+	teamName: {
+		fontFamily: '"Rajdhani", sans-serif',
+		fontSize: '1.15rem',
+		fontWeight: 600,
+		color: 'rgba(255, 255, 255, 0.5)',
+		textTransform: 'uppercase',
+		letterSpacing: '0.06em'
+	},
+	resultWin: {
+		fontFamily: '"Rajdhani", sans-serif',
+		fontSize: '1.35rem',
+		fontWeight: 700,
+		color: '#00e676'
+	},
+	resultLose: {
+		fontFamily: '"Rajdhani", sans-serif',
+		fontSize: '1.35rem',
+		fontWeight: 700,
+		color: '#ff5252'
 	},
 	lpChange: {
 		fontFamily: '"Rajdhani", sans-serif',
 		fontSize: '1.1rem',
-		fontWeight: 600,
-		marginTop: 2
-	},
-	ratingChange: {
-		fontFamily: '"Rajdhani", sans-serif',
-		fontSize: '1.3rem',
 		fontWeight: 600
 	},
 	ratingUp: {
-		color: '#00e676',
-		textShadow: '0 0 8px rgba(0, 230, 118, 0.5)'
+		color: '#00e676'
 	},
 	ratingDown: {
-		color: '#ff5252',
-		textShadow: '0 0 8px rgba(255, 82, 82, 0.5)'
+		color: '#ff5252'
 	},
 	ratingNeutral: {
 		color: 'rgba(255, 255, 255, 0.5)'
@@ -239,83 +273,80 @@ const useStyles = makeStyles()(() => ({
 	playerList: {
 		display: 'flex',
 		flexDirection: 'column',
-		gap: 8
+		gap: 4
 	},
 	playerRow: {
 		display: 'flex',
 		alignItems: 'center',
-		gap: 10,
-		padding: '4px 0'
+		gap: 8,
+		padding: '3px 0'
 	},
 	// position 없는 플레이어도 빈 슬롯을 차지해 이름/티어 세로 정렬이 흔들리지 않게 함.
 	positionSlot: {
-		width: 20,
-		height: 20,
+		width: 18,
+		height: 18,
 		display: 'inline-flex',
 		alignItems: 'center',
 		justifyContent: 'center',
 		flexShrink: 0
 	},
 	positionIcon: {
-		width: 20,
-		height: 20,
+		width: 18,
+		height: 18,
 		objectFit: 'contain'
 	},
 	positionFallback: {
 		fontFamily: '"Rajdhani", sans-serif',
-		fontSize: '0.95rem',
+		fontSize: '0.9rem',
 		fontWeight: 700,
 		color: 'rgba(255, 255, 255, 0.55)'
 	},
 	tierIcon: {
-		width: 28,
-		height: 28,
-		flexShrink: 0,
-		transition: 'transform 0.2s ease',
-		'&:hover': {
-			transform: 'scale(1.2)'
-		}
+		width: 22,
+		height: 22,
+		flexShrink: 0
 	},
-	tierBadge: {
+	// 티어 짧은 라벨: 배경 칩 없이 컬러 텍스트만 (시각적 노이즈 축소)
+	tierShort: {
 		fontFamily: '"Rajdhani", sans-serif',
-		fontSize: '1.2rem',
+		fontSize: '1.1rem',
 		fontWeight: 700,
-		minWidth: 40,
+		minWidth: 26,
 		flexShrink: 0,
-		textAlign: 'center',
-		padding: '2px 6px',
-		borderRadius: 4,
-		background: 'rgba(255, 255, 255, 0.1)'
+		textAlign: 'center'
 	},
 	// LCU 수집 매치: 플레이한 챔피언 아이콘. 팀 내 일부만 스탯이 있어도 정렬 유지용 빈 슬롯 렌더.
 	champIcon: {
-		width: 26,
-		height: 26,
+		width: 24,
+		height: 24,
 		borderRadius: '50%',
 		objectFit: 'cover',
 		border: '1px solid rgba(255, 255, 255, 0.2)',
 		flexShrink: 0
 	},
 	champSlot: {
-		width: 26,
-		height: 26,
+		width: 24,
+		height: 24,
 		flexShrink: 0
 	},
 	// 긴 닉네임은 두 줄로 깨지지 않게 한 줄 말줄임(…). 이름만 줄어들도록 minWidth:0.
 	playerName: {
 		fontFamily: '"Noto Sans KR", sans-serif',
-		fontSize: '1.4rem',
+		fontSize: '1.3rem',
 		fontWeight: 500,
-		color: '#fff',
+		color: 'rgba(255, 255, 255, 0.92)',
 		cursor: 'pointer',
 		minWidth: 0,
 		overflow: 'hidden',
 		textOverflow: 'ellipsis',
-		whiteSpace: 'nowrap'
+		whiteSpace: 'nowrap',
+		'&:hover': {
+			color: '#00d4ff'
+		}
 	},
 	playerNameHighlight: {
 		fontFamily: '"Noto Sans KR", sans-serif',
-		fontSize: '1.4rem',
+		fontSize: '1.3rem',
 		fontWeight: 700,
 		color: '#00d4ff',
 		background: 'rgba(0, 212, 255, 0.15)',
@@ -328,25 +359,19 @@ const useStyles = makeStyles()(() => ({
 		textOverflow: 'ellipsis',
 		whiteSpace: 'nowrap'
 	},
-	teamLabel: {
-		display: 'flex',
-		alignItems: 'center',
-		gap: 8
+	settingsBtn: {
+		color: 'rgba(255, 255, 255, 0.4)',
+		padding: 6,
+		'&:hover': {
+			color: '#00d4ff',
+			backgroundColor: 'rgba(0, 212, 255, 0.1)'
+		}
 	},
-	teamEmoji: {
+	settingsIcon: {
 		fontSize: '1.6rem'
-	},
-	vsCell: {
-		fontFamily: '"Rajdhani", sans-serif',
-		fontSize: '1.8rem',
-		fontWeight: 700,
-		color: 'rgba(255, 255, 255, 0.3)',
-		textAlign: 'center',
-		padding: '0 8px'
 	},
 	pagination: {
 		color: 'rgba(255, 255, 255, 0.7)',
-		borderTop: '1px solid rgba(255, 255, 255, 0.1)',
 		'& .MuiTablePagination-selectIcon': {
 			color: 'rgba(255, 255, 255, 0.5)'
 		},
@@ -359,6 +384,11 @@ const useStyles = makeStyles()(() => ({
 		'& .MuiSelect-icon': {
 			color: 'rgba(255, 255, 255, 0.5)'
 		}
+	},
+	emptyPanel: {
+		background: 'linear-gradient(135deg, #1a1a2e 0%, #0f0f1a 100%)',
+		borderRadius: 16,
+		border: '1px solid rgba(0, 212, 255, 0.15)'
 	},
 	emptyState: {
 		display: 'flex',
@@ -377,204 +407,17 @@ const useStyles = makeStyles()(() => ({
 		fontFamily: '"Noto Sans KR", sans-serif',
 		fontSize: '1.8rem',
 		color: 'rgba(255, 255, 255, 0.4)'
-	},
-	// Mobile card styles
-	mobileCardList: {
-		padding: '16px'
-	},
-	mobileCard: {
-		background: 'rgba(255, 255, 255, 0.03)',
-		borderRadius: 16,
-		marginBottom: 16,
-		border: '1px solid rgba(255, 255, 255, 0.08)',
-		overflow: 'hidden'
-	},
-	mobileCardHeader: {
-		display: 'flex',
-		justifyContent: 'space-between',
-		alignItems: 'center',
-		padding: '12px 16px',
-		background: 'rgba(0, 212, 255, 0.08)',
-		borderBottom: '1px solid rgba(255, 255, 255, 0.08)'
-	},
-	mobileDate: {
-		fontFamily: '"Noto Sans KR", sans-serif',
-		fontSize: '1.1rem',
-		color: 'rgba(255, 255, 255, 0.6)'
-	},
-	mobileTeamSection: {
-		padding: '12px 16px'
-	},
-	mobileTeamWin: {
-		borderLeft: '4px solid #00c853',
-		background: 'rgba(0, 200, 83, 0.08)'
-	},
-	mobileTeamLose: {
-		borderLeft: '4px solid #ff5252',
-		background: 'rgba(255, 82, 82, 0.05)'
-	},
-	mobileTeamHeader: {
-		display: 'flex',
-		justifyContent: 'space-between',
-		alignItems: 'center',
-		marginBottom: 10
-	},
-	mobileTeamInfo: {
-		display: 'flex',
-		alignItems: 'center',
-		gap: 10
-	},
-	mobileTeamEmoji: {
-		fontSize: '1.4rem'
-	},
-	mobileTeamName: {
-		fontFamily: '"Rajdhani", sans-serif',
-		fontSize: '1.2rem',
-		fontWeight: 600,
-		color: 'rgba(255, 255, 255, 0.8)'
-	},
-	mobileBadgeWin: {
-		padding: '3px 10px',
-		borderRadius: 4,
-		background: 'linear-gradient(135deg, #00c853 0%, #00e676 100%)',
-		color: '#fff',
-		fontFamily: '"Rajdhani", sans-serif',
-		fontSize: '1rem',
-		fontWeight: 700,
-		textTransform: 'uppercase'
-	},
-	mobileBadgeLose: {
-		padding: '3px 10px',
-		borderRadius: 4,
-		background: 'linear-gradient(135deg, #ff5252 0%, #ff1744 100%)',
-		color: '#fff',
-		fontFamily: '"Rajdhani", sans-serif',
-		fontSize: '1rem',
-		fontWeight: 700,
-		textTransform: 'uppercase'
-	},
-	mobileLpChange: {
-		fontFamily: '"Rajdhani", sans-serif',
-		fontSize: '0.95rem',
-		fontWeight: 600
-	},
-	mobileRatingChange: {
-		fontFamily: '"Rajdhani", sans-serif',
-		fontSize: '1.1rem',
-		fontWeight: 600
-	},
-	mobilePlayerList: {
-		display: 'flex',
-		flexDirection: 'column',
-		gap: 6
-	},
-	mobilePlayerChip: {
-		display: 'flex',
-		alignItems: 'center',
-		gap: 4,
-		padding: '4px 8px',
-		background: 'rgba(255, 255, 255, 0.06)',
-		borderRadius: 6
-	},
-	// 모바일은 칩(pill)이라 정렬용 빈 슬롯 불필요 — position 있을 때만 렌더.
-	mobilePositionIcon: {
-		width: 16,
-		height: 16,
-		objectFit: 'contain',
-		flexShrink: 0
-	},
-	mobilePositionFallback: {
-		fontFamily: '"Rajdhani", sans-serif',
-		fontSize: '0.85rem',
-		fontWeight: 700,
-		color: 'rgba(255, 255, 255, 0.55)'
-	},
-	mobilePlayerTierIcon: {
-		width: 18,
-		height: 18
-	},
-	mobileChampIcon: {
-		width: 18,
-		height: 18,
-		borderRadius: '50%',
-		objectFit: 'cover',
-		flexShrink: 0
-	},
-	mobileChampSlot: {
-		width: 18,
-		height: 18,
-		flexShrink: 0
-	},
-	mobilePlayerTier: {
-		fontFamily: '"Rajdhani", sans-serif',
-		fontSize: '0.9rem',
-		fontWeight: 700
-	},
-	mobilePlayerName: {
-		fontFamily: '"Noto Sans KR", sans-serif',
-		fontSize: '1rem',
-		color: '#fff',
-		cursor: 'pointer'
-	},
-	mobilePlayerNameHighlight: {
-		fontFamily: '"Noto Sans KR", sans-serif',
-		fontSize: '1rem',
-		fontWeight: 700,
-		color: '#00d4ff',
-		background: 'rgba(0, 212, 255, 0.15)',
-		padding: '1px 6px',
-		borderRadius: 4,
-		textShadow: '0 0 6px rgba(0, 212, 255, 0.5)',
-		cursor: 'pointer'
-	},
-	mobileVsDivider: {
-		textAlign: 'center',
-		padding: '6px 0',
-		fontFamily: '"Rajdhani", sans-serif',
-		fontSize: '1.2rem',
-		fontWeight: 700,
-		color: 'rgba(255, 255, 255, 0.2)',
-		background: 'rgba(0, 0, 0, 0.2)'
-	},
-	settingsBtn: {
-		color: 'rgba(255, 255, 255, 0.4)',
-		padding: 6,
-		'&:hover': {
-			color: '#00d4ff',
-			backgroundColor: 'rgba(0, 212, 255, 0.1)'
-		}
-	},
-	settingsIcon: {
-		fontSize: '1.6rem'
-	}
-}));
-
-const StyledTableCell = withStyles(TableCell, () => ({
-	body: {
-		backgroundColor: 'transparent',
-		color: '#fff',
-		fontFamily: '"Noto Sans KR", sans-serif',
-		fontSize: '1.2rem',
-		borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
-		padding: '16px'
-	}
-}));
-
-const StyledTableRow = withStyles(TableRow, () => ({
-	root: {
-		transition: 'background-color 0.2s ease',
-		'&:hover': {
-			backgroundColor: 'rgba(0, 212, 255, 0.05)'
-		}
 	}
 }));
 
 /**
- * 매치 목록(데스크탑 테이블 + 모바일 카드 + 페이지네이션 + empty state) 공용 컴포넌트.
+ * 매치 목록(카드 리스트 + 페이지네이션 + empty state) 공용 컴포넌트.
+ * 매치 카드: 헤더(날짜 · 관리자 메뉴) + Team 1 | VS | Team 2 로스터(모바일은 세로 스택).
+ * LCU 수집 매치는 카드 클릭 시 상세(MatchDetail)가 펼쳐진다.
  *
  * props:
  *  - matches, total, page(1-base), rowsPerPage, onPageChange(nextPage 1-base)
- *  - isAdmin, onMenuOpen(e, match): 관리자 설정(복제/취소) 버튼. 미지정 시 버튼/컬럼 숨김
+ *  - isAdmin, onMenuOpen(e, match): 관리자 설정(복제/취소) 버튼. 미지정 시 버튼 숨김
  *  - isHighlighted(player) => boolean: 강조할 플레이어 판별(선택, 예: 검색어 매칭)
  *  - perspectivePuuid: 지정 시 그 유저 이름 강조 + 매치별 승/패 배지 + 내 LP 칩 표시
  */
@@ -589,13 +432,26 @@ function MatchList({
 	isHighlighted,
 	perspectivePuuid
 }) {
-	const { classes } = useStyles();
+	const { classes, cx } = useStyles();
 	const navigate = useNavigate();
+	const [expandedIds, setExpandedIds] = useState(() => new Set());
 
 	const showAdmin = Boolean(isAdmin && onMenuOpen);
 
 	const isPlayerHighlighted = player =>
 		(isHighlighted && isHighlighted(player)) || (perspectivePuuid && player.puuid === perspectivePuuid);
+
+	const matchHasDetail = match =>
+		match.team1.players.some(p => p.stat) || match.team2.players.some(p => p.stat);
+
+	const toggleExpand = gameId => {
+		setExpandedIds(prev => {
+			const next = new Set(prev);
+			if (next.has(gameId)) next.delete(gameId);
+			else next.add(gameId);
+			return next;
+		});
+	};
 
 	// 본인 관점 승/패 + 내 LP 계산 (perspectivePuuid 있을 때만)
 	const getPerspective = match => {
@@ -609,10 +465,10 @@ function MatchList({
 		return { won: match.winTeam === myTeam, myLp };
 	};
 
-	const renderLpSpan = (lp, cls) => {
-		if (lp > 0) return <span className={`${cls} ${classes.ratingUp}`}>+{lp} LP</span>;
-		if (lp < 0) return <span className={`${cls} ${classes.ratingDown}`}>{lp} LP</span>;
-		return <span className={`${cls} ${classes.ratingNeutral}`}>0 LP</span>;
+	const renderLpSpan = lp => {
+		if (lp > 0) return <span className={`${classes.lpChange} ${classes.ratingUp}`}>+{lp} LP</span>;
+		if (lp < 0) return <span className={`${classes.lpChange} ${classes.ratingDown}`}>{lp} LP</span>;
+		return <span className={`${classes.lpChange} ${classes.ratingNeutral}`}>0 LP</span>;
 	};
 
 	// {포지션}{티어아이콘}{티어}{플레이챔프(LCU 수집 시)}{닉네임(태그 제외)}
@@ -637,9 +493,8 @@ function MatchList({
 						className={classes.tierIcon}
 						src={`/assets/images/ranked-emblems/Emblem_${getTierIconName(player.tier)}.webp`}
 						alt={player.tier}
-						style={{ filter: `drop-shadow(0 0 4px ${getTierColor(player.tier)}40)` }}
 					/>
-					<span className={classes.tierBadge} style={{ color: getTierColor(player.tier) }}>
+					<span className={classes.tierShort} style={{ color: getTierColor(player.tier) }}>
 						{getTierShortName(player.tier)}
 					</span>
 					{hasChamps &&
@@ -659,7 +514,10 @@ function MatchList({
 					<span
 						className={isPlayerHighlighted(player) ? classes.playerNameHighlight : classes.playerName}
 						title={player.name}
-						onClick={() => navigate(`/userinfo/${player.puuid}`)}
+						onClick={e => {
+							e.stopPropagation();
+							navigate(`/userinfo/${player.puuid}`);
+						}}
 					>
 						{stripTag(player.name)}
 					</span>
@@ -668,251 +526,100 @@ function MatchList({
 		});
 	};
 
-	const renderMobilePlayers = players => {
-		const sortedPlayers = sortPlayers(players);
-		const hasChamps = players.some(p => p.stat && p.stat.championName);
-		return sortedPlayers.map(player => {
-			const posIconKey = POSITION_ICON_KEY[player.position];
-			const champName = player.stat && player.stat.championName;
-			return (
-				<div key={player.puuid} className={classes.mobilePlayerChip}>
-					{posIconKey && (
-						<PositionIcon
-							position={posIconKey}
-							className={classes.mobilePositionIcon}
-							fallbackClassName={classes.mobilePositionFallback}
-						/>
-					)}
-					<img
-						className={classes.mobilePlayerTierIcon}
-						src={`/assets/images/ranked-emblems/Emblem_${getTierIconName(player.tier)}.webp`}
-						alt={player.tier}
-					/>
-					<span className={classes.mobilePlayerTier} style={{ color: getTierColor(player.tier) }}>
-						{getTierShortName(player.tier)}
+	const renderTeamBlock = (match, teamNo) => {
+		const team = teamNo === 1 ? match.team1 : match.team2;
+		const won = match.winTeam === teamNo;
+		return (
+			<div className={cx(classes.teamBlock, won ? classes.teamBlockWin : classes.teamBlockLose)}>
+				<div className={classes.teamHeader}>
+					<span role="img" aria-label={teamNo === 1 ? 'dog' : 'cat'} className={classes.teamEmoji}>
+						{teamNo === 1 ? '🐶' : '🐱'}
 					</span>
-					{hasChamps &&
-						(champName ? (
-							<img
-								className={classes.mobileChampIcon}
-								src={getChampionIcon(champName)}
-								alt={(player.stat && player.stat.championKoName) || champName}
-								onError={e => {
-									e.currentTarget.style.visibility = 'hidden';
-								}}
-							/>
-						) : (
-							<span className={classes.mobileChampSlot} />
-						))}
-					<span
-						className={isPlayerHighlighted(player) ? classes.mobilePlayerNameHighlight : classes.mobilePlayerName}
-						title={player.name}
-						onClick={() => navigate(`/userinfo/${player.puuid}`)}
-					>
-						{stripTag(player.name)}
-					</span>
+					<span className={classes.teamName}>Team {teamNo}</span>
+					<span className={won ? classes.resultWin : classes.resultLose}>{won ? 'WIN' : 'LOSE'}</span>
+					{renderLpSpan(team.ratingChange * 4)}
 				</div>
-			);
-		});
+				<div className={classes.playerList}>{renderPlayers(team.players)}</div>
+			</div>
+		);
 	};
 
 	return (
 		<div className={classes.container}>
-			<div className={classes.tableWrapper}>
-				{matches && matches.length > 0 ? (
-					<>
-						{/* Desktop Table View */}
-						<Box sx={{ display: { xs: 'none', md: 'block' } }}>
-							<FuseScrollbars className="flex-grow overflow-x-auto">
-								<Table sx={{ tableLayout: 'fixed' }}>
-									<TableHead>
-										<TableRow>
-											<TableCell className={classes.headerCell}>
-												<span className={classes.teamLabel}>
-													<span role="img" aria-label="dog" className={classes.teamEmoji}>
-														🐶
-													</span>{' '}
-													Team 1
+			{matches && matches.length > 0 ? (
+				<>
+					<RevealGroup className={classes.cardList} distance={16}>
+						{matches.map(match => {
+							const persp = getPerspective(match);
+							const dateParts = formatDateParts(match.createdAt);
+							const detailAvailable = matchHasDetail(match);
+							const expanded = detailAvailable && expandedIds.has(match.gameId);
+							return (
+								<div
+									key={match.gameId}
+									className={cx(classes.matchCard, detailAvailable && classes.matchCardClickable)}
+									onClick={detailAvailable ? () => toggleExpand(match.gameId) : undefined}
+								>
+									<div className={classes.cardHeader}>
+										<span className={classes.dateDay}>{dateParts.day}</span>
+										<span className={classes.dateTime}>{dateParts.time}</span>
+										{persp && (
+											<>
+												<span
+													className={cx(classes.perspResult, persp.won ? classes.resultWin : classes.resultLose)}
+												>
+													{persp.won ? 'WIN' : 'LOSE'}
 												</span>
-											</TableCell>
-											<TableCell className={classes.headerCell}>
-												<span className={classes.teamLabel}>
-													<span role="img" aria-label="cat" className={classes.teamEmoji}>
-														🐱
-													</span>{' '}
-													Team 2
-												</span>
-											</TableCell>
-											{showAdmin && <TableCell className={classes.headerCell} style={{ width: 48 }} />}
-										</TableRow>
-									</TableHead>
-									<TableBody>
-										{matches.map(match => {
-											const isTeam1Win = match.winTeam === 1;
-											const persp = getPerspective(match);
-											const dateParts = formatDateParts(match.createdAt);
-											return (
-												<React.Fragment key={match.gameId}>
-													{/* 매치별 날짜 스트립 (좌측 상단) */}
-													<TableRow>
-														<TableCell
-															className={classes.dateRowCell}
-															style={{ borderBottom: 'none', padding: '14px 16px 8px' }}
-															colSpan={showAdmin ? 3 : 2}
-														>
-															<div className={classes.dateRowInner}>
-																<span className={classes.dateDay}>{dateParts.day}</span>
-																<span className={classes.dateTime}>{dateParts.time}</span>
-																{persp && (
-																	<>
-																		<span
-																			className={persp.won ? classes.winBadge : classes.loseBadge}
-																			style={{ marginBottom: 0 }}
-																		>
-																			{persp.won ? 'WIN' : 'LOSE'}
-																		</span>
-																		{persp.myLp != null && renderLpSpan(persp.myLp, classes.lpChange)}
-																	</>
-																)}
-															</div>
-														</TableCell>
-													</TableRow>
-													<StyledTableRow>
-														<StyledTableCell className={isTeam1Win ? classes.winTeamCell : classes.loseTeamCell}>
-															<div className={classes.teamCellHeader}>
-																<span
-																	className={isTeam1Win ? classes.winBadge : classes.loseBadge}
-																	style={{ marginBottom: 0 }}
-																>
-																	{isTeam1Win ? 'WIN' : 'LOSE'}
-																</span>
-																{renderLpSpan(match.team1.ratingChange * 4, classes.lpChange)}
-															</div>
-															<div className={classes.playerList}>{renderPlayers(match.team1.players)}</div>
-														</StyledTableCell>
-														<StyledTableCell className={!isTeam1Win ? classes.winTeamCell : classes.loseTeamCell}>
-															<div className={classes.teamCellHeader}>
-																<span
-																	className={!isTeam1Win ? classes.winBadge : classes.loseBadge}
-																	style={{ marginBottom: 0 }}
-																>
-																	{!isTeam1Win ? 'WIN' : 'LOSE'}
-																</span>
-																{renderLpSpan(match.team2.ratingChange * 4, classes.lpChange)}
-															</div>
-															<div className={classes.playerList}>{renderPlayers(match.team2.players)}</div>
-														</StyledTableCell>
-														{showAdmin && (
-															<StyledTableCell align="center" style={{ padding: '8px 4px' }}>
-																<IconButton
-																	className={classes.settingsBtn}
-																	size="small"
-																	onClick={e => onMenuOpen(e, match)}
-																>
-																	<SettingsIcon className={classes.settingsIcon} />
-																</IconButton>
-															</StyledTableCell>
-														)}
-													</StyledTableRow>
-												</React.Fragment>
-											);
-										})}
-									</TableBody>
-								</Table>
-							</FuseScrollbars>
-						</Box>
-
-						{/* Mobile Card View */}
-						<Box sx={{ display: { md: 'none' } }}>
-							<div className={classes.mobileCardList}>
-								{matches.map(match => {
-									const isTeam1Win = match.winTeam === 1;
-									const persp = getPerspective(match);
-									return (
-										<div key={match.gameId} className={classes.mobileCard}>
-											<div className={classes.mobileCardHeader}>
-												<div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-													<span className={classes.mobileDate}>{formatDate(match.createdAt)}</span>
-													{persp && (
-														<>
-															<span className={persp.won ? classes.mobileBadgeWin : classes.mobileBadgeLose}>
-																{persp.won ? 'WIN' : 'LOSE'}
-															</span>
-															{persp.myLp != null && renderLpSpan(persp.myLp, classes.mobileLpChange)}
-														</>
-													)}
-												</div>
-												{showAdmin && (
-													<IconButton
-														className={classes.settingsBtn}
-														size="small"
-														onClick={e => onMenuOpen(e, match)}
-													>
-														<SettingsIcon className={classes.settingsIcon} />
-													</IconButton>
-												)}
-											</div>
-											{/* Team 1 */}
-											<div
-												className={`${classes.mobileTeamSection} ${
-													isTeam1Win ? classes.mobileTeamWin : classes.mobileTeamLose
-												}`}
-											>
-												<div className={classes.mobileTeamHeader}>
-													<div className={classes.mobileTeamInfo}>
-														<span role="img" aria-label="dog" className={classes.mobileTeamEmoji}>
-															🐶
-														</span>
-														<span className={classes.mobileTeamName}>Team 1</span>
-														<span className={isTeam1Win ? classes.mobileBadgeWin : classes.mobileBadgeLose}>
-															{isTeam1Win ? 'WIN' : 'LOSE'}
-														</span>
-													</div>
-													{renderLpSpan(match.team1.ratingChange * 4, classes.mobileLpChange)}
-												</div>
-												<div className={classes.mobilePlayerList}>{renderMobilePlayers(match.team1.players)}</div>
-											</div>
-											{/* VS Divider */}
-											<div className={classes.mobileVsDivider}>VS</div>
-											{/* Team 2 */}
-											<div
-												className={`${classes.mobileTeamSection} ${
-													!isTeam1Win ? classes.mobileTeamWin : classes.mobileTeamLose
-												}`}
-											>
-												<div className={classes.mobileTeamHeader}>
-													<div className={classes.mobileTeamInfo}>
-														<span role="img" aria-label="cat" className={classes.mobileTeamEmoji}>
-															🐱
-														</span>
-														<span className={classes.mobileTeamName}>Team 2</span>
-														<span className={!isTeam1Win ? classes.mobileBadgeWin : classes.mobileBadgeLose}>
-															{!isTeam1Win ? 'WIN' : 'LOSE'}
-														</span>
-													</div>
-													{renderLpSpan(match.team2.ratingChange * 4, classes.mobileLpChange)}
-												</div>
-												<div className={classes.mobilePlayerList}>{renderMobilePlayers(match.team2.players)}</div>
-											</div>
+												{persp.myLp != null && renderLpSpan(persp.myLp)}
+											</>
+										)}
+										<div className={classes.headerRight}>
+											{detailAvailable && (
+												<>
+													<span className={classes.expandHint}>상세</span>
+													<ExpandMoreIcon
+														className={cx(classes.expandIcon, expanded && classes.expandIconOpen)}
+													/>
+												</>
+											)}
+											{showAdmin && (
+												<IconButton
+													className={classes.settingsBtn}
+													size="small"
+													onClick={e => {
+														e.stopPropagation();
+														onMenuOpen(e, match);
+													}}
+												>
+													<SettingsIcon className={classes.settingsIcon} />
+												</IconButton>
+											)}
 										</div>
-									);
-								})}
-							</div>
-						</Box>
-
-						<TablePagination
-							className={classes.pagination}
-							component="div"
-							count={total}
-							rowsPerPage={rowsPerPage}
-							rowsPerPageOptions={[]}
-							page={page - 1}
-							backIconButtonProps={{ 'aria-label': 'Previous Page' }}
-							nextIconButtonProps={{ 'aria-label': 'Next Page' }}
-							onPageChange={(event, newPage) => onPageChange(newPage + 1)}
-						/>
-					</>
-				) : (
+									</div>
+									<div className={classes.teamsGrid}>
+										{renderTeamBlock(match, 1)}
+										<div className={classes.vsDivider}>VS</div>
+										{renderTeamBlock(match, 2)}
+									</div>
+									{expanded && <MatchDetail match={match} perspectivePuuid={perspectivePuuid} />}
+								</div>
+							);
+						})}
+					</RevealGroup>
+					<TablePagination
+						className={classes.pagination}
+						component="div"
+						count={total}
+						rowsPerPage={rowsPerPage}
+						rowsPerPageOptions={[]}
+						page={page - 1}
+						backIconButtonProps={{ 'aria-label': 'Previous Page' }}
+						nextIconButtonProps={{ 'aria-label': 'Next Page' }}
+						onPageChange={(event, newPage) => onPageChange(newPage + 1)}
+					/>
+				</>
+			) : (
+				<div className={classes.emptyPanel}>
 					<div className={classes.emptyState}>
 						<div className={classes.emptyIcon}>
 							<span role="img" aria-label="scroll">
@@ -921,8 +628,8 @@ function MatchList({
 						</div>
 						<div className={classes.emptyText}>매치 기록이 없습니다</div>
 					</div>
-				)}
-			</div>
+				</div>
+			)}
 		</div>
 	);
 }
