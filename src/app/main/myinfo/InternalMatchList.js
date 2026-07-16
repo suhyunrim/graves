@@ -9,7 +9,8 @@ import {
 	getSpellIcon,
 	getKeystoneIcon,
 	getMultiKillBadge,
-	loadChampionKeysById
+	loadChampionKeysById,
+	loadPerkIcons
 } from 'app/main/challenge/ddragonUtils';
 import { getTierShortName, getTierIconName, getTierColor } from '../components/MatchList';
 import PositionIcon from '../tournament/PositionIcon';
@@ -825,25 +826,32 @@ function InternalMatchList({ matches, total, page, rowsPerPage, onPageChange, pe
 	const [expandedIds, setExpandedIds] = useState(() => new Set());
 	// 밴 목록(championId 숫자)의 아이콘 렌더용 id → DDragon 키 맵
 	const [champKeys, setChampKeys] = useState({});
+	// perk ID → 실제 아이콘 URL (CDragon perks/perkstyles 기반). 로드 전엔 정적 매핑 폴백.
+	const [perkIcons, setPerkIcons] = useState({});
 
 	useEffect(() => {
 		let alive = true;
 		loadChampionKeysById().then(map => {
 			if (alive) setChampKeys(map);
 		});
+		loadPerkIcons().then(map => {
+			if (alive) setPerkIcons(map);
+		});
 		return () => {
 			alive = false;
 		};
 	}, []);
+
+	const getPerkIcon = perkId => perkIcons[perkId] || getKeystoneIcon(perkId);
 
 	// 스펠(좌열) + 룬(우열) 2x2 아이콘. 스펠/룬 정보가 아예 없으면 렌더 안 함(구 수집분 호환)
 	const renderSpellsRunes = (stat, gridCls, iconCls, emptyCls) => {
 		if (stat.spell1Id == null && stat.runeKeystoneId == null) return null;
 		const cells = [
 			stat.spell1Id != null ? getSpellIcon(stat.spell1Id) : null,
-			stat.runeKeystoneId != null ? getKeystoneIcon(stat.runeKeystoneId) : null,
+			stat.runeKeystoneId != null ? getPerkIcon(stat.runeKeystoneId) : null,
 			stat.spell2Id != null ? getSpellIcon(stat.spell2Id) : null,
-			stat.runeSubStyleId != null ? getKeystoneIcon(stat.runeSubStyleId) : null
+			stat.runeSubStyleId != null ? getPerkIcon(stat.runeSubStyleId) : null
 		];
 		return (
 			<div className={gridCls}>

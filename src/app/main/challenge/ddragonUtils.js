@@ -121,6 +121,35 @@ export function getMultiKillBadge(participant) {
 	return null;
 }
 
+let perkIconsPromise = null;
+
+// CDragon perks.json + perkstyles.json에서 모든 perk ID → 아이콘 URL 매핑을 1회 로드해 캐시.
+// PERK_STYLE_ICONS 하드코딩은 로드 전/실패 시 즉시 렌더용 폴백 (패치로 룬 추가·파일명 변경 대응).
+export function loadPerkIcons() {
+	if (perkIconsPromise) return perkIconsPromise;
+	const CDRAGON_BASE = 'https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default';
+	const toUrl = iconPath => `${CDRAGON_BASE}${iconPath.replace('/lol-game-data/assets', '').toLowerCase()}`;
+	perkIconsPromise = Promise.all([
+		axios
+			.get(`${CDRAGON_BASE}/v1/perks.json`)
+			.then(res => res.data || [])
+			.catch(() => []),
+		axios
+			.get(`${CDRAGON_BASE}/v1/perkstyles.json`)
+			.then(res => (res.data && res.data.styles) || [])
+			.catch(() => [])
+	])
+		.then(([perks, styles]) => {
+			const map = {};
+			[...perks, ...styles].forEach(p => {
+				if (p && p.id != null && p.iconPath) map[p.id] = toUrl(p.iconPath);
+			});
+			return map;
+		})
+		.catch(() => ({}));
+	return perkIconsPromise;
+}
+
 let championKeysPromise = null;
 
 // DDragon 챔피언 숫자 ID → DDragon 키("Thresh") 매핑을 1회 로드해 캐시.
