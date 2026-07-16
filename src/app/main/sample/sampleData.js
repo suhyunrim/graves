@@ -454,13 +454,13 @@ export function getSampleInternalStats(puuid) {
 		totalGames: 42,
 		wins: 25,
 		champions: [
-			{ championId: 412, championName: 'Thresh', championKoName: '쓰레쉬', games: 14, wins: 8, winRate: 57.1, kills: 2.1, deaths: 4.3, assists: 15.2, kda: 4.02, csPerMin: 1.1 },
-			{ championId: 89, championName: 'Leona', championKoName: '레오나', games: 10, wins: 6, winRate: 60.0, kills: 1.8, deaths: 4.9, assists: 13.7, kda: 3.16, csPerMin: 0.9 },
-			{ championId: 99, championName: 'Lux', championKoName: '럭스', games: 8, wins: 4, winRate: 50.0, kills: 6.5, deaths: 4.1, assists: 9.8, kda: 3.98, csPerMin: 5.2 },
-			{ championId: 104, championName: 'Graves', championKoName: '그레이브즈', games: 6, wins: 4, winRate: 66.7, kills: 7.2, deaths: 4.0, assists: 5.1, kda: 3.08, csPerMin: 6.8 },
-			{ championId: 202, championName: 'Jhin', championKoName: '진', games: 4, wins: 3, winRate: 75.0, kills: 8.0, deaths: 3.2, assists: 7.5, kda: 4.84, csPerMin: 7.9 },
-			{ championId: 64, championName: 'LeeSin', championKoName: '리 신', games: 3, wins: 1, winRate: 33.3, kills: 5.1, deaths: 5.8, assists: 6.0, kda: 1.91, csPerMin: 5.5 },
-			{ championId: 86, championName: 'Garen', championKoName: '가렌', games: 2, wins: 1, winRate: 50.0, kills: 4.0, deaths: 3.5, assists: 3.0, kda: 2.0, csPerMin: 6.1 }
+			{ championId: 412, championName: 'Thresh', championKoName: '쓰레쉬', games: 14, wins: 8, winRate: 57.1, kills: 2.1, deaths: 4.3, assists: 15.2, kda: 4.02, csPerMin: 1.1, mainPosition: 'UTILITY', killParticipation: 68.4, damageShare: 8.2, gpm: 265, dpm: 310, visionPerMin: 1.8, laneGoldDiffAvg: 120, objectiveShare: 48.2 },
+			{ championId: 89, championName: 'Leona', championKoName: '레오나', games: 10, wins: 6, winRate: 60.0, kills: 1.8, deaths: 4.9, assists: 13.7, kda: 3.16, csPerMin: 0.9, mainPosition: 'UTILITY', killParticipation: 71.2, damageShare: 7.5, gpm: 251, dpm: 285, visionPerMin: 1.5, laneGoldDiffAvg: -80, objectiveShare: 51.0 },
+			{ championId: 99, championName: 'Lux', championKoName: '럭스', games: 8, wins: 4, winRate: 50.0, kills: 6.5, deaths: 4.1, assists: 9.8, kda: 3.98, csPerMin: 5.2, mainPosition: 'MIDDLE', killParticipation: 62.0, damageShare: 24.8, gpm: 388, dpm: 645, visionPerMin: 0.9, laneGoldDiffAvg: 210, objectiveShare: 44.1 },
+			{ championId: 104, championName: 'Graves', championKoName: '그레이브즈', games: 6, wins: 4, winRate: 66.7, kills: 7.2, deaths: 4.0, assists: 5.1, kda: 3.08, csPerMin: 6.8, mainPosition: 'JUNGLE', killParticipation: 58.7, damageShare: 21.3, gpm: 421, dpm: 590, visionPerMin: 0.7, laneGoldDiffAvg: null, objectiveShare: 63.5 },
+			{ championId: 202, championName: 'Jhin', championKoName: '진', games: 4, wins: 3, winRate: 75.0, kills: 8.0, deaths: 3.2, assists: 7.5, kda: 4.84, csPerMin: 7.9, mainPosition: 'BOTTOM', killParticipation: 66.1, damageShare: 28.4, gpm: 445, dpm: 720, visionPerMin: 0.8, laneGoldDiffAvg: 340, objectiveShare: 39.8 },
+			{ championId: 64, championName: 'LeeSin', championKoName: '리 신', games: 3, wins: 1, winRate: 33.3, kills: 5.1, deaths: 5.8, assists: 6.0, kda: 1.91, csPerMin: 5.5, mainPosition: 'TOP', killParticipation: 49.5, damageShare: 18.0, gpm: 365, dpm: 480, visionPerMin: 0.6, laneGoldDiffAvg: -180, objectiveShare: 35.2 },
+			{ championId: 86, championName: 'Garen', championKoName: '가렌', games: 2, wins: 1, winRate: 50.0, kills: 4.0, deaths: 3.5, assists: 3.0, kda: 2.0, csPerMin: 6.1, mainPosition: null, killParticipation: 45.0, damageShare: 19.6, gpm: 402, dpm: 510, visionPerMin: 0.5, laneGoldDiffAvg: null, objectiveShare: null }
 		],
 		positions: [
 			{ position: 'UTILITY', games: 24, wins: 14, winRate: 58.3, kda: 3.6, csPerMin: 1.0, dpm: 320, laneGames: 22, csDiffAvg: -2.1, goldDiffAvg: 180, damageDiffAvg: 900 },

@@ -1371,8 +1371,11 @@ function InternalMatchList({ matches, total, page, rowsPerPage, onPageChange, pe
 												</span>
 											</span>
 											{laneShare != null && (
-												<span className={classes.miniStatLine}>
-													라인전{' '}
+												<span
+													className={classes.miniStatLine}
+													title="게임 전체 최종 골드 기준, 맞라인 상대와의 지분"
+												>
+													맞라인{' '}
 													<span
 														className={cx(
 															classes.miniStatValue,

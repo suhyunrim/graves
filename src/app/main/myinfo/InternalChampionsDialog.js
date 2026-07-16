@@ -3,7 +3,10 @@ import { makeStyles } from 'tss-react/mui';
 import Dialog from '@mui/material/Dialog';
 import Button from '@mui/material/Button';
 import { getChampionIcon } from 'app/main/challenge/ddragonUtils';
+import PositionIcon from '../tournament/PositionIcon';
 import { getChampBadges } from './championBadges';
+
+const POSITION_ICON_KEY = { TOP: 'top', JUNGLE: 'jungle', MIDDLE: 'mid', BOTTOM: 'adc', UTILITY: 'support' };
 
 const useStyles = makeStyles()((theme) => ({
 	dialogPaper: {
@@ -15,7 +18,7 @@ const useStyles = makeStyles()((theme) => ({
 		overflow: 'hidden',
 		position: 'relative',
 		width: '100%',
-		maxWidth: 760,
+		maxWidth: 900,
 		'&::before': {
 			content: '""',
 			position: 'absolute',
@@ -122,6 +125,25 @@ const useStyles = makeStyles()((theme) => ({
 		fontSize: '1rem',
 		color: 'rgba(255, 255, 255, 0.4)'
 	},
+	posSlot: {
+		width: 16,
+		height: 16,
+		flexShrink: 0,
+		display: 'inline-flex',
+		alignItems: 'center',
+		justifyContent: 'center'
+	},
+	posIcon: {
+		width: 16,
+		height: 16,
+		objectFit: 'contain'
+	},
+	posFallback: {
+		fontFamily: '"Rajdhani", sans-serif',
+		fontSize: '0.85rem',
+		fontWeight: 700,
+		color: 'rgba(255, 255, 255, 0.55)'
+	},
 	winHigh: {
 		color: '#00ff7f'
 	},
@@ -165,6 +187,9 @@ function InternalChampionsDialog({ open, onClose, champions, totalGames }) {
 								<th className={classes.th}>승률</th>
 								<th className={classes.th}>KDA</th>
 								<th className={classes.th}>평균 K / D / A</th>
+								<th className={classes.th}>킬관여</th>
+								<th className={classes.th}>DPM</th>
+								<th className={classes.th}>GPM</th>
 								<th className={classes.th}>CS/분</th>
 							</tr>
 						</thead>
@@ -172,10 +197,20 @@ function InternalChampionsDialog({ open, onClose, champions, totalGames }) {
 							{list.map(c => {
 								const name = c.championKoName || c.championName;
 								const badges = getChampBadges(c, totalGames);
+								const posKey = POSITION_ICON_KEY[c.mainPosition];
 								return (
 									<tr key={c.championId}>
 										<td className={classes.td}>
 											<div className={classes.champCell}>
+												<span className={classes.posSlot}>
+													{posKey && (
+														<PositionIcon
+															position={posKey}
+															className={classes.posIcon}
+															fallbackClassName={classes.posFallback}
+														/>
+													)}
+												</span>
 												<img
 													className={classes.champImg}
 													src={getChampionIcon(c.championName)}
@@ -202,6 +237,9 @@ function InternalChampionsDialog({ open, onClose, champions, totalGames }) {
 												{c.kills} / {c.deaths} / {c.assists}
 											</span>
 										</td>
+										<td className={classes.td}>{c.killParticipation != null ? `${c.killParticipation}%` : '-'}</td>
+										<td className={classes.td}>{c.dpm != null ? c.dpm : '-'}</td>
+										<td className={classes.td}>{c.gpm != null ? c.gpm : '-'}</td>
 										<td className={classes.td}>{c.csPerMin != null ? c.csPerMin : '-'}</td>
 									</tr>
 								);

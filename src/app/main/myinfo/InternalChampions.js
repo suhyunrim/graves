@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { makeStyles } from 'tss-react/mui';
 import { getChampionIcon } from 'app/main/challenge/ddragonUtils';
+import PositionIcon from '../tournament/PositionIcon';
 import InternalChampionsDialog from './InternalChampionsDialog';
 import { getChampBadges } from './championBadges';
 
@@ -10,6 +11,61 @@ const kdaColor = kda => {
 	if (kda >= 3) return '#00d4ff';
 	if (kda >= 2) return 'rgba(255, 255, 255, 0.85)';
 	return 'rgba(255, 255, 255, 0.5)';
+};
+
+const POSITION_ICON_KEY = { TOP: 'top', JUNGLE: 'jungle', MIDDLE: 'mid', BOTTOM: 'adc', UTILITY: 'support' };
+
+// 주 포지션 대표 지표 1개 (탑=맞라인 골드차 / 정글=오브젝트 장악 / 미드=킬관여 / 원딜=DPM / 서폿=분당시야).
+// 모든 수치는 그 챔피언으로 플레이한 판들 기준 집계. 지정 지표가 null이거나 mainPosition이 없으면 DPM 폴백.
+// 주의: goldDiff는 라인전 페이즈가 아니라 게임 전체 최종 골드 기준 맞라인 격차 (LCU에 시점 데이터 없음).
+export const getPositionStats = c => {
+	const pct = v => `${v}%`;
+	switch (c.mainPosition) {
+		case 'TOP':
+			if (c.laneGoldDiffAvg != null) {
+				return [
+					{
+						label: '맞라인 골드',
+						value: `${c.laneGoldDiffAvg > 0 ? '+' : ''}${c.laneGoldDiffAvg}G`,
+						color: c.laneGoldDiffAvg > 0 ? '#00ff7f' : c.laneGoldDiffAvg < 0 ? '#ff6b6b' : undefined,
+						title: '게임 전체 최종 골드 기준, 맞라인 상대와의 차이 평균'
+					}
+				];
+			}
+			break;
+		case 'JUNGLE':
+			if (c.objectiveShare != null) {
+				return [
+					{
+						label: '오브젝트 장악',
+						value: pct(c.objectiveShare),
+						title: '내 게임에서 우리 팀이 가져간 에픽 몬스터(용·전령·유충·바론) 비율'
+					}
+				];
+			}
+			break;
+		case 'MIDDLE':
+			if (c.killParticipation != null) {
+				return [{ label: '킬관여', value: pct(c.killParticipation), title: '팀 킬 중 킬/어시스트로 관여한 비율' }];
+			}
+			break;
+		case 'BOTTOM':
+			if (c.dpm != null) {
+				return [{ label: 'DPM', value: String(c.dpm), title: '분당 챔피언 딜량' }];
+			}
+			break;
+		case 'UTILITY':
+			if (c.visionPerMin != null) {
+				return [{ label: '분당시야', value: String(c.visionPerMin), title: '분당 시야 점수' }];
+			}
+			break;
+		default:
+			break;
+	}
+	if (c.dpm != null) {
+		return [{ label: 'DPM', value: String(c.dpm), title: '분당 챔피언 딜량' }];
+	}
+	return [];
 };
 
 const useStyles = makeStyles()((theme) => ({
@@ -100,6 +156,29 @@ const useStyles = makeStyles()((theme) => ({
 			width: 36,
 			height: 36
 		}
+	},
+	posSlot: {
+		width: 18,
+		height: 18,
+		flexShrink: 0,
+		display: 'inline-flex',
+		alignItems: 'center',
+		justifyContent: 'center'
+	},
+	posIcon: {
+		width: 18,
+		height: 18,
+		objectFit: 'contain'
+	},
+	posFallback: {
+		fontFamily: '"Rajdhani", sans-serif',
+		fontSize: '0.9rem',
+		fontWeight: 700,
+		color: 'rgba(255, 255, 255, 0.55)'
+	},
+	posStatValue: {
+		fontWeight: 700,
+		color: 'rgba(255, 255, 255, 0.75)'
 	},
 	nameCol: {
 		display: 'flex',
@@ -193,8 +272,15 @@ function InternalChampions({ champions, totalGames }) {
 					const wrColor = wr >= 50 ? '#00ff7f' : 'rgba(255, 255, 255, 0.6)';
 					const name = c.championKoName || c.championName;
 					const badges = getChampBadges(c, totalGames);
+					const posKey = POSITION_ICON_KEY[c.mainPosition];
+					const posStats = getPositionStats(c);
 					return (
 						<div key={c.championId} className={classes.row}>
+							<span className={classes.posSlot}>
+								{posKey && (
+									<PositionIcon position={posKey} className={classes.posIcon} fallbackClassName={classes.posFallback} />
+								)}
+							</span>
 							<img
 								className={classes.champImg}
 								src={getChampionIcon(c.championName)}
@@ -214,7 +300,21 @@ function InternalChampions({ champions, totalGames }) {
 										</span>
 									))}
 								</div>
-								<span className={classes.subLine}>{c.csPerMin != null ? `CS/분 ${c.csPerMin}` : ''}</span>
+								<span className={classes.subLine}>
+									{posStats.length > 0
+										? posStats.map((s, i) => (
+												<React.Fragment key={s.label}>
+													{i > 0 && ' · '}
+													<span title={s.title}>
+														{s.label}{' '}
+														<span className={classes.posStatValue} style={s.color ? { color: s.color } : undefined}>
+															{s.value}
+														</span>
+													</span>
+												</React.Fragment>
+										  ))
+										: c.csPerMin != null && `CS/분 ${c.csPerMin}`}
+								</span>
 							</div>
 							<div className={classes.kdaCol}>
 								<span
