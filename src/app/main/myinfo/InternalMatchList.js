@@ -11,6 +11,7 @@ import {
 	getMultiKillBadge,
 	loadPerkIcons
 } from 'app/main/challenge/ddragonUtils';
+import { formatRelativeTime, formatFullDateTime } from 'app/utility/formatRelativeTime';
 import { getTierShortName, getTierIconName, getTierColor } from '../components/MatchList';
 import MatchDetail from '../components/MatchDetail';
 import PositionIcon from '../tournament/PositionIcon';
@@ -45,16 +46,6 @@ const sortPlayers = players =>
 		if (aHas !== bHas) return aHas ? -1 : 1;
 		return b.rating - a.rating;
 	});
-
-const formatDate = utcDateString => {
-	const date = new Date(utcDateString);
-	const year = String(date.getFullYear()).slice(-2);
-	const month = String(date.getMonth() + 1).padStart(2, '0');
-	const day = String(date.getDate()).padStart(2, '0');
-	const hours = String(date.getHours()).padStart(2, '0');
-	const minutes = String(date.getMinutes()).padStart(2, '0');
-	return `${year}-${month}-${day} ${hours}:${minutes}`;
-};
 
 const formatDuration = sec => {
 	if (sec == null) return null;
@@ -687,7 +678,9 @@ function InternalMatchList({ matches, total, page, rowsPerPage, onPageChange, pe
 							<div className={classes.resultCol}>
 								<span className={won ? classes.resultWin : classes.resultLose}>{won ? '승리' : '패배'}</span>
 								{renderLp(myLp)}
-								<span className={classes.metaText}>{formatDate(match.createdAt)}</span>
+								<span className={classes.metaText} title={formatFullDateTime(match.createdAt)}>
+									{formatRelativeTime(match.createdAt)}
+								</span>
 								{durationSec != null && <span className={classes.metaText}>{formatDuration(durationSec)}</span>}
 								{patch && <span className={classes.metaText}>패치 {patch}</span>}
 							</div>

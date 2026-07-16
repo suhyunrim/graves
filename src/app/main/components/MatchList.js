@@ -5,6 +5,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { makeStyles } from 'tss-react/mui';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { formatRelativeTime, formatFullDateTime } from 'app/utility/formatRelativeTime';
 import { RevealGroup } from './Reveal';
 import PositionIcon from '../tournament/PositionIcon';
 import { getChampionIcon } from '../challenge/ddragonUtils';
@@ -102,17 +103,6 @@ export const getTierColor = tier => {
 // 닉네임의 라이엇 태그(#KR1 등)는 목록에선 숨긴다 (hover title로만 노출)
 const stripTag = name => (name || '').split('#')[0];
 
-// 날짜 문자열을 날짜/시간으로 분리.
-const formatDateParts = utcDateString => {
-	const date = new Date(utcDateString);
-	const year = String(date.getFullYear()).slice(-2);
-	const month = String(date.getMonth() + 1).padStart(2, '0');
-	const day = String(date.getDate()).padStart(2, '0');
-	const hours = String(date.getHours()).padStart(2, '0');
-	const minutes = String(date.getMinutes()).padStart(2, '0');
-	return { day: `${year}-${month}-${day}`, time: `${hours}:${minutes}` };
-};
-
 const useStyles = makeStyles()(theme => ({
 	container: {
 		padding: '28px',
@@ -152,18 +142,13 @@ const useStyles = makeStyles()(theme => ({
 			padding: '8px 12px'
 		}
 	},
-	dateDay: {
-		fontFamily: '"Rajdhani", sans-serif',
-		fontSize: '1.3rem',
+	dateLabel: {
+		fontFamily: '"Rajdhani", "Noto Sans KR", sans-serif',
+		fontSize: '1.25rem',
 		fontWeight: 600,
-		color: 'rgba(255, 255, 255, 0.85)',
-		whiteSpace: 'nowrap'
-	},
-	dateTime: {
-		fontFamily: '"Rajdhani", sans-serif',
-		fontSize: '1.15rem',
-		color: 'rgba(255, 255, 255, 0.45)',
-		whiteSpace: 'nowrap'
+		color: 'rgba(255, 255, 255, 0.75)',
+		whiteSpace: 'nowrap',
+		cursor: 'default'
 	},
 	perspResult: {
 		fontFamily: '"Rajdhani", sans-serif',
@@ -551,7 +536,6 @@ function MatchList({
 					<RevealGroup className={classes.cardList} distance={16}>
 						{matches.map(match => {
 							const persp = getPerspective(match);
-							const dateParts = formatDateParts(match.createdAt);
 							const detailAvailable = matchHasDetail(match);
 							const expanded = detailAvailable && expandedIds.has(match.gameId);
 							return (
@@ -561,8 +545,9 @@ function MatchList({
 									onClick={detailAvailable ? () => toggleExpand(match.gameId) : undefined}
 								>
 									<div className={classes.cardHeader}>
-										<span className={classes.dateDay}>{dateParts.day}</span>
-										<span className={classes.dateTime}>{dateParts.time}</span>
+										<span className={classes.dateLabel} title={formatFullDateTime(match.createdAt)}>
+											{formatRelativeTime(match.createdAt)}
+										</span>
 										{persp && (
 											<>
 												<span
