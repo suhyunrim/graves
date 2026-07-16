@@ -472,7 +472,9 @@ const useStyles = makeStyles()((theme) => ({
 		cursor: 'default'
 	},
 	teamTableWrap: {
-		overflowX: 'auto'
+		overflowX: 'auto',
+		// 테이블 minWidth(880)가 조상 flex의 min-width로 전파돼 모바일 페이지 폭을 밀어올리는 것 차단
+		contain: 'inline-size'
 	},
 	teamTable: {
 		width: '100%',
@@ -712,6 +714,8 @@ const useStyles = makeStyles()((theme) => ({
 	},
 	objText: {
 		flex: 1,
+		// nowrap 텍스트의 min-content 폭이 카드/페이지 폭을 밀어올리는 것 차단 (flex:1이 실제 폭 배분, 넘치면 ellipsis)
+		width: 0,
 		fontFamily: '"Rajdhani", "Noto Sans KR", sans-serif',
 		fontSize: '1.02rem',
 		fontWeight: 600,
