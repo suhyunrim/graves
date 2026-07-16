@@ -1280,6 +1280,19 @@ function InternalMatchList({ matches, total, page, rowsPerPage, onPageChange, pe
 								{durationSec != null && <span className={classes.metaText}>{formatDuration(durationSec)}</span>}
 								{patch && <span className={classes.metaText}>패치 {patch}</span>}
 							</div>
+							{myTier && (
+								<div className={classes.myTierCol}>
+									<img
+										className={classes.myTierEmblem}
+										src={`/assets/images/ranked-emblems/Emblem_${getTierIconName(myTier)}.webp`}
+										alt={myTier}
+									/>
+									<span className={classes.myTierLabel} style={{ color: getTierColor(myTier) }}>
+										{getTierShortName(myTier)}
+									</span>
+									<span className={classes.myTierCaption}>당시 티어</span>
+								</div>
+							)}
 							<div className={classes.champCol}>
 								{posIconKey && (
 									<span className={classes.posSlot}>
@@ -1383,19 +1396,6 @@ function InternalMatchList({ matches, total, page, rowsPerPage, onPageChange, pe
 									<span className={classes.noDetail}>상세 미수집</span>
 								)}
 							</div>
-							{myTier && (
-								<div className={classes.myTierCol}>
-									<img
-										className={classes.myTierEmblem}
-										src={`/assets/images/ranked-emblems/Emblem_${getTierIconName(myTier)}.webp`}
-										alt={myTier}
-									/>
-									<span className={classes.myTierLabel} style={{ color: getTierColor(myTier) }}>
-										{getTierShortName(myTier)}
-									</span>
-									<span className={classes.myTierCaption}>당시 티어</span>
-								</div>
-							)}
 							<div className={classes.miniRosters}>
 								{renderMiniRoster(match.team1)}
 								{renderMiniRoster(match.team2)}
