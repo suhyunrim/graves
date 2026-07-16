@@ -3,7 +3,7 @@ import { makeStyles } from 'tss-react/mui';
 import { getChampionIcon } from 'app/main/challenge/ddragonUtils';
 import PositionIcon from '../tournament/PositionIcon';
 import InternalChampionsDialog from './InternalChampionsDialog';
-import { getChampBadges } from './championBadges';
+import { getChampBadges, getMetricColor } from './championBadges';
 
 // KDA 배율 색상 (InternalMatchList와 동일 기준)
 const kdaColor = kda => {
@@ -39,6 +39,7 @@ export const getPositionStats = c => {
 					{
 						label: '오브젝트 장악',
 						value: pct(c.objectiveShare),
+						color: getMetricColor('objectiveShare', c.objectiveShare),
 						title: '내 게임에서 우리 팀이 가져간 에픽 몬스터(용·전령·유충·바론) 비율'
 					}
 				];
@@ -46,24 +47,38 @@ export const getPositionStats = c => {
 			break;
 		case 'MIDDLE':
 			if (c.killParticipation != null) {
-				return [{ label: '킬관여', value: pct(c.killParticipation), title: '팀 킬 중 킬/어시스트로 관여한 비율' }];
+				return [
+					{
+						label: '킬관여',
+						value: pct(c.killParticipation),
+						color: getMetricColor('killParticipation', c.killParticipation),
+						title: '팀 킬 중 킬/어시스트로 관여한 비율'
+					}
+				];
 			}
 			break;
 		case 'BOTTOM':
 			if (c.dpm != null) {
-				return [{ label: 'DPM', value: String(c.dpm), title: '분당 챔피언 딜량' }];
+				return [{ label: 'DPM', value: String(c.dpm), color: getMetricColor('dpm', c.dpm), title: '분당 챔피언 딜량' }];
 			}
 			break;
 		case 'UTILITY':
 			if (c.visionPerMin != null) {
-				return [{ label: '분당시야', value: String(c.visionPerMin), title: '분당 시야 점수' }];
+				return [
+					{
+						label: '분당시야',
+						value: String(c.visionPerMin),
+						color: getMetricColor('visionPerMin', c.visionPerMin),
+						title: '분당 시야 점수'
+					}
+				];
 			}
 			break;
 		default:
 			break;
 	}
 	if (c.dpm != null) {
-		return [{ label: 'DPM', value: String(c.dpm), title: '분당 챔피언 딜량' }];
+		return [{ label: 'DPM', value: String(c.dpm), color: getMetricColor('dpm', c.dpm), title: '분당 챔피언 딜량' }];
 	}
 	return [];
 };

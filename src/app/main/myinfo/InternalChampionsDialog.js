@@ -4,7 +4,7 @@ import Dialog from '@mui/material/Dialog';
 import Button from '@mui/material/Button';
 import { getChampionIcon } from 'app/main/challenge/ddragonUtils';
 import PositionIcon from '../tournament/PositionIcon';
-import { getChampBadges } from './championBadges';
+import { getChampBadges, getMetricColor } from './championBadges';
 
 const POSITION_ICON_KEY = { TOP: 'top', JUNGLE: 'jungle', MIDDLE: 'mid', BOTTOM: 'adc', UTILITY: 'support' };
 
@@ -237,8 +237,12 @@ function InternalChampionsDialog({ open, onClose, champions, totalGames }) {
 												{c.kills} / {c.deaths} / {c.assists}
 											</span>
 										</td>
-										<td className={classes.td}>{c.killParticipation != null ? `${c.killParticipation}%` : '-'}</td>
-										<td className={classes.td}>{c.dpm != null ? c.dpm : '-'}</td>
+										<td className={classes.td} style={{ color: getMetricColor('killParticipation', c.killParticipation) }}>
+											{c.killParticipation != null ? `${c.killParticipation}%` : '-'}
+										</td>
+										<td className={classes.td} style={{ color: getMetricColor('dpm', c.dpm) }}>
+											{c.dpm != null ? c.dpm : '-'}
+										</td>
 										<td className={classes.td}>{c.gpm != null ? c.gpm : '-'}</td>
 										<td className={classes.td}>{c.csPerMin != null ? c.csPerMin : '-'}</td>
 									</tr>
