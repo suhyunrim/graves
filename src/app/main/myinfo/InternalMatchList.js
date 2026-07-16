@@ -347,7 +347,11 @@ const useStyles = makeStyles()((theme) => ({
 		paddingLeft: 14,
 		borderLeft: '1px solid rgba(255, 255, 255, 0.1)',
 		flexShrink: 0,
-		minWidth: 112
+		minWidth: 112,
+		// 모바일: 접힌 행 높이 압축 — 상세 지표는 펼침 뷰에서 확인
+		[theme.breakpoints.down('sm')]: {
+			display: 'none'
+		}
 	},
 	// 그 경기 시점의 내전 티어
 	myTierCol: {
