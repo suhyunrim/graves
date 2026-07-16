@@ -34,6 +34,14 @@ const navigationConfig = [
 				url: '/match-history'
 			},
 			{
+				id: 'champion-tierlist-component',
+				title: '내전 챔피언 티어',
+				type: 'item',
+				// 아이콘 폰트가 커스텀 서브셋이라 leaderboard 글리프가 없음 → bar_chart 사용
+				icon: 'bar_chart',
+				url: '/champion-tierlist'
+			},
+			{
 				id: 'honor-ranking-component',
 				title: '명예',
 				type: 'item',
@@ -49,7 +57,7 @@ const navigationConfig = [
 			},
 			{
 				id: 'ai-assistant-component',
-				title: 'AI 도우미 (BETA)',
+				title: 'AI 도우미',
 				type: 'item',
 				icon: 'assistant',
 				url: '/ai'
@@ -74,13 +82,6 @@ const navigationConfig = [
 				type: 'item',
 				icon: 'compare_arrows',
 				url: '/compare'
-			},
-			{
-				id: 'champion-tierlist-component',
-				title: '챔피언 티어',
-				type: 'item',
-				icon: 'leaderboard',
-				url: '/champion-tierlist'
 			},
 			{
 				id: 'balance-report-component',
