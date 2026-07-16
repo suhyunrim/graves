@@ -1261,11 +1261,9 @@ function MyInfoPage(props) {
 		? (POSITION_MAP[summonerInfo.subPosition] || {}).label || summonerInfo.subPosition
 		: null;
 
-	// 히어로: 내전 최다 픽 챔피언 스플래시 배경 (표본 3판 미만이면 기존 배경 유지)
+	// 히어로: 내전 최다 픽 챔피언 스플래시 배경 (수집 데이터 없으면 기존 배경 유지)
 	const signatureChamp =
-		internalStats && internalStats.champions && internalStats.champions[0] && internalStats.champions[0].games >= 3
-			? internalStats.champions[0]
-			: null;
+		internalStats && internalStats.champions && internalStats.champions[0] ? internalStats.champions[0] : null;
 	const heroStyle = signatureChamp
 		? {
 				backgroundImage: `linear-gradient(90deg, rgba(18, 18, 32, 0.96) 0%, rgba(18, 18, 32, 0.85) 45%, rgba(18, 18, 32, 0.5) 100%), url(https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${signatureChamp.championName}_0.jpg)`,
