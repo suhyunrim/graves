@@ -152,6 +152,26 @@ const MATCH_CHAMPS = [
 ];
 const MATCH_POSITIONS = ['TOP', 'JUNGLE', 'MIDDLE', 'BOTTOM', 'UTILITY'];
 
+const MATCH_ITEM_SETS = [
+	[3078, 6672, 3153, 3071, 3742, 0],
+	[3031, 6673, 3094, 3036, 3026, 3006],
+	[3157, 3089, 4645, 3020, 3165, 0],
+	[3065, 3742, 3068, 3047, 3075, 0],
+	[3853, 3117, 3222, 3107, 3011, 0]
+];
+const MATCH_RUNE_SETS = [
+	{ runeKeystoneId: 8005, runePrimaryStyleId: 8000, runeSubStyleId: 8400 },
+	{ runeKeystoneId: 8010, runePrimaryStyleId: 8000, runeSubStyleId: 8200 },
+	{ runeKeystoneId: 8112, runePrimaryStyleId: 8100, runeSubStyleId: 8300 },
+	{ runeKeystoneId: 8128, runePrimaryStyleId: 8100, runeSubStyleId: 8200 },
+	{ runeKeystoneId: 8214, runePrimaryStyleId: 8200, runeSubStyleId: 8100 },
+	{ runeKeystoneId: 8229, runePrimaryStyleId: 8200, runeSubStyleId: 8000 },
+	{ runeKeystoneId: 8437, runePrimaryStyleId: 8400, runeSubStyleId: 8300 },
+	{ runeKeystoneId: 8369, runePrimaryStyleId: 8300, runeSubStyleId: 8000 }
+];
+const MATCH_SPELL_PAIRS = [[4, 12], [4, 14], [4, 11], [4, 7], [4, 3], [4, 6]];
+const MATCH_BAN_IDS = [266, 103, 84, 523, 875, 234, 121, 245, 517, 777];
+
 function makeMatch(index, dayOffset) {
 	const gameId = `sample-match-${String(index + 1).padStart(3, '0')}`;
 	const d = new Date(2026, 3, 10);
@@ -174,8 +194,10 @@ function makeMatch(index, dayOffset) {
 
 	const makeStat = (pi, slotIndex, teamWon) => {
 		const champ = MATCH_CHAMPS[(offset + slotIndex) % MATCH_CHAMPS.length];
+		const spells = MATCH_SPELL_PAIRS[(index + slotIndex) % MATCH_SPELL_PAIRS.length];
 		return {
 			...champ,
+			...MATCH_RUNE_SETS[(index + slotIndex) % MATCH_RUNE_SETS.length],
 			kills: ((index + slotIndex * 3) % 10) + (teamWon ? 3 : 1),
 			deaths: ((index + slotIndex * 2) % 6) + (teamWon ? 1 : 3),
 			assists: ((index * 2 + slotIndex) % 12) + 2,
@@ -189,7 +211,43 @@ function makeMatch(index, dayOffset) {
 			csDiff: hasPositions ? ((index * 7 + slotIndex * 11) % 80) - 40 : null,
 			goldDiff: hasPositions ? ((index * 130 + slotIndex * 77) % 3000) - 1500 : null,
 			damageDiff: hasPositions ? ((index * 210 + slotIndex * 133) % 8000) - 4000 : null,
+			champLevel: 9 + ((index + slotIndex * 3) % 10),
+			items: MATCH_ITEM_SETS[(index + slotIndex) % MATCH_ITEM_SETS.length],
+			trinket: slotIndex % 4 === 3 ? 3364 : 3340,
+			spell1Id: spells[0],
+			spell2Id: spells[1],
+			doubleKills: (index + slotIndex) % 5 === 0 ? 1 : 0,
+			tripleKills: (index + slotIndex) % 9 === 0 ? 1 : 0,
+			quadraKills: 0,
+			pentaKills: index === 0 && slotIndex === 0 ? 1 : 0,
+			largestMultiKill: index === 0 && slotIndex === 0 ? 5 : ((index + slotIndex) % 5 === 0 ? 2 : 1),
+			largestKillingSpree: 2 + ((index + slotIndex) % 6),
+			firstBloodKill: slotIndex === index % 10,
+			wardsPlaced: 5 + ((index + slotIndex * 3) % 25),
+			wardsKilled: (index + slotIndex) % 8,
+			controlWardsBought: (index + slotIndex) % 4,
 			gameDurationSec
+		};
+	};
+
+	const makeTeamStats = teamNo => {
+		const won = winTeam === teamNo;
+		return {
+			baronKills: won ? index % 2 : 0,
+			dragonKills: won ? 2 + (index % 3) : index % 2,
+			riftHeraldKills: (index + teamNo) % 2,
+			hordeKills: (index * teamNo) % 7,
+			towerKills: won ? 7 + (index % 4) : 2 + (index % 3),
+			inhibitorKills: won ? 1 + (index % 2) : 0,
+			firstBlood: won,
+			firstTower: !won,
+			firstDragon: won,
+			firstBaron: won && index % 2 === 1,
+			firstInhibitor: won,
+			bans: Array.from({ length: 5 }, (_, i) => ({
+				championId: MATCH_BAN_IDS[(index + teamNo * 5 + i) % MATCH_BAN_IDS.length],
+				pickTurn: i + 1
+			}))
 		};
 	};
 
@@ -226,6 +284,8 @@ function makeMatch(index, dayOffset) {
 		createdAt,
 		winTeam,
 		gameDurationSec: gameDurationSec || undefined,
+		gameVersion: hasStats ? '16.13.791.5903' : undefined,
+		teamStats: hasStats ? { team1: makeTeamStats(1), team2: makeTeamStats(2) } : undefined,
 		team1: { avgRating: avg1, ratingChange: winTeam === 1 ? 4 : -4, players: team1Players },
 		team2: { avgRating: avg2, ratingChange: winTeam === 2 ? 4 : -4, players: team2Players }
 	};

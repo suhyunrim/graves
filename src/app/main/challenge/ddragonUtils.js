@@ -119,6 +119,30 @@ export function getMultiKillBadge(participant) {
 	return null;
 }
 
+let championKeysPromise = null;
+
+// DDragon 챔피언 숫자 ID → DDragon 키("Thresh") 매핑을 1회 로드해 캐시.
+// 밴 목록처럼 championId(숫자)만 있는 데이터의 아이콘 렌더용.
+export function loadChampionKeysById() {
+	if (championKeysPromise) return championKeysPromise;
+	championKeysPromise = axios
+		.get('https://ddragon.leagueoflegends.com/api/versions.json')
+		.then(res => {
+			const v = (res.data && res.data[0]) || import.meta.env.VITE_RIOT_DATA_VERSION || '14.10.1';
+			return axios.get(`https://ddragon.leagueoflegends.com/cdn/${v}/data/ko_KR/champion.json`);
+		})
+		.then(res => {
+			const data = (res.data && res.data.data) || {};
+			const map = {};
+			Object.keys(data).forEach(id => {
+				map[Number(data[id].key)] = id;
+			});
+			return map;
+		})
+		.catch(() => ({}));
+	return championKeysPromise;
+}
+
 let championNamesPromise = null;
 
 // DDragon ko_KR 챔피언 id → 한글명 매핑을 1회 로드해 캐시 (promise 공유).

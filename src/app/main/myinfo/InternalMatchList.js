@@ -1,9 +1,16 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { makeStyles } from 'tss-react/mui';
 import { useNavigate } from 'react-router-dom';
 import TablePagination from '@mui/material/TablePagination';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { getChampionIcon } from 'app/main/challenge/ddragonUtils';
+import {
+	getChampionIcon,
+	getItemIcon,
+	getSpellIcon,
+	getKeystoneIcon,
+	getMultiKillBadge,
+	loadChampionKeysById
+} from 'app/main/challenge/ddragonUtils';
 import { getTierShortName, getTierIconName, getTierColor } from '../components/MatchList';
 import PositionIcon from '../tournament/PositionIcon';
 
@@ -26,6 +33,16 @@ const POSITION_ICON_KEY = POSITIONS.reduce((acc, pos) => {
 
 // 팀 아이덴티티 컬러 (VS 비교의 A/B 컬러와 동일 계열)
 const TEAM_COLORS = { 1: '#00d4ff', 2: '#ff6b9a' };
+
+// 팀 오브젝트 표시 순서
+const OBJECTIVE_DEFS = [
+	['baronKills', '바론'],
+	['dragonKills', '용'],
+	['riftHeraldKills', '전령'],
+	['hordeKills', '유충'],
+	['towerKills', '타워'],
+	['inhibitorKills', '억제기']
+];
 
 // 매치 데이터의 position이 없으면 수집 스탯의 position으로 폴백
 const getPlayerPosition = player => player.position || (player.stat && player.stat.position) || null;
@@ -176,6 +193,108 @@ const useStyles = makeStyles()((theme) => ({
 			height: 42
 		}
 	},
+	champWrap: {
+		position: 'relative',
+		flexShrink: 0,
+		display: 'inline-flex'
+	},
+	champLevel: {
+		position: 'absolute',
+		right: -3,
+		bottom: -3,
+		minWidth: 19,
+		height: 19,
+		borderRadius: 10,
+		background: 'rgba(0, 0, 0, 0.85)',
+		border: '1px solid rgba(255, 255, 255, 0.25)',
+		fontFamily: '"Rajdhani", sans-serif',
+		fontSize: '0.95rem',
+		fontWeight: 700,
+		color: '#fff',
+		display: 'flex',
+		alignItems: 'center',
+		justifyContent: 'center',
+		padding: '0 3px'
+	},
+	champColInner: {
+		display: 'flex',
+		flexDirection: 'column',
+		gap: 7,
+		minWidth: 0
+	},
+	champTopRow: {
+		display: 'flex',
+		alignItems: 'center',
+		gap: 10
+	},
+	champBottomRow: {
+		display: 'flex',
+		alignItems: 'center',
+		gap: 8,
+		flexWrap: 'wrap'
+	},
+	spellRuneGrid: {
+		display: 'grid',
+		gridTemplateColumns: '20px 20px',
+		gridAutoRows: 20,
+		gap: 2,
+		flexShrink: 0
+	},
+	spellRuneIcon: {
+		width: 20,
+		height: 20,
+		borderRadius: 4,
+		objectFit: 'cover',
+		background: 'rgba(0, 0, 0, 0.4)'
+	},
+	spellRuneEmpty: {
+		width: 20,
+		height: 20,
+		borderRadius: 4,
+		background: 'rgba(255, 255, 255, 0.06)'
+	},
+	itemsRow: {
+		display: 'flex',
+		gap: 3,
+		alignItems: 'center'
+	},
+	itemImg: {
+		width: 22,
+		height: 22,
+		borderRadius: 4,
+		objectFit: 'cover',
+		border: '1px solid rgba(255, 255, 255, 0.12)'
+	},
+	itemEmpty: {
+		width: 22,
+		height: 22,
+		borderRadius: 4,
+		background: 'rgba(255, 255, 255, 0.06)',
+		border: '1px solid rgba(255, 255, 255, 0.06)'
+	},
+	trinketGap: {
+		marginLeft: 4
+	},
+	killBadge: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '0.95rem',
+		fontWeight: 700,
+		color: '#fff',
+		background: 'linear-gradient(135deg, #ff5252 0%, #ff1744 100%)',
+		borderRadius: 10,
+		padding: '2px 9px',
+		whiteSpace: 'nowrap'
+	},
+	fbBadge: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '0.95rem',
+		fontWeight: 700,
+		color: '#ffd700',
+		border: '1px solid rgba(255, 215, 0, 0.5)',
+		borderRadius: 10,
+		padding: '1px 8px',
+		whiteSpace: 'nowrap'
+	},
 	kdaBlock: {
 		display: 'flex',
 		flexDirection: 'column',
@@ -313,7 +432,7 @@ const useStyles = makeStyles()((theme) => ({
 	},
 	teamTable: {
 		width: '100%',
-		minWidth: 680,
+		minWidth: 880,
 		borderCollapse: 'collapse'
 	},
 	teamHeadRow: {
@@ -461,6 +580,110 @@ const useStyles = makeStyles()((theme) => ({
 		fontSize: '0.98rem',
 		color: 'rgba(255, 255, 255, 0.45)'
 	},
+	detailChampWrap: {
+		position: 'relative',
+		flexShrink: 0,
+		display: 'inline-flex'
+	},
+	detailChampLevel: {
+		position: 'absolute',
+		right: -4,
+		bottom: -4,
+		minWidth: 15,
+		height: 15,
+		borderRadius: 8,
+		background: 'rgba(0, 0, 0, 0.85)',
+		border: '1px solid rgba(255, 255, 255, 0.25)',
+		fontFamily: '"Rajdhani", sans-serif',
+		fontSize: '0.8rem',
+		fontWeight: 700,
+		color: '#fff',
+		display: 'flex',
+		alignItems: 'center',
+		justifyContent: 'center',
+		padding: '0 2px'
+	},
+	detailSpellRuneGrid: {
+		display: 'grid',
+		gridTemplateColumns: '14px 14px',
+		gridAutoRows: 14,
+		gap: 1,
+		flexShrink: 0
+	},
+	detailSpellRuneIcon: {
+		width: 14,
+		height: 14,
+		borderRadius: 3,
+		objectFit: 'cover',
+		background: 'rgba(0, 0, 0, 0.4)'
+	},
+	detailSpellRuneEmpty: {
+		width: 14,
+		height: 14,
+		borderRadius: 3,
+		background: 'rgba(255, 255, 255, 0.06)'
+	},
+	detailItemImg: {
+		width: 20,
+		height: 20,
+		borderRadius: 4,
+		objectFit: 'cover',
+		border: '1px solid rgba(255, 255, 255, 0.12)'
+	},
+	detailItemEmpty: {
+		width: 20,
+		height: 20,
+		borderRadius: 4,
+		background: 'rgba(255, 255, 255, 0.06)'
+	},
+	wardSub: {
+		fontFamily: '"Rajdhani", sans-serif',
+		fontSize: '0.98rem',
+		color: 'rgba(255, 255, 255, 0.45)'
+	},
+	bansRow: {
+		display: 'inline-flex',
+		alignItems: 'center',
+		gap: 3,
+		marginLeft: 12
+	},
+	banLabel: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '0.95rem',
+		fontWeight: 600,
+		color: 'rgba(255, 255, 255, 0.4)',
+		marginRight: 2
+	},
+	banImg: {
+		width: 18,
+		height: 18,
+		borderRadius: 4,
+		objectFit: 'cover',
+		filter: 'grayscale(0.7) brightness(0.8)'
+	},
+	objRow: {
+		display: 'flex',
+		alignItems: 'center',
+		gap: 10
+	},
+	objText: {
+		flex: 1,
+		fontFamily: '"Rajdhani", "Noto Sans KR", sans-serif',
+		fontSize: '1.02rem',
+		fontWeight: 600,
+		whiteSpace: 'nowrap',
+		overflow: 'hidden',
+		textOverflow: 'ellipsis'
+	},
+	objCenter: {
+		fontFamily: '"Rajdhani", sans-serif',
+		fontSize: '0.95rem',
+		fontWeight: 700,
+		color: 'rgba(255, 255, 255, 0.35)',
+		textTransform: 'uppercase',
+		letterSpacing: '0.06em',
+		flexShrink: 0
+	},
 	// 팀 합계 스트립 (Total Kill / Total Gold)
 	summaryStrip: {
 		display: 'flex',
@@ -573,6 +796,67 @@ function InternalMatchList({ matches, total, page, rowsPerPage, onPageChange, pe
 	const { classes, cx } = useStyles();
 	const navigate = useNavigate();
 	const [expandedIds, setExpandedIds] = useState(() => new Set());
+	// 밴 목록(championId 숫자)의 아이콘 렌더용 id → DDragon 키 맵
+	const [champKeys, setChampKeys] = useState({});
+
+	useEffect(() => {
+		let alive = true;
+		loadChampionKeysById().then(map => {
+			if (alive) setChampKeys(map);
+		});
+		return () => {
+			alive = false;
+		};
+	}, []);
+
+	// 스펠(좌열) + 룬(우열) 2x2 아이콘. 스펠/룬 정보가 아예 없으면 렌더 안 함(구 수집분 호환)
+	const renderSpellsRunes = (stat, gridCls, iconCls, emptyCls) => {
+		if (stat.spell1Id == null && stat.runeKeystoneId == null) return null;
+		const cells = [
+			stat.spell1Id != null ? getSpellIcon(stat.spell1Id) : null,
+			stat.runeKeystoneId != null ? getKeystoneIcon(stat.runeKeystoneId) : null,
+			stat.spell2Id != null ? getSpellIcon(stat.spell2Id) : null,
+			stat.runeSubStyleId != null ? getKeystoneIcon(stat.runeSubStyleId) : null
+		];
+		return (
+			<div className={gridCls}>
+				{cells.map((src, i) =>
+					src ? (
+						// eslint-disable-next-line react/no-array-index-key
+						<img key={i} className={iconCls} src={src} alt="" />
+					) : (
+						// eslint-disable-next-line react/no-array-index-key
+						<span key={i} className={emptyCls} />
+					)
+				)}
+			</div>
+		);
+	};
+
+	// 아이템 6칸 + 장신구. items 정보 없으면 렌더 안 함(구 수집분 호환)
+	const renderItems = (stat, imgCls, emptyCls) => {
+		if (!stat.items && stat.trinket == null) return null;
+		const slots = [...(stat.items || [])];
+		while (slots.length < 6) slots.push(0);
+		return (
+			<div className={classes.itemsRow}>
+				{slots.slice(0, 6).map((id, i) =>
+					id ? (
+						// eslint-disable-next-line react/no-array-index-key
+						<img key={i} className={imgCls} src={getItemIcon(id)} alt="" />
+					) : (
+						// eslint-disable-next-line react/no-array-index-key
+						<span key={i} className={emptyCls} />
+					)
+				)}
+				{stat.trinket ? (
+					<img className={cx(imgCls, classes.trinketGap)} src={getItemIcon(stat.trinket)} alt="" />
+				) : (
+					<span className={cx(emptyCls, classes.trinketGap)} />
+				)}
+			</div>
+		);
+	};
 
 	const toggleExpand = gameId => {
 		setExpandedIds(prev => {
@@ -649,6 +933,8 @@ function InternalMatchList({ matches, total, page, rowsPerPage, onPageChange, pe
 		const won = match.winTeam === teamNo;
 		const players = sortPlayers(team.players);
 		const durationMin = durationSec ? durationSec / 60 : null;
+		const teamStat = match.teamStats ? match.teamStats[`team${teamNo}`] : null;
+		const bans = teamStat && teamStat.bans ? teamStat.bans : [];
 		return (
 			<div className={classes.teamTableWrap}>
 				<table className={classes.teamTable}>
@@ -660,12 +946,24 @@ function InternalMatchList({ matches, total, page, rowsPerPage, onPageChange, pe
 								</span>{' '}
 								Team {teamNo}{' '}
 								<span className={won ? classes.teamResultWin : classes.teamResultLose}>{won ? 'WIN' : 'LOSE'}</span>
+								{bans.length > 0 && (
+									<span className={classes.bansRow}>
+										<span className={classes.banLabel}>밴</span>
+										{bans.map(b => {
+											const key = champKeys[b.championId];
+											return key ? (
+												<img key={`${b.championId}-${b.pickTurn}`} className={classes.banImg} src={getChampionIcon(key)} alt="" title={key} />
+											) : null;
+										})}
+									</span>
+								)}
 							</th>
 							<th>KDA</th>
 							<th>피해량 (가한/받은)</th>
-							<th>시야</th>
+							<th title="시야점수 · 제어와드 / 설치 / 제거">와드</th>
 							<th>CS</th>
 							<th>골드</th>
+							<th>아이템</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -690,15 +988,28 @@ function InternalMatchList({ matches, total, page, rowsPerPage, onPageChange, pe
 												)}
 											</span>
 											{stat && (
-												<img
-													className={classes.detailChampImg}
-													src={getChampionIcon(stat.championName)}
-													alt={stat.championKoName || stat.championName}
-													title={stat.championKoName || stat.championName}
-													onError={e => {
-														e.currentTarget.style.visibility = 'hidden';
-													}}
-												/>
+												<>
+													<span className={classes.detailChampWrap}>
+														<img
+															className={classes.detailChampImg}
+															src={getChampionIcon(stat.championName)}
+															alt={stat.championKoName || stat.championName}
+															title={stat.championKoName || stat.championName}
+															onError={e => {
+																e.currentTarget.style.visibility = 'hidden';
+															}}
+														/>
+														{stat.champLevel != null && (
+															<span className={classes.detailChampLevel}>{stat.champLevel}</span>
+														)}
+													</span>
+													{renderSpellsRunes(
+														stat,
+														classes.detailSpellRuneGrid,
+														classes.detailSpellRuneIcon,
+														classes.detailSpellRuneEmpty
+													)}
+												</>
 											)}
 											<img
 												className={classes.tierIcon}
@@ -758,7 +1069,17 @@ function InternalMatchList({ matches, total, page, rowsPerPage, onPageChange, pe
 													</div>
 												</div>
 											</td>
-											<td className={classes.td}>{stat.visionScore != null ? stat.visionScore : '-'}</td>
+											<td className={classes.td}>
+												<div className={classes.csCell} title="시야점수 · 제어와드 / 설치 / 제거">
+													<span>{stat.visionScore != null ? stat.visionScore : '-'}</span>
+													{stat.wardsPlaced != null && (
+														<span className={classes.wardSub}>
+															{stat.controlWardsBought != null ? stat.controlWardsBought : 0} /{' '}
+															{stat.wardsPlaced} / {stat.wardsKilled != null ? stat.wardsKilled : 0}
+														</span>
+													)}
+												</div>
+											</td>
 											<td className={classes.td}>
 												<div className={classes.csCell}>
 													<span>{stat.cs}</span>
@@ -766,9 +1087,12 @@ function InternalMatchList({ matches, total, page, rowsPerPage, onPageChange, pe
 												</div>
 											</td>
 											<td className={classes.td}>{formatK(stat.goldEarned)}</td>
+											<td className={classes.td}>
+												{renderItems(stat, classes.detailItemImg, classes.detailItemEmpty) || '-'}
+											</td>
 										</>
 									) : (
-										<td className={classes.td} colSpan={5}>
+										<td className={classes.td} colSpan={6}>
 											<span className={classes.noDetail}>-</span>
 										</td>
 									)}
@@ -788,6 +1112,11 @@ function InternalMatchList({ matches, total, page, rowsPerPage, onPageChange, pe
 			{ label: 'Total Kill', t1: sum(match.team1, 'kills'), t2: sum(match.team2, 'kills'), fmt: v => v },
 			{ label: 'Total Gold', t1: sum(match.team1, 'goldEarned'), t2: sum(match.team2, 'goldEarned'), fmt: formatK }
 		];
+		const ts = match.teamStats;
+		const objText = team =>
+			OBJECTIVE_DEFS.filter(([k]) => team[k] != null)
+				.map(([k, label]) => `${label} ${team[k]}`)
+				.join(' · ');
 		return (
 			<div className={classes.summaryStrip}>
 				{rows.map(r => {
@@ -809,6 +1138,17 @@ function InternalMatchList({ matches, total, page, rowsPerPage, onPageChange, pe
 						</div>
 					);
 				})}
+				{ts && ts.team1 && ts.team2 && (
+					<div className={classes.objRow}>
+						<span className={classes.objText} style={{ color: TEAM_COLORS[1], textAlign: 'right' }}>
+							{objText(ts.team1)}
+						</span>
+						<span className={classes.objCenter}>오브젝트</span>
+						<span className={classes.objText} style={{ color: TEAM_COLORS[2] }}>
+							{objText(ts.team2)}
+						</span>
+					</div>
+				)}
 			</div>
 		);
 	};
@@ -883,6 +1223,8 @@ function InternalMatchList({ matches, total, page, rowsPerPage, onPageChange, pe
 				const csPerMin = myStat && durationSec ? (myStat.cs / (durationSec / 60)).toFixed(1) : null;
 				const kp = myStat ? getKillParticipation(myStat, myTeamPlayers) : null;
 				const laneShare = myStat ? getLaneShare(myStat) : null;
+				const multiKill = myStat ? getMultiKillBadge(myStat) : null;
+				const patch = match.gameVersion ? match.gameVersion.split('.').slice(0, 2).join('.') : null;
 				const posIconKey = POSITION_ICON_KEY[myPosition];
 				const allPlayers = [...match.team1.players, ...match.team2.players];
 				const hasAnyStats = allPlayers.some(p => p.stat);
@@ -900,28 +1242,52 @@ function InternalMatchList({ matches, total, page, rowsPerPage, onPageChange, pe
 								{renderLp(myLp)}
 								<span className={classes.metaText}>{formatDate(match.createdAt)}</span>
 								{durationSec != null && <span className={classes.metaText}>{formatDuration(durationSec)}</span>}
+								{patch && <span className={classes.metaText}>패치 {patch}</span>}
 							</div>
 							<div className={classes.champCol}>
 								{myStat ? (
 									<>
-										<img
-											className={classes.champImg}
-											src={getChampionIcon(myStat.championName)}
-											alt={myStat.championKoName || myStat.championName}
-											onError={e => {
-												e.currentTarget.style.visibility = 'hidden';
-											}}
-										/>
-										<div className={classes.kdaBlock}>
-											<span className={classes.champNameSmall}>
-												{myStat.championKoName || myStat.championName}
-											</span>
-											<span className={classes.kdaLine}>
-												{myStat.kills} / <span className={classes.kdaDeath}>{myStat.deaths}</span> / {myStat.assists}
-											</span>
-											<span className={classes.kdaRatio} style={{ color: kdaRatioColor(kdaRatio) }}>
-												{kdaRatio == null ? 'Perfect' : `${kdaRatio.toFixed(2)}:1 평점`}
-											</span>
+										<div className={classes.champColInner}>
+											<div className={classes.champTopRow}>
+												<span className={classes.champWrap}>
+													<img
+														className={classes.champImg}
+														src={getChampionIcon(myStat.championName)}
+														alt={myStat.championKoName || myStat.championName}
+														onError={e => {
+															e.currentTarget.style.visibility = 'hidden';
+														}}
+													/>
+													{myStat.champLevel != null && (
+														<span className={classes.champLevel}>{myStat.champLevel}</span>
+													)}
+												</span>
+												{renderSpellsRunes(
+													myStat,
+													classes.spellRuneGrid,
+													classes.spellRuneIcon,
+													classes.spellRuneEmpty
+												)}
+												<div className={classes.kdaBlock}>
+													<span className={classes.champNameSmall}>
+														{myStat.championKoName || myStat.championName}
+													</span>
+													<span className={classes.kdaLine}>
+														{myStat.kills} / <span className={classes.kdaDeath}>{myStat.deaths}</span> /{' '}
+														{myStat.assists}
+													</span>
+													<span className={classes.kdaRatio} style={{ color: kdaRatioColor(kdaRatio) }}>
+														{kdaRatio == null ? 'Perfect' : `${kdaRatio.toFixed(2)}:1 평점`}
+													</span>
+												</div>
+											</div>
+											{(myStat.items || multiKill || myStat.firstBloodKill) && (
+												<div className={classes.champBottomRow}>
+													{renderItems(myStat, classes.itemImg, classes.itemEmpty)}
+													{multiKill && <span className={classes.killBadge}>{multiKill}</span>}
+													{myStat.firstBloodKill && <span className={classes.fbBadge}>퍼스트 블러드</span>}
+												</div>
+											)}
 										</div>
 										<div className={classes.miniStats}>
 											{kp != null && (
