@@ -427,7 +427,15 @@ const useStyles = makeStyles()((theme) => ({
 	miniChampSlot: {
 		width: 16,
 		height: 16,
-		flexShrink: 0
+		flexShrink: 0,
+		display: 'inline-flex',
+		alignItems: 'center',
+		justifyContent: 'center'
+	},
+	miniPosIcon: {
+		width: 16,
+		height: 16,
+		objectFit: 'contain'
 	},
 	miniName: {
 		fontFamily: '"Noto Sans KR", sans-serif',
@@ -1026,32 +1034,43 @@ function InternalMatchList({ matches, total, page, rowsPerPage, onPageChange, pe
 		navigate(`/userinfo/${p.puuid}`);
 	};
 
-	// 접힌 행 우측 미니 로스터 (팀별 5명: 챔프 아이콘 + 이름)
+	// 접힌 행 우측 미니 로스터 (팀별 5명: 챔프 아이콘 + 이름, 스탯 없으면 포지션 아이콘 폴백)
 	const renderMiniRoster = team => (
 		<div className={classes.miniRosterCol}>
-			{sortPlayers(team.players).map(p => (
-				<div key={p.puuid} className={classes.miniPlayer}>
-					{p.stat ? (
-						<img
-							className={classes.miniChampImg}
-							src={getChampionIcon(p.stat.championName)}
-							alt={p.stat.championKoName || p.stat.championName}
-							onError={e => {
-								e.currentTarget.style.visibility = 'hidden';
-							}}
-						/>
-					) : (
-						<span className={classes.miniChampSlot} />
-					)}
-					<span
-						className={cx(classes.miniName, p.puuid === perspectivePuuid && classes.miniNameMe)}
-						title={p.name}
-						onClick={e => goUser(e, p)}
-					>
-						{p.name}
-					</span>
-				</div>
-			))}
+			{sortPlayers(team.players).map(p => {
+				const posIconKey = POSITION_ICON_KEY[getPlayerPosition(p)];
+				return (
+					<div key={p.puuid} className={classes.miniPlayer}>
+						{p.stat ? (
+							<img
+								className={classes.miniChampImg}
+								src={getChampionIcon(p.stat.championName)}
+								alt={p.stat.championKoName || p.stat.championName}
+								onError={e => {
+									e.currentTarget.style.visibility = 'hidden';
+								}}
+							/>
+						) : (
+							<span className={classes.miniChampSlot}>
+								{posIconKey && (
+									<PositionIcon
+										position={posIconKey}
+										className={classes.miniPosIcon}
+										fallbackClassName={classes.posFallback}
+									/>
+								)}
+							</span>
+						)}
+						<span
+							className={cx(classes.miniName, p.puuid === perspectivePuuid && classes.miniNameMe)}
+							title={p.name}
+							onClick={e => goUser(e, p)}
+						>
+							{p.name}
+						</span>
+					</div>
+				);
+			})}
 		</div>
 	);
 
