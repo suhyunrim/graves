@@ -182,8 +182,13 @@ function makeMatch(index, dayOffset) {
 			cs: 120 + ((index * 13 + slotIndex * 29) % 140),
 			goldEarned: 9000 + ((index * 700 + slotIndex * 500) % 6000),
 			damageToChampions: 12000 + ((index * 1500 + slotIndex * 2300) % 25000),
+			damageTaken: 15000 + ((index * 1100 + slotIndex * 1900) % 30000),
 			visionScore: 10 + ((index + slotIndex * 7) % 40),
 			position: hasPositions ? MATCH_POSITIONS[pi] : null,
+			// 라인전 격차는 맞라인이 특정된(포지션 있는) 매치만
+			csDiff: hasPositions ? ((index * 7 + slotIndex * 11) % 80) - 40 : null,
+			goldDiff: hasPositions ? ((index * 130 + slotIndex * 77) % 3000) - 1500 : null,
+			damageDiff: hasPositions ? ((index * 210 + slotIndex * 133) % 8000) - 4000 : null,
 			gameDurationSec
 		};
 	};
