@@ -29,5 +29,3 @@ export const getChampBadges = (champ, totalGames) => {
 	}
 	return badges;
 };
-
-export default getChampBadges;

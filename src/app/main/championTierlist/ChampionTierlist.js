@@ -109,11 +109,11 @@ const useStyles = makeStyles()((theme) => ({
 		flexDirection: 'column',
 		gap: 10
 	},
+	// background은 등급 틴트 합성 때문에 행마다 inline style로 지정 (여기 선언하면 항상 덮여서 죽은 스타일이 됨)
 	row: {
 		display: 'flex',
 		alignItems: 'center',
 		gap: 16,
-		background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
 		border: '1px solid rgba(0, 212, 255, 0.15)',
 		borderRadius: 14,
 		padding: '12px 18px',

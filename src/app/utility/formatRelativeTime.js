@@ -1,4 +1,5 @@
-// 상대 시간 표시 (op.gg식).
+// 상대 시간 표시 (op.gg식) — 앱 공통 canonical.
+// 새 코드는 로컬 재구현 대신 이 유틸을 사용할 것 (challengeUtils/업적/그룹설정의 기존 분산 구현은 점진 통합 대상).
 // 5분 미만 '방금 전' → n분 전 → n시간 전 → n일 전, 30일 이상은 절대 날짜(yy-MM-dd)로 떨어뜨린다.
 // ("n개월 전"은 특정 매치를 찾을 때 정보가 뭉개져서 사용하지 않음)
 export function formatRelativeTime(utcDateString) {

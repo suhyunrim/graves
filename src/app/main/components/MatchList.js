@@ -10,98 +10,18 @@ import { RevealGroup } from './Reveal';
 import PositionIcon from '../tournament/PositionIcon';
 import { getChampionIcon } from '../challenge/ddragonUtils';
 import MatchDetail from './MatchDetail';
+import {
+	getTierShortName,
+	getTierIconName,
+	getTierColor,
+	POSITION_ICON_KEY,
+	getPlayerPosition,
+	sortPlayers,
+	stripTag
+} from './matchStatUtils';
 
-const tierColors = {
-	IRON: '#5C5C5C',
-	BRONZE: '#CD7F32',
-	SILVER: '#C0C0C0',
-	GOLD: '#FFD700',
-	PLATINUM: '#00CED1',
-	EMERALD: '#50C878',
-	DIAMOND: '#B9F2FF',
-	MASTER: '#9932CC',
-	GRANDMASTER: '#FF4500',
-	CHALLENGER: '#F0E68C'
-};
-
-// Riot 표준 포지션 키(대문자) → PositionIcon용 키(소문자).
-// 표시/정렬은 항상 탑 → 정글 → 미드 → 원딜 → 서폿 순서 고정 (RankingHeader/MyInfo 와 동일).
-const POSITIONS = [
-	{ key: 'TOP', icon: 'top' },
-	{ key: 'JUNGLE', icon: 'jungle' },
-	{ key: 'MIDDLE', icon: 'mid' },
-	{ key: 'BOTTOM', icon: 'adc' },
-	{ key: 'UTILITY', icon: 'support' }
-];
-
-const POSITION_ORDER = POSITIONS.reduce((acc, pos, i) => {
-	acc[pos.key] = i;
-	return acc;
-}, {});
-
-const POSITION_ICON_KEY = POSITIONS.reduce((acc, pos) => {
-	acc[pos.key] = pos.icon;
-	return acc;
-}, {});
-
-// 포지션 지정 플레이어를 먼저(탑→서폿 순), 미지정(null/undefined)은 뒤에서 레이팅 내림차순(기존 동작 유지).
-const sortPlayers = players =>
-	[...players].sort((a, b) => {
-		const ao = POSITION_ORDER[a.position];
-		const bo = POSITION_ORDER[b.position];
-		const aHas = ao !== undefined;
-		const bHas = bo !== undefined;
-		if (aHas && bHas) return ao - bo;
-		if (aHas !== bHas) return aHas ? -1 : 1;
-		return b.rating - a.rating;
-	});
-
-// 다이얼로그 프리뷰 등 외부에서도 재사용하는 tier 헬퍼
-export const getTierShortName = tier => {
-	if (!tier) return '';
-	const parts = tier.split(' ');
-	const tierName = parts[0];
-	const tierRank = parts[1];
-
-	const tierMap = {
-		IRON: 'I',
-		BRONZE: 'B',
-		SILVER: 'S',
-		GOLD: 'G',
-		PLATINUM: 'P',
-		EMERALD: 'E',
-		DIAMOND: 'D',
-		MASTER: 'M',
-		GRANDMASTER: 'GM',
-		CHALLENGER: 'C'
-	};
-
-	const rankMap = {
-		I: '1',
-		II: '2',
-		III: '3',
-		IV: '4'
-	};
-
-	const shortTier = tierMap[tierName] || tierName.charAt(0);
-	const shortRank = rankMap[tierRank] || '';
-
-	return `${shortTier}${shortRank}`;
-};
-
-export const getTierIconName = tier => {
-	if (!tier) return 'UNRANKED';
-	return tier.split(' ')[0];
-};
-
-export const getTierColor = tier => {
-	if (!tier) return '#fff';
-	const tierName = tier.split(' ')[0];
-	return tierColors[tierName] || '#fff';
-};
-
-// 닉네임의 라이엇 태그(#KR1 등)는 목록에선 숨긴다 (hover title로만 노출)
-const stripTag = name => (name || '').split('#')[0];
+// 기존 소비자(MatchHistoryTable 등) 호환용 re-export — 실제 정의는 matchStatUtils.
+export { getTierShortName, getTierIconName, getTierColor } from './matchStatUtils';
 
 const useStyles = makeStyles()(theme => ({
 	container: {
@@ -461,7 +381,7 @@ function MatchList({
 		const sortedPlayers = sortPlayers(players);
 		const hasChamps = players.some(p => p.stat && p.stat.championName);
 		return sortedPlayers.map(player => {
-			const posIconKey = POSITION_ICON_KEY[player.position];
+			const posIconKey = POSITION_ICON_KEY[getPlayerPosition(player)];
 			const champName = player.stat && player.stat.championName;
 			return (
 				<div key={player.puuid} className={classes.playerRow}>

@@ -1314,6 +1314,47 @@ function MyInfoPage(props) {
 		<VisitorCounter groupId={user.reprGroup.groupId} puuid={puuid || myPuuid} isLoggedIn={isDiscordLoggedIn} />
 	) : null;
 
+	// Custom Rating 카드 공통부 (엠블럼 + 라벨/티어 + 승패/승률) — 내전 탭 티어 카드/스탯 탭 카드 공유
+	const renderCustomRatingCore = () => (
+		<>
+			<div className={classes.cardHeader}>
+				<div className={classes.emblemContainer}>
+					<img
+						className={classes.emblem}
+						src={`/assets/images/ranked-emblems/Emblem_${ratingTierName}.webp`}
+						alt={ratingTierName}
+						style={{ filter: `drop-shadow(0 0 20px ${ratingTierColor.glow})` }}
+					/>
+				</div>
+				<div className={classes.cardTitleWrapper}>
+					<div className={classes.cardLabel}>Custom Rating</div>
+					<div className={classes.tierText} style={{ color: ratingTierColor.primary }}>
+						{getRatingTierDisplay()} {getRatingLP()}LP
+					</div>
+				</div>
+			</div>
+			<div className={classes.statsRow}>
+				<span className={classes.statItem}>
+					{scoreInfo.win}승 {scoreInfo.lose}패
+				</span>
+				{scoreInfo.win + scoreInfo.lose > 0 && (
+					<span className={`${classes.winRate} ${getWinRateClass(customWinRate)}`}>{customWinRate}%</span>
+				)}
+			</div>
+		</>
+	);
+
+	// 최근 10경기 O/X 행 — 내전 탭 티어 카드/스탯 탭 통계 카드 공유
+	const renderRecentResultsRow = () => (
+		<div className={classes.recentResultsRow} aria-label="최근 10경기 승패 (최신순)">
+			{[...recentResults].reverse().map((won, i) => (
+				<span key={i} className={won ? classes.recentResultWin : classes.recentResultLose}>
+					{won ? 'O' : 'X'}
+				</span>
+			))}
+		</div>
+	);
+
 	return (
 		<FusePageSimple
 			classes={{
@@ -1393,32 +1434,7 @@ function MyInfoPage(props) {
 							{internalStats && internalStats.champions && internalStats.champions.length > 0 ? (
 								<div className={classes.naejeonTopGrid}>
 									<div className={`${classes.rankCard} ${classes.customRatingCard} ${classes.naejeonTierCard}`}>
-										<div className={classes.cardHeader}>
-											<div className={classes.emblemContainer}>
-												<img
-													className={classes.emblem}
-													src={`/assets/images/ranked-emblems/Emblem_${ratingTierName}.webp`}
-													alt={ratingTierName}
-													style={{ filter: `drop-shadow(0 0 20px ${ratingTierColor.glow})` }}
-												/>
-											</div>
-											<div className={classes.cardTitleWrapper}>
-												<div className={classes.cardLabel}>Custom Rating</div>
-												<div className={classes.tierText} style={{ color: ratingTierColor.primary }}>
-													{getRatingTierDisplay()} {getRatingLP()}LP
-												</div>
-											</div>
-										</div>
-										<div className={classes.statsRow}>
-											<span className={classes.statItem}>
-												{scoreInfo.win}승 {scoreInfo.lose}패
-											</span>
-											{scoreInfo.win + scoreInfo.lose > 0 && (
-												<span className={`${classes.winRate} ${getWinRateClass(customWinRate)}`}>
-													{customWinRate}%
-												</span>
-											)}
-										</div>
+										{renderCustomRatingCore()}
 										{recentResults && recentResults.length > 0 && (
 											<div className={classes.tierCardExtra}>
 												<div className={classes.tierCardExtraRow}>
@@ -1430,13 +1446,7 @@ function MyInfoPage(props) {
 														</span>
 													</span>
 												</div>
-												<div className={classes.recentResultsRow} aria-label="최근 10경기 승패 (최신순)">
-													{[...recentResults].reverse().map((won, i) => (
-														<span key={i} className={won ? classes.recentResultWin : classes.recentResultLose}>
-															{won ? 'O' : 'X'}
-														</span>
-													))}
-												</div>
+												{renderRecentResultsRow()}
 												<div className={classes.tierCardExtraRow}>
 													<span className={classes.tierCardExtraLabel}>최다 연승</span>
 													<span className={`${classes.tierCardExtraValue} ${classes.streakWin}`}>
@@ -1478,30 +1488,7 @@ function MyInfoPage(props) {
 							{/* 내전 레이팅 / 솔로 랭크 카드 */}
 							<div className={classes.cardsGrid}>
 								<div className={`${classes.rankCard} ${classes.customRatingCard}`}>
-									<div className={classes.cardHeader}>
-										<div className={classes.emblemContainer}>
-											<img
-												className={classes.emblem}
-												src={`/assets/images/ranked-emblems/Emblem_${ratingTierName}.webp`}
-												alt={ratingTierName}
-												style={{ filter: `drop-shadow(0 0 20px ${ratingTierColor.glow})` }}
-											/>
-										</div>
-										<div className={classes.cardTitleWrapper}>
-											<div className={classes.cardLabel}>Custom Rating</div>
-											<div className={classes.tierText} style={{ color: ratingTierColor.primary }}>
-												{getRatingTierDisplay()} {getRatingLP()}LP
-											</div>
-										</div>
-									</div>
-									<div className={classes.statsRow}>
-										<span className={classes.statItem}>
-											{scoreInfo.win}승 {scoreInfo.lose}패
-										</span>
-										{scoreInfo.win + scoreInfo.lose > 0 && (
-											<span className={`${classes.winRate} ${getWinRateClass(customWinRate)}`}>{customWinRate}%</span>
-										)}
-									</div>
+									{renderCustomRatingCore()}
 									<div className={classes.decorLine} style={{ color: '#00d4ff' }} />
 								</div>
 								<div className={`${classes.rankCard} ${classes.soloRankCard}`}>
@@ -1545,15 +1532,7 @@ function MyInfoPage(props) {
 												{recentWins}승 {recentGames - recentWins}패
 											</div>
 										</div>
-										{recentResults && recentResults.length > 0 && (
-											<div className={classes.recentResultsRow} aria-label="최근 10경기 승패 (최신순)">
-												{[...recentResults].reverse().map((won, i) => (
-													<span key={i} className={won ? classes.recentResultWin : classes.recentResultLose}>
-														{won ? 'O' : 'X'}
-													</span>
-												))}
-											</div>
-										)}
+										{recentResults && recentResults.length > 0 && renderRecentResultsRow()}
 									</div>
 									<div className={classes.statCard}>
 										<div className={classes.statLabel}>최다 연승</div>

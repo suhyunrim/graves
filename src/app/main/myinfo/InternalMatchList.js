@@ -1,80 +1,34 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { makeStyles } from 'tss-react/mui';
+import useMediaQuery from '@mui/material/useMediaQuery';
 import { useNavigate } from 'react-router-dom';
 import TablePagination from '@mui/material/TablePagination';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import {
-	getChampionIcon,
-	getItemIcon,
-	getSpellIcon,
-	getKeystoneIcon,
-	getMultiKillBadge,
-	loadPerkIcons
-} from 'app/main/challenge/ddragonUtils';
+import { getChampionIcon, getMultiKillBadge } from 'app/main/challenge/ddragonUtils';
 import { formatRelativeTime, formatFullDateTime } from 'app/utility/formatRelativeTime';
-import { getTierShortName, getTierIconName, getTierColor } from '../components/MatchList';
+import {
+	getTierShortName,
+	getTierIconName,
+	getTierColor,
+	POSITION_ICON_KEY,
+	getPlayerPosition,
+	sortPlayers,
+	kdaRatioColor,
+	getKdaRatio,
+	formatK,
+	getKillParticipation,
+	usePerkIcons,
+	SpellRuneGrid,
+	ItemsRow
+} from '../components/matchStatUtils';
 import MatchDetail from '../components/MatchDetail';
 import PositionIcon from '../tournament/PositionIcon';
-
-// 탑 → 정글 → 미드 → 원딜 → 서폿 고정 순서 (MatchList와 동일)
-const POSITIONS = [
-	{ key: 'TOP', icon: 'top' },
-	{ key: 'JUNGLE', icon: 'jungle' },
-	{ key: 'MIDDLE', icon: 'mid' },
-	{ key: 'BOTTOM', icon: 'adc' },
-	{ key: 'UTILITY', icon: 'support' }
-];
-const POSITION_ORDER = POSITIONS.reduce((acc, pos, i) => {
-	acc[pos.key] = i;
-	return acc;
-}, {});
-const POSITION_ICON_KEY = POSITIONS.reduce((acc, pos) => {
-	acc[pos.key] = pos.icon;
-	return acc;
-}, {});
-
-// 매치 데이터의 position이 없으면 수집 스탯의 position으로 폴백
-const getPlayerPosition = player => player.position || (player.stat && player.stat.position) || null;
-
-const sortPlayers = players =>
-	[...players].sort((a, b) => {
-		const ao = POSITION_ORDER[getPlayerPosition(a)];
-		const bo = POSITION_ORDER[getPlayerPosition(b)];
-		const aHas = ao !== undefined;
-		const bHas = bo !== undefined;
-		if (aHas && bHas) return ao - bo;
-		if (aHas !== bHas) return aHas ? -1 : 1;
-		return b.rating - a.rating;
-	});
 
 const formatDuration = sec => {
 	if (sec == null) return null;
 	const m = Math.floor(sec / 60);
 	const s = sec % 60;
 	return `${m}분 ${String(s).padStart(2, '0')}초`;
-};
-
-// KDA 배율 색상 (op.gg 관례: 높을수록 강조)
-const kdaRatioColor = ratio => {
-	if (ratio == null) return '#ffd700'; // Perfect
-	if (ratio >= 4) return '#ffd700';
-	if (ratio >= 3) return '#00d4ff';
-	if (ratio >= 2) return 'rgba(255, 255, 255, 0.85)';
-	return 'rgba(255, 255, 255, 0.5)';
-};
-
-const getKdaRatio = stat => (stat.deaths === 0 ? null : Math.round(((stat.kills + stat.assists) / stat.deaths) * 100) / 100);
-
-const formatK = v => {
-	if (v == null) return '-';
-	return v >= 1000 ? `${(v / 1000).toFixed(1)}k` : String(v);
-};
-
-// 팀 킬 합 대비 킬관여율 (%)
-const getKillParticipation = (stat, teamPlayers) => {
-	const teamKills = teamPlayers.reduce((sum, p) => sum + (p.stat ? p.stat.kills : 0), 0);
-	if (teamKills <= 0) return null;
-	return Math.round(((stat.kills + stat.assists) / teamKills) * 100);
 };
 
 // 맞라인 대비 골드 지분 (op.gg "라인전 48:52" 스타일). goldDiff = 본인 - 상대.
@@ -375,15 +329,12 @@ const useStyles = makeStyles()((theme) => ({
 		fontSize: '1.1rem',
 		color: 'rgba(255, 255, 255, 0.3)'
 	},
-	// 접힌 행 우측 미니 로스터 (5+5)
+	// 접힌 행 우측 미니 로스터 (5+5) — md 미만은 JS에서 렌더 자체를 생략
 	miniRosters: {
 		display: 'flex',
 		gap: 14,
 		marginLeft: 'auto',
-		flexShrink: 0,
-		[theme.breakpoints.down('md')]: {
-			display: 'none'
-		}
+		flexShrink: 0
 	},
 	miniRosterCol: {
 		display: 'flex',
@@ -494,70 +445,9 @@ function InternalMatchList({ matches, total, page, rowsPerPage, onPageChange, pe
 	const { classes, cx } = useStyles();
 	const navigate = useNavigate();
 	const [expandedIds, setExpandedIds] = useState(() => new Set());
-	// perk ID → 실제 아이콘 URL (CDragon perks/perkstyles 기반). 로드 전엔 정적 매핑 폴백.
-	const [perkIcons, setPerkIcons] = useState({});
-
-	useEffect(() => {
-		let alive = true;
-		loadPerkIcons().then(map => {
-			if (alive) setPerkIcons(map);
-		});
-		return () => {
-			alive = false;
-		};
-	}, []);
-
-	const getPerkIcon = perkId => perkIcons[perkId] || getKeystoneIcon(perkId);
-
-	// 스펠(좌열) + 룬(우열) 2x2 아이콘. 스펠/룬 정보가 아예 없으면 렌더 안 함(구 수집분 호환)
-	const renderSpellsRunes = (stat, gridCls, iconCls, emptyCls) => {
-		if (stat.spell1Id == null && stat.runeKeystoneId == null) return null;
-		const cells = [
-			stat.spell1Id != null ? getSpellIcon(stat.spell1Id) : null,
-			stat.runeKeystoneId != null ? getPerkIcon(stat.runeKeystoneId) : null,
-			stat.spell2Id != null ? getSpellIcon(stat.spell2Id) : null,
-			stat.runeSubStyleId != null ? getPerkIcon(stat.runeSubStyleId) : null
-		];
-		return (
-			<div className={gridCls}>
-				{cells.map((src, i) =>
-					src ? (
-						// eslint-disable-next-line react/no-array-index-key
-						<img key={i} className={iconCls} src={src} alt="" />
-					) : (
-						// eslint-disable-next-line react/no-array-index-key
-						<span key={i} className={emptyCls} />
-					)
-				)}
-			</div>
-		);
-	};
-
-	// 아이템 6칸 + 장신구. items 정보 없으면 렌더 안 함(구 수집분 호환)
-	// 중간에 빈 슬롯(0)이 있으면 채워진 아이템을 앞으로 당기고 빈 칸은 뒤로 몰아 표시.
-	const renderItems = (stat, imgCls, emptyCls) => {
-		if (!stat.items && stat.trinket == null) return null;
-		const slots = (stat.items || []).filter(id => id).slice(0, 6);
-		while (slots.length < 6) slots.push(0);
-		return (
-			<div className={classes.itemsRow}>
-				{slots.slice(0, 6).map((id, i) =>
-					id ? (
-						// eslint-disable-next-line react/no-array-index-key
-						<img key={i} className={imgCls} src={getItemIcon(id)} alt="" />
-					) : (
-						// eslint-disable-next-line react/no-array-index-key
-						<span key={i} className={emptyCls} />
-					)
-				)}
-				{stat.trinket ? (
-					<img className={cx(imgCls, classes.trinketGap)} src={getItemIcon(stat.trinket)} alt="" />
-				) : (
-					<span className={cx(emptyCls, classes.trinketGap)} />
-				)}
-			</div>
-		);
-	};
+	const getPerkIcon = usePerkIcons();
+	// 미니 로스터는 md 미만에서 숨겨지므로 아예 렌더하지 않음 (숨겨진 챔프 아이콘 ~100장 다운로드 방지)
+	const isDesktop = useMediaQuery(theme => theme.breakpoints.up('md'));
 
 	const toggleExpand = gameId => {
 		setExpandedIds(prev => {
@@ -724,12 +614,13 @@ function InternalMatchList({ matches, total, page, rowsPerPage, onPageChange, pe
 														<span className={classes.champLevel}>{myStat.champLevel}</span>
 													)}
 												</span>
-												{renderSpellsRunes(
-													myStat,
-													classes.spellRuneGrid,
-													classes.spellRuneIcon,
-													classes.spellRuneEmpty
-												)}
+												<SpellRuneGrid
+													stat={myStat}
+													getPerkIcon={getPerkIcon}
+													gridClass={classes.spellRuneGrid}
+													iconClass={classes.spellRuneIcon}
+													emptyClass={classes.spellRuneEmpty}
+												/>
 												<div className={classes.kdaBlock}>
 													<span className={classes.champNameSmall}>
 														{myStat.championKoName || myStat.championName}
@@ -745,7 +636,13 @@ function InternalMatchList({ matches, total, page, rowsPerPage, onPageChange, pe
 											</div>
 											{myStat.items && (
 												<div className={classes.champBottomRow}>
-													{renderItems(myStat, classes.itemImg, classes.itemEmpty)}
+													<ItemsRow
+													stat={myStat}
+													rowClass={classes.itemsRow}
+													imgClass={classes.itemImg}
+													emptyClass={classes.itemEmpty}
+													gapClass={classes.trinketGap}
+												/>
 												</div>
 											)}
 										</div>
@@ -801,6 +698,7 @@ function InternalMatchList({ matches, total, page, rowsPerPage, onPageChange, pe
 									<span className={classes.noDetail}>상세 미수집</span>
 								)}
 							</div>
+							{isDesktop && (
 							<div className={classes.miniRosters}>
 								{(multiKill || (myStat && myStat.firstBloodKill)) && (
 									<div className={classes.badgeCol}>
@@ -811,6 +709,7 @@ function InternalMatchList({ matches, total, page, rowsPerPage, onPageChange, pe
 								{renderMiniRoster(match.team1)}
 								{renderMiniRoster(match.team2)}
 							</div>
+							)}
 							<ExpandMoreIcon className={cx(classes.expandIcon, expanded && classes.expandIconOpen)} />
 						</div>
 						{expanded && <MatchDetail match={match} perspectivePuuid={perspectivePuuid} />}

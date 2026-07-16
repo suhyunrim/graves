@@ -1,86 +1,69 @@
 import React, { useState } from 'react';
 import { makeStyles } from 'tss-react/mui';
 import { getChampionIcon } from 'app/main/challenge/ddragonUtils';
+import { kdaRatioColor, POSITION_ICON_KEY } from '../components/matchStatUtils';
 import PositionIcon from '../tournament/PositionIcon';
 import InternalChampionsDialog from './InternalChampionsDialog';
 import { getChampBadges, getMetricColor } from './championBadges';
 
-// KDA 배율 색상 (InternalMatchList와 동일 기준)
-const kdaColor = kda => {
-	if (kda >= 4) return '#ffd700';
-	if (kda >= 3) return '#00d4ff';
-	if (kda >= 2) return 'rgba(255, 255, 255, 0.85)';
-	return 'rgba(255, 255, 255, 0.5)';
-};
-
-const POSITION_ICON_KEY = { TOP: 'top', JUNGLE: 'jungle', MIDDLE: 'mid', BOTTOM: 'adc', UTILITY: 'support' };
-
 // 주 포지션 대표 지표 1개 (탑=맞라인 골드차 / 정글=오브젝트 장악 / 미드=킬관여 / 원딜=DPM / 서폿=분당시야).
 // 모든 수치는 그 챔피언으로 플레이한 판들 기준 집계. 지정 지표가 null이거나 mainPosition이 없으면 DPM 폴백.
 // 주의: goldDiff는 라인전 페이즈가 아니라 게임 전체 최종 골드 기준 맞라인 격차 (LCU에 시점 데이터 없음).
-export const getPositionStats = c => {
+const getPositionStat = c => {
 	const pct = v => `${v}%`;
 	switch (c.mainPosition) {
 		case 'TOP':
 			if (c.laneGoldDiffAvg != null) {
-				return [
-					{
-						label: '맞라인 골드',
-						value: `${c.laneGoldDiffAvg > 0 ? '+' : ''}${c.laneGoldDiffAvg}G`,
-						color: c.laneGoldDiffAvg > 0 ? '#00ff7f' : c.laneGoldDiffAvg < 0 ? '#ff6b6b' : undefined,
-						title: '게임 전체 최종 골드 기준, 맞라인 상대와의 차이 평균'
-					}
-				];
+				return {
+					label: '맞라인 골드',
+					value: `${c.laneGoldDiffAvg > 0 ? '+' : ''}${c.laneGoldDiffAvg}G`,
+					color: c.laneGoldDiffAvg > 0 ? '#00ff7f' : c.laneGoldDiffAvg < 0 ? '#ff6b6b' : undefined,
+					title: '게임 전체 최종 골드 기준, 맞라인 상대와의 차이 평균'
+				};
 			}
 			break;
 		case 'JUNGLE':
 			if (c.objectiveShare != null) {
-				return [
-					{
-						label: '오브젝트 장악',
-						value: pct(c.objectiveShare),
-						color: getMetricColor('objectiveShare', c.objectiveShare),
-						title: '내 게임에서 우리 팀이 가져간 에픽 몬스터(용·전령·유충·바론) 비율'
-					}
-				];
+				return {
+					label: '오브젝트 장악',
+					value: pct(c.objectiveShare),
+					color: getMetricColor('objectiveShare', c.objectiveShare),
+					title: '내 게임에서 우리 팀이 가져간 에픽 몬스터(용·전령·유충·바론) 비율'
+				};
 			}
 			break;
 		case 'MIDDLE':
 			if (c.killParticipation != null) {
-				return [
-					{
-						label: '킬관여',
-						value: pct(c.killParticipation),
-						color: getMetricColor('killParticipation', c.killParticipation),
-						title: '팀 킬 중 킬/어시스트로 관여한 비율'
-					}
-				];
+				return {
+					label: '킬관여',
+					value: pct(c.killParticipation),
+					color: getMetricColor('killParticipation', c.killParticipation),
+					title: '팀 킬 중 킬/어시스트로 관여한 비율'
+				};
 			}
 			break;
 		case 'BOTTOM':
 			if (c.dpm != null) {
-				return [{ label: 'DPM', value: String(c.dpm), color: getMetricColor('dpm', c.dpm), title: '분당 챔피언 딜량' }];
+				return { label: 'DPM', value: String(c.dpm), color: getMetricColor('dpm', c.dpm), title: '분당 챔피언 딜량' };
 			}
 			break;
 		case 'UTILITY':
 			if (c.visionPerMin != null) {
-				return [
-					{
-						label: '분당시야',
-						value: String(c.visionPerMin),
-						color: getMetricColor('visionPerMin', c.visionPerMin),
-						title: '분당 시야 점수'
-					}
-				];
+				return {
+					label: '분당시야',
+					value: String(c.visionPerMin),
+					color: getMetricColor('visionPerMin', c.visionPerMin),
+					title: '분당 시야 점수'
+				};
 			}
 			break;
 		default:
 			break;
 	}
 	if (c.dpm != null) {
-		return [{ label: 'DPM', value: String(c.dpm), color: getMetricColor('dpm', c.dpm), title: '분당 챔피언 딜량' }];
+		return { label: 'DPM', value: String(c.dpm), color: getMetricColor('dpm', c.dpm), title: '분당 챔피언 딜량' };
 	}
-	return [];
+	return null;
 };
 
 const useStyles = makeStyles()((theme) => ({
@@ -312,7 +295,7 @@ function InternalChampions({ champions, totalGames }) {
 					const name = c.championKoName || c.championName;
 					const badges = getChampBadges(c, totalGames);
 					const posKey = POSITION_ICON_KEY[c.mainPosition];
-					const posStats = getPositionStats(c);
+					const posStat = getPositionStat(c);
 					return (
 						<div key={c.championId} className={classes.row}>
 							<span className={classes.posSlot}>
@@ -342,17 +325,17 @@ function InternalChampions({ champions, totalGames }) {
 								<span className={classes.subLine}>{c.csPerMin != null ? `CS/분 ${c.csPerMin}` : ''}</span>
 							</div>
 							<div className={classes.posStatCol}>
-								{posStats.length > 0 && (
+								{posStat && (
 									<>
 										<span
 											className={classes.posStatBig}
-											style={posStats[0].color ? { color: posStats[0].color } : undefined}
-											title={posStats[0].title}
+											style={posStat.color ? { color: posStat.color } : undefined}
+											title={posStat.title}
 										>
-											{posStats[0].value}
+											{posStat.value}
 										</span>
-										<span className={classes.subLine} title={posStats[0].title}>
-											{posStats[0].label}
+										<span className={classes.subLine} title={posStat.title}>
+											{posStat.label}
 										</span>
 									</>
 								)}
@@ -360,7 +343,7 @@ function InternalChampions({ champions, totalGames }) {
 							<div className={classes.kdaCol}>
 								<span
 									className={classes.kdaRatio}
-									style={{ color: typeof c.kda === 'number' ? kdaColor(c.kda) : 'rgba(255, 255, 255, 0.5)' }}
+									style={{ color: typeof c.kda === 'number' ? kdaRatioColor(c.kda) : 'rgba(255, 255, 255, 0.5)' }}
 								>
 									{typeof c.kda === 'number' ? `${c.kda.toFixed(2)}:1 평점` : '-'}
 								</span>

@@ -1,33 +1,24 @@
 import React, { useEffect, useState } from 'react';
 import { makeStyles } from 'tss-react/mui';
+import useMediaQuery from '@mui/material/useMediaQuery';
 import { useNavigate } from 'react-router-dom';
+import { getChampionIcon, loadChampionKeysById } from 'app/main/challenge/ddragonUtils';
 import {
-	getChampionIcon,
-	getItemIcon,
-	getSpellIcon,
-	getKeystoneIcon,
-	loadChampionKeysById,
-	loadPerkIcons
-} from 'app/main/challenge/ddragonUtils';
-import { getTierShortName, getTierIconName, getTierColor } from './MatchList';
+	getTierShortName,
+	getTierIconName,
+	getTierColor,
+	POSITION_ICON_KEY,
+	getPlayerPosition,
+	sortPlayers,
+	kdaRatioColor,
+	getKdaRatio,
+	formatK,
+	getKillParticipation,
+	usePerkIcons,
+	SpellRuneGrid,
+	ItemsRow
+} from './matchStatUtils';
 import PositionIcon from '../tournament/PositionIcon';
-
-// 탑 → 정글 → 미드 → 원딜 → 서폿 고정 순서
-const POSITIONS = [
-	{ key: 'TOP', icon: 'top' },
-	{ key: 'JUNGLE', icon: 'jungle' },
-	{ key: 'MIDDLE', icon: 'mid' },
-	{ key: 'BOTTOM', icon: 'adc' },
-	{ key: 'UTILITY', icon: 'support' }
-];
-const POSITION_ORDER = POSITIONS.reduce((acc, pos, i) => {
-	acc[pos.key] = i;
-	return acc;
-}, {});
-const POSITION_ICON_KEY = POSITIONS.reduce((acc, pos) => {
-	acc[pos.key] = pos.icon;
-	return acc;
-}, {});
 
 // 팀 아이덴티티 컬러 (VS 비교의 A/B 컬러와 동일 계열)
 const TEAM_COLORS = { 1: '#00d4ff', 2: '#ff6b9a' };
@@ -42,44 +33,7 @@ const OBJECTIVE_DEFS = [
 	['inhibitorKills', '억제기']
 ];
 
-// 매치 데이터의 position이 없으면 수집 스탯의 position으로 폴백
-const getPlayerPosition = player => player.position || (player.stat && player.stat.position) || null;
-
-const sortPlayers = players =>
-	[...players].sort((a, b) => {
-		const ao = POSITION_ORDER[getPlayerPosition(a)];
-		const bo = POSITION_ORDER[getPlayerPosition(b)];
-		const aHas = ao !== undefined;
-		const bHas = bo !== undefined;
-		if (aHas && bHas) return ao - bo;
-		if (aHas !== bHas) return aHas ? -1 : 1;
-		return b.rating - a.rating;
-	});
-
-// KDA 배율 색상 (op.gg 관례: 높을수록 강조)
-const kdaRatioColor = ratio => {
-	if (ratio == null) return '#ffd700'; // Perfect
-	if (ratio >= 4) return '#ffd700';
-	if (ratio >= 3) return '#00d4ff';
-	if (ratio >= 2) return 'rgba(255, 255, 255, 0.85)';
-	return 'rgba(255, 255, 255, 0.5)';
-};
-
-const getKdaRatio = stat => (stat.deaths === 0 ? null : Math.round(((stat.kills + stat.assists) / stat.deaths) * 100) / 100);
-
-const formatK = v => {
-	if (v == null) return '-';
-	return v >= 1000 ? `${(v / 1000).toFixed(1)}k` : String(v);
-};
-
-// 팀 킬 합 대비 킬관여율 (%)
-const getKillParticipation = (stat, teamPlayers) => {
-	const teamKills = teamPlayers.reduce((sum, p) => sum + (p.stat ? p.stat.kills : 0), 0);
-	if (teamKills <= 0) return null;
-	return Math.round(((stat.kills + stat.assists) / teamKills) * 100);
-};
-
-const useStyles = makeStyles()((theme) => ({
+const useStyles = makeStyles()(() => ({
 	detailWrap: {
 		borderTop: '1px solid rgba(255, 255, 255, 0.08)',
 		background: 'rgba(0, 0, 0, 0.3)',
@@ -87,12 +41,8 @@ const useStyles = makeStyles()((theme) => ({
 	},
 	teamTableWrap: {
 		overflowX: 'auto',
-		// 테이블 minWidth(880)가 조상 flex의 min-width로 전파돼 모바일 페이지 폭을 밀어올리는 것 차단
-		contain: 'inline-size',
-		// md 미만은 가로 스크롤 테이블 대신 모바일 컴팩트 뷰(mTeamBlock)로 대체
-		[theme.breakpoints.down('md')]: {
-			display: 'none'
-		}
+		// 테이블 minWidth(880)가 조상 flex의 min-width로 전파돼 페이지 폭을 밀어올리는 것 차단
+		contain: 'inline-size'
 	},
 	teamTable: {
 		width: '100%',
@@ -318,11 +268,7 @@ const useStyles = makeStyles()((theme) => ({
 	},
 	// ===== 모바일 컴팩트 상세 (md 미만: 테이블 대신 플레이어별 세로 스택) =====
 	mTeamBlock: {
-		display: 'none',
-		[theme.breakpoints.down('md')]: {
-			display: 'block',
-			padding: '10px 12px 6px'
-		}
+		padding: '10px 12px 6px'
 	},
 	mTeamHeader: {
 		display: 'flex',
@@ -473,10 +419,10 @@ const useStyles = makeStyles()((theme) => ({
 	// 스탯 없는 매치 폴백 로스터
 	simpleTeams: {
 		display: 'grid',
-		gridTemplateColumns: '1fr 1fr',
-		[theme.breakpoints.down('md')]: {
-			gridTemplateColumns: '1fr'
-		}
+		gridTemplateColumns: '1fr 1fr'
+	},
+	simpleTeamsMobile: {
+		gridTemplateColumns: '1fr'
 	},
 	simpleTeamBlock: {
 		padding: '12px 16px'
@@ -526,32 +472,27 @@ const useStyles = makeStyles()((theme) => ({
 /**
  * 매치 펼침 상세 공용 컴포넌트.
  * - LCU 수집 매치: 팀별 상세 테이블(KDA/피해량 바/시야/CS/골드/아이템) + 팀 합계 스트립,
- *   md 미만에서는 플레이어별 세로 스택으로 대체
+ *   md 미만에서는 플레이어별 세로 스택으로 대체 (한쪽 뷰만 렌더)
  * - 미수집 매치: 단순 로스터(포지션/티어/이름) 폴백
  * 내정보 내전 기록(InternalMatchList)과 내전 기록 페이지(MatchList)에서 공유한다.
  */
 function MatchDetail({ match, perspectivePuuid }) {
 	const { classes, cx } = useStyles();
 	const navigate = useNavigate();
+	const isMobile = useMediaQuery(theme => theme.breakpoints.down('md'));
+	const getPerkIcon = usePerkIcons();
 	// 밴 목록(championId 숫자)의 아이콘 렌더용 id → DDragon 키 맵
 	const [champKeys, setChampKeys] = useState({});
-	// perk ID → 실제 아이콘 URL (CDragon perks/perkstyles 기반). 로드 전엔 정적 매핑 폴백.
-	const [perkIcons, setPerkIcons] = useState({});
 
 	useEffect(() => {
 		let alive = true;
 		loadChampionKeysById().then(map => {
 			if (alive) setChampKeys(map);
 		});
-		loadPerkIcons().then(map => {
-			if (alive) setPerkIcons(map);
-		});
 		return () => {
 			alive = false;
 		};
 	}, []);
-
-	const getPerkIcon = perkId => perkIcons[perkId] || getKeystoneIcon(perkId);
 
 	const allPlayers = [...match.team1.players, ...match.team2.players];
 	const hasAnyStats = allPlayers.some(p => p.stat);
@@ -559,92 +500,123 @@ function MatchDetail({ match, perspectivePuuid }) {
 	const maxTaken = Math.max(...allPlayers.map(p => (p.stat ? p.stat.damageTaken || 0 : 0)));
 	const firstWithStat = allPlayers.find(p => p.stat);
 	const durationSec = match.gameDurationSec || (firstWithStat && firstWithStat.stat.gameDurationSec) || null;
+	const durationMin = durationSec ? durationSec / 60 : null;
 
 	const goUser = (e, p) => {
 		e.stopPropagation();
 		navigate(`/userinfo/${p.puuid}`);
 	};
 
-	// 스펠(좌열) + 룬(우열) 2x2 아이콘. 스펠/룬 정보가 아예 없으면 렌더 안 함(구 수집분 호환)
-	const renderSpellsRunes = stat => {
-		if (stat.spell1Id == null && stat.runeKeystoneId == null) return null;
-		const cells = [
-			stat.spell1Id != null ? getSpellIcon(stat.spell1Id) : null,
-			stat.runeKeystoneId != null ? getPerkIcon(stat.runeKeystoneId) : null,
-			stat.spell2Id != null ? getSpellIcon(stat.spell2Id) : null,
-			stat.runeSubStyleId != null ? getPerkIcon(stat.runeSubStyleId) : null
-		];
+	const getTeamCtx = teamNo => {
+		const team = teamNo === 1 ? match.team1 : match.team2;
+		const teamStat = match.teamStats ? match.teamStats[`team${teamNo}`] : null;
+		return {
+			team,
+			won: match.winTeam === teamNo,
+			players: sortPlayers(team.players),
+			bans: (teamStat && teamStat.bans) || []
+		};
+	};
+
+	// "🐶 Team N WIN/LOSE + 밴 목록" — 테이블 헤더/모바일 헤더/단순 폴백 공용
+	const renderTeamHeaderContent = (teamNo, won, bans) => (
+		<>
+			<span role="img" aria-label={teamNo === 1 ? 'dog' : 'cat'}>
+				{teamNo === 1 ? '🐶' : '🐱'}
+			</span>{' '}
+			Team {teamNo}{' '}
+			<span className={won ? classes.teamResultWin : classes.teamResultLose}>{won ? 'WIN' : 'LOSE'}</span>
+			{bans.length > 0 && (
+				<span className={classes.bansRow}>
+					<span className={classes.banLabel}>밴</span>
+					{bans.map(b => {
+						const key = champKeys[b.championId];
+						return key ? (
+							<img key={`${b.championId}-${b.pickTurn}`} className={classes.banImg} src={getChampionIcon(key)} alt="" title={key} />
+						) : null;
+					})}
+				</span>
+			)}
+		</>
+	);
+
+	// "포지션 + 챔프(레벨) + 스펠/룬 + 티어 + 이름" — 테이블/모바일/단순 폴백 공용
+	const renderPlayerIdentity = (player, nameClass) => {
+		const posIconKey = POSITION_ICON_KEY[getPlayerPosition(player)];
+		const { stat } = player;
+		const isMe = player.puuid === perspectivePuuid;
 		return (
-			<div className={classes.detailSpellRuneGrid}>
-				{cells.map((src, i) =>
-					src ? (
-						// eslint-disable-next-line react/no-array-index-key
-						<img key={i} className={classes.detailSpellRuneIcon} src={src} alt="" />
-					) : (
-						// eslint-disable-next-line react/no-array-index-key
-						<span key={i} className={classes.detailSpellRuneEmpty} />
-					)
+			<>
+				<span className={classes.posSlot}>
+					{posIconKey && (
+						<PositionIcon position={posIconKey} className={classes.posIcon} fallbackClassName={classes.posFallback} />
+					)}
+				</span>
+				{stat && (
+					<>
+						<span className={classes.detailChampWrap}>
+							<img
+								className={classes.detailChampImg}
+								src={getChampionIcon(stat.championName)}
+								alt={stat.championKoName || stat.championName}
+								title={stat.championKoName || stat.championName}
+								onError={e => {
+									e.currentTarget.style.visibility = 'hidden';
+								}}
+							/>
+							{stat.champLevel != null && <span className={classes.detailChampLevel}>{stat.champLevel}</span>}
+						</span>
+						<SpellRuneGrid
+							stat={stat}
+							getPerkIcon={getPerkIcon}
+							gridClass={classes.detailSpellRuneGrid}
+							iconClass={classes.detailSpellRuneIcon}
+							emptyClass={classes.detailSpellRuneEmpty}
+						/>
+					</>
 				)}
-			</div>
+				<img
+					className={classes.tierIcon}
+					src={`/assets/images/ranked-emblems/Emblem_${getTierIconName(player.tier)}.webp`}
+					alt={player.tier}
+				/>
+				<span className={classes.tierBadge} style={{ color: getTierColor(player.tier) }}>
+					{getTierShortName(player.tier)}
+				</span>
+				<span
+					className={cx(nameClass, isMe && classes.playerNameHighlight)}
+					title={player.name}
+					onClick={e => goUser(e, player)}
+				>
+					{player.name}
+				</span>
+			</>
 		);
 	};
 
-	// 아이템 6칸 + 장신구. items 정보 없으면 렌더 안 함(구 수집분 호환)
-	// 중간에 빈 슬롯(0)이 있으면 채워진 아이템을 앞으로 당기고 빈 칸은 뒤로 몰아 표시.
-	const renderItems = stat => {
-		if (!stat.items && stat.trinket == null) return null;
-		const slots = (stat.items || []).filter(id => id).slice(0, 6);
-		while (slots.length < 6) slots.push(0);
-		return (
-			<div className={classes.itemsRow}>
-				{slots.slice(0, 6).map((id, i) =>
-					id ? (
-						// eslint-disable-next-line react/no-array-index-key
-						<img key={i} className={classes.detailItemImg} src={getItemIcon(id)} alt="" />
-					) : (
-						// eslint-disable-next-line react/no-array-index-key
-						<span key={i} className={classes.detailItemEmpty} />
-					)
-				)}
-				{stat.trinket ? (
-					<img className={cx(classes.detailItemImg, classes.trinketGap)} src={getItemIcon(stat.trinket)} alt="" />
-				) : (
-					<span className={cx(classes.detailItemEmpty, classes.trinketGap)} />
-				)}
-			</div>
-		);
-	};
+	// "K / D / A (킬관여%) + 평점" — 테이블/모바일 공용
+	const renderKda = (stat, kp, ratio) => (
+		<>
+			<span className={classes.kdaCellMain}>
+				{stat.kills} / <span className={classes.kdaDeath}>{stat.deaths}</span> / {stat.assists}
+				{kp != null && <span className={classes.kpText}> ({kp}%)</span>}
+			</span>
+			<span className={classes.kdaCellSub} style={{ color: kdaRatioColor(ratio) }}>
+				{ratio == null ? 'Perfect' : `${ratio.toFixed(2)}:1`}
+			</span>
+		</>
+	);
 
 	// 펼침(md 이상): 팀별 상세 테이블 (KDA / 피해량 / 시야 / CS / 골드)
 	const renderTeamTable = teamNo => {
-		const team = teamNo === 1 ? match.team1 : match.team2;
-		const won = match.winTeam === teamNo;
-		const players = sortPlayers(team.players);
-		const durationMin = durationSec ? durationSec / 60 : null;
-		const teamStat = match.teamStats ? match.teamStats[`team${teamNo}`] : null;
-		const bans = teamStat && teamStat.bans ? teamStat.bans : [];
+		const { team, won, players, bans } = getTeamCtx(teamNo);
 		return (
 			<div className={classes.teamTableWrap}>
 				<table className={classes.teamTable}>
 					<thead>
 						<tr className={classes.teamHeadRow}>
 							<th className={classes.teamNameTh} style={{ color: TEAM_COLORS[teamNo] }}>
-								<span role="img" aria-label={teamNo === 1 ? 'dog' : 'cat'}>
-									{teamNo === 1 ? '🐶' : '🐱'}
-								</span>{' '}
-								Team {teamNo}{' '}
-								<span className={won ? classes.teamResultWin : classes.teamResultLose}>{won ? 'WIN' : 'LOSE'}</span>
-								{bans.length > 0 && (
-									<span className={classes.bansRow}>
-										<span className={classes.banLabel}>밴</span>
-										{bans.map(b => {
-											const key = champKeys[b.championId];
-											return key ? (
-												<img key={`${b.championId}-${b.pickTurn}`} className={classes.banImg} src={getChampionIcon(key)} alt="" title={key} />
-											) : null;
-										})}
-									</span>
-								)}
+								{renderTeamHeaderContent(teamNo, won, bans)}
 							</th>
 							<th>KDA</th>
 							<th>피해량 (가한/받은)</th>
@@ -656,73 +628,19 @@ function MatchDetail({ match, perspectivePuuid }) {
 					</thead>
 					<tbody>
 						{players.map(player => {
-							const pos = getPlayerPosition(player);
-							const posIconKey = POSITION_ICON_KEY[pos];
 							const { stat } = player;
-							const isMe = player.puuid === perspectivePuuid;
 							const ratio = stat ? getKdaRatio(stat) : null;
 							const kp = stat ? getKillParticipation(stat, team.players) : null;
+							const hasItems = stat && (stat.items || stat.trinket != null);
 							return (
 								<tr key={player.puuid}>
 									<td className={classes.td}>
-										<div className={classes.playerCell}>
-											<span className={classes.posSlot}>
-												{posIconKey && (
-													<PositionIcon
-														position={posIconKey}
-														className={classes.posIcon}
-														fallbackClassName={classes.posFallback}
-													/>
-												)}
-											</span>
-											{stat && (
-												<>
-													<span className={classes.detailChampWrap}>
-														<img
-															className={classes.detailChampImg}
-															src={getChampionIcon(stat.championName)}
-															alt={stat.championKoName || stat.championName}
-															title={stat.championKoName || stat.championName}
-															onError={e => {
-																e.currentTarget.style.visibility = 'hidden';
-															}}
-														/>
-														{stat.champLevel != null && (
-															<span className={classes.detailChampLevel}>{stat.champLevel}</span>
-														)}
-													</span>
-													{renderSpellsRunes(stat)}
-												</>
-											)}
-											<img
-												className={classes.tierIcon}
-												src={`/assets/images/ranked-emblems/Emblem_${getTierIconName(player.tier)}.webp`}
-												alt={player.tier}
-											/>
-											<span className={classes.tierBadge} style={{ color: getTierColor(player.tier) }}>
-												{getTierShortName(player.tier)}
-											</span>
-											<span
-												className={cx(classes.playerName, isMe && classes.playerNameHighlight)}
-												title={player.name}
-												onClick={e => goUser(e, player)}
-											>
-												{player.name}
-											</span>
-										</div>
+										<div className={classes.playerCell}>{renderPlayerIdentity(player, classes.playerName)}</div>
 									</td>
 									{stat ? (
 										<>
 											<td className={classes.td}>
-												<div className={classes.kdaCell}>
-													<span className={classes.kdaCellMain}>
-														{stat.kills} / <span className={classes.kdaDeath}>{stat.deaths}</span> / {stat.assists}
-														{kp != null && <span className={classes.kpText}> ({kp}%)</span>}
-													</span>
-													<span className={classes.kdaCellSub} style={{ color: kdaRatioColor(ratio) }}>
-														{ratio == null ? 'Perfect' : `${ratio.toFixed(2)}:1`}
-													</span>
-												</div>
+												<div className={classes.kdaCell}>{renderKda(stat, kp, ratio)}</div>
 											</td>
 											<td className={classes.td}>
 												<div className={classes.dmgCell}>
@@ -770,7 +688,19 @@ function MatchDetail({ match, perspectivePuuid }) {
 												</div>
 											</td>
 											<td className={classes.td}>{formatK(stat.goldEarned)}</td>
-											<td className={classes.td}>{renderItems(stat) || '-'}</td>
+											<td className={classes.td}>
+												{hasItems ? (
+													<ItemsRow
+														stat={stat}
+														rowClass={classes.itemsRow}
+														imgClass={classes.detailItemImg}
+														emptyClass={classes.detailItemEmpty}
+														gapClass={classes.trinketGap}
+													/>
+												) : (
+													'-'
+												)}
+											</td>
 										</>
 									) : (
 										<td className={classes.td} colSpan={6}>
@@ -788,99 +718,31 @@ function MatchDetail({ match, perspectivePuuid }) {
 
 	// 펼침(md 미만): 테이블 대신 플레이어별 2줄 세로 스택 — 가로 스크롤 없이 전체 정보 표시
 	const renderTeamMobile = teamNo => {
-		const team = teamNo === 1 ? match.team1 : match.team2;
-		const won = match.winTeam === teamNo;
-		const players = sortPlayers(team.players);
-		const durationMin = durationSec ? durationSec / 60 : null;
-		const teamStat = match.teamStats ? match.teamStats[`team${teamNo}`] : null;
-		const bans = teamStat && teamStat.bans ? teamStat.bans : [];
+		const { team, won, players, bans } = getTeamCtx(teamNo);
 		return (
 			<div className={classes.mTeamBlock}>
 				<div className={classes.mTeamHeader} style={{ color: TEAM_COLORS[teamNo] }}>
-					<span role="img" aria-label={teamNo === 1 ? 'dog' : 'cat'}>
-						{teamNo === 1 ? '🐶' : '🐱'}
-					</span>
-					Team {teamNo}
-					<span className={won ? classes.teamResultWin : classes.teamResultLose}>{won ? 'WIN' : 'LOSE'}</span>
-					{bans.length > 0 && (
-						<span className={classes.bansRow}>
-							<span className={classes.banLabel}>밴</span>
-							{bans.map(b => {
-								const key = champKeys[b.championId];
-								return key ? (
-									<img key={`${b.championId}-${b.pickTurn}`} className={classes.banImg} src={getChampionIcon(key)} alt="" title={key} />
-								) : null;
-							})}
-						</span>
-					)}
+					{renderTeamHeaderContent(teamNo, won, bans)}
 				</div>
 				{players.map(player => {
-					const posIconKey = POSITION_ICON_KEY[getPlayerPosition(player)];
 					const { stat } = player;
-					const isMe = player.puuid === perspectivePuuid;
 					const ratio = stat ? getKdaRatio(stat) : null;
 					const kp = stat ? getKillParticipation(stat, team.players) : null;
 					return (
 						<div key={player.puuid} className={classes.mPlayer}>
 							<div className={classes.mPlayerTop}>
-								<span className={classes.posSlot}>
-									{posIconKey && (
-										<PositionIcon
-											position={posIconKey}
-											className={classes.posIcon}
-											fallbackClassName={classes.posFallback}
-										/>
-									)}
-								</span>
-								{stat && (
-									<>
-										<span className={classes.detailChampWrap}>
-											<img
-												className={classes.detailChampImg}
-												src={getChampionIcon(stat.championName)}
-												alt={stat.championKoName || stat.championName}
-												title={stat.championKoName || stat.championName}
-												onError={e => {
-													e.currentTarget.style.visibility = 'hidden';
-												}}
-											/>
-											{stat.champLevel != null && (
-												<span className={classes.detailChampLevel}>{stat.champLevel}</span>
-											)}
-										</span>
-										{renderSpellsRunes(stat)}
-									</>
-								)}
-								<img
-									className={classes.tierIcon}
-									src={`/assets/images/ranked-emblems/Emblem_${getTierIconName(player.tier)}.webp`}
-									alt={player.tier}
-								/>
-								<span className={classes.tierBadge} style={{ color: getTierColor(player.tier) }}>
-									{getTierShortName(player.tier)}
-								</span>
-								<span
-									className={cx(classes.mPlayerName, isMe && classes.playerNameHighlight)}
-									title={player.name}
-									onClick={e => goUser(e, player)}
-								>
-									{player.name}
-								</span>
-								{stat && (
-									<div className={classes.mKda}>
-										<span className={classes.kdaCellMain}>
-											{stat.kills} / <span className={classes.kdaDeath}>{stat.deaths}</span> / {stat.assists}
-											{kp != null && <span className={classes.kpText}> ({kp}%)</span>}
-										</span>
-										<span className={classes.kdaCellSub} style={{ color: kdaRatioColor(ratio) }}>
-											{ratio == null ? 'Perfect' : `${ratio.toFixed(2)}:1`}
-										</span>
-									</div>
-								)}
+								{renderPlayerIdentity(player, classes.mPlayerName)}
+								{stat && <div className={classes.mKda}>{renderKda(stat, kp, ratio)}</div>}
 							</div>
 							{stat && (
 								<div className={classes.mPlayerBottom}>
-									{renderItems(stat)}
+									<ItemsRow
+										stat={stat}
+										rowClass={classes.itemsRow}
+										imgClass={classes.detailItemImg}
+										emptyClass={classes.detailItemEmpty}
+										gapClass={classes.trinketGap}
+									/>
 									<span className={classes.mStatText}>
 										딜 {formatK(stat.damageToChampions)} · 받 {formatK(stat.damageTaken)} · CS {stat.cs}
 										{durationMin ? ` (${(stat.cs / durationMin).toFixed(1)})` : ''} · 골드{' '}
@@ -946,61 +808,31 @@ function MatchDetail({ match, perspectivePuuid }) {
 
 	// 스탯 없는 매치 폴백: 단순 로스터 (포지션/티어/이름)
 	const renderSimpleTeam = teamNo => {
-		const team = teamNo === 1 ? match.team1 : match.team2;
-		const won = match.winTeam === teamNo;
+		const { won, players, bans } = getTeamCtx(teamNo);
 		return (
 			<div className={classes.simpleTeamBlock}>
-				<div className={classes.simpleTeamHeader}>
-					<span role="img" aria-label={teamNo === 1 ? 'dog' : 'cat'}>
-						{teamNo === 1 ? '🐶' : '🐱'}
-					</span>
-					Team {teamNo}
-					<span className={won ? classes.teamResultWin : classes.teamResultLose}>{won ? 'WIN' : 'LOSE'}</span>
-				</div>
-				{sortPlayers(team.players).map(player => {
-					const posIconKey = POSITION_ICON_KEY[getPlayerPosition(player)];
-					const isMe = player.puuid === perspectivePuuid;
-					return (
-						<div key={player.puuid} className={classes.simplePlayerRow}>
-							<span className={classes.posSlot}>
-								{posIconKey && (
-									<PositionIcon position={posIconKey} className={classes.posIcon} fallbackClassName={classes.posFallback} />
-								)}
-							</span>
-							<img
-								className={classes.tierIcon}
-								src={`/assets/images/ranked-emblems/Emblem_${getTierIconName(player.tier)}.webp`}
-								alt={player.tier}
-							/>
-							<span className={classes.tierBadge} style={{ color: getTierColor(player.tier) }}>
-								{getTierShortName(player.tier)}
-							</span>
-							<span
-								className={cx(classes.playerName, isMe && classes.playerNameHighlight)}
-								title={player.name}
-								onClick={e => goUser(e, player)}
-							>
-								{player.name}
-							</span>
-						</div>
-					);
-				})}
+				<div className={classes.simpleTeamHeader}>{renderTeamHeaderContent(teamNo, won, bans)}</div>
+				{players.map(player => (
+					<div key={player.puuid} className={classes.simplePlayerRow}>
+						{renderPlayerIdentity(player, classes.playerName)}
+					</div>
+				))}
 			</div>
 		);
 	};
+
+	const renderTeams = teamNo => (isMobile ? renderTeamMobile(teamNo) : renderTeamTable(teamNo));
 
 	return (
 		<div className={classes.detailWrap} onClick={e => e.stopPropagation()}>
 			{hasAnyStats ? (
 				<>
-					{renderTeamTable(1)}
-					{renderTeamMobile(1)}
+					{renderTeams(1)}
 					{renderSummaryStrip()}
-					{renderTeamTable(2)}
-					{renderTeamMobile(2)}
+					{renderTeams(2)}
 				</>
 			) : (
-				<div className={classes.simpleTeams}>
+				<div className={cx(classes.simpleTeams, isMobile && classes.simpleTeamsMobile)}>
 					{renderSimpleTeam(1)}
 					{renderSimpleTeam(2)}
 				</div>

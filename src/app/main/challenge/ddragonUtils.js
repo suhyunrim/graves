@@ -150,49 +150,50 @@ export function loadPerkIcons() {
 	return perkIconsPromise;
 }
 
-let championKeysPromise = null;
+let championDataPromise = null;
 
-// DDragon 챔피언 숫자 ID → DDragon 키("Thresh") 매핑을 1회 로드해 캐시.
-// 밴 목록처럼 championId(숫자)만 있는 데이터의 아이콘 렌더용.
-export function loadChampionKeysById() {
-	if (championKeysPromise) return championKeysPromise;
-	championKeysPromise = axios
+// DDragon versions.json → 최신 버전 ko_KR champion.json 을 1회 로드해 캐시.
+// keys/names 매핑이 같은 응답을 공유한다 (champion.json 이중 다운로드 방지).
+function loadChampionData() {
+	if (championDataPromise) return championDataPromise;
+	championDataPromise = axios
 		.get('https://ddragon.leagueoflegends.com/api/versions.json')
 		.then(res => {
 			const v = (res.data && res.data[0]) || import.meta.env.VITE_RIOT_DATA_VERSION || '14.10.1';
 			return axios.get(`https://ddragon.leagueoflegends.com/cdn/${v}/data/ko_KR/champion.json`);
 		})
-		.then(res => {
-			const data = (res.data && res.data.data) || {};
-			const map = {};
-			Object.keys(data).forEach(id => {
-				map[Number(data[id].key)] = id;
-			});
-			return map;
-		})
+		.then(res => (res.data && res.data.data) || {})
 		.catch(() => ({}));
+	return championDataPromise;
+}
+
+let championKeysPromise = null;
+
+// DDragon 챔피언 숫자 ID → DDragon 키("Thresh") 매핑.
+// 밴 목록처럼 championId(숫자)만 있는 데이터의 아이콘 렌더용.
+export function loadChampionKeysById() {
+	if (championKeysPromise) return championKeysPromise;
+	championKeysPromise = loadChampionData().then(data => {
+		const map = {};
+		Object.keys(data).forEach(id => {
+			map[Number(data[id].key)] = id;
+		});
+		return map;
+	});
 	return championKeysPromise;
 }
 
 let championNamesPromise = null;
 
-// DDragon ko_KR 챔피언 id → 한글명 매핑을 1회 로드해 캐시 (promise 공유).
+// DDragon ko_KR 챔피언 id → 한글명 매핑.
 export function loadChampionNames() {
 	if (championNamesPromise) return championNamesPromise;
-	championNamesPromise = axios
-		.get('https://ddragon.leagueoflegends.com/api/versions.json')
-		.then(res => {
-			const v = (res.data && res.data[0]) || import.meta.env.VITE_RIOT_DATA_VERSION || '14.10.1';
-			return axios.get(`https://ddragon.leagueoflegends.com/cdn/${v}/data/ko_KR/champion.json`);
-		})
-		.then(res => {
-			const data = (res.data && res.data.data) || {};
-			const map = {};
-			Object.keys(data).forEach(id => {
-				map[id] = data[id].name;
-			});
-			return map;
-		})
-		.catch(() => ({}));
+	championNamesPromise = loadChampionData().then(data => {
+		const map = {};
+		Object.keys(data).forEach(id => {
+			map[id] = data[id].name;
+		});
+		return map;
+	});
 	return championNamesPromise;
 }
