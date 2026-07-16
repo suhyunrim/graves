@@ -139,6 +139,23 @@ const useStyles = makeStyles()((theme) => ({
 		padding: '14px 18px',
 		marginBottom: 20
 	},
+	// 내전 탭 상단: 내전 티어 카드(좌) + 모스트 챔피언 행 리스트(우)
+	naejeonTopGrid: {
+		display: 'grid',
+		gridTemplateColumns: 'minmax(280px, 340px) 1fr',
+		gap: 24,
+		alignItems: 'stretch',
+		marginBottom: 24,
+		[theme.breakpoints.down('md')]: {
+			gridTemplateColumns: '1fr',
+			gap: 16
+		}
+	},
+	naejeonTierCard: {
+		display: 'flex',
+		flexDirection: 'column',
+		justifyContent: 'center'
+	},
 	profileVisitor: {
 		marginLeft: 'auto',
 		[theme.breakpoints.down('sm')]: {
@@ -1385,9 +1402,38 @@ function MyInfoPage(props) {
 
 					{activeTab === 0 && (
 						<>
-							{/* 내전 탭: 모스트 챔피언(수집분) + 내전 기록. 챔피언 데이터 없으면 안내만 표시 */}
+							{/* 내전 탭: 내전 티어 카드 + 모스트 챔피언(수집분) + 내전 기록. 챔피언 데이터 없으면 안내만 표시 */}
 							{internalStats && internalStats.champions && internalStats.champions.length > 0 ? (
-								<div className={classes.trophyCabinetWrap}>
+								<div className={classes.naejeonTopGrid}>
+									<div className={`${classes.rankCard} ${classes.customRatingCard} ${classes.naejeonTierCard}`}>
+										<div className={classes.cardHeader}>
+											<div className={classes.emblemContainer}>
+												<img
+													className={classes.emblem}
+													src={`/assets/images/ranked-emblems/Emblem_${ratingTierName}.webp`}
+													alt={ratingTierName}
+													style={{ filter: `drop-shadow(0 0 20px ${ratingTierColor.glow})` }}
+												/>
+											</div>
+											<div className={classes.cardTitleWrapper}>
+												<div className={classes.cardLabel}>Custom Rating</div>
+												<div className={classes.tierText} style={{ color: ratingTierColor.primary }}>
+													{getRatingTierDisplay()} {getRatingLP()}LP
+												</div>
+											</div>
+										</div>
+										<div className={classes.statsRow}>
+											<span className={classes.statItem}>
+												{scoreInfo.win}승 {scoreInfo.lose}패
+											</span>
+											{scoreInfo.win + scoreInfo.lose > 0 && (
+												<span className={`${classes.winRate} ${getWinRateClass(customWinRate)}`}>
+													{customWinRate}%
+												</span>
+											)}
+										</div>
+										<div className={classes.decorLine} style={{ color: '#00d4ff' }} />
+									</div>
 									<InternalChampions
 										champions={internalStats.champions}
 										totalGames={internalStats.totalGames}
