@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { makeStyles } from 'tss-react/mui';
 import { getChampionIcon } from 'app/main/challenge/ddragonUtils';
+import InternalChampionsDialog from './InternalChampionsDialog';
+import { getChampBadges } from './championBadges';
 
 const useStyles = makeStyles()((theme) => ({
 	root: {
@@ -113,6 +115,38 @@ const useStyles = makeStyles()((theme) => ({
 		fontFamily: '"Noto Sans KR", sans-serif',
 		fontSize: '0.92rem',
 		color: 'rgba(255, 255, 255, 0.4)'
+	},
+	showAllBtn: {
+		marginLeft: 'auto',
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.05rem',
+		fontWeight: 600,
+		color: 'rgba(255, 255, 255, 0.55)',
+		background: 'rgba(255, 255, 255, 0.04)',
+		border: '1px solid rgba(255, 255, 255, 0.15)',
+		borderRadius: 8,
+		padding: '4px 14px',
+		cursor: 'pointer',
+		textTransform: 'none',
+		letterSpacing: 'normal',
+		transition: 'all 0.2s ease',
+		'&:hover': {
+			color: '#00d4ff',
+			borderColor: 'rgba(0, 212, 255, 0.4)',
+			background: 'rgba(0, 212, 255, 0.08)'
+		}
+	},
+	badgeRow: {
+		display: 'flex',
+		gap: 4
+	},
+	badge: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '0.85rem',
+		fontWeight: 700,
+		padding: '1px 6px',
+		borderRadius: 6,
+		border: '1px solid currentColor'
 	}
 }));
 
@@ -120,7 +154,9 @@ const useStyles = makeStyles()((theme) => ({
 // KDA를 함께 노출한다. championKoName은 API가 직접 제공하므로 별도 한글명 로드가 필요 없다.
 function InternalChampions({ champions, totalGames }) {
 	const { classes } = useStyles();
-	const list = (champions || []).slice(0, 5);
+	const [dialogOpen, setDialogOpen] = useState(false);
+	const all = champions || [];
+	const list = all.slice(0, 5);
 
 	if (list.length === 0) {
 		return null;
@@ -131,6 +167,11 @@ function InternalChampions({ champions, totalGames }) {
 			<div className={classes.header}>
 				내전 모스트 챔피언
 				<span className={classes.count}>(수집 {totalGames}판)</span>
+				{all.length > 5 && (
+					<button type="button" className={classes.showAllBtn} onClick={() => setDialogOpen(true)}>
+						전체 보기 ({all.length})
+					</button>
+				)}
 			</div>
 			<div className={classes.grid}>
 				{list.map(c => {
@@ -138,6 +179,7 @@ function InternalChampions({ champions, totalGames }) {
 					const wrColor = wr >= 50 ? '#00ff7f' : 'rgba(255, 255, 255, 0.55)';
 					const kda = typeof c.kda === 'number' ? c.kda.toFixed(2) : '-';
 					const name = c.championKoName || c.championName;
+					const badges = getChampBadges(c, totalGames);
 					return (
 						<div key={c.championId} className={classes.card}>
 							<img
@@ -151,6 +193,15 @@ function InternalChampions({ champions, totalGames }) {
 							<div className={classes.champName} title={name}>
 								{name}
 							</div>
+							{badges.length > 0 && (
+								<div className={classes.badgeRow}>
+									{badges.map(b => (
+										<span key={b.key} className={classes.badge} style={{ color: b.color }}>
+											{b.label}
+										</span>
+									))}
+								</div>
+							)}
 							<div className={classes.stat}>
 								{c.games}판 · 승률{' '}
 								<span className={classes.winRate} style={{ color: wrColor }}>
@@ -167,6 +218,12 @@ function InternalChampions({ champions, totalGames }) {
 					);
 				})}
 			</div>
+			<InternalChampionsDialog
+				open={dialogOpen}
+				onClose={() => setDialogOpen(false)}
+				champions={all}
+				totalGames={totalGames}
+			/>
 		</div>
 	);
 }

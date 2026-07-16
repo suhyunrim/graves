@@ -138,6 +138,20 @@ export function getSampleDashboardData(month) {
 // ============================================================
 // 매치 히스토리 데이터 (30경기)
 // ============================================================
+const MATCH_CHAMPS = [
+	{ championId: 412, championName: 'Thresh', championKoName: '쓰레쉬' },
+	{ championId: 64, championName: 'LeeSin', championKoName: '리 신' },
+	{ championId: 131, championName: 'Diana', championKoName: '다이애나' },
+	{ championId: 157, championName: 'Yasuo', championKoName: '야스오' },
+	{ championId: 222, championName: 'Jinx', championKoName: '징크스' },
+	{ championId: 99, championName: 'Lux', championKoName: '럭스' },
+	{ championId: 86, championName: 'Garen', championKoName: '가렌' },
+	{ championId: 92, championName: 'Riven', championKoName: '리븐' },
+	{ championId: 254, championName: 'Vi', championKoName: '바이' },
+	{ championId: 202, championName: 'Jhin', championKoName: '진' }
+];
+const MATCH_POSITIONS = ['TOP', 'JUNGLE', 'MIDDLE', 'BOTTOM', 'UTILITY'];
+
 function makeMatch(index, dayOffset) {
 	const gameId = `sample-match-${String(index + 1).padStart(3, '0')}`;
 	const d = new Date(2026, 3, 10);
@@ -146,12 +160,33 @@ function makeMatch(index, dayOffset) {
 	const createdAt = d.toISOString();
 	const winTeam = (index % 3 === 0) ? 2 : 1;
 
+	// 실서비스 혼재 상태 재현: 헬퍼(elise) 수집 매치 2/3, 포지션 없는 매치 1/4
+	const hasStats = index % 3 !== 2;
+	const hasPositions = index % 4 !== 3;
+	const gameDurationSec = hasStats ? 1320 + (index % 6) * 180 : null;
+
 	// 10명 선택 (순환)
 	const offset = (index * 7) % PLAYERS.length;
 	const selected = [];
 	for (let i = 0; i < 10; i++) {
 		selected.push(PLAYERS[(offset + i) % PLAYERS.length]);
 	}
+
+	const makeStat = (pi, slotIndex, teamWon) => {
+		const champ = MATCH_CHAMPS[(offset + slotIndex) % MATCH_CHAMPS.length];
+		return {
+			...champ,
+			kills: ((index + slotIndex * 3) % 10) + (teamWon ? 3 : 1),
+			deaths: ((index + slotIndex * 2) % 6) + (teamWon ? 1 : 3),
+			assists: ((index * 2 + slotIndex) % 12) + 2,
+			cs: 120 + ((index * 13 + slotIndex * 29) % 140),
+			goldEarned: 9000 + ((index * 700 + slotIndex * 500) % 6000),
+			damageToChampions: 12000 + ((index * 1500 + slotIndex * 2300) % 25000),
+			visionScore: 10 + ((index + slotIndex * 7) % 40),
+			position: hasPositions ? MATCH_POSITIONS[pi] : null,
+			gameDurationSec
+		};
+	};
 
 	const team1Players = selected.slice(0, 5).map((p, pi) => {
 		const rating = RANKING_RATINGS[(offset + pi) % RANKING_RATINGS.length];
@@ -160,7 +195,9 @@ function makeMatch(index, dayOffset) {
 			puuid: p.puuid,
 			rating,
 			ratingChange: winTeam === 1 ? 3 + (pi % 3) : -(3 + (pi % 3)),
-			tier: getTierStringFromRating(rating)
+			tier: getTierStringFromRating(rating),
+			position: hasPositions ? MATCH_POSITIONS[pi] : undefined,
+			stat: hasStats ? makeStat(pi, pi, winTeam === 1) : undefined
 		};
 	});
 	const team2Players = selected.slice(5, 10).map((p, pi) => {
@@ -170,7 +207,9 @@ function makeMatch(index, dayOffset) {
 			puuid: p.puuid,
 			rating,
 			ratingChange: winTeam === 2 ? 3 + (pi % 3) : -(3 + (pi % 3)),
-			tier: getTierStringFromRating(rating)
+			tier: getTierStringFromRating(rating),
+			position: hasPositions ? MATCH_POSITIONS[pi] : undefined,
+			stat: hasStats ? makeStat(pi, 5 + pi, winTeam === 2) : undefined
 		};
 	});
 
@@ -181,6 +220,7 @@ function makeMatch(index, dayOffset) {
 		gameId,
 		createdAt,
 		winTeam,
+		gameDurationSec: gameDurationSec || undefined,
 		team1: { avgRating: avg1, ratingChange: winTeam === 1 ? 4 : -4, players: team1Players },
 		team2: { avgRating: avg2, ratingChange: winTeam === 2 ? 4 : -4, players: team2Players }
 	};
@@ -353,7 +393,9 @@ export function getSampleInternalStats(puuid) {
 			{ championId: 89, championName: 'Leona', championKoName: '레오나', games: 10, wins: 6, winRate: 60.0, kills: 1.8, deaths: 4.9, assists: 13.7, kda: 3.16, csPerMin: 0.9 },
 			{ championId: 99, championName: 'Lux', championKoName: '럭스', games: 8, wins: 4, winRate: 50.0, kills: 6.5, deaths: 4.1, assists: 9.8, kda: 3.98, csPerMin: 5.2 },
 			{ championId: 104, championName: 'Graves', championKoName: '그레이브즈', games: 6, wins: 4, winRate: 66.7, kills: 7.2, deaths: 4.0, assists: 5.1, kda: 3.08, csPerMin: 6.8 },
-			{ championId: 202, championName: 'Jhin', championKoName: '진', games: 4, wins: 3, winRate: 75.0, kills: 8.0, deaths: 3.2, assists: 7.5, kda: 4.84, csPerMin: 7.9 }
+			{ championId: 202, championName: 'Jhin', championKoName: '진', games: 4, wins: 3, winRate: 75.0, kills: 8.0, deaths: 3.2, assists: 7.5, kda: 4.84, csPerMin: 7.9 },
+			{ championId: 64, championName: 'LeeSin', championKoName: '리 신', games: 3, wins: 1, winRate: 33.3, kills: 5.1, deaths: 5.8, assists: 6.0, kda: 1.91, csPerMin: 5.5 },
+			{ championId: 86, championName: 'Garen', championKoName: '가렌', games: 2, wins: 1, winRate: 50.0, kills: 4.0, deaths: 3.5, assists: 3.0, kda: 2.0, csPerMin: 6.1 }
 		],
 		positions: [
 			{ position: 'UTILITY', games: 24, wins: 14, winRate: 58.3, kda: 3.6, csPerMin: 1.0, dpm: 320, laneGames: 22, csDiffAvg: -2.1, goldDiffAvg: 180, damageDiffAvg: 900 },

@@ -108,6 +108,37 @@ const useStyles = makeStyles()((theme) => ({
 			padding: 16
 		}
 	},
+	// 시그니처 챔피언(내전 최다 픽) 스플래시를 히어로 배경으로 쓸 때 텍스트 가독성용 칩
+	heroStatsRow: {
+		display: 'flex',
+		flexWrap: 'wrap',
+		gap: 8,
+		marginTop: 12
+	},
+	heroChip: {
+		fontFamily: '"Rajdhani", "Noto Sans KR", sans-serif',
+		fontSize: '1.15rem',
+		fontWeight: 700,
+		color: 'rgba(255, 255, 255, 0.85)',
+		background: 'rgba(0, 0, 0, 0.45)',
+		border: '1px solid rgba(0, 212, 255, 0.25)',
+		borderRadius: 8,
+		padding: '3px 10px',
+		whiteSpace: 'nowrap'
+	},
+	heroChipAccent: {
+		color: '#00d4ff'
+	},
+	collectNotice: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.15rem',
+		color: 'rgba(255, 255, 255, 0.45)',
+		background: 'rgba(0, 212, 255, 0.05)',
+		border: '1px dashed rgba(0, 212, 255, 0.25)',
+		borderRadius: 12,
+		padding: '14px 18px',
+		marginBottom: 20
+	},
 	profileVisitor: {
 		marginLeft: 'auto',
 		[theme.breakpoints.down('sm')]: {
@@ -1213,6 +1244,33 @@ function MyInfoPage(props) {
 		? (POSITION_MAP[summonerInfo.subPosition] || {}).label || summonerInfo.subPosition
 		: null;
 
+	// 히어로: 내전 최다 픽 챔피언 스플래시 배경 (표본 3판 미만이면 기존 배경 유지)
+	const signatureChamp =
+		internalStats && internalStats.champions && internalStats.champions[0] && internalStats.champions[0].games >= 3
+			? internalStats.champions[0]
+			: null;
+	const heroStyle = signatureChamp
+		? {
+				backgroundImage: `linear-gradient(90deg, rgba(18, 18, 32, 0.96) 0%, rgba(18, 18, 32, 0.85) 45%, rgba(18, 18, 32, 0.5) 100%), url(https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${signatureChamp.championName}_0.jpg)`,
+				backgroundSize: 'cover',
+				backgroundPosition: 'center 25%'
+		  }
+		: undefined;
+
+	// 내전 전체 KDA (수집분 가중 평균)
+	let internalKda = null;
+	if (internalStats && internalStats.champions && internalStats.champions.length > 0) {
+		let k = 0;
+		let d = 0;
+		let a = 0;
+		internalStats.champions.forEach(c => {
+			k += c.kills * c.games;
+			d += c.deaths * c.games;
+			a += c.assists * c.games;
+		});
+		if (d > 0) internalKda = ((k + a) / d).toFixed(2);
+	}
+
 	return (
 		<FusePageSimple
 			classes={{
@@ -1227,8 +1285,8 @@ function MyInfoPage(props) {
 			}
 			content={
 				<div className={classes.container}>
-					{/* 프로필 섹션 */}
-					<div className={classes.profileSection}>
+					{/* 프로필 섹션 (시그니처 챔피언 스플래시 히어로) */}
+					<div className={classes.profileSection} style={heroStyle}>
 						<img className={classes.profileIcon} src={getProfileIconURI()} alt="Profile Icon" />
 						<div className={classes.profileInfo}>
 							<div className={classes.summonerName}>
@@ -1278,6 +1336,20 @@ function MyInfoPage(props) {
 									/>
 								)}
 							</div>
+							<div className={classes.heroStatsRow}>
+								<span className={`${classes.heroChip} ${classes.heroChipAccent}`}>
+									내전 {getRatingTierDisplay()} {getRatingLP()}LP
+								</span>
+								{scoreInfo.win + scoreInfo.lose > 0 && (
+									<span className={classes.heroChip}>승률 {customWinRate}%</span>
+								)}
+								{internalKda != null && <span className={classes.heroChip}>KDA {internalKda}</span>}
+								{signatureChamp && (
+									<span className={classes.heroChip}>
+										시그니처 · {signatureChamp.championKoName || signatureChamp.championName}
+									</span>
+								)}
+							</div>
 						</div>
 						{user?.reprGroup?.groupId && (
 							<div className={classes.profileVisitor}>
@@ -1299,21 +1371,38 @@ function MyInfoPage(props) {
 						className={classes.tabs}
 					>
 						<Tab label="내전" className={classes.tab} />
+						<Tab label="스탯" className={classes.tab} />
 						<Tab label="솔랭" className={classes.tab} />
 						<Tab label="업적" className={classes.tab} />
 						<Tab label="방명록" className={classes.tab} />
-						<Tab label="내전 기록" className={classes.tab} />
 					</Tabs>
 
-					{activeTab === 2 && <AchievementContent />}
+					{activeTab === 3 && <AchievementContent />}
 
-					{activeTab === 3 && user?.reprGroup?.groupId && (
+					{activeTab === 4 && user?.reprGroup?.groupId && (
 						<Guestbook groupId={user.reprGroup.groupId} puuid={puuid || myPuuid} />
 					)}
 
-					{activeTab === 4 && <MyMatchHistory key={puuid || myPuuid} puuid={puuid || myPuuid} />}
-
 					{activeTab === 0 && (
+						<>
+							{/* 내전 탭: 모스트 챔피언(수집분) + 내전 기록. 챔피언 데이터 없으면 안내만 표시 */}
+							{internalStats && internalStats.champions && internalStats.champions.length > 0 ? (
+								<div className={classes.trophyCabinetWrap}>
+									<InternalChampions
+										champions={internalStats.champions}
+										totalGames={internalStats.totalGames}
+									/>
+								</div>
+							) : (
+								<div className={classes.collectNotice}>
+									챔피언/KDA 정보는 헬퍼(elise)가 수집한 내전부터 표시됩니다. 아직 수집된 경기가 없어요.
+								</div>
+							)}
+							<MyMatchHistory key={puuid || myPuuid} puuid={puuid || myPuuid} />
+						</>
+					)}
+
+					{activeTab === 1 && (
 						<>
 							{/* 트로피 캐비닛: 우승 토너먼트가 있을 때만 (빈 캐비닛은 페이지 부피만 늘리니 숨김) */}
 							{tournamentChampionships && tournamentChampionships.length > 0 && (
@@ -1351,15 +1440,6 @@ function MyInfoPage(props) {
 									<div className={classes.decorLine} style={{ color: '#00d4ff' }} />
 								</div>
 							</div>
-							{internalStats && internalStats.champions && internalStats.champions.length > 0 && (
-								<div className={classes.trophyCabinetWrap}>
-									<InternalChampions
-										champions={internalStats.champions}
-										totalGames={internalStats.totalGames}
-									/>
-								</div>
-							)}
-
 							{/* 최근 전적 & 연승/연패 통계 */}
 							<div className={classes.statsSection}>
 								<div className={classes.statsGrid}>
@@ -1655,7 +1735,7 @@ function MyInfoPage(props) {
 						</>
 					)}
 
-					{activeTab === 1 && (
+					{activeTab === 2 && (
 						<>
 							{/* 솔로 랭크 카드 */}
 							<div className={classes.cardsGrid}>

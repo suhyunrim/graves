@@ -4,7 +4,7 @@ import createCamilleAxios from 'app/utility/camilleAxios';
 import { isSampleMode } from 'app/main/sample/sampleStorage';
 import { getSampleMatchHistoryData } from 'app/main/sample/sampleData';
 import { MatchHistorySkeleton } from '../components/SkeletonLoaders';
-import MatchList from '../components/MatchList';
+import InternalMatchList from './InternalMatchList';
 
 const ROWS_PER_PAGE = 10;
 
@@ -53,7 +53,7 @@ function MyMatchHistory({ puuid }) {
 	}
 
 	return (
-		<MatchList
+		<InternalMatchList
 			matches={data.matches}
 			total={data.total}
 			page={page}
