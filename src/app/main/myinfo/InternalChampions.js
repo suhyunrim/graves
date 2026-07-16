@@ -50,12 +50,6 @@ const useStyles = makeStyles()((theme) => ({
 			fontSize: '1.4rem'
 		}
 	},
-	count: {
-		fontFamily: '"Noto Sans KR", sans-serif',
-		fontSize: '1.1rem',
-		color: 'rgba(255, 255, 255, 0.5)',
-		fontWeight: 400
-	},
 	showAllBtn: {
 		marginLeft: 'auto',
 		fontFamily: '"Noto Sans KR", sans-serif',
@@ -189,7 +183,6 @@ function InternalChampions({ champions, totalGames }) {
 		<div className={classes.root}>
 			<div className={classes.header}>
 				내전 모스트 챔피언
-				<span className={classes.count}>(수집 {totalGames}판)</span>
 				<button type="button" className={classes.showAllBtn} onClick={() => setDialogOpen(true)}>
 					전체 보기 ({all.length})
 				</button>
@@ -238,7 +231,9 @@ function InternalChampions({ champions, totalGames }) {
 								<span className={classes.winRate} style={{ color: wrColor }}>
 									{wr}%
 								</span>
-								<span className={classes.subLine}>{c.games} 게임</span>
+								<span className={classes.subLine}>
+									{c.wins}승 {c.games - c.wins}패
+								</span>
 							</div>
 						</div>
 					);
