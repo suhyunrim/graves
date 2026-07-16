@@ -13,6 +13,7 @@ import { fadeInUp } from './Reveal';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import PositionIcon from '../tournament/PositionIcon';
+import { getChampionIcon } from '../challenge/ddragonUtils';
 
 const tierColors = {
 	IRON: '#5C5C5C',
@@ -26,21 +27,6 @@ const tierColors = {
 	GRANDMASTER: '#FF4500',
 	CHALLENGER: '#F0E68C'
 };
-
-const tierThresholds = {
-	IRON: 200,
-	BRONZE: 300,
-	SILVER: 400,
-	GOLD: 500,
-	PLATINUM: 600,
-	EMERALD: 700,
-	DIAMOND: 800,
-	MASTER: 900,
-	GRANDMASTER: 1000,
-	CHALLENGER: 1150
-};
-
-const tierSteps = ['IV', 'III', 'II', 'I'];
 
 // Riot 표준 포지션 키(대문자) → 한글 라벨 + PositionIcon용 키(소문자).
 // 표시/정렬은 항상 탑 → 정글 → 미드 → 원딜 → 서폿 순서 고정 (RankingHeader/MyInfo 와 동일).
@@ -119,28 +105,10 @@ export const getTierColor = tier => {
 	return tierColors[tierName] || '#fff';
 };
 
-const isNonStepTier = tierName => {
-	return tierName === 'MASTER' || tierName === 'GRANDMASTER' || tierName === 'CHALLENGER';
-};
+// 닉네임의 라이엇 태그(#KR1 등)는 목록에선 숨긴다 (hover title로만 노출)
+const stripTag = name => (name || '').split('#')[0];
 
-const getTierNameFromRating = rating => {
-	const entries = Object.entries(tierThresholds).sort((a, b) => b[1] - a[1]);
-	const found = entries.find(([, tierRating]) => rating >= tierRating);
-	return found ? found[0] : 'IRON';
-};
-
-const getRatingTierName = rating => {
-	const entries = Object.entries(tierThresholds).sort((a, b) => b[1] - a[1]);
-	const found = entries.find(([, tierRating]) => rating >= tierRating);
-	if (!found) return 'IRON IV';
-	const [name, tierRating] = found;
-	if (isNonStepTier(name)) {
-		return name;
-	}
-	return `${name} ${tierSteps[Math.floor((rating - tierRating) / 25)]}`;
-};
-
-// 날짜 문자열을 날짜/시간으로 분리. 데스크탑 날짜 컬럼은 두 줄로 나눠 폭을 줄인다.
+// 날짜 문자열을 날짜/시간으로 분리.
 const formatDateParts = utcDateString => {
 	const date = new Date(utcDateString);
 	const year = String(date.getFullYear()).slice(-2);
@@ -218,20 +186,17 @@ const useStyles = makeStyles()(() => ({
 		marginBottom: 8,
 		boxShadow: '0 2px 8px rgba(255, 82, 82, 0.4)'
 	},
-	matchIdCell: {
-		fontFamily: '"Rajdhani", sans-serif',
-		fontSize: '1.6rem',
-		fontWeight: 700,
-		color: '#00d4ff',
-		textAlign: 'center',
-		minWidth: 60
-	},
-	dateCell: {
-		display: 'flex',
-		flexDirection: 'column',
+	// 매치별 날짜 스트립 (팀 셀 위에 좌측 정렬로 표시)
+	dateRowCell: {
+		borderBottom: 'none',
+		padding: '14px 16px 8px',
 		fontFamily: '"Rajdhani", "Noto Sans KR", sans-serif',
-		whiteSpace: 'nowrap',
-		lineHeight: 1.25
+		whiteSpace: 'nowrap'
+	},
+	dateRowInner: {
+		display: 'flex',
+		alignItems: 'center',
+		gap: 8
 	},
 	dateDay: {
 		fontSize: '1.3rem',
@@ -242,41 +207,12 @@ const useStyles = makeStyles()(() => ({
 		fontSize: '1.15rem',
 		color: 'rgba(255, 255, 255, 0.5)'
 	},
-	// 본인 관점(perspective) 승/패 배지 + 내 LP 칩
-	perspectiveRow: {
+	// 팀 셀 상단: WIN/LOSE 배지 + 팀 LP 변동 (멤버 리스트 위)
+	teamCellHeader: {
 		display: 'flex',
 		alignItems: 'center',
 		gap: 8,
-		marginTop: 8
-	},
-	avgRatingWrapper: {
-		display: 'flex',
-		flexDirection: 'column',
-		alignItems: 'center',
-		gap: 6
-	},
-	avgTierDisplay: {
-		display: 'flex',
-		alignItems: 'center',
-		gap: 8
-	},
-	avgTierIcon: {
-		width: 32,
-		height: 32,
-		transition: 'transform 0.2s ease',
-		'&:hover': {
-			transform: 'scale(1.15)'
-		}
-	},
-	avgTierBadge: {
-		fontFamily: '"Rajdhani", sans-serif',
-		fontSize: '1.3rem',
-		fontWeight: 700,
-		minWidth: 48,
-		textAlign: 'center',
-		padding: '3px 8px',
-		borderRadius: 4,
-		background: 'rgba(255, 255, 255, 0.1)'
+		marginBottom: 10
 	},
 	lpChange: {
 		fontFamily: '"Rajdhani", sans-serif',
@@ -350,6 +286,20 @@ const useStyles = makeStyles()(() => ({
 		padding: '2px 6px',
 		borderRadius: 4,
 		background: 'rgba(255, 255, 255, 0.1)'
+	},
+	// LCU 수집 매치: 플레이한 챔피언 아이콘. 팀 내 일부만 스탯이 있어도 정렬 유지용 빈 슬롯 렌더.
+	champIcon: {
+		width: 26,
+		height: 26,
+		borderRadius: '50%',
+		objectFit: 'cover',
+		border: '1px solid rgba(255, 255, 255, 0.2)',
+		flexShrink: 0
+	},
+	champSlot: {
+		width: 26,
+		height: 26,
+		flexShrink: 0
 	},
 	// 긴 닉네임은 두 줄로 깨지지 않게 한 줄 말줄임(…). 이름만 줄어들도록 minWidth:0.
 	playerName: {
@@ -447,12 +397,6 @@ const useStyles = makeStyles()(() => ({
 		background: 'rgba(0, 212, 255, 0.08)',
 		borderBottom: '1px solid rgba(255, 255, 255, 0.08)'
 	},
-	mobileMatchId: {
-		fontFamily: '"Rajdhani", sans-serif',
-		fontSize: '1.4rem',
-		fontWeight: 700,
-		color: '#00d4ff'
-	},
 	mobileDate: {
 		fontFamily: '"Noto Sans KR", sans-serif',
 		fontSize: '1.1rem',
@@ -509,29 +453,6 @@ const useStyles = makeStyles()(() => ({
 		fontWeight: 700,
 		textTransform: 'uppercase'
 	},
-	mobileRatingInfo: {
-		display: 'flex',
-		flexDirection: 'column',
-		alignItems: 'flex-end',
-		gap: 2
-	},
-	mobileAvgTierRow: {
-		display: 'flex',
-		alignItems: 'center',
-		gap: 4
-	},
-	mobileAvgTierIcon: {
-		width: 20,
-		height: 20
-	},
-	mobileAvgTierBadge: {
-		fontFamily: '"Rajdhani", sans-serif',
-		fontSize: '1rem',
-		fontWeight: 700,
-		padding: '2px 6px',
-		borderRadius: 4,
-		background: 'rgba(255, 255, 255, 0.1)'
-	},
 	mobileLpChange: {
 		fontFamily: '"Rajdhani", sans-serif',
 		fontSize: '0.95rem',
@@ -571,6 +492,18 @@ const useStyles = makeStyles()(() => ({
 	mobilePlayerTierIcon: {
 		width: 18,
 		height: 18
+	},
+	mobileChampIcon: {
+		width: 18,
+		height: 18,
+		borderRadius: '50%',
+		objectFit: 'cover',
+		flexShrink: 0
+	},
+	mobileChampSlot: {
+		width: 18,
+		height: 18,
+		flexShrink: 0
 	},
 	mobilePlayerTier: {
 		fontFamily: '"Rajdhani", sans-serif',
@@ -682,10 +615,13 @@ function MatchList({
 		return <span className={`${cls} ${classes.ratingNeutral}`}>0 LP</span>;
 	};
 
+	// {포지션}{티어아이콘}{티어}{플레이챔프(LCU 수집 시)}{닉네임(태그 제외)}
 	const renderPlayers = players => {
 		const sortedPlayers = sortPlayers(players);
+		const hasChamps = players.some(p => p.stat && p.stat.championName);
 		return sortedPlayers.map(player => {
 			const posIconKey = POSITION_ICON_KEY[player.position];
+			const champName = player.stat && player.stat.championName;
 			return (
 				<div key={player.puuid} className={classes.playerRow}>
 					<span className={classes.positionSlot}>
@@ -706,12 +642,26 @@ function MatchList({
 					<span className={classes.tierBadge} style={{ color: getTierColor(player.tier) }}>
 						{getTierShortName(player.tier)}
 					</span>
+					{hasChamps &&
+						(champName ? (
+							<img
+								className={classes.champIcon}
+								src={getChampionIcon(champName)}
+								alt={(player.stat && player.stat.championKoName) || champName}
+								title={(player.stat && player.stat.championKoName) || champName}
+								onError={e => {
+									e.currentTarget.style.visibility = 'hidden';
+								}}
+							/>
+						) : (
+							<span className={classes.champSlot} />
+						))}
 					<span
 						className={isPlayerHighlighted(player) ? classes.playerNameHighlight : classes.playerName}
 						title={player.name}
 						onClick={() => navigate(`/userinfo/${player.puuid}`)}
 					>
-						{player.name}
+						{stripTag(player.name)}
 					</span>
 				</div>
 			);
@@ -720,8 +670,10 @@ function MatchList({
 
 	const renderMobilePlayers = players => {
 		const sortedPlayers = sortPlayers(players);
+		const hasChamps = players.some(p => p.stat && p.stat.championName);
 		return sortedPlayers.map(player => {
 			const posIconKey = POSITION_ICON_KEY[player.position];
+			const champName = player.stat && player.stat.championName;
 			return (
 				<div key={player.puuid} className={classes.mobilePlayerChip}>
 					{posIconKey && (
@@ -739,18 +691,30 @@ function MatchList({
 					<span className={classes.mobilePlayerTier} style={{ color: getTierColor(player.tier) }}>
 						{getTierShortName(player.tier)}
 					</span>
+					{hasChamps &&
+						(champName ? (
+							<img
+								className={classes.mobileChampIcon}
+								src={getChampionIcon(champName)}
+								alt={(player.stat && player.stat.championKoName) || champName}
+								onError={e => {
+									e.currentTarget.style.visibility = 'hidden';
+								}}
+							/>
+						) : (
+							<span className={classes.mobileChampSlot} />
+						))}
 					<span
 						className={isPlayerHighlighted(player) ? classes.mobilePlayerNameHighlight : classes.mobilePlayerName}
+						title={player.name}
 						onClick={() => navigate(`/userinfo/${player.puuid}`)}
 					>
-						{player.name}
+						{stripTag(player.name)}
 					</span>
 				</div>
 			);
 		});
 	};
-
-	const getDisplayId = index => total - ((page - 1) * rowsPerPage + index);
 
 	return (
 		<div className={classes.container}>
@@ -763,13 +727,6 @@ function MatchList({
 								<Table sx={{ tableLayout: 'fixed' }}>
 									<TableHead>
 										<TableRow>
-											<TableCell className={classes.headerCell} align="center" style={{ width: 56 }}>
-												#
-											</TableCell>
-											<TableCell className={classes.headerCell} style={{ width: 112 }}>날짜</TableCell>
-											<TableCell className={classes.headerCell} align="center" style={{ width: 128 }}>
-												평균
-											</TableCell>
 											<TableCell className={classes.headerCell}>
 												<span className={classes.teamLabel}>
 													<span role="img" aria-label="dog" className={classes.teamEmoji}>
@@ -777,9 +734,6 @@ function MatchList({
 													</span>{' '}
 													Team 1
 												</span>
-											</TableCell>
-											<TableCell className={classes.headerCell} align="center" style={{ width: 128 }}>
-												평균
 											</TableCell>
 											<TableCell className={classes.headerCell}>
 												<span className={classes.teamLabel}>
@@ -793,119 +747,74 @@ function MatchList({
 										</TableRow>
 									</TableHead>
 									<TableBody>
-										{matches.map((match, index) => {
+										{matches.map(match => {
 											const isTeam1Win = match.winTeam === 1;
-											const displayId = getDisplayId(index);
 											const persp = getPerspective(match);
 											const dateParts = formatDateParts(match.createdAt);
 											return (
-												<StyledTableRow key={match.gameId}>
-													<StyledTableCell>
-														<span className={classes.matchIdCell}>{displayId}</span>
-													</StyledTableCell>
-													<StyledTableCell>
-														<div className={classes.dateCell}>
-															<span className={classes.dateDay}>{dateParts.day}</span>
-															<span className={classes.dateTime}>{dateParts.time}</span>
-														</div>
-														{persp && (
-															<div className={classes.perspectiveRow}>
+												<React.Fragment key={match.gameId}>
+													{/* 매치별 날짜 스트립 (좌측 상단) */}
+													<TableRow>
+														<TableCell
+															className={classes.dateRowCell}
+															style={{ borderBottom: 'none', padding: '14px 16px 8px' }}
+															colSpan={showAdmin ? 3 : 2}
+														>
+															<div className={classes.dateRowInner}>
+																<span className={classes.dateDay}>{dateParts.day}</span>
+																<span className={classes.dateTime}>{dateParts.time}</span>
+																{persp && (
+																	<>
+																		<span
+																			className={persp.won ? classes.winBadge : classes.loseBadge}
+																			style={{ marginBottom: 0 }}
+																		>
+																			{persp.won ? 'WIN' : 'LOSE'}
+																		</span>
+																		{persp.myLp != null && renderLpSpan(persp.myLp, classes.lpChange)}
+																	</>
+																)}
+															</div>
+														</TableCell>
+													</TableRow>
+													<StyledTableRow>
+														<StyledTableCell className={isTeam1Win ? classes.winTeamCell : classes.loseTeamCell}>
+															<div className={classes.teamCellHeader}>
 																<span
-																	className={persp.won ? classes.winBadge : classes.loseBadge}
+																	className={isTeam1Win ? classes.winBadge : classes.loseBadge}
 																	style={{ marginBottom: 0 }}
 																>
-																	{persp.won ? 'WIN' : 'LOSE'}
+																	{isTeam1Win ? 'WIN' : 'LOSE'}
 																</span>
-																{persp.myLp != null && renderLpSpan(persp.myLp, classes.lpChange)}
+																{renderLpSpan(match.team1.ratingChange * 4, classes.lpChange)}
 															</div>
-														)}
-													</StyledTableCell>
-													<StyledTableCell
-														align="center"
-														className={isTeam1Win ? classes.winTeamCell : classes.loseTeamCell}
-													>
-														<div className={classes.avgRatingWrapper}>
-															<span
-																className={isTeam1Win ? classes.winBadge : classes.loseBadge}
-																style={{ marginBottom: 0 }}
-															>
-																{isTeam1Win ? 'WIN' : 'LOSE'}
-															</span>
-															<div className={classes.avgTierDisplay}>
-																<img
-																	className={classes.avgTierIcon}
-																	src={`/assets/images/ranked-emblems/Emblem_${getTierNameFromRating(
-																		match.team1.avgRating
-																	)}.webp`}
-																	alt={getRatingTierName(match.team1.avgRating)}
-																	style={{
-																		filter: `drop-shadow(0 0 4px ${
-																			tierColors[getTierNameFromRating(match.team1.avgRating)]
-																		}40)`
-																	}}
-																/>
-																<span
-																	className={classes.avgTierBadge}
-																	style={{ color: tierColors[getTierNameFromRating(match.team1.avgRating)] }}
-																>
-																	{getTierShortName(getRatingTierName(match.team1.avgRating))}
-																</span>
-															</div>
-															{renderLpSpan(match.team1.ratingChange * 4, classes.lpChange)}
-														</div>
-													</StyledTableCell>
-													<StyledTableCell className={isTeam1Win ? classes.winTeamCell : classes.loseTeamCell}>
-														<div className={classes.playerList}>{renderPlayers(match.team1.players)}</div>
-													</StyledTableCell>
-													<StyledTableCell
-														align="center"
-														className={!isTeam1Win ? classes.winTeamCell : classes.loseTeamCell}
-													>
-														<div className={classes.avgRatingWrapper}>
-															<span
-																className={!isTeam1Win ? classes.winBadge : classes.loseBadge}
-																style={{ marginBottom: 0 }}
-															>
-																{!isTeam1Win ? 'WIN' : 'LOSE'}
-															</span>
-															<div className={classes.avgTierDisplay}>
-																<img
-																	className={classes.avgTierIcon}
-																	src={`/assets/images/ranked-emblems/Emblem_${getTierNameFromRating(
-																		match.team2.avgRating
-																	)}.webp`}
-																	alt={getRatingTierName(match.team2.avgRating)}
-																	style={{
-																		filter: `drop-shadow(0 0 4px ${
-																			tierColors[getTierNameFromRating(match.team2.avgRating)]
-																		}40)`
-																	}}
-																/>
-																<span
-																	className={classes.avgTierBadge}
-																	style={{ color: tierColors[getTierNameFromRating(match.team2.avgRating)] }}
-																>
-																	{getTierShortName(getRatingTierName(match.team2.avgRating))}
-																</span>
-															</div>
-															{renderLpSpan(match.team2.ratingChange * 4, classes.lpChange)}
-														</div>
-													</StyledTableCell>
-													<StyledTableCell className={!isTeam1Win ? classes.winTeamCell : classes.loseTeamCell}>
-														<div className={classes.playerList}>{renderPlayers(match.team2.players)}</div>
-													</StyledTableCell>
-													{showAdmin && (
-														<StyledTableCell align="center" style={{ padding: '8px 4px' }}>
-															<IconButton
-																className={classes.settingsBtn}
-																size="small"
-																onClick={e => onMenuOpen(e, match)}
-															>
-																<SettingsIcon className={classes.settingsIcon} />
-															</IconButton>
+															<div className={classes.playerList}>{renderPlayers(match.team1.players)}</div>
 														</StyledTableCell>
-													)}
-												</StyledTableRow>
+														<StyledTableCell className={!isTeam1Win ? classes.winTeamCell : classes.loseTeamCell}>
+															<div className={classes.teamCellHeader}>
+																<span
+																	className={!isTeam1Win ? classes.winBadge : classes.loseBadge}
+																	style={{ marginBottom: 0 }}
+																>
+																	{!isTeam1Win ? 'WIN' : 'LOSE'}
+																</span>
+																{renderLpSpan(match.team2.ratingChange * 4, classes.lpChange)}
+															</div>
+															<div className={classes.playerList}>{renderPlayers(match.team2.players)}</div>
+														</StyledTableCell>
+														{showAdmin && (
+															<StyledTableCell align="center" style={{ padding: '8px 4px' }}>
+																<IconButton
+																	className={classes.settingsBtn}
+																	size="small"
+																	onClick={e => onMenuOpen(e, match)}
+																>
+																	<SettingsIcon className={classes.settingsIcon} />
+																</IconButton>
+															</StyledTableCell>
+														)}
+													</StyledTableRow>
+												</React.Fragment>
 											);
 										})}
 									</TableBody>
@@ -916,15 +825,14 @@ function MatchList({
 						{/* Mobile Card View */}
 						<Box sx={{ display: { md: 'none' } }}>
 							<div className={classes.mobileCardList}>
-								{matches.map((match, index) => {
+								{matches.map(match => {
 									const isTeam1Win = match.winTeam === 1;
-									const displayId = getDisplayId(index);
 									const persp = getPerspective(match);
 									return (
 										<div key={match.gameId} className={classes.mobileCard}>
 											<div className={classes.mobileCardHeader}>
 												<div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-													<span className={classes.mobileMatchId}>#{displayId}</span>
+													<span className={classes.mobileDate}>{formatDate(match.createdAt)}</span>
 													{persp && (
 														<>
 															<span className={persp.won ? classes.mobileBadgeWin : classes.mobileBadgeLose}>
@@ -934,18 +842,15 @@ function MatchList({
 														</>
 													)}
 												</div>
-												<div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-													<span className={classes.mobileDate}>{formatDate(match.createdAt)}</span>
-													{showAdmin && (
-														<IconButton
-															className={classes.settingsBtn}
-															size="small"
-															onClick={e => onMenuOpen(e, match)}
-														>
-															<SettingsIcon className={classes.settingsIcon} />
-														</IconButton>
-													)}
-												</div>
+												{showAdmin && (
+													<IconButton
+														className={classes.settingsBtn}
+														size="small"
+														onClick={e => onMenuOpen(e, match)}
+													>
+														<SettingsIcon className={classes.settingsIcon} />
+													</IconButton>
+												)}
 											</div>
 											{/* Team 1 */}
 											<div
@@ -963,24 +868,7 @@ function MatchList({
 															{isTeam1Win ? 'WIN' : 'LOSE'}
 														</span>
 													</div>
-													<div className={classes.mobileRatingInfo}>
-														<div className={classes.mobileAvgTierRow}>
-															<img
-																className={classes.mobileAvgTierIcon}
-																src={`/assets/images/ranked-emblems/Emblem_${getTierNameFromRating(
-																	match.team1.avgRating
-																)}.webp`}
-																alt={getRatingTierName(match.team1.avgRating)}
-															/>
-															<span
-																className={classes.mobileAvgTierBadge}
-																style={{ color: tierColors[getTierNameFromRating(match.team1.avgRating)] }}
-															>
-																{getTierShortName(getRatingTierName(match.team1.avgRating))}
-															</span>
-														</div>
-														{renderLpSpan(match.team1.ratingChange * 4, classes.mobileLpChange)}
-													</div>
+													{renderLpSpan(match.team1.ratingChange * 4, classes.mobileLpChange)}
 												</div>
 												<div className={classes.mobilePlayerList}>{renderMobilePlayers(match.team1.players)}</div>
 											</div>
@@ -1002,24 +890,7 @@ function MatchList({
 															{!isTeam1Win ? 'WIN' : 'LOSE'}
 														</span>
 													</div>
-													<div className={classes.mobileRatingInfo}>
-														<div className={classes.mobileAvgTierRow}>
-															<img
-																className={classes.mobileAvgTierIcon}
-																src={`/assets/images/ranked-emblems/Emblem_${getTierNameFromRating(
-																	match.team2.avgRating
-																)}.webp`}
-																alt={getRatingTierName(match.team2.avgRating)}
-															/>
-															<span
-																className={classes.mobileAvgTierBadge}
-																style={{ color: tierColors[getTierNameFromRating(match.team2.avgRating)] }}
-															>
-																{getTierShortName(getRatingTierName(match.team2.avgRating))}
-															</span>
-														</div>
-														{renderLpSpan(match.team2.ratingChange * 4, classes.mobileLpChange)}
-													</div>
+													{renderLpSpan(match.team2.ratingChange * 4, classes.mobileLpChange)}
 												</div>
 												<div className={classes.mobilePlayerList}>{renderMobilePlayers(match.team2.players)}</div>
 											</div>
