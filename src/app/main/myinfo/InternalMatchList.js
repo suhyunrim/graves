@@ -322,14 +322,41 @@ const useStyles = makeStyles()((theme) => ({
 		fontSize: '1.1rem',
 		fontWeight: 700
 	},
-	// 킬관여/CS/라인전 미니 지표 (op.gg 가운데 블록)
+	// 킬관여/CS/라인전, 딜량/골드/시야 미니 지표 (op.gg 가운데 블록)
 	miniStats: {
 		display: 'flex',
 		flexDirection: 'column',
 		gap: 2,
 		paddingLeft: 14,
 		borderLeft: '1px solid rgba(255, 255, 255, 0.1)',
-		flexShrink: 0
+		flexShrink: 0,
+		minWidth: 112
+	},
+	// 그 경기 시점의 내전 티어
+	myTierCol: {
+		display: 'flex',
+		flexDirection: 'column',
+		alignItems: 'center',
+		gap: 1,
+		minWidth: 58,
+		flexShrink: 0,
+		[theme.breakpoints.down('sm')]: {
+			display: 'none'
+		}
+	},
+	myTierEmblem: {
+		width: 34,
+		height: 34
+	},
+	myTierLabel: {
+		fontFamily: '"Rajdhani", sans-serif',
+		fontSize: '1.1rem',
+		fontWeight: 700
+	},
+	myTierCaption: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '0.85rem',
+		color: 'rgba(255, 255, 255, 0.35)'
 	},
 	miniStatLine: {
 		fontFamily: '"Noto Sans KR", sans-serif',
@@ -879,7 +906,8 @@ function InternalMatchList({ matches, total, page, rowsPerPage, onPageChange, pe
 			myLp: myTeam.ratingChange == null ? null : myTeam.ratingChange * 4,
 			myStat: me && me.stat ? me.stat : null,
 			myTeamPlayers: myTeam.players,
-			myPosition: me ? getPlayerPosition(me) : null
+			myPosition: me ? getPlayerPosition(me) : null,
+			myTier: me ? me.tier : null
 		};
 	};
 
@@ -1216,7 +1244,7 @@ function InternalMatchList({ matches, total, page, rowsPerPage, onPageChange, pe
 			{matches.map(match => {
 				const ctx = getMyContext(match);
 				if (!ctx) return null;
-				const { won, myLp, myStat, myTeamPlayers, myPosition } = ctx;
+				const { won, myLp, myStat, myTeamPlayers, myPosition, myTier } = ctx;
 				const expanded = expandedIds.has(match.gameId);
 				const durationSec = match.gameDurationSec || (myStat && myStat.gameDurationSec) || null;
 				const kdaRatio = myStat ? getKdaRatio(myStat) : null;
@@ -1245,6 +1273,15 @@ function InternalMatchList({ matches, total, page, rowsPerPage, onPageChange, pe
 								{patch && <span className={classes.metaText}>패치 {patch}</span>}
 							</div>
 							<div className={classes.champCol}>
+								{posIconKey && (
+									<span className={classes.posSlot}>
+										<PositionIcon
+											position={posIconKey}
+											className={classes.posIcon}
+											fallbackClassName={classes.posFallback}
+										/>
+									</span>
+								)}
 								{myStat ? (
 									<>
 										<div className={classes.champColInner}>
@@ -1318,20 +1355,43 @@ function InternalMatchList({ matches, total, page, rowsPerPage, onPageChange, pe
 												</span>
 											)}
 										</div>
+										<div className={classes.miniStats}>
+											<span className={classes.miniStatLine}>
+												딜량 <span className={classes.miniStatValue}>{formatK(myStat.damageToChampions)}</span>
+											</span>
+											<span className={classes.miniStatLine}>
+												골드 <span className={classes.miniStatValue}>{formatK(myStat.goldEarned)}</span>
+											</span>
+											{myStat.visionScore != null && (
+												<span className={classes.miniStatLine}>
+													시야 <span className={classes.miniStatValue}>{myStat.visionScore}</span>
+													{myStat.wardsPlaced != null &&
+														` · 와드 ${myStat.wardsPlaced}/${myStat.wardsKilled != null ? myStat.wardsKilled : 0}`}
+												</span>
+											)}
+										</div>
 									</>
 								) : (
 									<span className={classes.noDetail}>상세 미수집</span>
 								)}
 							</div>
+							{myTier && (
+								<div className={classes.myTierCol}>
+									<img
+										className={classes.myTierEmblem}
+										src={`/assets/images/ranked-emblems/Emblem_${getTierIconName(myTier)}.webp`}
+										alt={myTier}
+									/>
+									<span className={classes.myTierLabel} style={{ color: getTierColor(myTier) }}>
+										{getTierShortName(myTier)}
+									</span>
+									<span className={classes.myTierCaption}>당시 티어</span>
+								</div>
+							)}
 							<div className={classes.miniRosters}>
 								{renderMiniRoster(match.team1)}
 								{renderMiniRoster(match.team2)}
 							</div>
-							{posIconKey && (
-								<span className={classes.posSlot}>
-									<PositionIcon position={posIconKey} className={classes.posIcon} fallbackClassName={classes.posFallback} />
-								</span>
-							)}
 							<ExpandMoreIcon className={cx(classes.expandIcon, expanded && classes.expandIconOpen)} />
 						</div>
 						{expanded && (
