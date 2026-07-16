@@ -45,31 +45,33 @@ export function getKeystoneIcon(perkId) {
 }
 
 // 주요 키스톤/스타일 ID → 아이콘 경로 매핑
+// 스타일(트리) 아이콘은 CDragon에서 "{7200번대 에셋ID}_{이름}.png" 형태 (예: 7202_sorcery.png).
+// "sorcery/sorcery.png" 같은 경로는 존재하지 않음 — 키스톤만 하위 디렉토리 구조.
 const PERK_STYLE_ICONS = {
 	// Precision
-	8000: 'precision/precision',
+	8000: '7201_precision',
 	8005: 'precision/presstheattack/presstheattack',
-	8008: 'precision/lethaltempoptemp/lethaltempotemp',
+	8008: 'precision/lethaltempo/lethaltempotemp',
 	8010: 'precision/conqueror/conqueror',
 	8021: 'precision/fleetfootwork/fleetfootwork',
 	// Domination
-	8100: 'domination/domination',
+	8100: '7200_domination',
 	8112: 'domination/electrocute/electrocute',
 	8124: 'domination/predator/predator',
 	8128: 'domination/darkharvest/darkharvest',
 	9923: 'domination/hailofblades/hailofblades',
 	// Sorcery
-	8200: 'sorcery/sorcery',
+	8200: '7202_sorcery',
 	8214: 'sorcery/summonaery/summonaery',
 	8229: 'sorcery/arcanecomet/arcanecomet',
-	8230: 'sorcery/phaserush/phaserush',
-	// Resolve
-	8300: 'inspiration/inspiration',
+	8230: 'sorcery/phaserush/stormraiderssurgeruneicon2',
+	// Inspiration (에셋명은 whimsy)
+	8300: '7203_whimsy',
 	8351: 'inspiration/glacialaugment/glacialaugment',
 	8360: 'inspiration/unsealedspellbook/unsealedspellbook',
 	8369: 'inspiration/firststrike/firststrike',
-	// Resolve (actual)
-	8400: 'resolve/resolve',
+	// Resolve
+	8400: '7204_resolve',
 	8437: 'resolve/graspoftheundying/graspoftheundying',
 	8439: 'resolve/veteranaftershock/veteranaftershock',
 	8465: 'resolve/guardian/guardian'
@@ -78,7 +80,7 @@ const PERK_STYLE_ICONS = {
 function getPerkPath(perkId) {
 	const path = PERK_STYLE_ICONS[perkId];
 	if (path) return `${path}.png`;
-	return 'precision/precision.png'; // fallback
+	return 'runesicon.png'; // 범용 룬 아이콘 (미매핑 ID 폴백)
 }
 
 export function formatKDA(kills, deaths, assists) {
