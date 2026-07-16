@@ -156,6 +156,36 @@ const useStyles = makeStyles()((theme) => ({
 		flexDirection: 'column',
 		justifyContent: 'center'
 	},
+	tierCardExtra: {
+		marginTop: 16,
+		paddingTop: 14,
+		borderTop: '1px solid rgba(255, 255, 255, 0.08)',
+		display: 'flex',
+		flexDirection: 'column',
+		gap: 8
+	},
+	tierCardExtraRow: {
+		display: 'flex',
+		alignItems: 'center',
+		justifyContent: 'space-between'
+	},
+	tierCardExtraLabel: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.1rem',
+		color: 'rgba(255, 255, 255, 0.5)'
+	},
+	tierCardExtraValue: {
+		fontFamily: '"Rajdhani", "Noto Sans KR", sans-serif',
+		fontSize: '1.3rem',
+		fontWeight: 700,
+		color: 'rgba(255, 255, 255, 0.85)'
+	},
+	tierCardExtraSub: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1rem',
+		fontWeight: 400,
+		color: 'rgba(255, 255, 255, 0.45)'
+	},
 	profileVisitor: {
 		marginLeft: 'auto',
 		[theme.breakpoints.down('sm')]: {
@@ -1430,6 +1460,38 @@ function MyInfoPage(props) {
 												</span>
 											)}
 										</div>
+										{recentResults && recentResults.length > 0 && (
+											<div className={classes.tierCardExtra}>
+												<div className={classes.tierCardExtraRow}>
+													<span className={classes.tierCardExtraLabel}>최근 10경기</span>
+													<span className={classes.tierCardExtraValue}>
+														{recentWinRate}%{' '}
+														<span className={classes.tierCardExtraSub}>
+															({recentWins}승 {recentGames - recentWins}패)
+														</span>
+													</span>
+												</div>
+												<div className={classes.recentResultsRow} aria-label="최근 10경기 승패 (최신순)">
+													{[...recentResults].reverse().map((won, i) => (
+														<span key={i} className={won ? classes.recentResultWin : classes.recentResultLose}>
+															{won ? 'O' : 'X'}
+														</span>
+													))}
+												</div>
+												<div className={classes.tierCardExtraRow}>
+													<span className={classes.tierCardExtraLabel}>최다 연승</span>
+													<span className={`${classes.tierCardExtraValue} ${classes.streakWin}`}>
+														{maxWinStreak}연승
+													</span>
+												</div>
+												<div className={classes.tierCardExtraRow}>
+													<span className={classes.tierCardExtraLabel}>최다 연패</span>
+													<span className={`${classes.tierCardExtraValue} ${classes.streakLose}`}>
+														{maxLoseStreak}연패
+													</span>
+												</div>
+											</div>
+										)}
 										<div className={classes.decorLine} style={{ color: '#00d4ff' }} />
 									</div>
 									<InternalChampions
