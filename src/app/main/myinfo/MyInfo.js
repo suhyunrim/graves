@@ -37,7 +37,6 @@ import Guestbook from './Guestbook';
 import MyMatchHistory from './MyMatchHistory';
 import StatusMessage from './StatusMessage';
 import TrophyCabinet from './TrophyCabinet';
-import MostChampions from './MostChampions';
 import InternalChampions from './InternalChampions';
 import LaneStats from './LaneStats';
 import PositionIcon from '../tournament/PositionIcon';
@@ -53,11 +52,6 @@ const POSITIONS = [
 	{ key: 'BOTTOM', label: '원딜', icon: 'adc' },
 	{ key: 'UTILITY', label: '서폿', icon: 'support' }
 ];
-
-const POSITION_MAP = POSITIONS.reduce((acc, pos) => {
-	acc[pos.key] = pos;
-	return acc;
-}, {});
 
 const tierColors = {
 	IRON: { primary: '#5C5C5C', glow: 'rgba(92, 92, 92, 0.4)' },
@@ -107,27 +101,6 @@ const useStyles = makeStyles()((theme) => ({
 			gap: 16,
 			padding: 16
 		}
-	},
-	// 시그니처 챔피언(내전 최다 픽) 스플래시를 히어로 배경으로 쓸 때 텍스트 가독성용 칩
-	heroStatsRow: {
-		display: 'flex',
-		flexWrap: 'wrap',
-		gap: 8,
-		marginTop: 12
-	},
-	heroChip: {
-		fontFamily: '"Rajdhani", "Noto Sans KR", sans-serif',
-		fontSize: '1.15rem',
-		fontWeight: 700,
-		color: 'rgba(255, 255, 255, 0.85)',
-		background: 'rgba(0, 0, 0, 0.45)',
-		border: '1px solid rgba(0, 212, 255, 0.25)',
-		borderRadius: 8,
-		padding: '3px 10px',
-		whiteSpace: 'nowrap'
-	},
-	heroChipAccent: {
-		color: '#00d4ff'
 	},
 	collectNotice: {
 		fontFamily: '"Noto Sans KR", sans-serif',
@@ -1103,12 +1076,11 @@ function MyInfoPage(props) {
 	const honorStats = useSelector(({ MyInfo }) => MyInfo.myInfo.honorStats);
 	const subAccount = useSelector(({ MyInfo }) => MyInfo.myInfo.subAccount);
 	const tournamentChampionships = useSelector(({ MyInfo }) => MyInfo.myInfo.tournamentChampionships);
-	const mostChampions = useSelector(({ MyInfo }) => MyInfo.myInfo.mostChampions);
 	const positionStats = useSelector(({ MyInfo }) => MyInfo.myInfo.positionStats);
 	const internalStats = useSelector(({ MyInfo }) => MyInfo.myInfo.internalStats);
 
 	const [searchParams, setSearchParams] = useSearchParams();
-	const [activeTab, setActiveTab] = useState(() => getIntParam(searchParams, 'tab', 0, { min: 0, max: 4 }));
+	const [activeTab, setActiveTab] = useState(() => getIntParam(searchParams, 'tab', 0, { min: 0, max: 3 }));
 	const [subAccountInput, setSubAccountInput] = useState('');
 	const [subAccountLoading, setSubAccountLoading] = useState(false);
 	const [removeDialogOpen, setRemoveDialogOpen] = useState(false);
@@ -1292,14 +1264,6 @@ function MyInfoPage(props) {
 	const soloWinRate = calculateWinRate(summonerInfo.rankWin, summonerInfo.rankLose);
 	const customWinRate = calculateWinRate(scoreInfo.win, scoreInfo.lose);
 
-	// 솔랭 메인/서브 포지션 — 솔랭 모스트 챔피언 헤더에 표시
-	const mainPositionLabel = summonerInfo.mainPosition
-		? (POSITION_MAP[summonerInfo.mainPosition] || {}).label || summonerInfo.mainPosition
-		: null;
-	const subPositionLabel = summonerInfo.subPosition
-		? (POSITION_MAP[summonerInfo.subPosition] || {}).label || summonerInfo.subPosition
-		: null;
-
 	// 히어로: 내전 최다 픽 챔피언 스플래시 배경 (수집 데이터 없으면 기존 배경 유지)
 	const signatureChamp =
 		internalStats && internalStats.champions && internalStats.champions[0] ? internalStats.champions[0] : null;
@@ -1310,20 +1274,6 @@ function MyInfoPage(props) {
 				backgroundPosition: 'center 25%'
 		  }
 		: undefined;
-
-	// 내전 전체 KDA (수집분 가중 평균)
-	let internalKda = null;
-	if (internalStats && internalStats.champions && internalStats.champions.length > 0) {
-		let k = 0;
-		let d = 0;
-		let a = 0;
-		internalStats.champions.forEach(c => {
-			k += c.kills * c.games;
-			d += c.deaths * c.games;
-			a += c.assists * c.games;
-		});
-		if (d > 0) internalKda = ((k + a) / d).toFixed(2);
-	}
 
 	return (
 		<FusePageSimple
@@ -1390,20 +1340,6 @@ function MyInfoPage(props) {
 									/>
 								)}
 							</div>
-							<div className={classes.heroStatsRow}>
-								<span className={`${classes.heroChip} ${classes.heroChipAccent}`}>
-									내전 {getRatingTierDisplay()} {getRatingLP()}LP
-								</span>
-								{scoreInfo.win + scoreInfo.lose > 0 && (
-									<span className={classes.heroChip}>승률 {customWinRate}%</span>
-								)}
-								{internalKda != null && <span className={classes.heroChip}>KDA {internalKda}</span>}
-								{signatureChamp && (
-									<span className={classes.heroChip}>
-										시그니처 · {signatureChamp.championKoName || signatureChamp.championName}
-									</span>
-								)}
-							</div>
 						</div>
 						{user?.reprGroup?.groupId && (
 							<div className={classes.profileVisitor}>
@@ -1429,14 +1365,13 @@ function MyInfoPage(props) {
 					>
 						<Tab label="내전" className={classes.tab} />
 						<Tab label="스탯" className={classes.tab} />
-						<Tab label="솔랭" className={classes.tab} />
 						<Tab label="업적" className={classes.tab} />
 						<Tab label="방명록" className={classes.tab} />
 					</Tabs>
 
-					{activeTab === 3 && <AchievementContent />}
+					{activeTab === 2 && <AchievementContent />}
 
-					{activeTab === 4 && user?.reprGroup?.groupId && (
+					{activeTab === 3 && user?.reprGroup?.groupId && (
 						<Guestbook groupId={user.reprGroup.groupId} puuid={puuid || myPuuid} />
 					)}
 
@@ -1528,7 +1463,7 @@ function MyInfoPage(props) {
 									<TrophyCabinet championships={tournamentChampionships} />
 								</div>
 							)}
-							{/* 내전 레이팅 카드 */}
+							{/* 내전 레이팅 / 솔로 랭크 카드 */}
 							<div className={classes.cardsGrid}>
 								<div className={`${classes.rankCard} ${classes.customRatingCard}`}>
 									<div className={classes.cardHeader}>
@@ -1556,6 +1491,33 @@ function MyInfoPage(props) {
 										)}
 									</div>
 									<div className={classes.decorLine} style={{ color: '#00d4ff' }} />
+								</div>
+								<div className={`${classes.rankCard} ${classes.soloRankCard}`}>
+									<div className={classes.cardHeader}>
+										<div className={classes.emblemContainer}>
+											<img
+												className={classes.emblem}
+												src={`/assets/images/ranked-emblems/Emblem_${soloTierName}.webp`}
+												alt={soloTierName}
+												style={{ filter: `drop-shadow(0 0 20px ${soloTierColor.glow})` }}
+											/>
+										</div>
+										<div className={classes.cardTitleWrapper}>
+											<div className={classes.cardLabel}>Solo Rank</div>
+											<div className={classes.tierText} style={{ color: soloTierColor.primary }}>
+												{summonerInfo.rankTier}
+											</div>
+										</div>
+									</div>
+									<div className={classes.statsRow}>
+										<span className={classes.statItem}>
+											{summonerInfo.rankWin}승 {summonerInfo.rankLose}패
+										</span>
+										{summonerInfo.rankWin + summonerInfo.rankLose > 0 && (
+											<span className={`${classes.winRate} ${getWinRateClass(soloWinRate)}`}>{soloWinRate}%</span>
+										)}
+									</div>
+									<div className={classes.decorLine} style={{ color: soloTierColor.primary }} />
 								</div>
 							</div>
 							{/* 최근 전적 & 연승/연패 통계 */}
@@ -1848,54 +1810,6 @@ function MyInfoPage(props) {
 											</div>
 										</>
 									)}
-								</div>
-							)}
-						</>
-					)}
-
-					{activeTab === 2 && (
-						<>
-							{/* 솔로 랭크 카드 */}
-							<div className={classes.cardsGrid}>
-								<div className={`${classes.rankCard} ${classes.soloRankCard}`}>
-									<div className={classes.cardHeader}>
-										<div className={classes.emblemContainer}>
-											<img
-												className={classes.emblem}
-												src={`/assets/images/ranked-emblems/Emblem_${soloTierName}.webp`}
-												alt={soloTierName}
-												style={{ filter: `drop-shadow(0 0 20px ${soloTierColor.glow})` }}
-											/>
-										</div>
-										<div className={classes.cardTitleWrapper}>
-											<div className={classes.cardLabel}>Solo Rank</div>
-											<div className={classes.tierText} style={{ color: soloTierColor.primary }}>
-												{summonerInfo.rankTier}
-											</div>
-										</div>
-									</div>
-									<div className={classes.statsRow}>
-										<span className={classes.statItem}>
-											{summonerInfo.rankWin}승 {summonerInfo.rankLose}패
-										</span>
-										{summonerInfo.rankWin + summonerInfo.rankLose > 0 && (
-											<span className={`${classes.winRate} ${getWinRateClass(soloWinRate)}`}>{soloWinRate}%</span>
-										)}
-									</div>
-									<div className={classes.decorLine} style={{ color: soloTierColor.primary }} />
-								</div>
-							</div>
-							{mostChampions && mostChampions.length > 0 && (
-								<div className={classes.trophyCabinetWrap}>
-									<MostChampions
-										champions={mostChampions}
-										mainPosition={mainPositionLabel}
-										mainPositionIcon={(POSITION_MAP[summonerInfo.mainPosition] || {}).icon}
-										mainPositionRate={summonerInfo.mainPosition ? Math.round(summonerInfo.mainPositionRate) : null}
-										subPosition={subPositionLabel}
-										subPositionIcon={(POSITION_MAP[summonerInfo.subPosition] || {}).icon}
-										subPositionRate={summonerInfo.subPosition ? Math.round(summonerInfo.subPositionRate) : null}
-									/>
 								</div>
 							)}
 						</>
