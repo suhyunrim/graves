@@ -114,6 +114,7 @@ const useStyles = makeStyles()((theme) => ({
 		gap: 10
 	},
 	matchCard: {
+		position: 'relative',
 		borderRadius: 12,
 		overflow: 'hidden',
 		cursor: 'pointer',
@@ -122,6 +123,16 @@ const useStyles = makeStyles()((theme) => ({
 		'&:hover': {
 			borderColor: 'rgba(0, 212, 255, 0.35)'
 		}
+	},
+	// 멀티킬/퍼블 뱃지: 우측 정렬된 로스터 그룹 왼쪽에 세로 스택 — 다른 컬럼을 밀지 않음
+	badgeCol: {
+		display: 'flex',
+		flexDirection: 'column',
+		alignItems: 'flex-end',
+		justifyContent: 'center',
+		gap: 5,
+		marginRight: 12,
+		flexShrink: 0
 	},
 	matchWin: {
 		background: 'rgba(0, 200, 83, 0.10)',
@@ -869,9 +880,10 @@ function InternalMatchList({ matches, total, page, rowsPerPage, onPageChange, pe
 	};
 
 	// 아이템 6칸 + 장신구. items 정보 없으면 렌더 안 함(구 수집분 호환)
+	// 중간에 빈 슬롯(0)이 있으면 채워진 아이템을 앞으로 당기고 빈 칸은 뒤로 몰아 표시.
 	const renderItems = (stat, imgCls, emptyCls) => {
 		if (!stat.items && stat.trinket == null) return null;
-		const slots = [...(stat.items || [])];
+		const slots = (stat.items || []).filter(id => id).slice(0, 6);
 		while (slots.length < 6) slots.push(0);
 		return (
 			<div className={classes.itemsRow}>
@@ -1339,11 +1351,9 @@ function InternalMatchList({ matches, total, page, rowsPerPage, onPageChange, pe
 													</span>
 												</div>
 											</div>
-											{(myStat.items || multiKill || myStat.firstBloodKill) && (
+											{myStat.items && (
 												<div className={classes.champBottomRow}>
 													{renderItems(myStat, classes.itemImg, classes.itemEmpty)}
-													{multiKill && <span className={classes.killBadge}>{multiKill}</span>}
-													{myStat.firstBloodKill && <span className={classes.fbBadge}>퍼스트 블러드</span>}
 												</div>
 											)}
 										</div>
@@ -1397,6 +1407,12 @@ function InternalMatchList({ matches, total, page, rowsPerPage, onPageChange, pe
 								)}
 							</div>
 							<div className={classes.miniRosters}>
+								{(multiKill || (myStat && myStat.firstBloodKill)) && (
+									<div className={classes.badgeCol}>
+										{multiKill && <span className={classes.killBadge}>{multiKill}</span>}
+										{myStat.firstBloodKill && <span className={classes.fbBadge}>퍼블</span>}
+									</div>
+								)}
 								{renderMiniRoster(match.team1)}
 								{renderMiniRoster(match.team2)}
 							</div>
