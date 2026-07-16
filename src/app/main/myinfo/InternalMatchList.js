@@ -474,7 +474,11 @@ const useStyles = makeStyles()((theme) => ({
 	teamTableWrap: {
 		overflowX: 'auto',
 		// 테이블 minWidth(880)가 조상 flex의 min-width로 전파돼 모바일 페이지 폭을 밀어올리는 것 차단
-		contain: 'inline-size'
+		contain: 'inline-size',
+		// md 미만은 가로 스크롤 테이블 대신 모바일 컴팩트 뷰(mTeamBlock)로 대체
+		[theme.breakpoints.down('md')]: {
+			display: 'none'
+		}
 	},
 	teamTable: {
 		width: '100%',
@@ -686,6 +690,69 @@ const useStyles = makeStyles()((theme) => ({
 		fontFamily: '"Rajdhani", sans-serif',
 		fontSize: '0.98rem',
 		color: 'rgba(255, 255, 255, 0.45)'
+	},
+	// ===== 모바일 컴팩트 상세 (md 미만: 테이블 대신 플레이어별 세로 스택) =====
+	mTeamBlock: {
+		display: 'none',
+		[theme.breakpoints.down('md')]: {
+			display: 'block',
+			padding: '10px 12px 6px'
+		}
+	},
+	mTeamHeader: {
+		display: 'flex',
+		alignItems: 'center',
+		flexWrap: 'wrap',
+		gap: 6,
+		marginBottom: 4,
+		fontFamily: '"Rajdhani", "Noto Sans KR", sans-serif',
+		fontSize: '1.2rem',
+		fontWeight: 700,
+		textTransform: 'uppercase',
+		letterSpacing: '0.05em'
+	},
+	mPlayer: {
+		padding: '7px 0',
+		borderBottom: '1px solid rgba(255, 255, 255, 0.04)',
+		'&:last-of-type': {
+			borderBottom: 'none'
+		}
+	},
+	mPlayerTop: {
+		display: 'flex',
+		alignItems: 'center',
+		gap: 6
+	},
+	mPlayerName: {
+		flex: 1,
+		// nowrap 이름의 min-content 폭이 카드 폭을 밀지 않게 차단 (넘치면 ellipsis)
+		width: 0,
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.1rem',
+		color: '#fff',
+		cursor: 'pointer',
+		overflow: 'hidden',
+		textOverflow: 'ellipsis',
+		whiteSpace: 'nowrap'
+	},
+	mKda: {
+		display: 'flex',
+		flexDirection: 'column',
+		alignItems: 'flex-end',
+		flexShrink: 0
+	},
+	mPlayerBottom: {
+		display: 'flex',
+		alignItems: 'center',
+		flexWrap: 'wrap',
+		gap: 8,
+		rowGap: 4,
+		padding: '5px 0 0 28px'
+	},
+	mStatText: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '0.95rem',
+		color: 'rgba(255, 255, 255, 0.5)'
 	},
 	bansRow: {
 		display: 'inline-flex',
@@ -1162,6 +1229,121 @@ function InternalMatchList({ matches, total, page, rowsPerPage, onPageChange, pe
 		);
 	};
 
+	// 펼침(md 미만): 테이블 대신 플레이어별 2줄 세로 스택 — 가로 스크롤 없이 전체 정보 표시
+	const renderTeamMobile = (match, teamNo, durationSec) => {
+		const team = teamNo === 1 ? match.team1 : match.team2;
+		const won = match.winTeam === teamNo;
+		const players = sortPlayers(team.players);
+		const durationMin = durationSec ? durationSec / 60 : null;
+		const teamStat = match.teamStats ? match.teamStats[`team${teamNo}`] : null;
+		const bans = teamStat && teamStat.bans ? teamStat.bans : [];
+		return (
+			<div className={classes.mTeamBlock}>
+				<div className={classes.mTeamHeader} style={{ color: TEAM_COLORS[teamNo] }}>
+					<span role="img" aria-label={teamNo === 1 ? 'dog' : 'cat'}>
+						{teamNo === 1 ? '🐶' : '🐱'}
+					</span>
+					Team {teamNo}
+					<span className={won ? classes.teamResultWin : classes.teamResultLose}>{won ? 'WIN' : 'LOSE'}</span>
+					{bans.length > 0 && (
+						<span className={classes.bansRow}>
+							<span className={classes.banLabel}>밴</span>
+							{bans.map(b => {
+								const key = champKeys[b.championId];
+								return key ? (
+									<img key={`${b.championId}-${b.pickTurn}`} className={classes.banImg} src={getChampionIcon(key)} alt="" title={key} />
+								) : null;
+							})}
+						</span>
+					)}
+				</div>
+				{players.map(player => {
+					const posIconKey = POSITION_ICON_KEY[getPlayerPosition(player)];
+					const { stat } = player;
+					const isMe = player.puuid === perspectivePuuid;
+					const ratio = stat ? getKdaRatio(stat) : null;
+					const kp = stat ? getKillParticipation(stat, team.players) : null;
+					return (
+						<div key={player.puuid} className={classes.mPlayer}>
+							<div className={classes.mPlayerTop}>
+								<span className={classes.posSlot}>
+									{posIconKey && (
+										<PositionIcon
+											position={posIconKey}
+											className={classes.posIcon}
+											fallbackClassName={classes.posFallback}
+										/>
+									)}
+								</span>
+								{stat && (
+									<>
+										<span className={classes.detailChampWrap}>
+											<img
+												className={classes.detailChampImg}
+												src={getChampionIcon(stat.championName)}
+												alt={stat.championKoName || stat.championName}
+												title={stat.championKoName || stat.championName}
+												onError={e => {
+													e.currentTarget.style.visibility = 'hidden';
+												}}
+											/>
+											{stat.champLevel != null && (
+												<span className={classes.detailChampLevel}>{stat.champLevel}</span>
+											)}
+										</span>
+										{renderSpellsRunes(
+											stat,
+											classes.detailSpellRuneGrid,
+											classes.detailSpellRuneIcon,
+											classes.detailSpellRuneEmpty
+										)}
+									</>
+								)}
+								<img
+									className={classes.tierIcon}
+									src={`/assets/images/ranked-emblems/Emblem_${getTierIconName(player.tier)}.webp`}
+									alt={player.tier}
+								/>
+								<span className={classes.tierBadge} style={{ color: getTierColor(player.tier) }}>
+									{getTierShortName(player.tier)}
+								</span>
+								<span
+									className={cx(classes.mPlayerName, isMe && classes.playerNameHighlight)}
+									title={player.name}
+									onClick={e => goUser(e, player)}
+								>
+									{player.name}
+								</span>
+								{stat && (
+									<div className={classes.mKda}>
+										<span className={classes.kdaCellMain}>
+											{stat.kills} / <span className={classes.kdaDeath}>{stat.deaths}</span> / {stat.assists}
+											{kp != null && <span className={classes.kpText}> ({kp}%)</span>}
+										</span>
+										<span className={classes.kdaCellSub} style={{ color: kdaRatioColor(ratio) }}>
+											{ratio == null ? 'Perfect' : `${ratio.toFixed(2)}:1`}
+										</span>
+									</div>
+								)}
+							</div>
+							{stat && (
+								<div className={classes.mPlayerBottom}>
+									{renderItems(stat, classes.detailItemImg, classes.detailItemEmpty)}
+									<span className={classes.mStatText}>
+										딜 {formatK(stat.damageToChampions)} · 받 {formatK(stat.damageTaken)} · CS {stat.cs}
+										{durationMin ? ` (${(stat.cs / durationMin).toFixed(1)})` : ''} · 골드{' '}
+										{formatK(stat.goldEarned)}
+										{stat.visionScore != null ? ` · 시야 ${stat.visionScore}` : ''}
+									</span>
+								</div>
+							)}
+						</div>
+					);
+				})}
+			</div>
+		);
+	};
+
 	// 팀 합계 스트립 (Total Kill / Total Gold — 팀 컬러 비율 바)
 	const renderSummaryStrip = match => {
 		const sum = (team, key) => team.players.reduce((s, p) => s + (p.stat ? p.stat[key] || 0 : 0), 0);
@@ -1435,8 +1617,10 @@ function InternalMatchList({ matches, total, page, rowsPerPage, onPageChange, pe
 								{hasAnyStats ? (
 									<>
 										{renderTeamTable(match, 1, maxDealt, maxTaken, durationSec)}
+										{renderTeamMobile(match, 1, durationSec)}
 										{renderSummaryStrip(match)}
 										{renderTeamTable(match, 2, maxDealt, maxTaken, durationSec)}
+										{renderTeamMobile(match, 2, durationSec)}
 									</>
 								) : (
 									<div className={classes.simpleTeams}>
