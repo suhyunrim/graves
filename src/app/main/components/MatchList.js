@@ -17,7 +17,9 @@ import {
 	POSITION_ICON_KEY,
 	getPlayerPosition,
 	sortPlayers,
-	stripTag
+	stripTag,
+	getKdaRatio,
+	kdaRatioColor
 } from './matchStatUtils';
 
 // 기존 소비자(MatchHistoryTable 등) 호환용 re-export — 실제 정의는 matchStatUtils.
@@ -234,6 +236,16 @@ const useStyles = makeStyles()(theme => ({
 		height: 24,
 		flexShrink: 0
 	},
+	// LCU 수집 매치: 행 우측 끝 KDA "5/2/8 (6.5)". 배율 색상은 kdaRatioColor 관례.
+	playerKda: {
+		marginLeft: 'auto',
+		fontFamily: '"Rajdhani", sans-serif',
+		fontSize: '1.15rem',
+		fontWeight: 600,
+		color: 'rgba(255, 255, 255, 0.75)',
+		whiteSpace: 'nowrap',
+		flexShrink: 0
+	},
 	// 긴 닉네임은 두 줄로 깨지지 않게 한 줄 말줄임(…). 이름만 줄어들도록 minWidth:0.
 	playerName: {
 		fontFamily: '"Noto Sans KR", sans-serif',
@@ -376,13 +388,16 @@ function MatchList({
 		return <span className={`${classes.lpChange} ${classes.ratingNeutral}`}>0 LP</span>;
 	};
 
-	// {포지션}{티어아이콘}{티어}{플레이챔프(LCU 수집 시)}{닉네임(태그 제외)}
+	// {포지션}{티어아이콘}{티어}{플레이챔프(LCU 수집 시)}{닉네임(태그 제외)}{KDA(LCU 수집 시)}
 	const renderPlayers = players => {
 		const sortedPlayers = sortPlayers(players);
 		const hasChamps = players.some(p => p.stat && p.stat.championName);
 		return sortedPlayers.map(player => {
 			const posIconKey = POSITION_ICON_KEY[getPlayerPosition(player)];
 			const champName = player.stat && player.stat.championName;
+			const stat = player.stat;
+			const hasKda = Boolean(stat && stat.kills != null);
+			const kdaRatio = hasKda ? getKdaRatio(stat) : undefined;
 			return (
 				<div key={player.puuid} className={classes.playerRow}>
 					<span className={classes.positionSlot}>
@@ -426,6 +441,14 @@ function MatchList({
 					>
 						{stripTag(player.name)}
 					</span>
+					{hasKda && (
+						<span className={classes.playerKda}>
+							{stat.kills}/{stat.deaths}/{stat.assists}{' '}
+							<span style={{ color: kdaRatioColor(kdaRatio) }}>
+								({kdaRatio == null ? 'Perfect' : kdaRatio})
+							</span>
+						</span>
+					)}
 				</div>
 			);
 		});
