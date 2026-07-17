@@ -349,7 +349,13 @@ export function computeVsRecords(teamId, scrims, teams) {
 		.sort((a, b) => (b.mySets - b.oppSets) - (a.mySets - a.oppSets));
 }
 
+// 수집기 자동 기록 세트 행. id가 대표값이라 단건 수정/삭제 API와 1:1 대응이 아님 → 프론트에서 관리 불가.
+export function isCollectorScrim(scrim) {
+	return scrim.recordedByDiscordId === 'collector';
+}
+
 export function canEditScrim(scrim, user, isAdmin) {
+	if (isCollectorScrim(scrim)) return false;
 	if (isAdmin) return true;
 	const myDiscordId = user && user.data && user.data.discordUser && user.data.discordUser.discordId;
 	return Boolean(myDiscordId && scrim.recordedByDiscordId === myDiscordId);

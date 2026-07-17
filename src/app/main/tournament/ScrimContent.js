@@ -26,6 +26,7 @@ import {
 	computeScrimLeaderboard,
 	computeVsRecords,
 	canEditScrim,
+	isCollectorScrim,
 	checkIsAdmin,
 	getTierName,
 	getTierShortLabel,
@@ -341,6 +342,12 @@ const useStyles = makeStyles()((theme) => ({
 		minWidth: 110,
 		textAlign: 'right'
 	},
+	scrimAutoTag: {
+		fontFamily: '"Noto Sans KR", sans-serif',
+		fontSize: '1.05rem',
+		color: 'rgba(0, 212, 255, 0.55)',
+		whiteSpace: 'nowrap'
+	},
 	scrimActions: {
 		display: 'flex',
 		gap: 4
@@ -578,7 +585,7 @@ function formatDate(iso) {
 	return `${yyyy}.${mm}.${dd}`;
 }
 
-function ScrimContent({ tournamentId, teams, scrims, onMutated }) {
+function ScrimContent({ tournamentId, teams, scrims, autoScrimEnabled, onMutated }) {
 	const { classes, cx } = useStyles();
 	const { classes: dialogClasses } = useDialogStyles();
 	const theme = useTheme();
@@ -650,7 +657,12 @@ function ScrimContent({ tournamentId, teams, scrims, onMutated }) {
 			<div className={classes.section}>
 				<div className={classes.sectionHeader}>
 					<div className={classes.sectionTitle}>리더보드</div>
-					{isLoggedIn ? (
+					{autoScrimEnabled && (
+						<span className={classes.loginHint}>
+							<span role="img" aria-label="robot">🤖</span> 엘리스봇이 스크림을 자동 수집합니다
+						</span>
+					)}
+					{!autoScrimEnabled && isLoggedIn && (
 						<Button
 							className={classes.primaryBtn}
 							startIcon={<AddIcon />}
@@ -658,7 +670,8 @@ function ScrimContent({ tournamentId, teams, scrims, onMutated }) {
 						>
 							결과 기록
 						</Button>
-					) : (
+					)}
+					{!autoScrimEnabled && !isLoggedIn && (
 						<span className={classes.loginHint}>기록은 로그인 후 가능합니다</span>
 					)}
 				</div>
@@ -924,6 +937,11 @@ function ScrimContent({ tournamentId, teams, scrims, onMutated }) {
 											{teamName(s.team2Id)}
 										</span>
 									</div>
+									{isCollectorScrim(s) && (
+										<span className={classes.scrimAutoTag}>
+											<span role="img" aria-label="robot">🤖</span> 자동 기록
+										</span>
+									)}
 									<span className={classes.scrimMeta}>{formatDate(s.createdAt)}</span>
 									{editable && (
 										<div className={classes.scrimActions}>

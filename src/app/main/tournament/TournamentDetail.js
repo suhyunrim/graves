@@ -740,6 +740,7 @@ function TournamentDetail() {
 	const teams = useSelector(({ Tournament }) => Tournament.tournament.teams);
 	const matches = useSelector(({ Tournament }) => Tournament.tournament.matches);
 	const scrims = useSelector(({ Tournament }) => Tournament.tournament.scrims);
+	const autoScrimEnabled = useSelector(({ Tournament }) => Tournament.tournament.autoScrimEnabled);
 	const roundLabels = useSelector(({ Tournament }) => Tournament.tournament.roundLabels);
 	const leaderboard = useSelector(({ Tournament }) => Tournament.tournament.leaderboard);
 	const loadingDetail = useSelector(({ Tournament }) => Tournament.tournament.loadingDetail);
@@ -1176,6 +1177,7 @@ function TournamentDetail() {
 							tournamentId={tournamentId}
 							teams={teams}
 							scrims={scrims}
+							autoScrimEnabled={autoScrimEnabled}
 							onMutated={reload}
 						/>
 					)}
