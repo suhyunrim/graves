@@ -27,7 +27,7 @@ const LIGHTWEIGHT_ITEMS = [
 		icon: SpeedIcon,
 		label: 'CPU',
 		value: '평상시 0%',
-		desc: '15초에 한 번 롤 클라이언트를 가볍게 확인하는 게 전부'
+		desc: '10분에 한 번 롤 클라이언트를 가볍게 확인하는 게 전부'
 	},
 	{
 		key: 'game',
@@ -75,7 +75,7 @@ const FAQ_ITEMS = [
 	{
 		key: 'when-on',
 		q: '언제 켜두면 되나요?',
-		a: '항상 켜두세요. 내전 직후가 아니어도 클라이언트를 켜면 최근 판을 소급 수집합니다.'
+		a: '컴퓨터가 켜질 때 자동으로 켜집니다. (끄지만 말아주세요) 내전 직후가 아니어도 클라이언트를 켜면 최근 판을 소급 수집합니다.'
 	},
 	{
 		key: 'during-game',
@@ -169,11 +169,14 @@ const useStyles = makeStyles()((theme) => ({
 		textAlign: 'center',
 		padding: '40px 28px 36px'
 	},
-	heroEmoji: {
-		fontSize: '4.2rem',
-		lineHeight: 1,
+	heroIcon: {
+		width: 76,
+		height: 76,
+		borderRadius: '50%',
+		border: '1px solid rgba(0, 212, 255, 0.35)',
+		boxShadow: '0 0 24px rgba(0, 212, 255, 0.25)',
 		display: 'block',
-		marginBottom: 14
+		margin: '0 auto 14px'
 	},
 	heroTitle: {
 		fontFamily: '"Rajdhani", "Noto Sans KR", sans-serif',
@@ -334,9 +337,7 @@ function EliseBot() {
 				<div className={classes.container}>
 					<Reveal>
 						<div className={cx(classes.section, classes.hero)}>
-							<span className={classes.heroEmoji} role="img" aria-label="spider">
-								🕷️
-							</span>
+							<img className={classes.heroIcon} src="/assets/images/elise-icon.png" alt="Elise Bot" />
 							<div className={classes.heroTitle}>Elise Bot — 내전 전적 자동 수집기</div>
 							<div className={classes.heroDesc}>
 								롤 클라이언트에서 내전/스크림 게임의 챔피언, KDA, CS 등을 자동으로 수집해 전적 페이지에
