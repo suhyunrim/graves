@@ -270,7 +270,8 @@ const useStyles = makeStyles()((theme) => ({
 
 // 내전 상세(헬퍼 수집) 기반 모스트 챔피언 — op.gg 스타일 가로 행 리스트.
 // 좌측 내전 티어 카드와 나란히 배치되므로 height 100%로 채운다.
-function InternalChampions({ champions, totalGames }) {
+// className/style은 <Reveal>의 진입 애니 주입용 (래퍼 없이 루트에 병합).
+function InternalChampions({ champions, totalGames, className, style }) {
 	const { classes } = useStyles();
 	const [dialogOpen, setDialogOpen] = useState(false);
 	const all = champions || [];
@@ -281,7 +282,7 @@ function InternalChampions({ champions, totalGames }) {
 	}
 
 	return (
-		<div className={classes.root}>
+		<div className={className ? `${classes.root} ${className}` : classes.root} style={style}>
 			<div className={classes.header}>
 				내전 모스트 챔피언
 				<button type="button" className={classes.showAllBtn} onClick={() => setDialogOpen(true)}>

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import FusePageSimple from '@fuse/core/FusePageSimple';
 import { makeStyles } from 'tss-react/mui';
-import { fadeInUp } from '../components/Reveal';
+import { fadeInUp, Reveal } from '../components/Reveal';
 import {
 	Button,
 	TextField,
@@ -1463,17 +1463,25 @@ function MyInfoPage(props) {
 										)}
 										<div className={classes.decorLine} style={{ color: '#00d4ff' }} />
 									</div>
-									<InternalChampions
-										champions={internalStats.champions}
-										totalGames={internalStats.totalGames}
-									/>
+									<Reveal delay={0.3}>
+										<InternalChampions
+											champions={internalStats.champions}
+											totalGames={internalStats.totalGames}
+										/>
+									</Reveal>
 								</div>
 							) : (
-								<div className={classes.collectNotice}>
-									챔피언/KDA 정보는 헬퍼(elise)가 수집한 내전부터 표시됩니다. 아직 수집된 경기가 없어요.
-								</div>
+								<Reveal>
+									<div className={classes.collectNotice}>
+										챔피언/KDA 정보는 헬퍼(elise)가 수집한 내전부터 표시됩니다. 아직 수집된 경기가 없어요.
+									</div>
+								</Reveal>
 							)}
-							<MyMatchHistory key={puuid || myPuuid} puuid={puuid || myPuuid} />
+							<Reveal delay={0.4}>
+								<div>
+									<MyMatchHistory key={puuid || myPuuid} puuid={puuid || myPuuid} />
+								</div>
+							</Reveal>
 						</>
 					)}
 
