@@ -185,7 +185,8 @@ const useStyles = makeStyles()((theme) => ({
 		color: '#00d4ff',
 		letterSpacing: '0.05em',
 		textShadow: '0 0 20px rgba(0, 212, 255, 0.3)',
-		marginBottom: 12
+		marginBottom: 12,
+		wordBreak: 'keep-all'
 	},
 	heroDesc: {
 		fontFamily: '"Noto Sans KR", sans-serif',
@@ -338,7 +339,11 @@ function EliseBot() {
 					<Reveal>
 						<div className={cx(classes.section, classes.hero)}>
 							<img className={classes.heroIcon} src="/assets/images/elise-icon.png" alt="Elise Bot" />
-							<div className={classes.heroTitle}>Elise Bot — 내전 전적 자동 수집기</div>
+							<div className={classes.heroTitle}>
+								Elise Bot
+								<br />
+								내전 전적 자동 수집기
+							</div>
 							<div className={classes.heroDesc}>
 								롤 클라이언트에서 내전/스크림 게임의 챔피언, KDA, CS 등을 자동으로 수집해 전적 페이지에
 								반영합니다. 켜두기만 하면 됩니다 — 게임 중 조작 불필요, 트레이 상주, 자동 업데이트.
