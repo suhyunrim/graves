@@ -16,6 +16,7 @@ import AchievementDashboardConfig from 'app/main/achievementDashboard/Achievemen
 import BalanceReportConfig from 'app/main/balanceReport/BalanceReportConfig';
 import ChampionTierlistConfig from 'app/main/championTierlist/ChampionTierlistConfig';
 import CompareConfig from 'app/main/compare/CompareConfig';
+import EliseBotConfig from 'app/main/elise/EliseBotConfig';
 import AiAssistantConfig from 'app/main/ai/AiAssistantConfig';
 import LoginPageConfig from 'app/main/login/LoginPageConfig';
 import MaintenanceConfig from 'app/main/maintenance/MaintenanceConfig';
@@ -41,6 +42,7 @@ const routeConfigs = [
 	BalanceReportConfig,
 	ChampionTierlistConfig,
 	CompareConfig,
+	EliseBotConfig,
 	AiAssistantConfig,
 	MaintenanceConfig
 ];

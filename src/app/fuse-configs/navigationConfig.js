@@ -91,6 +91,14 @@ const navigationConfig = [
 				url: '/balance-report'
 			},
 			{
+				id: 'elise-bot-component',
+				title: '엘리스 봇',
+				type: 'item',
+				// 아이콘 폰트가 커스텀 서브셋이라 smart_toy/download 글리프가 없음 → cloud_download 사용
+				icon: 'cloud_download',
+				url: '/elise'
+			},
+			{
 				id: 'group-settings-component',
 				title: '그룹 설정',
 				type: 'item',
