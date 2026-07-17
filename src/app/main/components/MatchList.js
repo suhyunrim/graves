@@ -445,7 +445,7 @@ function MatchList({
 						<span className={classes.playerKda}>
 							{stat.kills}/{stat.deaths}/{stat.assists}{' '}
 							<span style={{ color: kdaRatioColor(kdaRatio) }}>
-								({kdaRatio == null ? 'Perfect' : kdaRatio})
+								({kdaRatio == null ? 'Perfect' : kdaRatio.toFixed(2)})
 							</span>
 						</span>
 					)}
