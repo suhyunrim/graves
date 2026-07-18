@@ -19,7 +19,9 @@ import {
 	getKillParticipation,
 	usePerkIcons,
 	SpellRuneGrid,
-	ItemsRow
+	ItemsRow,
+	getMatchTime,
+	sortMatchesByTime
 } from '../components/matchStatUtils';
 import MatchDetail from '../components/MatchDetail';
 import PositionIcon from '../tournament/PositionIcon';
@@ -545,7 +547,7 @@ function InternalMatchList({ matches, total, page, rowsPerPage, onPageChange, pe
 
 	return (
 		<div className={classes.wrapper}>
-			{matches.map(match => {
+			{sortMatchesByTime(matches).map(match => {
 				const ctx = getMyContext(match);
 				if (!ctx) return null;
 				const { won, myLp, myStat, myTeamPlayers, myPosition, myTier } = ctx;
@@ -568,8 +570,8 @@ function InternalMatchList({ matches, total, page, rowsPerPage, onPageChange, pe
 							<div className={classes.resultCol}>
 								<span className={won ? classes.resultWin : classes.resultLose}>{won ? '승리' : '패배'}</span>
 								{renderLp(myLp)}
-								<span className={classes.metaText} title={formatFullDateTime(match.createdAt)}>
-									{formatRelativeTime(match.createdAt)}
+								<span className={classes.metaText} title={formatFullDateTime(getMatchTime(match))}>
+									{formatRelativeTime(getMatchTime(match))}
 								</span>
 								{durationSec != null && <span className={classes.metaText}>{formatDuration(durationSec)}</span>}
 								{patch && <span className={classes.metaText}>패치 {patch}</span>}

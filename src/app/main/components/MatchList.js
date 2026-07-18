@@ -19,7 +19,9 @@ import {
 	sortPlayers,
 	stripTag,
 	getKdaRatio,
-	kdaRatioColor
+	kdaRatioColor,
+	getMatchTime,
+	sortMatchesByTime
 } from './matchStatUtils';
 
 // 기존 소비자(MatchHistoryTable 등) 호환용 re-export — 실제 정의는 matchStatUtils.
@@ -354,6 +356,7 @@ function MatchList({
 	const [expandedIds, setExpandedIds] = useState(() => new Set());
 
 	const showAdmin = Boolean(isAdmin && onMenuOpen);
+	const orderedMatches = matches ? sortMatchesByTime(matches) : matches;
 
 	const isPlayerHighlighted = player =>
 		(isHighlighted && isHighlighted(player)) || (perspectivePuuid && player.puuid === perspectivePuuid);
@@ -474,10 +477,10 @@ function MatchList({
 
 	return (
 		<div className={classes.container}>
-			{matches && matches.length > 0 ? (
+			{orderedMatches && orderedMatches.length > 0 ? (
 				<>
 					<RevealGroup className={classes.cardList} distance={16}>
-						{matches.map(match => {
+						{orderedMatches.map(match => {
 							const persp = getPerspective(match);
 							const detailAvailable = matchHasDetail(match);
 							const expanded = detailAvailable && expandedIds.has(match.gameId);
@@ -488,8 +491,8 @@ function MatchList({
 									onClick={detailAvailable ? () => toggleExpand(match.gameId) : undefined}
 								>
 									<div className={classes.cardHeader}>
-										<span className={classes.dateLabel} title={formatFullDateTime(match.createdAt)}>
-											{formatRelativeTime(match.createdAt)}
+										<span className={classes.dateLabel} title={formatFullDateTime(getMatchTime(match))}>
+											{formatRelativeTime(getMatchTime(match))}
 										</span>
 										{persp && (
 											<>

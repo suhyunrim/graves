@@ -126,6 +126,18 @@ export const getKillParticipation = (stat, teamPlayers) => {
 // 닉네임의 라이엇 태그(#KR1 등) 제거 (hover title로만 노출)
 export const stripTag = name => (name || '').split('#')[0];
 
+// ===== 매치 시각 =====
+// 표시/정렬 기준 시각. gameCreation(elise 수집으로 확인된 실제 게임 시작)이 있으면 우선하고,
+// 없으면 createdAt(디스코드에서 플랜을 만든 시각)으로 폴백한다.
+// 수집 이전 판은 gameCreation이 영원히 null이라 한 목록 안에 두 기준이 계속 섞인다
+// (폴백 판은 실제 게임보다 보통 10~60분 이르게 표시된다).
+export const getMatchTime = match => match.gameCreation || match.createdAt;
+
+// 표시 시각 기준 최신순. 서버 페이지네이션이라 현재 페이지 안에서만 정렬된다
+// (페이지 경계를 넘는 순서는 서버 ORDER BY에 달려 있음).
+export const sortMatchesByTime = matches =>
+	[...matches].sort((a, b) => new Date(getMatchTime(b)).getTime() - new Date(getMatchTime(a)).getTime());
+
 // ===== 스펠/룬/아이템 아이콘 =====
 // perk ID → 실제 아이콘 URL 조회 함수를 반환. 로드 전엔 정적 매핑 폴백.
 export function usePerkIcons() {

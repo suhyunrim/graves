@@ -185,6 +185,12 @@ function makeMatch(index, dayOffset) {
 	const hasPositions = index % 4 !== 3;
 	const gameDurationSec = hasStats ? 1320 + (index % 6) * 180 : null;
 
+	// 실제 게임 시작 시각은 elise 수집 매치에만 있다 (미수집 판은 null → createdAt 폴백).
+	// 플랜을 미리 만들어두고 게임을 하므로 createdAt보다 뒤.
+	const gameCreation = hasStats
+		? new Date(d.getTime() + (25 + (index % 5) * 13) * 60 * 1000).toISOString()
+		: undefined;
+
 	// 10명 선택 (순환)
 	const offset = (index * 7) % PLAYERS.length;
 	const selected = [];
@@ -282,6 +288,7 @@ function makeMatch(index, dayOffset) {
 	return {
 		gameId,
 		createdAt,
+		gameCreation,
 		winTeam,
 		gameDurationSec: gameDurationSec || undefined,
 		gameVersion: hasStats ? '16.13.791.5903' : undefined,
